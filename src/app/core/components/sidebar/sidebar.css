@@ -1,0 +1,10 @@
+.sidebar {
+  width: 220px;
+  background: white;
+  border-right: 1px solid #ddd;
+  padding-top: 8px;
+}
+
+a.active {
+  background-color: rgba(63, 81, 181, 0.15);
+}
