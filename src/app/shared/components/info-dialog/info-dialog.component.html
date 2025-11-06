@@ -1,0 +1,18 @@
+<button class="close-button" mat-icon-button mat-dialog-close>X</button>
+<div mat-dialog-title>
+    <mat-icon style="margin-right: 16px;">error_outline</mat-icon>
+    <span style="font-weight: normal; font-size:16px">{{viewModel?.title}}</span>
+</div>
+<mat-dialog-content>
+    <div style="font-weight: normal; font-size:12px" [innerHTML]="viewModel?.message"></div>
+    <mat-expansion-panel [expanded]="false" *ngIf="viewModel.errorDetails" style="margin-top: 10px;">
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                <span style="font-weight: 500;">Details:</span>
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+            <pre style="font-weight: normal; font-size:10pt">{{viewModel?.errorDetails}}</pre>
+        </ng-template>
+    </mat-expansion-panel>
+</mat-dialog-content>
