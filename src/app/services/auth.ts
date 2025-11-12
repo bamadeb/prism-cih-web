@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { LoginRequest } from '../models/requests/loginRequest';
 import { AppEnvService } from './app-env.service';
+// import { IStorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,8 @@ import { AppEnvService } from './app-env.service';
 export class Auth {
   constructor(
     private httpClient: HttpClient,
-    private environmentService: AppEnvService
+    private environmentService: AppEnvService,
+    // private storageService: IStorageService
   ) {}
 
   async login<TResponse>(request: LoginRequest): Promise<TResponse> {

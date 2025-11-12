@@ -1,24 +1,32 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef, MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from '@angular/material/legacy-dialog';
+import { Component, Inject } from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogModule
+} from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 
 @Component({
   selector: 'app-busy-indicator',
+  standalone: true,
+  imports: [MatDialogModule, MatProgressSpinnerModule],
   templateUrl: './busy-indicator.component.html',
   styleUrls: ['./busy-indicator.component.css']
 })
-export class BusyIndicatorComponent implements OnInit {
+export class BusyIndicatorComponent {
   message = 'Please wait...';
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data,
-    private dialogRef: MatDialogRef<BusyIndicatorComponent>) {
+    @Inject(MAT_DIALOG_DATA) public data: { message?: string },
+    private dialogRef: MatDialogRef<BusyIndicatorComponent>
+  ) {
+    if (data?.message) {
       this.message = data.message;
+    }
   }
 
   close(): void {
     this.dialogRef.close();
-  }
-
-  ngOnInit(): void {
   }
 }

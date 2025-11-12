@@ -1,30 +1,35 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef, MatLegacyDialogConfig as MatDialogConfig, MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { Component, Inject } from '@angular/core';
 
-class ViewModel {
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+
+export interface ErrorDialogData {
   title?: string;
-  message: string;
+  errorMessage: string;
   errorDetails?: string;
-  constructor(message: string, title: string, errorDetails?: string) {
-    this.message = message;
-    this.title = title;
-    this.errorDetails = errorDetails;
-  }
 }
 
 @Component({
   selector: 'app-error-dialog',
+  standalone: true,                       
   templateUrl: './error-dialog.component.html',
-  styleUrls: ['./error-dialog.component.css']
+  styleUrls: ['./error-dialog.component.css'],
+  imports: [
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatExpansionModule
+],
 })
-export class ErrorDialogComponent implements OnInit {
-  viewModel?: ViewModel;
-
+export class ErrorDialogComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data,
-    private dialogRef: MatDialogRef<ErrorDialogComponent>) { }
-
-  ngOnInit(): void {
-    this.viewModel = new ViewModel(this.data.errorMessage, this.data.title, this.data.errorDetails);
-  }
+    @Inject(MAT_DIALOG_DATA) public data: ErrorDialogData,
+    public dialogRef: MatDialogRef<ErrorDialogComponent>
+  ) {}
 }

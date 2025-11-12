@@ -1,8 +1,17 @@
-<h3 mat-dialog-title>{{data.title}}</h3>
-<div mat-dialog-content>
-  {{data.message}}
-</div>
-<div style="float:right;margin:20px;">
-  <button mat-flat-button class="primary-color-icon" style="margin:0px 10px;" [mat-dialog-close]="true">{{confirmButtonName}}</button>
+<h3 mat-dialog-title>{{ data.title }}</h3>
+
+<mat-dialog-content>
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" style="margin: 0 20px 20px 0;">
+  <button
+    mat-flat-button
+    color="primary"
+    [mat-dialog-close]="true"
+    style="margin-right: 10px;"
+  >
+    {{ confirmButtonName }}
+  </button>
   <button mat-flat-button [mat-dialog-close]="false">Cancel</button>
-</div>
+</mat-dialog-actions>

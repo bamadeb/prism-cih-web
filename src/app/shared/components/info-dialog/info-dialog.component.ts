@@ -1,30 +1,39 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
 
-class ViewModel {
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+
+interface InfoDialogData {
   title?: string;
-  message: string;
+  errorMessage: string;
   errorDetails?: string;
-  constructor(message: string, title: string, errorDetails?: string) {
-    this.message = message;
-    this.title = title;
-    this.errorDetails = errorDetails;
-  }
 }
 
 @Component({
   selector: 'app-info-dialog',
+  standalone: true, // ✅ recommended in Angular 20
+  imports: [
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatExpansionModule
+],
   templateUrl: './info-dialog.component.html',
-  styleUrls: ['./info-dialog.component.css']
+  styleUrls: ['./info-dialog.component.css'],
 })
-export class InfoDialogComponent implements OnInit {
-  viewModel?: ViewModel;
+export class InfoDialogComponent {
+  title?: string;
+  message!: string;
+  errorDetails?: string;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data:any,
-    private dialogRef: MatDialogRef<InfoDialogComponent>) { }
-
-  ngOnInit(): void {
-    this.viewModel = new ViewModel(this.data.errorMessage, this.data.title, this.data.errorDetails);
+    @Inject(MAT_DIALOG_DATA) public data: InfoDialogData,
+    public dialogRef: MatDialogRef<InfoDialogComponent>
+  ) {
+    this.title = data.title;
+    this.message = data.errorMessage;
+    this.errorDetails = data.errorDetails;
   }
 }

@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { CommonModule } from '@angular/common';
+
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
 import { LoginRequest } from '../../../models/requests/loginRequest';
@@ -13,14 +13,13 @@ import { LoginRequest } from '../../../models/requests/loginRequest';
 @Component({
   selector: 'app-login',
   imports: [
-    CommonModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule
-  ],
+],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })

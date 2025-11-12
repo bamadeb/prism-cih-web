@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { BusyIndicatorComponent } from '../busy-indicator/busy-indicator.component';
 
 @Component({
   selector: 'app-ok-dialog',
@@ -9,7 +10,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 export class OkDialogComponent {
 
   constructor(
-      @Inject(MAT_DIALOG_DATA) public data: any,
-      public dialogRef: MatDialogRef<OkDialogComponent>) { }
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<BusyIndicatorComponent>
+  ) {}
+  
 
 }

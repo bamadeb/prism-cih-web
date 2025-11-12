@@ -1,5 +1,13 @@
 .header {
-  height: 64px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  padding: 0 16px;
 }
 
 .spacer {
@@ -9,4 +17,8 @@
 .title {
   font-size: 20px;
   font-weight: 500;
+}
+.logout-btn {
+  margin-left: auto;
+  color : blue;
 }

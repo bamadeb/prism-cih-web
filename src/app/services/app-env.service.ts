@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { IAppEnvironment } from '../models/iapp-types';
 import CryptoJS from 'crypto-js';
 import { firstValueFrom } from 'rxjs';
+// import { IStorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +11,8 @@ import { firstValueFrom } from 'rxjs';
 export class AppEnvService {
     private config!: IAppEnvironment;
     constructor(
-        public http: HttpClient
+        public http: HttpClient,
+        // private storageService: IStorageService
     ) {
     }
 

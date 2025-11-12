@@ -7,7 +7,7 @@
     vertical-align: middle;
  }
  ::ng-deep .error-dialog > mat-dialog-container {
-  background-color: #FF0000;
+  background-color: none;
   /* background-color: #cf421f; */
 }
 ::ng-deep .warning-dialog > mat-dialog-container {
