@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class AppEnvService {
     private config!: IAppEnvironment;
+    envType: any;
     constructor(
         public http: HttpClient,
         // private storageService: IStorageService

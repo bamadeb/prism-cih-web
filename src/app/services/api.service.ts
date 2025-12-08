@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { AppEnvService } from './app-env.service';
 import { LoginRequest } from '../models/requests/loginRequest';
 import { firstValueFrom } from 'rxjs';
+import { commonPostApi } from '../utilities/functions';
 
 @Injectable({
   providedIn: 'root'
@@ -16,15 +17,28 @@ export class ConfigService {
   ) { }
 
   
-  async login<TResponse>(request: LoginRequest): Promise<TResponse> {
-    const body = JSON.stringify(request);
-    //console.log('Sending body: ' + body);
+  // async login<TResponse>(request: LoginRequest): Promise<TResponse> {
+  //   const body = JSON.stringify(request);
+  //   //console.log('Sending body: ' + body);
 
-    const requestUrl = `${this.environmentService.endpointUrl}/prismAuthentication-dev`;
-    const headers = new  HttpHeaders( {'content-type': 'application/json'});
-    const result = firstValueFrom(this.httpClient.post<TResponse>(requestUrl, body, { headers}));
-    return result;
-  }
+  //   const requestUrl = `${this.environmentService.endpointUrl}/prismAuthentication-${this.environmentService.envType}`;
+  //   const headers = new  HttpHeaders( {'content-type': 'application/json'});
+  //   const result = firstValueFrom(this.httpClient.post<TResponse>(requestUrl, body, { headers}));
+  //   return result;
+  // }
+
+  async login<TResponse>(request: LoginRequest): Promise<TResponse> {
+  return await commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismAuthentication',
+    request,
+    //{ username: 'lovell.harmon@gmail.com', password: 'CIH_00B' }  
+  );
+}
+
+
+  
   // async saveProcessorNode(request: JSON): Promise<string> {
   //   const body = JSON.stringify(request);
   //   //console.log('Sending body: ' + body);
