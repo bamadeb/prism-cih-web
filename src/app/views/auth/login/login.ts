@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
 import { LoginRequest } from '../../../models/requests/loginRequest';
 import { MatIconModule } from '@angular/material/icon';
+import { UserDataService } from '../../../services/user-data-service';
 @Component({
   selector: 'app-login',
   imports: [
@@ -31,7 +32,7 @@ export class Login {
   errorMessage = '';
   errorMsg: any;
 
-  constructor(private router: Router,private authService: Auth) {}
+  constructor(private router: Router,private authService: Auth, private userData: UserDataService) {}
   bgImages = [
       'assets/images/1.jpg',
       'assets/images/2.jpg',
@@ -47,9 +48,9 @@ export class Login {
       }, 4000); // 4 seconds
     }
   async onSubmit() {
-    this.errorMessage = '';
+    //this.errorMessage = '';
     this.isLoading = true;
-
+    this.clearError();
     const request: LoginRequest = {
       username: this.username,
       password: this.password
@@ -57,18 +58,31 @@ export class Login {
 
     try {
       const result = await this.authService.login<any>(request);
-      console.log('✅ Login success:', result);
+      //console.log('✅ Login success:', result);
       if(result.data.length>0){
+        const user = result.data[0];
+         //this.userData.setUser(user);
+        const roleId = user.role_id;
+        //console.log('roleId:',roleId);
+        if (roleId == 7) {
+          this.router.navigate(['/users']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
         this.router.navigate(['/dashboard']);
       }
       else{
-        this.errorMessage = 'Invalid credentials.';
+        this.errorMessage = 'Invalid login credentials';
       }
       //this.router.navigate(['/dashboard']);
     } catch (error) {
-      this.errorMessage = 'Invalid credentials or network error.';
+      this.errorMessage = 'Invalid login credentials';
     } finally {
       this.isLoading = false;
     }
+  }
+  clearError() {
+    //alert(1);
+    this.errorMessage = '';
   }
 }

@@ -27,16 +27,16 @@
 
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Username</mat-label>
-        <input matInput [(ngModel)]="username" name="username" required>
+        <input matInput [(ngModel)]="username" name="username" required (input)="clearError()">
       </mat-form-field>
 
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Password</mat-label>
-        <input matInput type="password" [(ngModel)]="password" name="password" required>
+        <input matInput type="password" [(ngModel)]="password" name="password" required (input)="clearError()">
       </mat-form-field>
 
           <div class="center-btn">
-      <button mat-flat-button color="primary" [disabled]="isLoading || !username || !password">
+      <button mat-flat-button color="primary" [disabled]="isLoading || !username || !password ">
         @if (!isLoading) {
           Login
         } @else {

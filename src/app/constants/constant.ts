@@ -69,6 +69,7 @@ export const PHONE_NUMBER_MIN_LENGTH_MESSAGE = 'Phone number should be 10 digit 
 /********END **************/
 
 /********Storage Key Constants */
+export const USER_KEY = 'app_user';
 export const USER_ID_KEY = 'USER_ID';
 export const ORG_ID_KEY = 'ORG_ID';
 
