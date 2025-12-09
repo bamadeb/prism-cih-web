@@ -1,9 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AppEnvService } from './app-env.service';
-import { LoginRequest } from '../models/requests/loginRequest';
+import { LoginRequest } from '../models/requests/loginRequest'; 
 import { firstValueFrom } from 'rxjs';
 import { commonPostApi } from '../utilities/functions';
+import { DashboardRequest } from '../models/requests/dashboardRequest';
 
 @Injectable({
   providedIn: 'root'
@@ -28,14 +29,22 @@ export class ConfigService {
   // }
 
   async login<TResponse>(request: LoginRequest): Promise<TResponse> {
-  return await commonPostApi<TResponse>(
-    this.httpClient,
-    this.environmentService,
-    'prismAuthentication',
-    request,
-    //{ username: 'lovell.harmon@gmail.com', password: 'CIH_00B' }  
-  );
-}
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismAuthentication',
+      request   
+    );
+  }
+
+  async dashboard<TResponse>(request: DashboardRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismOutreachAllmyworkspaceSP',
+      request   
+    );
+  }
 
 
   

@@ -1,4 +1,4 @@
-.sidebar {
+/* .sidebar {
   width: 220px;
   background: white;
   border-right: 1px solid #ddd;
@@ -7,4 +7,37 @@
 
 a.active {
   background-color: rgba(63, 81, 181, 0.15);
+} */
+
+
+.sidenav-container {
+  height: 100vh;
+}
+
+.app-sidenav {
+  width: 350px;
+  background-color: #1569c7;
+  color: #fff;
+}
+
+.sidenav-header {
+  padding: 16px;
+}
+
+.logo {
+  width: 120px;
+}
+
+mat-nav-list a {
+  color: #fff !important;
+}
+
+.custom-expansion {
+  background: transparent !important;
+  box-shadow: none;
+  color: #fff;
+}
+
+mat-expansion-panel-header {
+  padding-left: 16px;
 }
