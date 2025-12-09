@@ -12,6 +12,7 @@ import { BaseComponent } from '../../base/base.component';
 import { ErrorReportingService } from '../../services/errorReporting/error-reporting.service'; 
 import { ConfigService } from '../../services/api.service';
 import { DashboardRequest } from '../../models/requests/dashboardRequest';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,7 +31,7 @@ import { DashboardRequest } from '../../models/requests/dashboardRequest';
 })
 export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
-  displayedColumns: string[] = ['id', 'name', 'email'];
+  displayedColumns: string[] = ['MEM_NO', 'FIRST_NAME', 'LAST_NAME'];
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -40,6 +41,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     errorLogger: ErrorReportingService,
     matDialog: MatDialog,
     private httpClient: HttpClient,
+    private titleService: Title,
     private apiService: ConfigService,
     public dialog: MatDialog
   ) {
@@ -47,6 +49,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.titleService.setTitle('PRISM :: DASHBOARD');
     this.loadTableData();
   }
 
@@ -56,31 +59,32 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   /** Load data from API */
   async loadTableData(): Promise<void> { 
-    const DATA = [
-      { id: 1, name: 'John Doe', email: 'john@test.com' },
-      { id: 2, name: 'Anna Smith', email: 'anna@test.com' },
-      { id: 3, name: 'David Lee', email: 'david@test.com' }
-    ];
-    this.dataSource.data = DATA;
-    //  const request: DashboardRequest = {
-    //       user_id: '1' 
-    //     };
+     const request: DashboardRequest = {
+          user_id: '1' 
+        };
 
-    // try {
-    //   const result = await this.apiService.dashboard<any>(request);
-    //   console.log('Dashboard:', result.data);
-    //   if(result.data.length>0){
-    //     const user = result.data[0];         
-    //   }else{
-        
-    //   } 
+    try {
+      const result = await this.apiService.dashboard<any>(request); 
+      const members = result.data?.members || [];  
+      //console.log('Dashboard:', members.length);
+      if (members.length > 0) { 
 
-    // }catch(error) {
+          // Map API data to your table structure
+          const DATA = members.map((m: any, index: number) => ({
+            MEM_NO: m.MEM_NO || m.MEM_NO,
+            FIRST_NAME: m.FIRST_NAME || m.FIRST_NAME || 'N/A',
+            LAST_NAME: m.LAST_NAME || m.LAST_NAME || 'N/A'
+          }));
+          console.log(DATA);
+          this.dataSource.data = DATA;      
+      } 
+
+    }catch(error) {
       
-    // }finally{
+    }finally{
        
-    // }
-
+    }
+        
   }
 
   /** Attach paginator & sorting */

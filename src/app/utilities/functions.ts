@@ -10,9 +10,9 @@ export async function commonPostApi<T>(
   params?: Record<string, any>
 ): Promise<T> {
 
-  let url = `${env.endpointUrl}/${apiName}-${env.envType}`;
+  // ✅ FIX HERE
+  let url = `${env.endpointUrl()}${apiName}-${env.envType()}`; 
 
-  // Add query parameters (if any)
   if (params) {
     const httpParams = new HttpParams({ fromObject: params });
     const queryString = httpParams.toString();
@@ -29,6 +29,10 @@ export async function commonPostApi<T>(
     http.post<T>(url, JSON.stringify(body), { headers })
   );
 }
+
+
+
+
 
 export function onDomLoad(callBackFunc: () => void): void {
     setTimeout(() => {

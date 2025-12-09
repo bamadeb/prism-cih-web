@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { Title } from '@angular/platform-browser';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
@@ -32,7 +33,7 @@ export class Login {
   errorMessage = '';
   errorMsg: any;
 
-  constructor(private router: Router,private authService: Auth, private userData: UserDataService) {}
+  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title) {}
   bgImages = [
       'assets/images/1.jpg',
       'assets/images/2.jpg',
@@ -43,6 +44,7 @@ export class Login {
     currentIndex = 0;
 
     ngOnInit() {
+       this.titleService.setTitle('PRISM :: LOGIN');
       setInterval(() => {
         this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
       }, 4000); // 4 seconds

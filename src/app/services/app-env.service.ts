@@ -10,7 +10,6 @@ import { firstValueFrom } from 'rxjs';
 })
 export class AppEnvService {
     private config!: IAppEnvironment;
-    envType: any;
     constructor(
         public http: HttpClient,
         // private storageService: IStorageService
@@ -28,6 +27,9 @@ export class AppEnvService {
     }
     endpointUrl(): string {
         return this.config.endpointUrl ?? 'unknown';
+    }
+    envType(): string {
+        return this.config.envType ?? 'unknown';
     }
     async load(): Promise<void> {
         try {
