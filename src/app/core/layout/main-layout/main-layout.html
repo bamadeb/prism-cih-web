@@ -1,11 +1,21 @@
-<app-header></app-header>
+<mat-sidenav-container class="sidenav-container" >
 
-<div class="layout-container">
-  <app-sidebar></app-sidebar>
+  <mat-sidenav #drawer mode="over" class="app-sidenav" style="background-color:darkcyan;">
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
 
-  <main class="content">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+  <mat-sidenav-content>
 
-<app-footer></app-footer>
+    <app-header [drawer]="drawer"></app-header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- Footer -->
+    <app-footer style="margin-bottom: 10px;"></app-footer>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

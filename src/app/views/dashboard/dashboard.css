@@ -1,5 +1,13 @@
 mat-card {
-  max-width: 600px;
-  margin: 250px auto;
-  text-align: center;
+ 
+  margin: 5% auto;
+   
 }
+table {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
