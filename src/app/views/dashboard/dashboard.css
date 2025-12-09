@@ -1,8 +1,4 @@
-mat-card {
- 
-  margin: 5% auto;
-   
-}
+
 table {
   width: 100%;
 }
@@ -10,4 +6,61 @@ table {
 mat-form-field {
   width: 100%;
 }
+
+.text-uppercase {
+  text-transform: uppercase;
+} 
+ 
+.search-box {
+  width: 200px;  
+} 
+
+.search-box input { 
+  height: 20px;
+}
+
+.custom-tabs ::ng-deep .mat-tab-label {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.tab-content {
+  padding: 15px;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.bg-header {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.navigator-select {
+  width: 250px;
+}
+
+
 
