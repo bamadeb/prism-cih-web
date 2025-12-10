@@ -62,8 +62,8 @@ export class Login {
       const result = await this.authService.login<any>(request);
       //console.log('✅ Login success:', result);
       if(result.data.length>0){
-        const user = result.data[0];
-         this.userData.setUser(user);
+        const user = result.data[0]; 
+        this.userData.setUser(user); 
         const roleId = user.role_id;
         //console.log('roleId:',roleId);
         if (roleId == 7) {
