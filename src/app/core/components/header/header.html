@@ -89,15 +89,15 @@
     <!-- Profile Menu -->
     <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-btn">
       <img src="assets/images/noimage.jpg" class="profile-img" />
-      <span class="d-none d-md-inline text-capitalize ms-2">{{ userName }}</span>
+      <span class="d-none d-md-inline text-capitalize ms-2" style="margin: 7px;">{{ userName }}</span>
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
 
     <mat-menu #profileMenu="matMenu">
-      <div class="menu-header text-center">
-        <strong>{{ Name }}</strong>
+      <!-- <div class="menu-header text-center">
+        <strong>{{ userName }}</strong>
       </div>
-      <mat-divider></mat-divider>
+      <mat-divider></mat-divider> -->
 
       <button mat-menu-item>
         <mat-icon>person</mat-icon>

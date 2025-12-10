@@ -2,5 +2,16 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.pagecontent{
+    margin-top: 60px;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;  /* left + right */
+  align-items: center;
+}
+
+
 
 

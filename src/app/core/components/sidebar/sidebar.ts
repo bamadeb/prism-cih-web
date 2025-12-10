@@ -5,6 +5,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RouterModule } from '@angular/router';
+import { UserDataService } from '../../../services/user-data-service';
 
 @Component({
   selector: 'app-sidebar',
@@ -17,6 +18,18 @@ import { RouterModule } from '@angular/router';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
+
+
 export class Sidebar {
-     userRole = 7; // example
+  userRole: any;
+    constructor(     
+    private userData: UserDataService 
+  ) {}
+
+  ngOnInit(): void {
+      const user = this.userData.getUser();
+      this.userRole = user.role_id;
+  }  
+     
+     
 }

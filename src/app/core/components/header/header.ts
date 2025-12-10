@@ -7,6 +7,7 @@ import { MatMenuModule, MatMenu } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider'; 
 import { CommonModule } from '@angular/common'; 
 import { MatSidenav } from '@angular/material/sidenav';
+import { UserDataService } from '../../../services/user-data-service';
 
 
 
@@ -20,10 +21,15 @@ export class Header {
  @Input() drawer!: MatSidenav;
 
   pageTitle = 'Dashboard';
-  userName = 'Admin';
-  Name:any;
+  userName: string | undefined;
  
-  constructor(private router: Router) {}
+  constructor(private router: Router,private userData: UserDataService ) {}
+
+   ngOnInit(): void {
+      const user = this.userData.getUser(); 
+      this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
+      //console.log(user);
+  }  
 
   logout() {
     localStorage.removeItem('user');

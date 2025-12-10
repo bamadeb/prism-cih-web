@@ -63,7 +63,7 @@ export class Login {
       //console.log('✅ Login success:', result);
       if(result.data.length>0){
         const user = result.data[0];
-         //this.userData.setUser(user);
+         this.userData.setUser(user);
         const roleId = user.role_id;
         //console.log('roleId:',roleId);
         if (roleId == 7) {

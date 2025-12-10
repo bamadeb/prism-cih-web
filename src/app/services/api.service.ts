@@ -41,6 +41,15 @@ export class ConfigService {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
+      'prismGetUserMemberList',
+      request   
+    );
+  }
+
+   async poweroverview<TResponse>(request: DashboardRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
       'prismOutreachAllmyworkspaceSP',
       request   
     );
