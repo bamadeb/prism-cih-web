@@ -50,7 +50,8 @@ export class ConfigService {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
-      'prismOutreachAllmyworkspaceSP',
+      //'prismOutreachAllmyworkspaceSP',
+      'prismOutreachmemberSP',
       request   
     );
   }

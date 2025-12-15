@@ -22,6 +22,9 @@ import { CommonModule } from '@angular/common';
 import { UserDataService } from '../../services/user-data-service';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+
 
 @Component({
   selector: 'app-dashboard',
@@ -48,15 +51,33 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   };
 
   displayedColumns: string[] = ['2','MEM_INFO', 'PHONE', 'PCP_TAX_ID', 'PCP_VISIT_FLAG','PRIORITY_FLAG','upcoming_task_date','Call_count','risk_gap_count','risk_comp_count','risk_perf','quality_count','quality_comp_count','quality_perf','1'];
+  displayedColumnsTransfer: string[] = [
+    'medicaid_id',
+    'refer_by_name',
+    'refer_to_name',
+    'added_date',
+    'referring_reason'
+  ];
+  displayedColumnsNolongerpatient: string[] = [
+    'medicaid_id',
+    'FIRST_NAME',
+    'LAST_NAME', 
+    'NO_LONGER_PATIENT_DATE'
+  ];
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
+  transferdataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
+  nolongerpatientdataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
+@ViewChild('mainPaginator') mainPaginator!: MatPaginator;
+@ViewChild('mainSort') mainSort!: MatSort;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-  riskData: any[] = []; 
-  riskColumns: any[] = []; 
-  totalArray: any = {};
-  workData: any[] = []; 
-  selectedDoctor1: any[] = []; 
+@ViewChild('transferPaginator') transferPaginator!: MatPaginator;
+@ViewChild('transferSort') transferSort!: MatSort;
+
+@ViewChild('nolongerpatientPaginator') nolongerpatientPaginator!: MatPaginator;
+@ViewChild('nolongerpatientSort') nolongerpatientSort!: MatSort;
+ 
+  transferlist: any[] = [];   
+  totalArray: any = {}; 
   loginUserId : number | null = null; 
   isLoading = false;
   isOpen = false;
@@ -67,10 +88,9 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   referralList: any = {};
   planList: any = {};
   NoLongerPatientList: any = {};
-  navigatorList: any[] = [];
+  navigatorList: any[] = []; 
   performanceArray: Record<string, ProviderPerformance>[] = [];
-  entry: any = {};
-  
+  entry: any = {}; 
 
   constructor(
     errorLogger: ErrorReportingService,
@@ -79,7 +99,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     private titleService: Title,
     private apiService: ConfigService,
     private userData: UserDataService,
-    public dialog: MatDialog
+    public dialog: MatDialog, private sanitizer: DomSanitizer
   ) {
     super(errorLogger, matDialog);
   }
@@ -90,8 +110,16 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  this.dataSource.paginator = this.mainPaginator;
+  this.dataSource.sort = this.mainSort;
+
+  // TRANSFER TABLE
+  this.transferdataSource.paginator = this.transferPaginator;
+  this.transferdataSource.sort = this.transferSort;
+
+  // NO LONGER PATIENT TABLE
+  this.nolongerpatientdataSource.paginator = this.nolongerpatientPaginator;
+  this.nolongerpatientdataSource.sort = this.nolongerpatientSort;
 
     this.dataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
@@ -102,7 +130,29 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
           return item[property];
       }
     };
+    this.transferdataSource.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case 'MEM_INFO':
+          // Sort by MEM_NO, change if you want different sorting
+          return item.medicaid_id;
+        default:
+          return item[property];
+      }
+    };
+
+    this.nolongerpatientdataSource.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case 'MEM_INFO':
+          // Sort by MEM_NO, change if you want different sorting
+          return item.medicaid_id;
+        default:
+          return item[property];
+      }
+    };
+
     this.attachTableFeatures();
+    this.attachTableFeaturestransfer();
+    this.attachTableFeaturesnoLongerpatient();
   }
 
   /** Load data from API */
@@ -153,7 +203,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
           this.dataSource.data = DATA;      
       } 
 
-      await this.loadprojectoverviewData();
+      this.loadprojectoverviewData();
 
     }catch(error) {
       console.log('error:'+error);      
@@ -163,6 +213,38 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
         
   }
 
+  openDialog(row: any) {
+    
+     const html = `
+    <div style="line-height:1.8;">
+      ${Object.entries(row)
+        .map(([key, value]) => `<b>${key.toUpperCase()}:</b> ${value}`)
+        .join('<br>')}
+    </div>
+  `;
+  const title = `BENEFITS - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
+
+  const safeHtml: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(html);
+  const dialogRef = this.dialog.open(ActionDialog, {
+    width: '80vw',           // XL SIZE
+    maxWidth: '900px',       // Prevent too large on big monitors
+    height: 'auto',
+    //disableClose: true,      // optional
+    panelClass: 'xl-dialog', // custom CSS
+    data: {
+      title: title,
+      htmlContent: safeHtml
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      // user clicked OK
+      //this.doAction(row);
+    }
+  });
+}
+
   async loadprojectoverviewData(): Promise<void> {  
     const request: DashboardRequest = {
         user_id: this.loginUserId
@@ -170,17 +252,18 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
     try {           
       const res = await this.apiService.poweroverview<any>(request);  
-      console.log('Power Overview:', res);  
+      //console.log('Power Overview:', res);  
        if (res.data) {
         this.overallSummary = res.data.overallRiskQualitySummary || [];
         this.ownSummary = res.data.ownRiskQualitySummary || [];
-        this.departmentList = res.data.departmentList || [];
+        this.navigatorList = res.data.navigatorList || [];
         this.recentActivity = res.data.recentActivity || [];
-        this.referralList = res.data.referralList || [];
-        this.planList = res.data.planList || [];
-        this.NoLongerPatientList = res.data.NoLongerPatientList || [];
+        //this.referralList = res.data.referralList || [];
+        //this.planList = res.data.planList || [];
+        //this.NoLongerPatientList = res.data.NoLongerPatientList || [];
         this.calculatePerformance(res.data);
-
+        this.loadTransfertabledata(res.data.referralList);
+        this.loadNopatienttabledata(res.data.NoLongerPatientList);   
        }
 
     }catch(error) {
@@ -189,9 +272,72 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   }
 
+loadTransfertabledata(transferlist: any){
+   if (transferlist.length > 0) { 
+      //console.log(transferlist); 
+      const transferDATA = transferlist.map((r: any, index: number) => ({
+        medicaid_id: r.medicaid_id,
+        added_date: r.added_date,
+        refer_by_name: r.refer_by_name,
+        refer_to_name: r.refer_to_name,
+        referring_reason: r.referring_reason
+      }));
+      //console.log(DATA);
+      this.transferdataSource.data = transferDATA;
+   }
+}
+
+loadNopatienttabledata(nolongerpatientlist: any){
+   if (nolongerpatientlist.length > 0) {   
+      const nopatientDATA = nolongerpatientlist.map((r: any, index: number) => ({
+        medicaid_id: r.medicaid_id,
+        FIRST_NAME: r.FIRST_NAME,
+        LAST_NAME: r.LAST_NAME,
+        NO_LONGER_PATIENT_DATE: r.NO_LONGER_PATIENT_DATE 
+      }));
+      //console.log(DATA);
+      this.nolongerpatientdataSource.data = nopatientDATA;
+   }
+} 
+  /** Attach paginator & sorting */
+  attachTableFeatures(): void {
+    if (this.mainPaginator) this.dataSource.paginator = this.mainPaginator;
+    if (this.mainSort) this.dataSource.sort = this.mainSort;
+  }
+
+  attachTableFeaturestransfer(): void {
+    if (this.transferPaginator) this.transferdataSource.paginator = this.transferPaginator;
+    if (this.transferSort) this.transferdataSource.sort = this.transferSort;
+  }
+
+  attachTableFeaturesnoLongerpatient(): void {
+    if (this.nolongerpatientPaginator) this.nolongerpatientdataSource.paginator = this.nolongerpatientPaginator;
+    if (this.nolongerpatientSort) this.nolongerpatientdataSource.sort = this.nolongerpatientSort;
+  }
+
+  /** Trigger error popup */
+  showErrorPopup(): void {
+    this.displayError('ERROR MESSAGE DISPLAY', 'ERROR POPUP TEST');
+  }
+
+  /** Search filter */
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value || '';
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  applyFiltertransfer(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value || '';
+    this.transferdataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  applyFilternopatient(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value || '';
+    this.nolongerpatientdataSource.filter = filterValue.trim().toLowerCase();
+  }
 
 
-toggleDiv() {
+  toggleDiv() {
   this.isOpen = !this.isOpen;
 }
 
@@ -345,22 +491,5 @@ calculatePerformance(data: any) {
     if (percent < 60) return 'red';
     if (percent < 80) return '#FFAE42';
     return 'green';
-  }
-
-  /** Attach paginator & sorting */
-  attachTableFeatures(): void {
-    if (this.paginator) this.dataSource.paginator = this.paginator;
-    if (this.sort) this.dataSource.sort = this.sort;
-  }
-
-  /** Trigger error popup */
-  showErrorPopup(): void {
-    this.displayError('ERROR MESSAGE DISPLAY', 'ERROR POPUP TEST');
-  }
-
-  /** Search filter */
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value || '';
-    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 }

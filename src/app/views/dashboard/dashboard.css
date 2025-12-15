@@ -10,6 +10,7 @@ mat-form-field {
 .text-uppercase {
   text-transform: uppercase;
 } 
+
  
 .search-box {
   width: 200px;  
@@ -17,7 +18,7 @@ mat-form-field {
 
 .search-box input { 
   height: 20px;
-}
+} 
 
 .custom-tabs ::ng-deep .mat-tab-label {
   font-weight: bold;
@@ -114,6 +115,65 @@ mat-form-field {
 .static-table tr:nth-child(even) {
   background-color: #f2f2f2;
 }
+
+.activity-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.activity-date {
+  width: 30%;
+  font-weight: 500;
+}
+
+.activity-dot {
+  margin-right: 16px;
+  font-size: 12px;
+}
+
+.activity-text {
+  width: 60%;
+  font-size: 14px;
+}
+
+.half-screen {
+  width: 50%;
+}
+
+.custom-tabs .mat-tab-label {
+  flex: 1; /* default equal width tabs */
+}
+
+/* LAST TAB override → shrink width */
+.custom-tabs .mat-tab-label:last-child {
+  flex: 0 0 auto !important;
+  width: 70px !important;      /* adjust width as needed */
+  padding: 0 !important;
+}
+
+/* Make the form-field fit nicely */
+.custom-tabs .mat-tab-label:last-child .mat-form-field {
+  width: 60%;
+  margin: 0;
+}
+
+.txlink{
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+::ng-deep .xl-dialog .mat-dialog-container {
+  width: 100% !important;
+  max-width: 900px !important;
+  margin: auto !important;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+
+
+
 
 
 

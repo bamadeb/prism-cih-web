@@ -1,442 +1,508 @@
-<!-- <mat-card>
-  <mat-card-title>Welcome to the Dashboard!</mat-card-title>
-  <mat-card-content>
-    <p>This page is shown after successful login.</p>
-    <button
-    mat-raised-button
-    color="warn"
-    (click)="showErrorPopup()"
-    style="margin-top: 20px;"
-  >
-    Show Error Popup
-  </button>
-  </mat-card-content>
-</mat-card> -->
-
-<div class="pagecontent">
-    <mat-card>
-  <mat-card-content>
-
-    <div class="project-header">
-
-      <!-- Left button -->
-      <a style="text-decoration: underline; font-size: 18px;" mat-raised-button color="primary" (click)="toggleDiv()">
-        PROJECT OVERVIEW
-      </a>
-
-      <!-- Right button -->
-      <mat-form-field appearance="outline" class="navigator-select" >
-      <mat-select placeholder="ALL NAVIGATOR">
-        <mat-option value="0">ALL NAVIGATOR</mat-option>
-        <mat-option value="1049">Cognito23 User</mat-option>
-        <mat-option value="1050">Cognito3 User</mat-option>
-        <mat-option value="1051">Cognito6 User</mat-option>
-        <mat-option value="1">Nicole Johnson</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    </div>
-
-  </mat-card-content>
-</mat-card>
-
-
-<div *ngIf="isOpen" class="box">
-  <table style="width: 100%;">
-    <tr>
-      <td>
-        <table class="static-table" style="width: 100%;">
-           <thead>
-            <tr>
-              <th>RISK</th>
-              <th>GAPS</th>
-              <th>COMPLETED</th>
-              <th>PERFORMANCE</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>OVERALL (PRIORITY)</td>
-              <td>{{ overallSummary?.priority_risk_count }}</td>
-              <td>{{ overallSummary?.priority_risk_comp_count }}</td>
-              <td>{{ overallSummary?.priority_risk_perf | number:'1.0-0' }}%</td>
-            </tr> 
-             <tr>
-              <td>OVERALL (OTHERS)</td>
-              <td>{{ overallSummary?.other_risk_count }}</td>
-              <td>{{ overallSummary?.other_risk_comp_count }}</td>
-              <td>{{ overallSummary?.other_risk_perf | number:'1.0-0' }}%</td>
-              </tr>
-              <tr style="border: 2px solid #000;"></tr>
-              <tr>
-              <td>MY OWN (PRIORITY)</td>
-              <td>{{ ownSummary?.priority_risk_count }}</td>
-              <td>{{ ownSummary?.priority_risk_comp_count }}</td>
-              <td>{{ ownSummary?.priority_risk_perf | number:'1.0-0' }}%</td>
-            </tr> 
-             <tr>
-              <td>MY OWN (OTHERS)</td>
-              <td>{{ ownSummary?.other_risk_count }}</td>
-              <td>{{ ownSummary?.other_risk_comp_count }}</td>
-              <td>{{ ownSummary?.other_risk_perf | number:'1.0-0' }}%</td>
-            </tr> 
-          </tbody> 
-          <thead>
-            <tr>
-              <th>QUALITY</th>
-              <th>GAPS</th>
-              <th>COMPLETED</th>
-              <th>PERFORMANCE</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>OVERALL (PRIORITY)</td>
-              <td>{{ overallSummary?.priority_quality_count }}</td>
-              <td>{{ overallSummary?.priority_quality_comp_count }}</td>
-              <td>{{ overallSummary?.priority_quality_perf | number:'1.0-0' }}%</td>
-            </tr> 
-             <tr>
-              <td>OVERALL (OTHERS)</td>
-              <td>{{ overallSummary?.other_quality_count }}</td>
-              <td>{{ overallSummary?.other_quality_comp_count }}</td>
-              <td>{{ overallSummary?.other_quality_perf | number:'1.0-0' }}%</td>
-              </tr>
-              <tr style="border: 2px solid #000;"></tr>
-               <tr>
-              <td>MY OWN (PRIORITY)</td>
-              <td>{{ ownSummary?.priority_quality_count }}</td>
-              <td>{{  ownSummary?.priority_quality_comp_count }}</td>
-              <td>{{ ownSummary?.priority_quality_perf | number:'1.0-0' }}%</td>
-            </tr> 
-             <tr>
-              <td>MY OWN (OTHERS)</td>
-              <td>{{ ownSummary?.other_quality_count }}</td>
-              <td>{{ ownSummary?.other_quality_comp_count }}</td>
-              <td>{{ ownSummary?.other_quality_perf | number:'1.0-0' }}%</td>
-            </tr> 
-          </tbody> 
-        </table>
-      </td>
-       <td>
-        <table class="static-table" style="width: 100%;">
-          <thead>
-            <tr>
-              <th>WORK OVERVIEW</th>
-              <th *ngFor="let item of performanceArray">
-                  <div *ngFor="let entry of (item | keyvalue)">  
-                    <span [title]="entry.value.provider_name" class="text-uppercase"> {{ entry.value.provider_name?.slice(0, 5) }}.. </span> 
-                  </div>
-              </th>
-              <th>TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>CONTACTED (PRIORITY)</td>
-              <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> {{ entry.value.call_count }}/{{entry.value.priority_count }}
-                    (<span [style.color]="entry.value.priority_color"
-                        style="padding: 0;">{{
-                        entry.value.priority_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td> {{ totalArray.total_call_count }}/{{
-                    totalArray.total_priority_count }}
-                    (<span [style.color]="totalArray.priority_call_color"
-                        style="padding: 0;">{{
-                        totalArray.priority_call_percentage |
-                        number:'1.0-0' }}%</span>)
-              </td>
-              </tr>
-              
-              <tr>
-              <td>CONTACTED (OTHERS)</td>
-               <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.other_call_count }}/{{entry.value.other_count }}
-                    (<span [style.color]="entry.value.other_call_color"
-                        style="padding: 0;">{{
-                        entry.value.other_call_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>
-                {{ totalArray.total_other_call_count }}/{{ totalArray.total_other_count }}
-                  (<span [style.color]="totalArray.other_call_color" style="padding: 0;">
-                    {{ totalArray.other_call_percentage | number:'1.0-0' }}%</span>)
-              </td>
-            </tr>    
-            <tr style="border: 2px solid #000;"></tr>          
-            <tr>
-              <td>RISK GAPS (PRIORITY)</td>
-               <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.priority_complete_gaps_count }}/{{entry.value.priority_gaps_count }}
-                    (<span [style.color]="entry.value.priority_gaps_color"
-                        style="padding: 0;">{{
-                        entry.value.priority_gaps_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>
-                {{ totalArray.total_priority_complete_gaps_count }}/{{totalArray.total_priority_gaps_count }}
-                    (<span [style.color]="totalArray.priority_gaps_color"
-                        style="padding: 0;">{{
-                        totalArray.priority_gaps_percentage |
-                        number:'1.0-0' }}%</span>)
-              </td>
-            </tr> 
-             <tr>
-              <td>RISK GAPS (OTHERS)</td>
-              <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.other_complete_gaps_count }}/{{entry.value.other_gaps_count }}
-                    (<span [style.color]="entry.value.other_gaps_color"
-                        style="padding: 0;">{{
-                        entry.value.other_gaps_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>
-                {{ totalArray.total_other_complete_gaps_count }}/{{
-                  totalArray.total_other_gaps_count }}
-                  (<span [style.color]="totalArray.other_gaps_color"
-                      style="padding: 0;">{{ totalArray.other_gaps_percentage
-                      |
-                      number:'1.0-0' }}%</span>)
-              </td>
-            </tr>  
-            <tr style="border: 2px solid #000;"></tr>
-            <tr>
-             <td>QUALITY GAPS (PRIORITY)</td>
-             <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.priority_complete_quality_gaps_count }}/{{entry.value.priority_quality_gaps_count }}
-                    (<span [style.color]="entry.value.priority_quality_gaps_color"
-                        style="padding: 0;">{{
-                        entry.value.priority_quality_gaps_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>{{ totalArray.total_priority_complete_quality_gaps_count  }}/{{ totalArray.total_priority_quality_gaps_count }}
-                    (<span [style.color]="totalArray.priority_quality_gaps_color"  style="padding: 0;">
-                       {{ totalArray.priority_quality_gaps_percentage |  number:'1.0-0'}}%</span>)
-              </td>
-            </tr> 
-             <tr>
-              <td>QUALITY GAPS (OTHERS)</td>
-              <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.other_complete_quality_gaps_count }}/{{entry.value.other_quality_gaps_count }}
-                    (<span [style.color]="entry.value.other_quality_gaps_color"
-                        style="padding: 0;">{{
-                        entry.value.other_quality_gaps_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>{{ totalArray.total_other_complete_quality_gaps_count }}/{{
-                      totalArray.total_other_quality_gaps_count }}
-                      (<span [style.color]="totalArray.other_quality_gaps_color"
-                          style="padding: 0;">{{
-                          totalArray.other_quality_gaps_percentage |
-                          number:'1.0-0'}}%</span>)
-              </td>
-             </tr>
-             <tr style="border: 2px solid #000;"></tr>
-             <tr>
-              <td>PCP VISIT (PRIORITY)</td>
-              <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.priority_pcp_visit_count }}/{{entry.value.priority_count }}
-                    (<span [style.color]="entry.value.priority_pcp_visit_color"
-                        style="padding: 0;">{{
-                        entry.value.priority_pcp_visit_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>
-                {{ totalArray.priority_pcp_visit_count ?? 0 }}/{{ totalArray.total_priority_count }}
-                  (<span [style.color]="totalArray.priority_pcp_color"
-                      style="padding: 0;">{{
-                      totalArray.priority_pcp_percentage |
-                      number:'1.0-0' }}%</span>)
-              </td>
-            </tr> 
-             <tr>
-              <td>PCP VISIT (OTHERS)</td>
-              <td *ngFor="let item of performanceArray">
-                <div *ngFor="let entry of (item | keyvalue)"> 
-                  {{ entry.value.other_pcp_visit_count }}/{{entry.value.other_count }}
-                    (<span [style.color]="entry.value.other_pcp_visit_color"
-                        style="padding: 0;">{{
-                        entry.value.other_pcp_visit_percentage |
-                        number:'1.0-0'}}%</span>)
-                </div>
-              </td>
-              <td>
-                {{ totalArray.total_other_count_pcp ?? 0 }}/{{ totalArray.total_other_count }}
-                (<span [style.color]="totalArray.other_pcp_color"
-                    style="padding: 0;">{{ totalArray.other_pcp_percentage |
-                    number:'1.0-0' }}%</span>)
-              </td>
-            </tr> 
-            <tr style="height: 40px;">
-              <td colspan="5"> </td> 
-            </tr> 
-            
-          </tbody> 
-        </table>
-        
-      </td>
-    </tr>
-  </table>
-  
  
-</div>
+<div class="pagecontent">
+  <mat-card>
+    <mat-card-content>
 
-   
-<mat-tab-group class="custom-tabs" mat-stretch-tabs>
+      <div class="project-header">
 
-  <mat-tab label="MEMBERS">
-    <div class="tab-content">
-      <mat-card> 
-  <mat-card-content>   
+        <!-- Left button -->
+        <a style="text-decoration: underline;cursor: pointer; font-size: 18px;" mat-raised-button color="primary"
+          (click)="toggleDiv()">
+          PROJECT OVERVIEW
+        </a>
 
-      <!-- Search box -->
-      <div style="display:flex; justify-content:flex-end;">
-          <mat-form-field appearance="outline"  class="search-box">
-            <mat-label>Search</mat-label>
-            <input matInput (keyup)="applyFilter($event)" placeholder="Search records">
-          </mat-form-field>
-      </div>      
-
-      <!-- Data Table -->
-      <div class="mat-elevation-z8">
-        <table mat-table [dataSource]="dataSource" matSort class="w-100 text-uppercase">
-          <ng-container matColumnDef="2">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
-            <td mat-cell *matCellDef="let row"><mat-checkbox class="example-margin"></mat-checkbox>
-              <a style="margin-left: 15px;">D</a>
-              <mat-icon style="margin-left: 7px;">add</mat-icon>
-              
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="MEM_INFO">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>#MEM ID / NAME / DOB</th>
-            <td mat-cell *matCellDef="let row">{{ row.MEM_NO }}<br>
-              <strong>{{ row.FIRST_NAME }} {{ row.LAST_NAME }}</strong><br>
-              {{ row.BIRTH }} 
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="PHONE">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>ADDRESS/PHONE</th>
-            <td mat-cell *matCellDef="let row">{{ row.OTHER_ADDR1 }}<br>{{ row.OTHER_PHONE | phoneFormat}}</td>
-          </ng-container>
-          <ng-container matColumnDef="PCP_TAX_ID">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>PRACTICE</th>
-            <td mat-cell *matCellDef="let row">{{ providerTinNameMapping[row.PCP_TAX_ID]?.slice(0, 5) }}..</td>
-          </ng-container>
-          <ng-container matColumnDef="PCP_VISIT_FLAG">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>PCP VISIT</th>
-            <td mat-cell *matCellDef="let row">
-              <div [ngClass]="row.PCP_VISIT_FLAG == 1 ? 'green' : 'red'">  </div>  <br />  {{ row.PCP_VISIT_DATE || '' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="PRIORITY_FLAG">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>PRIORITY</th>
-            <td mat-cell *matCellDef="let row">{{ row.PRIORITY_FLAG || '' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="upcoming_task_date">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>TASK</th>
-            <td mat-cell *matCellDef="let row">{{ row.upcoming_task_date || 'N/A' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="Call_count">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>CALL</th>
-            <td mat-cell *matCellDef="let row">{{ row.Call_count }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="risk_gap_count">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>RISK COUNT</th>
-            <td mat-cell *matCellDef="let row">{{ row.risk_gap_count }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="risk_comp_count">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>COMPLETED</th>
-            <td mat-cell *matCellDef="let row">{{ row.risk_comp_count }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="risk_perf">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>%</th>
-            <td mat-cell *matCellDef="let row">{{ row.risk_perf }}%</td>
-          </ng-container>
-
-          <ng-container matColumnDef="quality_count">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>GAP COUNT</th>
-            <td mat-cell *matCellDef="let row">{{ row.quality_count }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="quality_comp_count">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>COMPLETED</th>
-            <td mat-cell *matCellDef="let row">{{ row.quality_comp_count }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="quality_perf">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>%</th>
-            <td mat-cell *matCellDef="let row">{{ row.quality_perf }}%</td>
-          </ng-container>
-
-          <ng-container matColumnDef="1">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>ACTION</th>
-            <td mat-cell *matCellDef="let row"><a>P</a> &nbsp; <mat-icon style="color:red;height: 19px;">close</mat-icon> </td>
-          </ng-container>
-          
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        </table>
-
-        <!-- Pagination -->
-        <mat-paginator [pageSize]="10" showFirstLastButtons></mat-paginator>
+        <!-- Right button -->
+        <mat-form-field appearance="outline" class="navigator-select">
+          <mat-select placeholder="ALL NAVIGATOR">
+            <mat-option value="0">ALL NAVIGATOR</mat-option>
+            <mat-option value="1049">Cognito23 User</mat-option>
+            <mat-option value="1050">Cognito3 User</mat-option>
+            <mat-option value="1051">Cognito6 User</mat-option>
+            <mat-option value="1">Nicole Johnson</mat-option>
+          </mat-select>
+        </mat-form-field>
 
       </div>
 
     </mat-card-content>
-
   </mat-card>
 
 
-      
-    </div>
-  </mat-tab>
+  <div *ngIf="isOpen" class="box">
+    <table style="width: 100%;">
+      <tr>
+        <td>
+          <table class="static-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>RISK</th>
+                <th>GAPS</th>
+                <th>COMPLETED</th>
+                <th>PERFORMANCE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>OVERALL (PRIORITY)</td>
+                <td>{{ overallSummary?.priority_risk_count }}</td>
+                <td>{{ overallSummary?.priority_risk_comp_count }}</td>
+                <td>{{ overallSummary?.priority_risk_perf | number:'1.0-0' }}%</td>
+              </tr>
+              <tr>
+                <td>OVERALL (OTHERS)</td>
+                <td>{{ overallSummary?.other_risk_count }}</td>
+                <td>{{ overallSummary?.other_risk_comp_count }}</td>
+                <td>{{ overallSummary?.other_risk_perf | number:'1.0-0' }}%</td>
+              </tr>
+              <tr style="border: 2px solid #000;"></tr>
+              <tr>
+                <td>MY OWN (PRIORITY)</td>
+                <td>{{ ownSummary?.priority_risk_count }}</td>
+                <td>{{ ownSummary?.priority_risk_comp_count }}</td>
+                <td>{{ ownSummary?.priority_risk_perf | number:'1.0-0' }}%</td>
+              </tr>
+              <tr>
+                <td>MY OWN (OTHERS)</td>
+                <td>{{ ownSummary?.other_risk_count }}</td>
+                <td>{{ ownSummary?.other_risk_comp_count }}</td>
+                <td>{{ ownSummary?.other_risk_perf | number:'1.0-0' }}%</td>
+              </tr>
+            </tbody>
+            <thead>
+              <tr>
+                <th>QUALITY</th>
+                <th>GAPS</th>
+                <th>COMPLETED</th>
+                <th>PERFORMANCE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>OVERALL (PRIORITY)</td>
+                <td>{{ overallSummary?.priority_quality_count }}</td>
+                <td>{{ overallSummary?.priority_quality_comp_count }}</td>
+                <td>{{ overallSummary?.priority_quality_perf | number:'1.0-0' }}%</td>
+              </tr>
+              <tr>
+                <td>OVERALL (OTHERS)</td>
+                <td>{{ overallSummary?.other_quality_count }}</td>
+                <td>{{ overallSummary?.other_quality_comp_count }}</td>
+                <td>{{ overallSummary?.other_quality_perf | number:'1.0-0' }}%</td>
+              </tr>
+              <tr style="border: 2px solid #000;"></tr>
+              <tr>
+                <td>MY OWN (PRIORITY)</td>
+                <td>{{ ownSummary?.priority_quality_count }}</td>
+                <td>{{ ownSummary?.priority_quality_comp_count }}</td>
+                <td>{{ ownSummary?.priority_quality_perf | number:'1.0-0' }}%</td>
+              </tr>
+              <tr>
+                <td>MY OWN (OTHERS)</td>
+                <td>{{ ownSummary?.other_quality_count }}</td>
+                <td>{{ ownSummary?.other_quality_comp_count }}</td>
+                <td>{{ ownSummary?.other_quality_perf | number:'1.0-0' }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+        <td>
+          <table class="static-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>WORK OVERVIEW</th>
+                <th *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    <span [title]="entry.value.provider_name" class="text-uppercase"> {{
+                      entry.value.provider_name?.slice(0, 5) }}.. </span>
+                  </div>
+                </th>
+                <th>TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CONTACTED (PRIORITY)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)"> {{ entry.value.call_count
+                    }}/{{entry.value.priority_count }}
+                    (<span [style.color]="entry.value.priority_color" style="padding: 0;">{{
+                      entry.value.priority_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td> {{ totalArray.total_call_count }}/{{
+                  totalArray.total_priority_count }}
+                  (<span [style.color]="totalArray.priority_call_color" style="padding: 0;">{{
+                    totalArray.priority_call_percentage |
+                    number:'1.0-0' }}%</span>)
+                </td>
+              </tr>
 
-  <mat-tab label="TRANSFER">
-    <div class="tab-content">
-      Transfer content here
-    </div>
-  </mat-tab>
+              <tr>
+                <td>CONTACTED (OTHERS)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.other_call_count }}/{{entry.value.other_count }}
+                    (<span [style.color]="entry.value.other_call_color" style="padding: 0;">{{
+                      entry.value.other_call_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>
+                  {{ totalArray.total_other_call_count }}/{{ totalArray.total_other_count }}
+                  (<span [style.color]="totalArray.other_call_color" style="padding: 0;">
+                    {{ totalArray.other_call_percentage | number:'1.0-0' }}%</span>)
+                </td>
+              </tr>
+              <tr style="border: 2px solid #000;"></tr>
+              <tr>
+                <td>RISK GAPS (PRIORITY)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.priority_complete_gaps_count }}/{{entry.value.priority_gaps_count }}
+                    (<span [style.color]="entry.value.priority_gaps_color" style="padding: 0;">{{
+                      entry.value.priority_gaps_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>
+                  {{ totalArray.total_priority_complete_gaps_count }}/{{totalArray.total_priority_gaps_count }}
+                  (<span [style.color]="totalArray.priority_gaps_color" style="padding: 0;">{{
+                    totalArray.priority_gaps_percentage |
+                    number:'1.0-0' }}%</span>)
+                </td>
+              </tr>
+              <tr>
+                <td>RISK GAPS (OTHERS)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.other_complete_gaps_count }}/{{entry.value.other_gaps_count }}
+                    (<span [style.color]="entry.value.other_gaps_color" style="padding: 0;">{{
+                      entry.value.other_gaps_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>
+                  {{ totalArray.total_other_complete_gaps_count }}/{{
+                  totalArray.total_other_gaps_count }}
+                  (<span [style.color]="totalArray.other_gaps_color" style="padding: 0;">{{
+                    totalArray.other_gaps_percentage
+                    |
+                    number:'1.0-0' }}%</span>)
+                </td>
+              </tr>
+              <tr style="border: 2px solid #000;"></tr>
+              <tr>
+                <td>QUALITY GAPS (PRIORITY)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.priority_complete_quality_gaps_count }}/{{entry.value.priority_quality_gaps_count }}
+                    (<span [style.color]="entry.value.priority_quality_gaps_color" style="padding: 0;">{{
+                      entry.value.priority_quality_gaps_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>{{ totalArray.total_priority_complete_quality_gaps_count }}/{{
+                  totalArray.total_priority_quality_gaps_count }}
+                  (<span [style.color]="totalArray.priority_quality_gaps_color" style="padding: 0;">
+                    {{ totalArray.priority_quality_gaps_percentage | number:'1.0-0'}}%</span>)
+                </td>
+              </tr>
+              <tr>
+                <td>QUALITY GAPS (OTHERS)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.other_complete_quality_gaps_count }}/{{entry.value.other_quality_gaps_count }}
+                    (<span [style.color]="entry.value.other_quality_gaps_color" style="padding: 0;">{{
+                      entry.value.other_quality_gaps_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>{{ totalArray.total_other_complete_quality_gaps_count }}/{{
+                  totalArray.total_other_quality_gaps_count }}
+                  (<span [style.color]="totalArray.other_quality_gaps_color" style="padding: 0;">{{
+                    totalArray.other_quality_gaps_percentage |
+                    number:'1.0-0'}}%</span>)
+                </td>
+              </tr>
+              <tr style="border: 2px solid #000;"></tr>
+              <tr>
+                <td>PCP VISIT (PRIORITY)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.priority_pcp_visit_count }}/{{entry.value.priority_count }}
+                    (<span [style.color]="entry.value.priority_pcp_visit_color" style="padding: 0;">{{
+                      entry.value.priority_pcp_visit_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>
+                  {{ totalArray.priority_pcp_visit_count ?? 0 }}/{{ totalArray.total_priority_count }}
+                  (<span [style.color]="totalArray.priority_pcp_color" style="padding: 0;">{{
+                    totalArray.priority_pcp_percentage |
+                    number:'1.0-0' }}%</span>)
+                </td>
+              </tr>
+              <tr>
+                <td>PCP VISIT (OTHERS)</td>
+                <td *ngFor="let item of performanceArray">
+                  <div *ngFor="let entry of (item | keyvalue)">
+                    {{ entry.value.other_pcp_visit_count }}/{{entry.value.other_count }}
+                    (<span [style.color]="entry.value.other_pcp_visit_color" style="padding: 0;">{{
+                      entry.value.other_pcp_visit_percentage |
+                      number:'1.0-0'}}%</span>)
+                  </div>
+                </td>
+                <td>
+                  {{ totalArray.total_other_count_pcp ?? 0 }}/{{ totalArray.total_other_count }}
+                  (<span [style.color]="totalArray.other_pcp_color" style="padding: 0;">{{
+                    totalArray.other_pcp_percentage |
+                    number:'1.0-0' }}%</span>)
+                </td>
+              </tr>
+              <tr style="height: 40px;">
+                <td colspan="5"> </td>
+              </tr>
 
-  <mat-tab label="NO LONGER PATIENT">
-    <div class="tab-content">
-      No longer patient content here
-    </div>
-  </mat-tab>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
 
-</mat-tab-group>
+  <mat-tab-group class="custom-tabs" mat-stretch-tabs style="margin-top: 30px;">
+    <mat-tab label="MEMBERS">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-content>
+            <!-- Search box -->
+            <div style="display:flex; justify-content:flex-end;">
+              <mat-form-field appearance="outline" class="search-box">
+                <mat-label>Search</mat-label>
+                <input matInput (keyup)="applyFilter($event)" placeholder="Search records">
+              </mat-form-field>
+            </div>
+            <!-- Data Table -->
+            <div class="mat-elevation-z8">
+              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="w-100 text-uppercase">
+                <ng-container matColumnDef="2">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
+                  <td mat-cell *matCellDef="let row"><mat-checkbox class="example-margin"></mat-checkbox>
+                    <a style="margin-left: 15px;" class="txlink" (click)="showErrorPopup()">D</a>
+                    <mat-icon style="margin-left: 7px;" class="txlink" (click)="showErrorPopup()">add</mat-icon>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="MEM_INFO">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>#MEM ID / NAME / DOB</th>
+                  <td mat-cell *matCellDef="let row">{{ row.MEM_NO }}<br>
+                    <strong>{{ row.FIRST_NAME }} {{ row.LAST_NAME }}</strong><br>
+                    {{ row.BIRTH }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="PHONE">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>ADDRESS/PHONE</th>
+                  <td mat-cell *matCellDef="let row">{{ row.OTHER_ADDR1 }}<br>{{ row.OTHER_PHONE | phoneFormat}}</td>
+                </ng-container>
+                <ng-container matColumnDef="PCP_TAX_ID">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>PRACTICE</th>
+                  <td mat-cell *matCellDef="let row">{{ providerTinNameMapping[row.PCP_TAX_ID]?.slice(0, 5) }}..</td>
+                </ng-container>
+                <ng-container matColumnDef="PCP_VISIT_FLAG">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>PCP VISIT</th>
+                  <td mat-cell *matCellDef="let row">
+                    <div [ngClass]="row.PCP_VISIT_FLAG == 1 ? 'green' : 'red'"> </div> <br /> {{ row.PCP_VISIT_DATE ||
+                    '' }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="PRIORITY_FLAG">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>PRIORITY</th>
+                  <td mat-cell *matCellDef="let row">{{ row.PRIORITY_FLAG || '' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="upcoming_task_date">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>TASK</th>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.upcoming_task_date || 'N/A' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="Call_count">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>CALL</th>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.Call_count }}</td>
+                </ng-container>
+                <ng-container matColumnDef="risk_gap_count">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>RISK COUNT</th>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.risk_gap_count }}</td>
+                </ng-container>
+                <ng-container matColumnDef="risk_comp_count">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>COMPLETED</th>
+                  <td mat-cell *matCellDef="let row">{{ row.risk_comp_count }}</td>
+                </ng-container>
+                <ng-container matColumnDef="risk_perf">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>%</th>
+                  <td mat-cell *matCellDef="let row">{{ row.risk_perf }}%</td>
+                </ng-container>
+                <ng-container matColumnDef="quality_count">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>GAP COUNT</th>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.quality_count }}</td>
+                </ng-container>
+                <ng-container matColumnDef="quality_comp_count">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>COMPLETED</th>
+                  <td mat-cell *matCellDef="let row">{{ row.quality_comp_count }}</td>
+                </ng-container>
+                <ng-container matColumnDef="quality_perf">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>%</th>
+                  <td mat-cell *matCellDef="let row">{{ row.quality_perf }}%</td>
+                </ng-container>
+                <ng-container matColumnDef="1">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>ACTION</th>
+                  <td mat-cell *matCellDef="let row"><a class="txlink" (click)="openDialog(row)">P</a>
+                    &nbsp; <mat-icon class="txlink"  style="color:red;height: 19px;" (click)="openDialog(row)">close</mat-icon> </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+              <!-- Pagination -->
+              <mat-paginator #mainPaginator [pageSize]="10" showFirstLastButtons></mat-paginator>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="TRANSFER">
+      <div class="tab-content">
+        <div style="display:flex; justify-content:flex-end;">
+        <mat-form-field appearance="outline" class="search-box">
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="applyFiltertransfer($event)" placeholder="Search">
+        </mat-form-field>
+        </div>
+
+        <mat-table [dataSource]="transferdataSource" matSort #transferSort="matSort">
+
+          <ng-container matColumnDef="medicaid_id">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> #MEMBER ID </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.medicaid_id}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="refer_by_name">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> TRANSFERRED BY </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.refer_by_name}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="refer_to_name">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> TRANSFERRED TO </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.refer_to_name}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="added_date">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> TRANSFER DATE </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.added_date}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="referring_reason">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> TRANSFER REASON </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.referring_reason}} </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumnsTransfer"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumnsTransfer"></mat-row>
+        </mat-table>
+        <mat-paginator #transferPaginator [pageSize]="10"></mat-paginator> 
+
+      </div>
+    </mat-tab>
+
+    <mat-tab label="NO LONGER PATIENT">
+      <div class="tab-content">
+        <div style="display:flex; justify-content:flex-end;">
+        <mat-form-field appearance="outline" class="search-box">
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="applyFilternopatient($event)" placeholder="Search">
+        </mat-form-field>
+        </div>
+
+        <mat-table [dataSource]="nolongerpatientdataSource" matSort #nolongerpatientSort="matSort">
+
+          <ng-container matColumnDef="medicaid_id">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> #MEMBER ID </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.medicaid_id}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="FIRST_NAME">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> FIRST NAME </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.FIRST_NAME}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="LAST_NAME">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> LAST NAME </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.LAST_NAME}} </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="NO_LONGER_PATIENT_DATE">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> ACTION DATE </mat-header-cell>
+            <mat-cell *matCellDef="let row"> {{row.NO_LONGER_PATIENT_DATE}} </mat-cell>
+          </ng-container>           
+
+          <mat-header-row *matHeaderRowDef="displayedColumnsNolongerpatient"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumnsNolongerpatient"></mat-row>
+        </mat-table>
+        <mat-paginator #nolongerpatientPaginator [pageSize]="10"></mat-paginator> 
+         
+      </div>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div (click)="$event.stopPropagation()">
+        <mat-form-field appearance="outline">
+          <mat-select placeholder="ACTION">
+            <mat-option value="1">TRANSFER</mat-option>
+            <mat-option value="2">ASSIGN PLAN</mat-option> 
+          </mat-select>
+        </mat-form-field>
+        </div>
+      </ng-template>      
+    </mat-tab>
+  </mat-tab-group>
+  
+  <div class="half-screen">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-subtitle>Recent Activity | Today</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+
+        <div *ngFor="let recent of recentActivity; let i = index" class="activity-item">
+
+          <div class="activity-row">
+
+            <!-- Date -->
+            <div class="activity-date">
+              {{ recent.add_date | date: 'M/d/yyyy' }}
+            </div>
+
+            <!-- Material Icon -->
+            <mat-icon class="activity-dot" color="primary">fiber_manual_record</mat-icon>
+
+            <!-- Activity Text -->
+            <div class="activity-text">
+              #{{ recent.medicaid_id }}: {{ recent.log_name }}, {{ recent.log_details }}
+            </div>
+
+          </div>
+
+          <mat-divider></mat-divider>
+
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+
+
+
 </div>
 
 <div class="loader-backdrop" *ngIf="isLoading">
   <mat-spinner diameter="60"></mat-spinner>
 </div>
-
-
-
-
-
-
