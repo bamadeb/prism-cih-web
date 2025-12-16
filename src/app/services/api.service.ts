@@ -5,7 +5,7 @@ import { LoginRequest } from '../models/requests/loginRequest';
 import { firstValueFrom } from 'rxjs';
 import { commonPostApi } from '../utilities/functions';
 import { DashboardRequest } from '../models/requests/dashboardRequest';
-
+import { UserIdRequest } from '../models/requests/userIdRequest'
 @Injectable({
   providedIn: 'root'
 })
@@ -52,6 +52,22 @@ export class ConfigService {
       this.environmentService,
       //'prismOutreachAllmyworkspaceSP',
       'prismOutreachmemberSP',
+      request   
+    );
+  }
+  async addActionMaster<TResponse>(): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetAddActionMasterData',
+      {}   
+    );
+  }
+  async getMemberGapsList<TResponse>(request: UserIdRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetMemberGapsList',
       request   
     );
   }

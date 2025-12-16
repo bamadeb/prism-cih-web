@@ -24,7 +24,7 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-
+import { AddAction } from '../shared/components/add-action/add-action'
 
 @Component({
   selector: 'app-dashboard',
@@ -212,8 +212,16 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     }
         
   }
-
-  openDialog(row: any) {
+openAddActionDialog(medicaid_id: string){
+  const dialogRef = this.dialog.open(AddAction,{
+    width: '95vw',        // or '95%'
+    maxWidth: '100vw',    // IMPORTANT
+    height: 'auto'
+  });
+  
+  alert(medicaid_id);
+}
+openDialog(row: any) {
     
      const html = `
     <div style="line-height:1.8;">
