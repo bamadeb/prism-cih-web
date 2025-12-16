@@ -4,7 +4,7 @@ import { AppEnvService } from './app-env.service';
 import { LoginRequest } from '../models/requests/loginRequest'; 
 import { firstValueFrom } from 'rxjs';
 import { commonPostApi } from '../utilities/functions';
-import { DashboardRequest } from '../models/requests/dashboardRequest';
+import { BenefitsRequest, DashboardRequest } from '../models/requests/dashboardRequest';
 
 @Injectable({
   providedIn: 'root'
@@ -52,6 +52,15 @@ export class ConfigService {
       this.environmentService,
       //'prismOutreachAllmyworkspaceSP',
       'prismOutreachmemberSP',
+      request   
+    ); 
+  }
+
+  async benefitsList<TResponse>(request: BenefitsRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'pismGetbenefits',
       request   
     );
   }

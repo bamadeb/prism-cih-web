@@ -24,6 +24,7 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { BenefitsDialogService } from '../../services/benefits-dialog.service';
 
 
 @Component({
@@ -91,6 +92,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   navigatorList: any[] = []; 
   performanceArray: Record<string, ProviderPerformance>[] = [];
   entry: any = {}; 
+ 
 
   constructor(
     errorLogger: ErrorReportingService,
@@ -99,7 +101,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     private titleService: Title,
     private apiService: ConfigService,
     private userData: UserDataService,
-    public dialog: MatDialog, private sanitizer: DomSanitizer
+    public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService
   ) {
     super(errorLogger, matDialog);
   }
@@ -213,37 +215,17 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
         
   }
 
-  openDialog(row: any) {
-    
-     const html = `
-    <div style="line-height:1.8;">
-      ${Object.entries(row)
-        .map(([key, value]) => `<b>${key.toUpperCase()}:</b> ${value}`)
-        .join('<br>')}
-    </div>
-  `;
-  const title = `BENEFITS - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
+   showBenefits(row: any) {
+    this.isLoading = true;
 
-  const safeHtml: SafeHtml = this.sanitizer.bypassSecurityTrustHtml(html);
-  const dialogRef = this.dialog.open(ActionDialog, {
-    width: '80vw',           // XL SIZE
-    maxWidth: '900px',       // Prevent too large on big monitors
-    height: 'auto',
-    //disableClose: true,      // optional
-    panelClass: 'xl-dialog', // custom CSS
-    data: {
-      title: title,
-      htmlContent: safeHtml
-    }
-  });
-
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      // user clicked OK
-      //this.doAction(row);
-    }
-  });
+    this.benefitsService
+      .showBenefitsDialog(row)
+      .finally(() => {
+        this.isLoading = false;
+    });
 }
+
+
 
   async loadprojectoverviewData(): Promise<void> {  
     const request: DashboardRequest = {

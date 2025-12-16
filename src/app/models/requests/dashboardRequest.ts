@@ -35,3 +35,7 @@ export interface ProviderPerformance {
   other_pcp_visit_color: string;
   provider_name: string;
 }
+
+export class BenefitsRequest {
+     medicaid_id?: number | null;
+}
