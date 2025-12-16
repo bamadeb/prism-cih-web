@@ -23,10 +23,9 @@ import { UserDataService } from '../../services/user-data-service';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BenefitsDialogService } from '../../services/benefits-dialog.service';
-
-
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; 
+import { BenefitsDialogService } from '../../services/benefits-dialog.service'; 
+import { AddAction } from '../shared/components/add-action/add-action' 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -214,15 +213,25 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     }
         
   }
+ 
 
    showBenefits(row: any) {
     this.isLoading = true;
-
     this.benefitsService
       .showBenefitsDialog(row)
       .finally(() => {
         this.isLoading = false;
     });
+  }
+ 
+openAddActionDialog(medicaid_id: string){
+  const dialogRef = this.dialog.open(AddAction,{
+    width: '95vw',        // or '95%'
+    maxWidth: '100vw',    // IMPORTANT
+    height: 'auto'
+  });
+  
+  alert(medicaid_id); 
 }
 
 

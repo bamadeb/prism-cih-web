@@ -1,0 +1,107 @@
+/* Container full width */
+.w-100 {
+  width: 100%;
+}
+
+/* Section spacing */
+.mb-3 {
+  margin-bottom: 1.2rem;
+}
+
+/* Radio group spacing */
+.mat-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 6px;
+}
+
+.mat-radio-button {
+  font-size: 14px;
+}
+
+/* Material form field full width */
+.mat-form-field.w-100 {
+  width: 100%;
+}
+
+/* Make labels uppercase & bold */
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Fix textarea height */
+textarea[matInput] {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* File input look consistent */
+input[type=file] {
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #f8f8f8;
+  border-radius: 4px;
+}
+
+/* Optional: Improve mat-select & input visual spacing */
+.mat-mdc-form-field {
+  margin-top: 4px;
+}
+
+/* Increase datepicker icon clickable space */
+.mat-datepicker-toggle {
+  margin-right: 5px;
+}
+
+/* Error message styling */
+mat-error {
+  font-size: 12px;
+  margin-top: -5px;
+}
+
+/* Optional: Add slight shadow for form */
+.form-section {
+  padding: 16px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.action-row {
+  display: flex;
+  flex-wrap: wrap;       /* for responsive wrapping on small screens */
+  gap: 1rem;             /* space between fields */
+}
+
+.action-row .flex-item {
+  flex: 1 1 0;           /* grow/shrink, equal width */
+  min-width: 200px;      /* optional — ensures sensible minimum width */
+}
+.text-center {
+  text-align: center;  
+}
+.title-text {
+   font-size: 18px;
+   font-weight: bold; 
+}
+.text-uppercase{
+    text-transform: uppercase;
+}
+/* Make mat-tab-body height auto and remove scrolling */
+.mat-tab-body {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Optional: remove padding/margin if you want full-width content */
+.mat-tab-body-content {
+  overflow: visible !important;
+  height: auto !important;
+}
