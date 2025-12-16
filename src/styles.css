@@ -11,6 +11,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   justify-content: space-between;  /* left + right */
   align-items: center;
 }
+.txupper{
+  text-transform: uppercase;
+}
 
 
 

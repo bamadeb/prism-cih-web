@@ -41,7 +41,7 @@ export class AppEnvService {
             } else {
                 this.config = env;
             }
-            console.log('✅ Environment loaded:', this.config);
+            //console.log('✅ Environment loaded:', this.config);
         } catch (error) {
             console.error('❌ Error loading environment configuration:', error);
             throw error;

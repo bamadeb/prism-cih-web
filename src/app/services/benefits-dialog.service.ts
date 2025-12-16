@@ -34,7 +34,7 @@ export class BenefitsDialogService {
   private openDialog(row: any, benefitsList: any[]) {
     const html = benefitsList.length
       ? benefitsList.map(b => `
-          <div style="margin-bottom:12px">
+          <div style="margin-bottom:12px" class="txupper">
             <div style="font-weight:600">
               ${this.escapeHtml(b.plan_name)}
               (${b.start_date} - ${b.end_date})

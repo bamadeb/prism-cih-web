@@ -321,15 +321,16 @@
                 </ng-container>
                 <ng-container matColumnDef="upcoming_task_date">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>TASK</th>
-                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.upcoming_task_date || 'N/A' }}</td>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showTasklist(row)">
+                    {{ row.upcoming_task_date === '01/01/1900' ? 'N/A' : (row.upcoming_task_date || 'N/A') }}</td>
                 </ng-container>
                 <ng-container matColumnDef="Call_count">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>CALL</th>
-                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.Call_count }}</td>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showCallList(row)">{{ row.Call_count }}</td>
                 </ng-container>
                 <ng-container matColumnDef="risk_gap_count">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>RISK COUNT</th>
-                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.risk_gap_count }}</td>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showRiskgaps(row)">{{ row.risk_gap_count }}</td>
                 </ng-container>
                 <ng-container matColumnDef="risk_comp_count">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>COMPLETED</th>
@@ -340,8 +341,8 @@
                   <td mat-cell *matCellDef="let row">{{ row.risk_perf }}%</td>
                 </ng-container>
                 <ng-container matColumnDef="quality_count">
-                  <th mat-header-cell *matHeaderCellDef mat-sort-header>GAP COUNT</th>
-                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showErrorPopup()">{{ row.quality_count }}</td>
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>QUALITY COUNT</th>
+                  <td mat-cell *matCellDef="let row" class="txlink" (click)="showQualitygaps(row)">{{ row.quality_count }}</td>
                 </ng-container>
                 <ng-container matColumnDef="quality_comp_count">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>COMPLETED</th>
@@ -497,10 +498,6 @@
       </mat-card-content>
     </mat-card>
   </div>
-
-
-
-
 </div>
 
 <div class="loader-backdrop" *ngIf="isLoading">

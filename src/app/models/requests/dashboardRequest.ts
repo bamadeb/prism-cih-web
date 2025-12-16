@@ -39,3 +39,19 @@ export interface ProviderPerformance {
 export class BenefitsRequest {
      medicaid_id?: number | null;
 }
+
+export class QualitygapRequest {
+     medicaid_id?: number | null;
+}
+
+export class RiskgapRequest {
+     medicaid_id?: number | null;
+}
+
+export class CallListRequest {
+     medicaid_id?: number | null;
+}
+
+export class TaskListRequest {
+     medicaid_id?: number | null;
+}

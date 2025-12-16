@@ -25,6 +25,10 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; 
 import { BenefitsDialogService } from '../../services/benefits-dialog.service'; 
+import { QualitygapDialogService } from '../../services/qualitygap-dialog.service';
+import { RiskgapDialogService } from '../../services/riskgap-dialog.service';
+import { CallListDialogService } from '../../services/calllist-dialog.service';
+import { TaskListDialogService } from '../../services/tasklist-dialog.service';
 import { AddAction } from '../shared/components/add-action/add-action' 
 @Component({
   selector: 'app-dashboard',
@@ -100,7 +104,10 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     private titleService: Title,
     private apiService: ConfigService,
     private userData: UserDataService,
-    public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService
+    public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService,
+    private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
+    private callListService:CallListDialogService,private taskListService:TaskListDialogService
+    
   ) {
     super(errorLogger, matDialog);
   }
@@ -223,14 +230,49 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
         this.isLoading = false;
     });
   }
+
+  showQualitygaps(row: any) {
+    this.isLoading = true;
+    this.qualitygapsService
+      .showQualitygapDialog(row)
+      .finally(() => {
+        this.isLoading = false;
+    });
+  }
+
+  showRiskgaps(row: any) {
+    this.isLoading = true;
+    this.riskgapsService
+      .showRiskgapDialog(row)
+      .finally(() => {
+        this.isLoading = false;
+    });
+  }
+
+  showCallList(row: any) {
+    this.isLoading = true;
+    this.callListService
+      .showcallListDialog(row)
+      .finally(() => {
+        this.isLoading = false;
+    });
+  }
+
+  showTasklist(row: any) {
+    this.isLoading = true;
+    this.taskListService
+      .showcallListDialog(row)
+      .finally(() => {
+        this.isLoading = false;
+    });
+  }
  
 openAddActionDialog(medicaid_id: string){
   const dialogRef = this.dialog.open(AddAction,{
     width: '95vw',        // or '95%'
     maxWidth: '100vw',    // IMPORTANT
     height: 'auto'
-  });
-  
+  });  
   alert(medicaid_id); 
 }
 
