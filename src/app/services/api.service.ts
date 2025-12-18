@@ -1,12 +1,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AppEnvService } from './app-env.service';
-import { LoginRequest } from '../models/requests/loginRequest'; 
-import { firstValueFrom } from 'rxjs';
+import { LoginRequest } from '../models/requests/loginRequest';  
 import { commonPostApi } from '../utilities/functions';
-import { BenefitsRequest, DashboardRequest } from '../models/requests/dashboardRequest';  
 import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup } from '../models/requests/commonRequest' 
 import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
+import { BenefitsRequest,CallListRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest} from '../models/requests/dashboardRequest';  
 @Injectable({
   providedIn: 'root'
 })
@@ -17,17 +16,6 @@ export class ConfigService {
     private environmentService: AppEnvService,
 
   ) { }
-
-  
-  // async login<TResponse>(request: LoginRequest): Promise<TResponse> {
-  //   const body = JSON.stringify(request);
-  //   //console.log('Sending body: ' + body);
-
-  //   const requestUrl = `${this.environmentService.endpointUrl}/prismAuthentication-${this.environmentService.envType}`;
-  //   const headers = new  HttpHeaders( {'content-type': 'application/json'});
-  //   const result = firstValueFrom(this.httpClient.post<TResponse>(requestUrl, body, { headers}));
-  //   return result;
-  // }
 
   async login<TResponse>(request: LoginRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
@@ -65,6 +53,43 @@ export class ConfigService {
       request   
     );
   }
+
+  async gualitygapList<TResponse>(request: QualitygapRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetqualityList',
+      request   
+    );
+  }
+
+  async riskgapList<TResponse>(request: RiskgapRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetgapList',
+      request   
+    );
+  }
+
+  async calllistList<TResponse>(request: CallListRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetcallhistory',
+      request   
+    );
+  }
+
+  async tasklistList<TResponse>(request: TaskListRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetMemberUpcommingTaskList',
+      request   
+    );
+  }
+
   async addActionMaster<TResponse>(): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
@@ -73,13 +98,15 @@ export class ConfigService {
       {}   
     );
   }
+
   async getMemberGapsList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
-    return await commonPostApi<TResponse>(
+   return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
       'prismGetMemberGapsList',
       request   
     );
+
   }
   async getMemberTaskList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
@@ -140,37 +167,7 @@ export class ConfigService {
 
 
   
-  // async saveProcessorNode(request: JSON): Promise<string> {
-  //   const body = JSON.stringify(request);
-  //   //console.log('Sending body: ' + body);
+ 
 
-  //   const requestUrl = `${this.environmentService.activeEngineBaseUrl}/prismAuthentication-dev`;
-  //   const headers: HttpHeaders = new  HttpHeaders( {'content-type': 'application/json'});
-  //   const result = this.httpClient.post<string>(requestUrl, body, { headers}).toPromise();
-
-  //   return result;
-  // }
-
-  // async getConfigByGuidAsync(configGuid: string): Promise<DataTransformerConfig> {
-  //   //console.log(`Getting config : ${configGuid}`);
-
-  //   const requestUrl = `${this.environmentService.activeAppBaseUrl}/api/Config/${configGuid}`;
-  //   const headers: HttpHeaders = new  HttpHeaders( {'content-type': 'application/json'});
-  //   const result = await this.httpClient.get<string>(requestUrl, { headers}).toPromise();
-  //   //console.log(result);
-  //   const config: DataTransformerConfig = DataTransformerConfig.fromJSON(result);
-
-  //   return config;
-  // }
-
-  // async deleteConfigByGuid(guid: string): Promise<boolean> {
-  //   //console.log(`Deleting config : ${guid}`);
-
-  //   const requestUrl = `${this.environmentService.activeAppBaseUrl}/api/Config/${guid}`;
-  //   const headers: HttpHeaders = new  HttpHeaders( {'content-type': 'application/json'});
-  //   const result = this.httpClient.delete<boolean>(requestUrl, { headers}).toPromise();
-
-  //   return result;
-  // }
 
 }
