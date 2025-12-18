@@ -1,416 +1,593 @@
-<h2 mat-dialog-title>ADD/UPDATE ACTION</h2>
+<h2 mat-dialog-title class="text-uppercase">ADD/UPDATE ACTION | {{ this.member_name }} - #{{ this.medicaid_id }} - {{ this.member_dob }}</h2>
 <mat-dialog-content>
-  <mat-tab-group>
+  <mat-tab-group  mat-stretch-tabs="false" mat-align-tabs="start">
     <mat-tab label="TO-DO/DONE">
       <div>
 
-        <form enctype="multipart/form-data" (ngSubmit)="add_update_action_submit()">
+        <form enctype="multipart/form-data" (ngSubmit)="add_update_action_submit()" [formGroup]="addActionFormGroup">
 
-  <div class="grid-2-col">
+          <div class="grid-2-col">
 
-    <!-- LEFT COLUMN -->
-    <div>
-      <div class="w-100">
-        <div class="mb-3 text-center title-text text-uppercase">
-          Current Activity
-        </div>
+            <!-- LEFT COLUMN -->
+            <div>
+              <div class="w-100">
+                <div class="mb-3 text-center text-uppercase">
+                  <h2><b>Current Activity</b></h2>
+                </div>
 
-        <!-- Category -->
-        <div class="mb-3">
-          <label class="form-label text-uppercase fw-bold">Category:</label>
-          <mat-radio-group formControlName="action_id"> 
-            @for (reagon of action_activity_category; track reagon.id) { 
-              <mat-radio-button class="me-3" [value]="reagon.id"> 
-                {{ reagon.Panel_Name }} 
-              </mat-radio-button> 
-            } 
-          </mat-radio-group>
-        </div>
+                <!-- Category -->
+                <div class="mb-3">
+                  <label class="form-label text-uppercase fw-bold">Category:</label>
+                  <mat-radio-group formControlName="action_id">
+                    @for (reagon of action_activity_category; track reagon.id) {
+                    <mat-radio-button class="me-3" [value]="reagon.id">
+                      {{ reagon.Panel_Name }}
+                    </mat-radio-button>
+                    }
+                  </mat-radio-group>
+                </div>
 
-        <!-- Type -->
-        <div class="mb-3">
-          <label class="form-label text-uppercase fw-bold">Type:</label>
-          <mat-radio-group formControlName="panel_id"> 
-            @for (type of action_ativity_type; track type.id) { 
-              <mat-radio-button class="me-3" [value]="type.id"> 
-                {{ type.action_type }} 
-              </mat-radio-button> 
-            } 
-          </mat-radio-group>
-        </div>
+                <!-- Type -->
+                <div class="mb-3">
+                  <label class="form-label text-uppercase fw-bold">Type:</label>
+                  <mat-radio-group formControlName="panel_id">
+                    @for (type of action_ativity_type; track type.id) {
+                    <mat-radio-button class="me-3" [value]="type.id">
+                      {{ type.action_type }}
+                    </mat-radio-button>
+                    }
+                  </mat-radio-group>
+                </div>
 
-        <!-- Action Date / Status / Result -->
-        <div class="action-row mb-3">
-          <mat-form-field appearance="fill" class="w-100 flex-item">
-            <mat-label>Action Date</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="action_date" placeholder="Select date" />
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
+                <!-- Action Date / Status / Result -->
+                <div class="action-row mb-3">
+                  <mat-form-field appearance="fill" class="w-100 flex-item">
+                    <mat-label>Action Date</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="action_date" placeholder="Select date" />
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field>
 
-          <mat-form-field appearance="fill" class="w-100 flex-item">
-            <mat-label>Action Status</mat-label>
-            <mat-select formControlName="action_status">
-              <mat-option value="Scheduled">Scheduled</mat-option>
-              <mat-option value="Success">Success</mat-option>
-              <mat-option value="Failure">Failure</mat-option>
-            </mat-select>
-          </mat-form-field>
+                  <mat-form-field appearance="fill" class="w-100 flex-item">
+                    <mat-label>Action Status</mat-label>
+                    <mat-select formControlName="action_status">
+                      <mat-option value="Scheduled">Scheduled</mat-option>
+                      <mat-option value="Success">Success</mat-option>
+                      <mat-option value="Failure">Failure</mat-option>
+                    </mat-select>
+                  </mat-form-field>
 
-          <mat-form-field appearance="fill" class="w-100 flex-item">
-            <mat-label>Action Result</mat-label>
-            <mat-select formControlName="action_result_id" required> 
-              <mat-option value="">-- ACTION STATUS --</mat-option> 
-              @for (result of actionresult_followup_list; track result.id) { 
-                <mat-option [value]="result.id">
-                  {{ result.action_result }}
-                </mat-option> 
-              } 
-            </mat-select> 
-          </mat-form-field>
-        </div>
+                  <mat-form-field appearance="fill" class="w-100 flex-item">
+                    <mat-label>Action Result</mat-label>
+                    <mat-select formControlName="action_result_id">
+                      <mat-option value="">-- ACTION STATUS --</mat-option>
+                      @for (result of actionresult_followup_list; track result.id) {
+                      <mat-option [value]="result.id">
+                        {{ result.action_result }}
+                      </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
 
-        <!-- Notes -->
-        <div class="mb-3">
-          <mat-form-field appearance="fill" class="w-100">
-            <mat-label>Type your text...</mat-label>
-            <textarea matInput formControlName="action_note"></textarea>
-          </mat-form-field>
-        </div>
-      </div>
-    </div>
+                <!-- Notes -->
+                <div class="mb-3">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>Type your text...</mat-label>
+                    <textarea matInput formControlName="action_note" rows="2"></textarea>
+                  </mat-form-field>
+                  
+                </div>
+              </div>
+            </div>
 
-    <!-- RIGHT COLUMN -->
-    <div>
-      <div class="mb-3 text-center">
-        <h2><b>Next Activity</b></h2>
-      </div>
+            <!-- RIGHT COLUMN -->
+            <div>
+              <div class="mb-3 text-center text-uppercase">
+                <h2><b>Next Activity</b></h2>
+              </div>
 
-      <!-- Next Type -->
-      <div class="mb-3">
-        <label class="form-label text-uppercase fw-bold">Next Type:</label>
-        <mat-radio-group formControlName="next_panel_id" class="ms-2"> 
-          @for (type of action_ativity_type; track type.id) { 
-            <mat-radio-button class="me-3" [value]="type.id"> 
-              {{ type.action_type }} 
-            </mat-radio-button> 
-          } 
-        </mat-radio-group>
-      </div>
+              <!-- Next Type -->
+              <div class="mb-3">
+                <label class="form-label text-uppercase fw-bold">Next Type:</label>
+                <mat-radio-group formControlName="next_panel_id" class="ms-2">
+                  @for (type of action_ativity_type; track type.id) {
+                  <mat-radio-button class="me-3" [value]="type.id">
+                    {{ type.action_type }}
+                  </mat-radio-button>
+                  }
+                </mat-radio-group>
+              </div>
 
-      <!-- Next Date -->
-      <div class="next-row mb-3">
-        <mat-form-field appearance="fill" class="flex-item w-100">
-          <mat-label>Next Date</mat-label>
-          <input matInput [matDatepicker]="nextPicker" formControlName="next_action_date" placeholder="Next Action Date" />
-          <mat-datepicker-toggle matSuffix [for]="nextPicker"></mat-datepicker-toggle>
-          <mat-datepicker #nextPicker></mat-datepicker>
-        </mat-form-field>
-      </div>
+              <!-- Next Date -->
+              <div class="next-row mb-3">
+                <mat-form-field appearance="fill" class="flex-item w-100">
+                  <mat-label>Next Date</mat-label>
+                  <input matInput [matDatepicker]="nextPicker" formControlName="next_action_date"
+                    placeholder="Next Action Date" />
+                  <mat-datepicker-toggle matSuffix [for]="nextPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #nextPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
 
-      <!-- Next Action Note -->
-      <div class="mb-3">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Type your text...</mat-label>
-          <textarea matInput formControlName="next_action_note" rows="3"></textarea>
-        </mat-form-field>
-      </div>
+              <!-- Next Action Note -->
+              <div class="mb-3">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label>Type your text...</mat-label>
+                  <textarea matInput formControlName="next_action_note" rows="3"></textarea>
+                </mat-form-field>
+              </div>
 
-      <!-- MATERIAL TASK TABLE -->
-      <div class="mb-3">
-        <table mat-table [dataSource]="memberTaskList" class="mat-elevation-z8 full-width">
+              <!-- MATERIAL TASK TABLE -->
+              <div class="mb-3">
+                <table mat-table [dataSource]="memberTaskList" class="mat-elevation-z8 full-width">
 
-          <!-- Task Type Column -->
-          <ng-container matColumnDef="action_type">
-            <th mat-header-cell *matHeaderCellDef> Task Type </th>
-            <td mat-cell *matCellDef="let task"> {{ task.action_type || '' }} </td>
-          </ng-container>
+                  <!-- Task Type Column -->
+                  <ng-container matColumnDef="action_type">
+                    <th mat-header-cell *matHeaderCellDef> Task Type </th>
+                    <td mat-cell *matCellDef="let task"> {{ task.action_type || '' }} </td>
+                  </ng-container>
 
-          <!-- Task Date Column -->
-          <ng-container matColumnDef="action_date">
-            <th mat-header-cell *matHeaderCellDef> Task Date </th>
-            <td mat-cell *matCellDef="let task" [style.color]="task.bg_color || ''">
-              <!-- {{ task.action_date | date : 'MM/dd/yyyy' }} -->
-            </td>
-          </ng-container>
+                  <!-- Task Date Column -->
+                  <ng-container matColumnDef="action_date">
+                    <th mat-header-cell *matHeaderCellDef> Task Date </th>
+                    <td mat-cell *matCellDef="let task" [style.color]="task.bg_color || ''">
+                      {{ task.action_date | date : 'MM/dd/yyyy' }}
+                    </td>
+                  </ng-container>
 
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef> Status </th>
-            <td mat-cell *matCellDef="let task"> {{ task.status || '' }} </td>
-          </ng-container>
+                  <!-- Status Column -->
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef> Status </th>
+                    <td mat-cell *matCellDef="let task"> {{ task.status || '' }} </td>
+                  </ng-container>
 
-          <!-- Assign To Column -->
-          <ng-container matColumnDef="initial">
-            <th mat-header-cell *matHeaderCellDef> Assign To </th>
-            <td mat-cell *matCellDef="let task"> {{ task.initial || '' }} </td>
-          </ng-container>
+                  <!-- Assign To Column -->
+                  <ng-container matColumnDef="initial">
+                    <th mat-header-cell *matHeaderCellDef> Assign To </th>
+                    <td mat-cell *matCellDef="let task"> {{ task.initial || '' }} </td>
+                  </ng-container>
 
-          <!-- Note Column -->
-          <ng-container matColumnDef="action_note">
-            <th mat-header-cell *matHeaderCellDef> Note </th>
-            <td mat-cell *matCellDef="let task"> {{ task.action_note || '' }} </td>
-          </ng-container>
+                  <!-- Note Column -->
+                  <ng-container matColumnDef="action_note">
+                    <th mat-header-cell *matHeaderCellDef> Note </th>
+                    <td mat-cell *matCellDef="let task"> {{ task.action_note || '' }} </td>
+                  </ng-container>
 
-          <!-- Header & Row Definitions -->
-          <tr mat-header-row *matHeaderRowDef="taskColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: taskColumns" [style.backgroundColor]="row.bg_color || ''"></tr>
+                  <!-- Header & Row Definitions -->
+                  <tr mat-header-row *matHeaderRowDef="taskColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: taskColumns">
+                  </tr>
 
-          <!-- NO RECORDS MESSAGE -->
-          <tr class="mat-row" *matNoDataRow>
-            <td colspan="5" class="text-center py-3">No records found</td>
-          </tr>
+                  <!-- NO RECORDS MESSAGE -->
+                  <tr class="mat-row" *matNoDataRow>
+                    <td colspan="5" class="text-center py-3">No records found</td>
+                  </tr>
 
-        </table>
-      </div>
+                </table>
+              </div>
 
-    </div>
-  </div>
-
-  <!-- PCR TABLE INSIDE FORM -->
-  <div class="p-3 mt-3">
-    <h4><b>PCR DATA</b></h4>
-
-    <table mat-table [dataSource]="cihpcrList" class="mat-elevation-z8 full-width">
-      <ng-container matColumnDef="DISCHARGE_CC_DESC_1">
-        <th mat-header-cell *matHeaderCellDef>DISCHARGE CC_DESC_1</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.DISCHARGE_CC_DESC_1 }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="DISCHARGE_CC_DESC_2">
-        <th mat-header-cell *matHeaderCellDef>DISCHARGE CC_DESC_2</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.DISCHARGE_CC_DESC_2 }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="DISCHARGE_CC_DESC_3">
-        <th mat-header-cell *matHeaderCellDef>DISCHARGE CC_DESC_3</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.DISCHARGE_CC_DESC_3 }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="DISCH_ORDER">
-        <th mat-header-cell *matHeaderCellDef>DISCH_ORDER</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.DISCH_ORDER }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="INDEX_ADMIT_DT">
-        <th mat-header-cell *matHeaderCellDef>INDEX_ADMIT_DT</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.INDEX_ADMIT_DT }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="INDEX_DISCH_DT">
-        <th mat-header-cell *matHeaderCellDef>INDEX_DISCH_DT</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.INDEX_DISCH_DT }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="INDEX_STAY">
-        <th mat-header-cell *matHeaderCellDef>INDEX_STAY</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.INDEX_STAY }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="NUMER">
-        <th mat-header-cell *matHeaderCellDef>NUMER</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.NUMER }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="READMISSION">
-        <th mat-header-cell *matHeaderCellDef>READMISSION</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.READMISSION }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="READMT_ADMIT_DT">
-        <th mat-header-cell *matHeaderCellDef>READMT_ADMIT_DT</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.READMT_ADMIT_DT }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="READMT_DISCH_DT">
-        <th mat-header-cell *matHeaderCellDef>READMT_DISCH_DT</th>
-        <td mat-cell *matCellDef="let pcr">{{ pcr.READMT_DISCH_DT }}</td>
-      </ng-container>
-
-      <!-- Header & Row -->
-      <tr mat-header-row *matHeaderRowDef="pcrColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: pcrColumns;"></tr>
-
-      <!-- No Data -->
-      <tr class="mat-row" *matNoDataRow>
-        <td colspan="11" class="text-center">No records found</td>
-      </tr>
-    </table>
-  </div>
-<div class="grid-2-col">
-
-    <!-- LEFT COLUMN -->
-    <div>
-<h4 class="mb-2 text-uppercase fw-bold" style="cursor:pointer" (click)="toggleRiskGaps()">
-    <b>Risk Gaps</b>
-  </h4>
-
-  <div formArrayName="riskGapsList" *ngIf="showRiskGaps">
-
-    <mat-accordion>
-
-      <mat-expansion-panel
-        *ngFor="let riskGap of riskGapsList.controls; let i = index"
-       
-        class="mb-2">
-
-        <mat-expansion-panel-header>
-
-          <!-- Checkbox + Title -->
-          <mat-checkbox formControlName="PROCESS_STATUS" class="me-3">
-          </mat-checkbox>
-
-          <span class="text-uppercase">
-            {{ riskGap.get('DIAG_DESC')?.value }}
-          </span>
-
-        </mat-expansion-panel-header>
-
-
-        <!-- Hidden fields -->
-        <input type="hidden" formControlName="DIAG_CODE" />
-        <input type="hidden" formControlName="risk_gap_id" />
-
-
-        <!-- Risk Gap Details Form -->
-        <div class="row mt-3">
-
-          <!-- Observation Date -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Observation Date</mat-label>
-              <input matInput  formControlName="Observation_Date">
-              <mat-datepicker-toggle matSuffix ></mat-datepicker-toggle>
-              <mat-datepicker #picker{{i}}></mat-datepicker>
-            </mat-form-field>
+            </div>
           </div>
 
-          <!-- Observation Code -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Observation Code</mat-label>
-              <input matInput formControlName="Observation_Code">
-            </mat-form-field>
+          <!-- PCR TABLE INSIDE FORM -->
+          <div class="p-3 mt-3">
+            <h4><b>PCR DATA</b></h4>
+
+            <table mat-table [dataSource]="cihpcrList" class="mat-elevation-z8 full-width">
+              <ng-container matColumnDef="DISCHARGE_CC_DESC_1">
+                <th mat-header-cell *matHeaderCellDef>DISCHARGE CC_DESC_1</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.DISCHARGE_CC_DESC_1 }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="DISCHARGE_CC_DESC_2">
+                <th mat-header-cell *matHeaderCellDef>DISCHARGE CC_DESC_2</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.DISCHARGE_CC_DESC_2 }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="DISCHARGE_CC_DESC_3">
+                <th mat-header-cell *matHeaderCellDef>DISCHARGE CC_DESC_3</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.DISCHARGE_CC_DESC_3 }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="DISCH_ORDER">
+                <th mat-header-cell *matHeaderCellDef>DISCH_ORDER</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.DISCH_ORDER }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="INDEX_ADMIT_DT">
+                <th mat-header-cell *matHeaderCellDef>INDEX_ADMIT_DT</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.INDEX_ADMIT_DT }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="INDEX_DISCH_DT">
+                <th mat-header-cell *matHeaderCellDef>INDEX_DISCH_DT</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.INDEX_DISCH_DT }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="INDEX_STAY">
+                <th mat-header-cell *matHeaderCellDef>INDEX_STAY</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.INDEX_STAY }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="NUMER">
+                <th mat-header-cell *matHeaderCellDef>NUMER</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.NUMER }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="READMISSION">
+                <th mat-header-cell *matHeaderCellDef>READMISSION</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.READMISSION }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="READMT_ADMIT_DT">
+                <th mat-header-cell *matHeaderCellDef>READMT_ADMIT_DT</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.READMT_ADMIT_DT }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="READMT_DISCH_DT">
+                <th mat-header-cell *matHeaderCellDef>READMT_DISCH_DT</th>
+                <td mat-cell *matCellDef="let pcr">{{ pcr.READMT_DISCH_DT }}</td>
+              </ng-container>
+
+              <!-- Header & Row -->
+              <tr mat-header-row *matHeaderRowDef="pcrColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: pcrColumns;"></tr>
+
+              <!-- No Data -->
+              <tr class="mat-row" *matNoDataRow>
+                <td colspan="11" class="text-center">No records found</td>
+              </tr>
+            </table>
           </div>
 
-          <!-- CPT Code Modifier -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>CPT Code Modifier</mat-label>
-              <input matInput formControlName="CPT_Code_Modifier">
-            </mat-form-field>
+
+
+          <div class="grid-2-col">
+
+            <!-- LEFT COLUMN -->
+            <div>
+              <h4 class="mb-2 text-uppercase fw-bold" style="cursor:pointer" (click)="toggleRiskGaps()">
+                <b>Risk Gaps </b>
+              </h4>
+              <div formArrayName="riskGapsList">
+                <mat-accordion multi>
+
+                  <ng-container *ngFor="let gap of riskGapsList.controls; let i = index" [formGroupName]="i">
+
+                    <mat-expansion-panel class="mb-2">
+
+                      <!-- HEADER -->
+                      <mat-expansion-panel-header>
+
+
+                        <mat-panel-title class="text-uppercase panel-title-10">
+                          <mat-checkbox formControlName="PROCESS_STATUS" (click)="$event.stopPropagation()"
+                            (keydown)="$event.stopPropagation()" class="me-2">
+                          </mat-checkbox>
+
+                        </mat-panel-title>
+
+                        <mat-panel-description class="panel-desc-90">
+                          {{ gap.get('DIAG_DESC')?.value }}
+                        </mat-panel-description>
+                      </mat-expansion-panel-header>
+
+                      <!-- BODY -->
+                      <div class="row mt-3">
+
+                        <!-- Observation Date -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Date</mat-label>
+
+                            <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
+                              placeholder="MM/DD/YYYY" />
+
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Observation Code -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Code</mat-label>
+                            <input matInput formControlName="Observation_Code">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- CPT Code Modifier -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>CPT Code Modifier</mat-label>
+                            <input matInput formControlName="CPT_Code_Modifier">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Observation Code Set -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Code Set</mat-label>
+                            <input matInput formControlName="Observation_Code_Set">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Observation Result -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Result</mat-label>
+                            <mat-select formControlName="Observation_Result">
+                              <mat-option value="">-- Observation Result --</mat-option>
+                              <mat-option value="Rejected">Rejected</mat-option>
+                              <mat-option value="Addressed">Addressed</mat-option>
+                              <mat-option value="Trumped">Trumped</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider NPI -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Service Provider NPI</mat-label>
+                            <input matInput formControlName="Service_Provider_NPI">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider Taxonomy -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Taxonomy Code</mat-label>
+                            <input matInput formControlName="Service_Provider_Taxonomy_Code">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider Name -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Service Provider Name</mat-label>
+                            <input matInput formControlName="Service_Provider_Name">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider Type -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Service Provider Type</mat-label>
+                            <input matInput formControlName="Service_Provider_Type">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Rx Provider Flag -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Rx Provider Flag</mat-label>
+                            <input matInput formControlName="Service_Provider_RxProviderFlag">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Provider Group NPI -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Group NPI</mat-label>
+                            <input matInput formControlName="Provider_Group_NPI">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Provider Group Taxonomy -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Group Taxonomy</mat-label>
+                            <input matInput formControlName="Provider_Group_Taxonomy_Code">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Provider Group Name -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Group Name</mat-label>
+                            <input matInput formControlName="Provider_Group_Name">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="col-lg-9 col-md-12 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Note</mat-label>
+                            <textarea matInput rows="2" formControlName="note"></textarea>
+                          </mat-form-field>
+                        </div>
+
+                      </div>
+
+                    </mat-expansion-panel>
+
+                  </ng-container>
+
+                </mat-accordion>
+              </div>
+
+
+
+
+            </div>
+            <!-- LEFT COLUMN -->
+            <div>
+              <h4 class="mb-2 text-uppercase fw-bold" style="cursor:pointer" (click)="toggleRiskGaps()">
+                <b>Quality Gaps</b>
+              </h4>
+              <div formArrayName="qualityGapsList">
+                <mat-accordion multi>
+
+                  <ng-container *ngFor="let qgap of qualityGapsList.controls; let i = index" [formGroupName]="i">
+
+                    <mat-expansion-panel class="mb-2">
+
+                      <!-- HEADER -->
+                      <mat-expansion-panel-header>
+
+
+                        <mat-panel-title class="text-uppercase panel-title-10">
+                          <mat-checkbox formControlName="PROCESS_STATUS" (click)="$event.stopPropagation()"
+                            (keydown)="$event.stopPropagation()" class="me-2">
+                          </mat-checkbox>
+
+                        </mat-panel-title>
+
+                        <mat-panel-description class="panel-desc-90">
+                          {{ qgap.get('MEASURE_NAME')?.value }}
+                        </mat-panel-description>
+                      </mat-expansion-panel-header>
+
+                      <!-- BODY -->
+                      <div class="row mt-3">
+
+                        <!-- Observation Date -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Date</mat-label>
+
+                            <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
+                              placeholder="MM/DD/YYYY" />
+
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Observation Code -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Code</mat-label>
+                            <input matInput formControlName="Observation_Code">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- CPT Code Modifier -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>CPT Code Modifier</mat-label>
+                            <input matInput formControlName="CPT_Code_Modifier">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Observation Code Set -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Code Set</mat-label>
+                            <input matInput formControlName="Observation_Code_Set">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Observation Result -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Result</mat-label>
+                            <mat-select formControlName="Observation_Result">
+                              <mat-option value="">-- Observation Result --</mat-option>
+                              <mat-option value="Rejected">Rejected</mat-option>
+                              <mat-option value="Addressed">Addressed</mat-option>
+                              <mat-option value="Trumped">Trumped</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider NPI -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Service Provider NPI</mat-label>
+                            <input matInput formControlName="Service_Provider_NPI">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider Taxonomy -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Taxonomy Code</mat-label>
+                            <input matInput formControlName="Service_Provider_Taxonomy_Code">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider Name -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Service Provider Name</mat-label>
+                            <input matInput formControlName="Service_Provider_Name">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Service Provider Type -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Service Provider Type</mat-label>
+                            <input matInput formControlName="Service_Provider_Type">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Rx Provider Flag -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Rx Provider Flag</mat-label>
+                            <input matInput formControlName="Service_Provider_RxProviderFlag">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Provider Group NPI -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Group NPI</mat-label>
+                            <input matInput formControlName="Provider_Group_NPI">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Provider Group Taxonomy -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Group Taxonomy</mat-label>
+                            <input matInput formControlName="Provider_Group_Taxonomy_Code">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Provider Group Name -->
+                        <div class="col-lg-3 col-md-6 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Provider Group Name</mat-label>
+                            <input matInput formControlName="Provider_Group_Name">
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Note -->
+                        <div class="col-lg-9 col-md-12 mb-2">
+                          <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Note</mat-label>
+                            <textarea matInput rows="2" formControlName="note"></textarea>
+                          </mat-form-field>
+                        </div>
+
+                      </div>
+
+                    </mat-expansion-panel>
+
+                  </ng-container>
+
+                </mat-accordion>
+              </div>
+
+
+
+
+            </div>
+            <div>
+
+            </div>
           </div>
 
-          <!-- Observation Code Set -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Observation Code Set</mat-label>
-              <input matInput formControlName="Observation_Code_Set">
-            </mat-form-field>
+          <!-- SUBMIT BUTTON -->
+          <div class="text-end mt-3">
+            <button mat-flat-button color="primary" type="submit">Submit</button>
           </div>
 
-          <!-- Observation Result -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Observation Result</mat-label>
-              <input matInput formControlName="Observation_Result">
-            </mat-form-field>
-          </div>
-
-          <!-- Provider NPI -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Service Provider NPI</mat-label>
-              <input matInput formControlName="Service_Provider_NPI">
-            </mat-form-field>
-          </div>
-
-          <!-- Taxonomy Code -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Provider Taxonomy Code</mat-label>
-              <input matInput formControlName="Service_Provider_Taxonomy_Code">
-            </mat-form-field>
-          </div>
-
-          <!-- Provider Name -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Provider Name</mat-label>
-              <input matInput formControlName="Service_Provider_Name">
-            </mat-form-field>
-          </div>
-
-          <!-- Provider Type -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Provider Type</mat-label>
-              <input matInput formControlName="Service_Provider_Type">
-            </mat-form-field>
-          </div>
-
-          <!-- Rx Provider Flag -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Rx Provider Flag</mat-label>
-              <input matInput formControlName="Service_Provider_RxProviderFlag">
-            </mat-form-field>
-          </div>
-
-          <!-- Group NPI -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Provider Group NPI</mat-label>
-              <input matInput formControlName="Provider_Group_NPI">
-            </mat-form-field>
-          </div>
-
-          <!-- Group Taxonomy -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Group Taxonomy Code</mat-label>
-              <input matInput formControlName="Provider_Group_Taxonomy_Code">
-            </mat-form-field>
-          </div>
-
-          <!-- Group Name -->
-          <div class="col-3 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Provider Group Name</mat-label>
-              <input matInput formControlName="Provider_Group_Name">
-            </mat-form-field>
-          </div>
-
-          <!-- Note -->
-          <div class="col-12 mb-2">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Note</mat-label>
-              <textarea matInput formControlName="note" rows="2"></textarea>
-            </mat-form-field>
-          </div>
-
-        </div>
-      </mat-expansion-panel>
-
-    </mat-accordion>
-
-    <!-- NO DATA -->
-    <div class="mt-2" *ngIf="riskGapsList.length === 0">
-      <!-- <mat-card class="p-3 text-center">No Risk Gaps Found</mat-card> -->No Risk Gaps Found
-    </div>
-
-  </div>
-    </div>
-    <div>
-
-    </div>
- </div>
-      <!-- SUBMIT BUTTON -->
-  <div class="text-end mt-3">
-    <button mat-flat-button color="primary" type="submit">Submit</button>
-  </div>
-
-</form>
+        </form>
 
       </div>
     </mat-tab>

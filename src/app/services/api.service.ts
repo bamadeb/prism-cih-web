@@ -5,7 +5,8 @@ import { LoginRequest } from '../models/requests/loginRequest';
 import { firstValueFrom } from 'rxjs';
 import { commonPostApi } from '../utilities/functions';
 import { BenefitsRequest, DashboardRequest } from '../models/requests/dashboardRequest';  
-import { UserIdRequest } from '../models/requests/userIdRequest' 
+import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup } from '../models/requests/commonRequest' 
+import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
 @Injectable({
   providedIn: 'root'
 })
@@ -72,11 +73,67 @@ export class ConfigService {
       {}   
     );
   }
-  async getMemberGapsList<TResponse>(request: UserIdRequest): Promise<TResponse> {
+  async getMemberGapsList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
       'prismGetMemberGapsList',
+      request   
+    );
+  }
+  async getMemberTaskList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetMemberUpcommingTaskList',
+      request   
+    );
+  }
+  async multipleRowInsert<TResponse>(request: MultipleRowInsertRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismMultipleinsert',
+      request   
+    );
+  }
+  async unSetMemberGapsStatus<TResponse>(request: unSetMemberGapsStatusRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismUnSetMemberGapsStatus',
+      request   
+    );
+  }
+  async updategapStatus<TResponse>(request: updategapRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismUpdategapStatus',
+      request   
+    );
+  }
+ async updatequalityStatus<TResponse>(request: updatequalitygapRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismUpdatequalityStatus',
+      request   
+    );
+  }
+ async multipleRowAndFieldUpdate<TResponse>(request: MultipleRowAndFieldUpdateRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismMultipleRowAndFieldUpdate',
+      request   
+    );
+  }
+ async getActionresultfollowup<TResponse>(request: Actionresultfollowup): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismActionresultfollowup',
       request   
     );
   }

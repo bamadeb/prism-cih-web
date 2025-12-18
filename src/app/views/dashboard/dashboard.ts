@@ -25,7 +25,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; 
 import { BenefitsDialogService } from '../../services/benefits-dialog.service'; 
-import { AddAction } from '../shared/components/add-action/add-action' 
+import { AddActionDialogService } from '../../services/add-action-dialog.service' 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -100,7 +100,8 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     private titleService: Title,
     private apiService: ConfigService,
     private userData: UserDataService,
-    public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService
+    public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService,
+    private addActionService: AddActionDialogService
   ) {
     super(errorLogger, matDialog);
   }
@@ -224,14 +225,20 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     });
   }
  
-openAddActionDialog(medicaid_id: string){
-  const dialogRef = this.dialog.open(AddAction,{
-    width: '95vw',        // or '95%'
-    maxWidth: '100vw',    // IMPORTANT
-    height: 'auto'
-  });
+openAddActionDialog(medicaid_id: string, member_name: string,member_db: string){
+    this.isLoading = true;
+    this.addActionService
+      .showAddActionDialog(medicaid_id,member_name,member_db)
+      .finally(() => {
+        this.isLoading = false;
+    });
+  // const dialogRef = this.dialog.open(AddAction,{
+  //   width: '95vw',        // or '95%'
+  //   maxWidth: '100vw',    // IMPORTANT
+  //   height: 'auto'
+  // });
   
-  alert(medicaid_id); 
+  // alert(medicaid_id); 
 }
 
 
