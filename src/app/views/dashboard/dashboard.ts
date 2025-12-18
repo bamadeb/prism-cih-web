@@ -29,7 +29,9 @@ import { QualitygapDialogService } from '../../services/qualitygap-dialog.servic
 import { RiskgapDialogService } from '../../services/riskgap-dialog.service';
 import { CallListDialogService } from '../../services/calllist-dialog.service';
 import { TaskListDialogService } from '../../services/tasklist-dialog.service';
-import { AddAction } from '../shared/components/add-action/add-action' 
+import { AddAction } from '../shared/components/add-action/add-action';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -42,7 +44,8 @@ import { AddAction } from '../shared/components/add-action/add-action'
     MatFormFieldModule,
     MatInputModule,
     MatIcon, MatCheckboxModule, MatTabsModule, MatSelectModule, MatSelectModule, MatDividerModule, PhoneFormatPipe, CommonModule,
-    MatProgressSpinner
+    MatProgressSpinner,
+    MatTooltipModule
 ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -258,14 +261,78 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     });
   }
 
-  showTasklist(row: any) {
+  confirmAction(row: any) {
     this.isLoading = true;
-    this.taskListService
+    this.callListService
       .showcallListDialog(row)
       .finally(() => {
         this.isLoading = false;
     });
   }
+
+  updatealterAddr(row: any){
+    alert('addr');
+  }
+
+  updatealterPhone(row: any){
+    alert('phone');
+  }
+
+  async showTasklist(row: any) {
+    this.isLoading = true;
+  try {
+    const dialogRef = await this.taskListService.showtaskListDialog(row);
+    dialogRef.afterClosed().subscribe(result => {
+    if (result?.refresh) {
+      // 🔁 Refresh member data
+      this.refreshMemberRow(row.medicaid_id);
+    }
+  });
+  } catch (err) {
+    console.error(err);
+  } finally {
+    this.isLoading = false;
+  }
+}
+
+async refreshMemberRow(medicaid_id: string): Promise<void> {
+  try {
+    const request: DashboardRequest = {
+      user_id: this.loginUserId
+    };
+
+    const res = await this.apiService.dashboard<any>(request);
+    const members = res.data || [];
+
+    const updatedMember = members.find(
+      (m: any) => m.medicaid_id === medicaid_id
+    );
+
+    if (!updatedMember) return;
+
+    const index = this.dataSource.data.findIndex(
+      m => m.medicaid_id === medicaid_id
+    );
+
+    if (index !== -1) {
+      this.dataSource.data[index] = {
+        ...this.dataSource.data[index],
+        upcoming_task_date: updatedMember.upcoming_task_date,
+        Call_count: updatedMember.Call_count,
+        risk_gap_count: updatedMember.risk_gap_count,
+        quality_count: updatedMember.quality_count
+      };
+
+      // 🔁 trigger table refresh
+      this.dataSource._updateChangeSubscription();
+    }
+
+  } catch (err) {
+    console.error('Member refresh failed', err);
+  }
+}
+
+
  
 openAddActionDialog(medicaid_id: string){
   const dialogRef = this.dialog.open(AddAction,{

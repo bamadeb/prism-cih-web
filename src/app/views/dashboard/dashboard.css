@@ -169,6 +169,10 @@ mat-form-field {
   margin: auto !important;
   border-radius: 14px;
   padding: 24px;
+} 
+
+.pointer {
+  cursor: pointer; 
 }
 
 

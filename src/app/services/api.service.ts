@@ -3,12 +3,15 @@ import { Injectable } from '@angular/core';
 import { AppEnvService } from './app-env.service';
 import { LoginRequest } from '../models/requests/loginRequest';  
 import { commonPostApi } from '../utilities/functions';
-import { BenefitsRequest,CallListRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest} from '../models/requests/dashboardRequest';  
+import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest} from '../models/requests/dashboardRequest';  
 import { UserIdRequest } from '../models/requests/userIdRequest' 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigService {
+  LogInsertData<T>(request: TaskRequest) {
+    throw new Error('Method not implemented.');
+  }
 
   constructor(
     private httpClient: HttpClient,
@@ -71,7 +74,7 @@ export class ConfigService {
     );
   }
 
-  async calllistList<TResponse>(request: CallListRequest): Promise<TResponse> {
+  async callList<TResponse>(request: CallListRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService, 
@@ -80,12 +83,39 @@ export class ConfigService {
     );
   }
 
-  async tasklistList<TResponse>(request: TaskListRequest): Promise<TResponse> {
+  async taskList<TResponse>(request: TaskListRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService, 
       'prismGetMemberUpcommingTaskList',
       request   
+    );
+  }
+
+ async insert<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
+  return commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismMultipleinsert',
+    request
+  );
+}
+
+async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
+  return commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismMultiplefieldupdate',
+    request
+  );
+}
+
+  async masterdata<TResponse>(): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetAddActionMasterData',
+      {}   
     );
   }
 

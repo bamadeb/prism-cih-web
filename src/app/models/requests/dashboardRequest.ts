@@ -55,3 +55,57 @@ export class CallListRequest {
 export class TaskListRequest {
      medicaid_id?: number | null;
 }
+
+export interface TaskInsertData {
+  medicaid_id: number;
+  action_id: number;
+  assign_to: number;
+  action_date: string | Date;
+  action_note?: string;
+  status: string;
+  add_by: number;
+} 
+
+export interface UpdateTaskRequest {
+  table_name: string;
+  id_field_name: string;
+  id_field_value: number;   // ✅ FIXED (was string)
+  updateData: {
+    action_id: number;
+    assign_to: number;
+    action_date: string | Date;
+    action_note?: string;
+    status: string;
+  };
+}
+
+export interface TaskRequest {
+  table_name: string;
+  insertDataArray: TaskInsertData[];
+}
+
+export interface TaskInsertData {
+  medicaid_id: number;
+  action_id: number;
+  assign_to: number;
+  action_date: Date | string;
+  action_note?: string;
+  status: string;
+  add_by: number;
+}
+
+export interface SystemLogData {
+  medicaid_id: number;
+  log_name: string;
+  log_details: string;
+  log_status: string;
+  log_by: number;
+  action_type: string;
+}
+
+export interface LogRequest {
+  table_name: string;
+  insertDataArray: SystemLogData[];
+}
+
+
