@@ -25,12 +25,14 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; 
 import { BenefitsDialogService } from '../../services/benefits-dialog.service'; 
+import { AddActionDialogService } from '../../services/add-action-dialog.service';
 import { QualitygapDialogService } from '../../services/qualitygap-dialog.service';
 import { RiskgapDialogService } from '../../services/riskgap-dialog.service';
 import { CallListDialogService } from '../../services/calllist-dialog.service';
-import { TaskListDialogService } from '../../services/tasklist-dialog.service';
+import { TaskListDialogService } from '../../services/tasklist-dialog.service'; 
 import { AddAction } from '../shared/components/add-action/add-action';
 import { MatTooltipModule } from '@angular/material/tooltip';
+ 
 
 @Component({
   selector: 'app-dashboard',
@@ -108,9 +110,13 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     private apiService: ConfigService,
     private userData: UserDataService,
     public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService,
+
+    private addActionService: AddActionDialogService,
+
     private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
     private callListService:CallListDialogService,private taskListService:TaskListDialogService
     
+
   ) {
     super(errorLogger, matDialog);
   }
@@ -169,6 +175,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   /** Load data from API */
   async loadTableData(): Promise<void> { 
     this.isLoading = true;  
+    alert(this.isLoading);
     const user = this.userData.getUser();
     //console.log('Dashboard:', user);
     if(user.role_id == 7){
@@ -334,13 +341,15 @@ async refreshMemberRow(medicaid_id: string): Promise<void> {
 
 
  
-openAddActionDialog(medicaid_id: string){
-  const dialogRef = this.dialog.open(AddAction,{
-    width: '95vw',        // or '95%'
-    maxWidth: '100vw',    // IMPORTANT
-    height: 'auto'
-  });  
-  alert(medicaid_id); 
+
+openAddActionDialog(medicaid_id: string, member_name: string,member_db: string){
+    this.isLoading = true;
+    this.addActionService
+      .showAddActionDialog(medicaid_id,member_name,member_db)
+      .finally(() => {
+        this.isLoading = false;
+    });
+
 }
 
 

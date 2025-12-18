@@ -105,3 +105,80 @@ mat-error {
   overflow: visible !important;
   height: auto !important;
 }
+/* Force full width header */
+::ng-deep mat-expansion-panel-header {
+  display: flex;
+  width: 100%;
+}
+
+/* 10% width */
+::ng-deep .panel-title-10 {
+  flex: 0 0 5%;
+  max-width: 5%;
+  display: flex;
+  align-items: center;
+}
+
+/* 90% width */
+::ng-deep .panel-desc-90 {
+  flex: 0 0 95%;
+  max-width: 95%;
+  display: flex;
+  align-items: center;
+  white-space: normal;
+}
+/* Remove scroll from tab body */
+/* .mat-mdc-tab-body,
+.mat-mdc-tab-body-active {
+  overflow: hidden !important;
+} */
+
+/* Remove internal content scrolling */
+/* .mat-mdc-tab-body-content {
+  overflow: hidden !important;
+  height: auto !important;
+} */
+/* .mat-mdc-dialog-content {
+  overflow: hidden !important;
+  max-height: none !important;
+} */
+ /* .mat-mdc-tab-body-content {
+  overflow: visible !important;
+} */
+/* .mat-mdc-tab-body-active,
+.mat-mdc-tab-body-content,
+.mat-mdc-dialog-content {
+  overflow: hidden !important;
+} */
+ .mat-mdc-tab-body-active {
+  overflow-y: hidden !important;
+}
+
+.mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}
+.mat-mdc-tab-body.mat-mdc-tab-body-active {
+  overflow-y: hidden !important;
+}
+.mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}
+.add-action-dialog .mat-mdc-tab-body.mat-mdc-tab-body-active {
+  overflow-y: hidden !important;
+}
+
+.add-action-dialog .mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}
+:host ::ng-deep .mat-mdc-tab-labels {
+  justify-content: flex-start;   /* prevent full-width stretch */
+}
+:host ::ng-deep .mat-mdc-tab {
+  min-width: 90px !important;    /* 👈 reduce tab width */
+  padding: 0 12px !important;    /* 👈 horizontal spacing */
+  height: 36px !important;       /* 👈 tab height */
+}
+:host ::ng-deep .mat-mdc-tab-label-content {
+  font-size: 12px;               /* 👈 smaller text */
+  font-weight: 600;
+}
