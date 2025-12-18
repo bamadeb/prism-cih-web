@@ -1,0 +1,27 @@
+<h2 mat-dialog-title class="text-center">{{ data.title }}</h2>
+
+<mat-dialog-content class="text-center">
+
+  <div style="font-weight:bold; font-size:16px;">
+    {{ data.name }},
+    <span class="material-icons">phone</span> {{ data.phone }},
+    <span class="material-icons">calendar_today</span> {{ data.birth }}
+  </div>
+
+  <p style="margin-top:15px; font-size:16px;">
+    Are you sure, she/he is no longer a patient?
+  </p>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="center">
+  <button mat-raised-button color="primary" (click)="confirm(true, data.medicaid_id)">
+    Yes
+  </button>
+
+  <button mat-raised-button color="warn" (click)="confirm(false, data.medicaid_id)">
+    No
+  </button>
+</mat-dialog-actions>
+
+ 
