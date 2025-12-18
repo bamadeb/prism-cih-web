@@ -174,6 +174,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   /** Load data from API */
   async loadTableData(): Promise<void> { 
     this.isLoading = true;  
+    alert(this.isLoading);
     const user = this.userData.getUser();
     //console.log('Dashboard:', user);
     if(user.role_id == 7){

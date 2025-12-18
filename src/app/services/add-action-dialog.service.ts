@@ -15,11 +15,12 @@ export class AddActionDialogService {
     private dialog: MatDialog,
     private sanitizer: DomSanitizer
   ) {}
-
+isLoading = false;
   async showAddActionDialog(medicaid_id: string, member_name: string,member_db: string): Promise<void> {
     // const request: MedicaidIdRequest = {
     //   medicaid_id: medicaid_id
     // };
+        this.isLoading = true;
     this.openDialog(medicaid_id,member_name,member_db);
     //return true;
     // return this.apiService.benefitsList<any>(request)
@@ -34,7 +35,7 @@ export class AddActionDialogService {
 
   private openDialog(medicaid_id: string, member_name: string,member_dob: string) {
     
-
+    this.isLoading = true;
     this.dialog.open(AddAction, {
       width: '95vw',
       maxWidth: '100vw',
