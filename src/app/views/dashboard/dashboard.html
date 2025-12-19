@@ -303,9 +303,9 @@
                 <ng-container matColumnDef="PHONE">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>ADDRESS/PHONE</th>
                   <td mat-cell *matCellDef="let row">
-                    <span matTooltip="Edit" class="pointer" (click)="updatealterAddr(row)" matTooltipPosition="right">{{ row.OTHER_ADDR1 }} </span>                    
+                    <span matTooltip="Edit" class="pointer" (click)="updatealterAddr(row)" matTooltipPosition="right">{{ row.latest_alt_address || row.OTHER_ADDR1 }} </span>                    
                     <br>
-                    <span matTooltip="Edit" class="pointer" (click)="updatealterPhone(row)" matTooltipPosition="right">{{ row.OTHER_PHONE | phoneFormat}}</span>
+                    <span matTooltip="Edit" class="pointer" (click)="addalternativePhone(row)" matTooltipPosition="right">{{ row.latest_alt_phone || row.OTHER_PHONE | phoneFormat }}</span>
                   </td>
                 </ng-container>
                 <ng-container matColumnDef="PCP_TAX_ID">

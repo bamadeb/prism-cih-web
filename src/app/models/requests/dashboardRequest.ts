@@ -60,6 +60,10 @@ export class NoLongerPatientRequest {
      medicaid_id?: number | null;
 }
 
+export class AlterPhoneListRequest {
+     medicaid_id?: number | null;
+}
+
 export interface TaskInsertData {
   medicaid_id: number;
   action_id: number;
@@ -125,6 +129,17 @@ export interface UpdateMemberRequest {
 export interface ConfirmDialogResult {
   refresh: boolean;
   medicaid_id?: number;
+}
+
+export interface AltphoneRequest {
+  table_name: string;
+  insertDataArray: AltphoneInsertData[];
+}
+
+export interface AltphoneInsertData {
+  medicaid_id: number;
+  alt_phone_no: string; 
+  add_by: number;
 }
 
 
