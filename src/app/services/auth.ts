@@ -17,7 +17,7 @@ export class Auth {
 
   async login<TResponse>(request: LoginRequest): Promise<TResponse> {
     const body = JSON.stringify(request);
-    const requestUrl = `${this.environmentService.endpointUrl()}/prismAuthentication-dev`;
+    const requestUrl = `${this.environmentService.endpointUrl()}/prismAuthentication-${this.environmentService.envType()}`;
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
     try {

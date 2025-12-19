@@ -30,6 +30,7 @@ import { UserIdRequest, MedicaidIdRequest } from '../../../../models/requests/co
 import { UserDataService } from '../../../../services/user-data-service';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 @Component({
   selector: 'app-add-action',
   imports: [
@@ -52,9 +53,9 @@ import { CommonModule } from '@angular/common';
     MatCheckboxModule,
     MatExpansionModule,
     ReactiveFormsModule,
-
-    CommonModule
-  ],
+    CommonModule,
+    MatProgressSpinner
+],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],
@@ -64,6 +65,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AddAction {
   addActionFormGroup!: FormGroup;
+  appointmentFormGroup!: FormGroup;  
   action_activity_category: any[] = [];
   action_ativity_type: any[] = [];
   navigatorList: any[] = [];
@@ -89,7 +91,7 @@ export class AddAction {
     'READMT_DISCH_DT'
   ];
   taskColumns: string[] = ['action_type', 'action_date', 'status', 'initial', 'action_note'];
-  isLoading: boolean = false;
+  isProcessing: boolean = false;
   userId: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
@@ -128,7 +130,12 @@ export class AddAction {
       riskGapsList: this.fb.array([]),
       qualityGapsList: this.fb.array([])
     });
-
+    this.appointmentFormGroup = this.fb.group({
+      vendor_name: [''],
+      appointment_date: [''],
+      appointment_time: [''],
+      appointment_note: ['']
+    });
     this.medicaid_id = data?.medicaid_id;
     this.member_name = data?.member_name;
     this.member_dob = data?.member_dob;
@@ -216,7 +223,7 @@ export class AddAction {
     const formValues = this.addActionFormGroup.value;
     const action_id = formValues.update_action_id;
     //console.log(formValues);
-    this.isLoading = true; // 🔹 show loader
+    this.isProcessing = true; // 🔹 show loader
     this.addActionChangeFlag = 1;
 
     if (!action_id) {
@@ -261,12 +268,15 @@ export class AddAction {
           await this.apiService.multipleRowInsert<any>(taskPayload);
         }
         //this.insertSystemLog(formValues);
-        this.updateQualityAndRiskData(formValues, action_id);
+        await this.updateQualityAndRiskData(formValues, action_id);
+        this.isProcessing = false;
+        //alert(44);
+        this.cdr.detectChanges();
         //console.log('insert call:', result)
       } catch (error) {
         console.log('error:' + error);
       } finally {
-        this.isLoading = false;
+        this.isProcessing = false;
       }
 
       // console.log('📤 API Payload:', apiPayload);
@@ -389,7 +399,7 @@ private async updateQualityAndRiskData(
         Source: 'CIH',
         note: riskGap.note
       };
-
+      console.log("riskGap",riskGap);
       if (riskGap.risk_gap_id) {
         riskObsUpdateArray.push({
           ...commonData,
@@ -397,8 +407,29 @@ private async updateQualityAndRiskData(
           updated_date: new Date()
         });
       } else {
-        const hasValue = Object.values(commonData).some(v => v);
-        if (hasValue) {
+
+          const observationFields = [
+            riskGap.Observation_Date,
+            riskGap.Observation_Code,
+            riskGap.CPT_Code_Modifier,
+            riskGap.Observation_Code_Set,
+            riskGap.Observation_Result,
+            riskGap.Service_Provider_NPI,
+            riskGap.Service_Provider_Taxonomy_Code,
+            riskGap.Service_Provider_Name,
+            riskGap.Service_Provider_Type,
+            riskGap.Service_Provider_RxProviderFlag,
+            riskGap.Provider_Group_NPI,
+            riskGap.Provider_Group_Taxonomy_Code,
+            riskGap.Provider_Group_Name,
+            riskGap.note
+          ];
+
+          // TRUE if ANY value is non-null, non-empty
+          const hasAnyValue = observationFields.some(v => v !== null && v !== undefined && v !== "");
+
+        //const hasValue = Object.values(commonData).some(v => v);
+        if (hasAnyValue) {
           riskObsInsertArray.push({
             ...commonData,
             added_date: new Date()
@@ -536,7 +567,9 @@ private async updateQualityAndRiskData(
         insertDataArray: riskObsInsertArray
       });
     }
-alert('Successfuly to save data');
+//alert('Successfuly to save data');
+//this.isLoading = false;
+//alert(this.isLoading);
     /* ----------------------------------
        FINAL UI CLEANUP
     -----------------------------------*/
@@ -549,10 +582,16 @@ alert('Successfuly to save data');
 
   } catch (error) {
     console.error('❌ Error updating quality/risk data:', error);
-    alert('Failed to save data');
+    //alert('Failed to save data');
+    //this.isLoading = false;
+
   } finally {
-    this.isLoading = false;
+    //alert('finally to save data');
+    this.isProcessing = false;
+    //alert(this.isProcessing);
   }
+  //this.isProcessing = false;
+
 }
 
   toggleRiskGaps() {
@@ -561,7 +600,7 @@ alert('Successfuly to save data');
   async getMemberTaskList(medicaid_id: string) {
 
     //alert(medicaid_id);
-    this.isLoading = true;
+    //this.isLoading = true;
     const request: MedicaidIdRequest = {
       medicaid_id: medicaid_id
     };
@@ -572,7 +611,7 @@ alert('Successfuly to save data');
   async getMemberGapsList(medicaid_id: string) {
     const payload = { medicaid_id: medicaid_id };
     //console.log(payload);getMemberTaskList
-    this.isLoading = true;
+    //this.isLoading = true;
     const request: MedicaidIdRequest = {
       medicaid_id: medicaid_id
     };
