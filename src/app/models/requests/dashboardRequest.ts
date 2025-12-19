@@ -56,6 +56,10 @@ export class TaskListRequest {
      medicaid_id?: number | null;
 }
 
+export class NoLongerPatientRequest {
+     medicaid_id?: number | null;
+}
+
 export interface TaskInsertData {
   medicaid_id: number;
   action_id: number;
@@ -107,5 +111,21 @@ export interface LogRequest {
   table_name: string;
   insertDataArray: SystemLogData[];
 }
+
+export interface UpdateMemberRequest {
+  table_name: string;
+  id_field_name: string;
+  id_field_value: number;   // ✅ FIXED (was string)
+  updateData: {
+    NO_LONGER_PATIENT_FLAG: number;
+    NO_LONGER_PATIENT_DATE: string | Date; 
+  };
+}
+
+export interface ConfirmDialogResult {
+  refresh: boolean;
+  medicaid_id?: number;
+}
+
 
 

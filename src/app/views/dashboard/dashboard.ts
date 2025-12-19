@@ -29,7 +29,10 @@ import { AddActionDialogService } from '../../services/add-action-dialog.service
 import { QualitygapDialogService } from '../../services/qualitygap-dialog.service';
 import { RiskgapDialogService } from '../../services/riskgap-dialog.service';
 import { CallListDialogService } from '../../services/calllist-dialog.service';
-import { TaskListDialogService } from '../../services/tasklist-dialog.service';
+
+import { TaskListDialogService } from '../../services/tasklist-dialog.service'; 
+import { NolongerPatientDialogService } from '../../services/nolonger-patience-dialog.service';
+
 import { AddAction } from '../shared/components/add-action/add-action';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -113,8 +116,12 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
     private addActionService: AddActionDialogService,
 
-    private qualitygapsService: QualitygapDialogService, private riskgapsService: RiskgapDialogService,
-    private callListService: CallListDialogService, private taskListService: TaskListDialogService
+
+    private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
+    private callListService:CallListDialogService,private taskListService:TaskListDialogService,
+    private noLongerPatientService:NolongerPatientDialogService
+    
+    
 
 
   ) {
@@ -173,9 +180,10 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   }
 
   /** Load data from API */
-  async loadTableData(): Promise<void> {
-    this.isLoading = true;
-    //alert(this.isLoading);
+
+  async loadTableData(): Promise<void> { 
+    this.isLoading = true;       
+
     const user = this.userData.getUser();
     //console.log('Dashboard:', user);
     if (user.role_id == 7) {
@@ -269,13 +277,32 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   }
 
   confirmAction(row: any) {
-    this.isLoading = true;
-    this.callListService
-      .showcallListDialog(row)
-      .finally(() => {
-        this.isLoading = false;
-      });
-  }
+
+  this.isLoading = true;
+
+  this.noLongerPatientService
+    .confirmbox(row)
+    .then(result => {
+      if (result?.refresh) {
+        this.removeMemberFromTable(row.medicaid_id);
+      }
+    })
+    .finally(() => {
+      this.isLoading = false;
+    });
+}
+
+removeMemberFromTable(medicaidId: number): void {
+  const updatedData = this.dataSource.data.filter(
+    member => member.medicaid_id !== medicaidId
+  );
+
+  this.dataSource.data = updatedData;
+  // 🔁 refresh paginator & table
+  this.dataSource._updateChangeSubscription();
+}
+
+
 
   updatealterAddr(row: any) {
     alert('addr');

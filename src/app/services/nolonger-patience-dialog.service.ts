@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ConfigService } from './api.service';
-import { CallListRequest } from '../models/requests/dashboardRequest';
-import { ActionDialog } from '../dialogs/action-dialog/action-dialog';
+import { ConfigService } from './api.service'; 
+import { ConfirmDialog } from '../views/confirm-dialog/confirm-dialog';
+import {MatIconModule} from '@angular/material/icon'
+import { ConfirmDialogResult } from '../models/requests/dashboardRequest';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CallListDialogService {
+export class NolongerPatientDialogService {
 
   constructor(
     private apiService: ConfigService,
@@ -16,87 +17,24 @@ export class CallListDialogService {
     private sanitizer: DomSanitizer
   ) {}
 
-  showcallListDialog(row: any): Promise<void> {
-    const request: CallListRequest = {
-      medicaid_id: row.medicaid_id
-    };
+  
+confirmbox(row: any): Promise<ConfirmDialogResult | undefined> {
 
-    return this.apiService.callList<any>(request)
-      .then(res => {
-        const callList = res?.data || [];
-        this.openDialog(row, callList);
-      })
-      .catch(err => {
-        console.error('Risk gap error:', err);
-      });
-  }
-
-  private openDialog(row: any, callList: any[]) {
-
-  let html = '';
-
-  if (callList && callList.length) {
-
-    html = `
-      <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>DATE</th>
-            <th>ACTION</th>
-            <th>OUTCOME</th>
-            <th>NOTE</th> 
-          </tr>
-        </thead>
-        <tbody>
-          ${callList.map((q, i) => `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${this.formatDate(q.action_date)}</td>
-              <td>${this.escapeHtml(q.action_type)}</td>
-              <td>${this.escapeHtml(q.action_result)}</td>
-              <td>${this.escapeHtml(q.action_note)}</td> 
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>`;
-
-  } else {
-    html = `<p style="text-align:center;color:#777">No call list available</p>`;
-  }
-
-  const title = `CALL LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
-
-  this.dialog.open(ActionDialog, {
+  const dialogRef = this.dialog.open(ConfirmDialog, {
     width: '80vw',
-    maxWidth: '900px',
-    panelClass: 'xl-dialog',
+    maxWidth: '600px',
     data: {
-      title,
-      htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
+      title: 'CONFIRM ACTION',
+      name: `${row.FIRST_NAME} ${row.LAST_NAME}`,
+      phone: row.OTHER_PHONE,
+      birth: row.BIRTH,
+      medicaid_id: row.medicaid_id
     }
   });
+
+  return dialogRef.afterClosed().toPromise();
 }
 
-private formatDate(date: any): string {
-  if (!date) return '';
 
-  const d = new Date(date);
-  if (isNaN(d.getTime())) return '';
-
-  return d.toLocaleDateString('en-US', {
-    month: 'numeric',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-  private escapeHtml(text: string = ''): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+ 
 }
