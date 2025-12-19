@@ -37,7 +37,7 @@ import { AlterPhoneDialogService } from '../../services/alternatephone-dialog.se
 
 import { AddAction } from '../shared/components/add-action/add-action';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
+import { HeaderService } from '../../services/header.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -119,7 +119,8 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     private addActionService: AddActionDialogService,private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
 
     private callListService:CallListDialogService,private taskListService:TaskListDialogService,
-    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService  
+    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService,
+    private headerService: HeaderService  
 
 
   ) {
@@ -128,6 +129,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('PRISM :: DASHBOARD');
+    this.headerService.setTitle('Dashboard');
     this.loadTableData();
   }
 

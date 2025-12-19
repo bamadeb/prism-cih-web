@@ -4,6 +4,9 @@ import { AuthLayout } from './core/layout/auth-layout/auth-layout';
 import { Login } from './views/auth/login/login';
 import { MainLayout } from './core/layout/main-layout/main-layout';
 import { Dashboard } from './views/dashboard/dashboard';
+import { Users } from './views/users/users';
+import { StarPerformance } from './views/star-performance/star-performance';
+import { RisksGapReport } from './views/risks-gap-report/risks-gap-report';
 
 export const routes: Routes = [
   {
@@ -19,6 +22,27 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'dashboard', component: Dashboard },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'users', component: Users },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'starperformance', component: StarPerformance },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'riskgapsreport', component: RisksGapReport },
     ]
   },
   { path: '**', redirectTo: 'login' }

@@ -1,0 +1,109 @@
+<div class="pagecontent">
+    <mat-card>
+        <mat-card-content class="mat-card-content top-margin ">
+
+            <form [formGroup]="starPerformanceFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+
+                <!-- Year -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Year</mat-label>
+                    <mat-select formControlName="year">
+                        @for (y of years; track y) {
+                        <mat-option [value]="y">{{ y }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Plan -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Plan</mat-label>
+                    <mat-select formControlName="plan">
+                        @for (p of plans; track p.id) {
+                        <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- TINs -->
+                <mat-form-field appearance="outline">
+                    <mat-label>TINs</mat-label>
+                    <mat-select formControlName="tins" multiple>
+                        @for (tin of availableTins; track tin) {
+                        <mat-option [value]="tin">{{ tin }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- Apply -->
+                <button mat-raised-button color="primary" type="submit">
+                    Apply
+                </button>
+
+            </form>
+
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+        <mat-card-content>
+
+            <div class="project-header table-wrapper  " style="font-size:20px !important;">
+
+                @if (!isLoading && starReportList.length > 0) {
+                <table class="table table-bordered centered-table row-border-only">
+                    <tr>
+                        <td width="40%">Measurement Year</td>
+                        @for (tin of selectedTins; track tin) {
+                        <td>{{ measurementYear }}</td>
+                        }
+                    </tr>
+
+                    <tr>
+                        <td>PROVIDER GROUP</td>
+                        @for (tin of selectedTins; track tin) {
+                        <td>{{ providerGroup }}</td>
+                        }
+                    </tr>
+
+                    <tr>
+                        <td>TIN</td>
+                        @for (tin of selectedTins; track tin) {
+                        <td>{{ tin }}</td>
+                        }
+                    </tr>
+
+                    @for (report of starReportList; track $index) {
+                    <tr [style.background-color]="report.BG_COLOR">
+                        <td>{{ report.MEASURE_CODE }} {{ report.Metric }}</td>
+
+                        @for (tin of selectedTins; track tin) {
+                        <td>{{ report[tin] }}</td>
+                        }
+                    </tr>
+                    }
+
+                </table>
+                }@else if (!isLoading) {
+                    <div class="text-center p-4 text-muted">
+                        <strong>Data not found</strong>
+                    </div>
+                    }
+
+            </div>
+
+
+        </mat-card-content>
+    </mat-card>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
