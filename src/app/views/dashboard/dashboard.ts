@@ -31,6 +31,7 @@ import { RiskgapDialogService } from '../../services/riskgap-dialog.service';
 import { CallListDialogService } from '../../services/calllist-dialog.service';
 import { TaskListDialogService } from '../../services/tasklist-dialog.service'; 
 import { NolongerPatientDialogService } from '../../services/nolonger-patience-dialog.service';
+import { AlterPhoneDialogService } from '../../services/alternatephone-dialog.service';
 import { AddAction } from '../shared/components/add-action/add-action';
 import { MatTooltipModule } from '@angular/material/tooltip';
  
@@ -101,24 +102,18 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   navigatorList: any[] = []; 
   performanceArray: Record<string, ProviderPerformance>[] = [];
   entry: any = {}; 
+  alt_phone: any[] = []; 
+  members: any[] = [];
  
 
   constructor(
     errorLogger: ErrorReportingService,
     matDialog: MatDialog,
-    private httpClient: HttpClient,
-    private titleService: Title,
-    private apiService: ConfigService,
-    private userData: UserDataService,
+    private httpClient: HttpClient,private titleService: Title, private apiService: ConfigService,private userData: UserDataService,
     public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService,
-
-    private addActionService: AddActionDialogService,
-
-    private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
+    private addActionService: AddActionDialogService,private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
     private callListService:CallListDialogService,private taskListService:TaskListDialogService,
-    private noLongerPatientService:NolongerPatientDialogService
-    
-    
+    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService  
 
   ) {
     super(errorLogger, matDialog);
@@ -301,9 +296,61 @@ removeMemberFromTable(medicaidId: number): void {
     alert('addr');
   }
 
-  updatealterPhone(row: any){
-    alert('phone');
+  async addalternativePhone(row: any){
+    this.isLoading = true;
+    try {
+      const dialogRef = await this.alternatePhoneListService.showalterPhoneListDialog(row);
+      dialogRef.afterClosed().subscribe(result => {
+      if (result?.refresh) {
+        // 🔁 Refresh member data
+        //this.refreshAltPhoneList(row.medicaid_id);
+        this.syncMemberAltPhone(result.medicaid_id);
+      }
+    });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.isLoading = false;
+    }
   }
+
+//   refreshAltPhoneList(medicaidId: number) {
+//   const request = { medicaid_id: medicaidId };
+
+//   this.apiService.alternatephoneList<any>(request).then(res => {
+//     this.alt_phone = res.data.prismMemberaltphone || [];
+//   });
+// }
+
+syncMemberAltPhone(medicaidId: number) {
+  const request = { medicaid_id: medicaidId };
+
+  this.apiService.alternatephoneList<any>(request).then(res => {
+    const altPhones = res.data.prismMemberaltphone || [];
+
+    if (!altPhones.length) return;
+
+    // get latest phone
+    const latestPhone = altPhones[0].alt_phone_no;
+
+    // ✅ FIND ROW FROM TABLE DATA
+    const index = this.dataSource.data.findIndex(
+      (m: any) => m.medicaid_id === medicaidId
+    );
+
+    if (index !== -1) {
+      this.dataSource.data[index] = {
+        ...this.dataSource.data[index],
+        latest_alt_phone: latestPhone
+      };
+
+      // 🔁 FORCE MAT TABLE REFRESH
+      this.dataSource._updateChangeSubscription();
+    }
+  });
+}
+
+
 
   async showTasklist(row: any) {
     this.isLoading = true;
