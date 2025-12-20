@@ -6,13 +6,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { Title } from '@angular/platform-browser';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 @Component({
   selector: 'app-star-performance',
   imports: [MatCardModule,
     MatSelectModule,
     MatFormFieldModule,
     MatButtonModule,
-    ReactiveFormsModule],
+    ReactiveFormsModule,
+  MatDatepickerModule],
   templateUrl: './star-performance.html',
   styleUrl: './star-performance.css',
 })

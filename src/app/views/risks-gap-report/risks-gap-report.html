@@ -1,105 +1,128 @@
 <div class="pagecontent">
-    <mat-card>
-        <mat-card-content class="mat-card-content top-margin ">
+  <mat-card>
+    <mat-card-content class="mat-card-content top-margin ">
 
-                <!-- <form [formGroup]="riskGapsFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+      <form [formGroup]="riskGapsFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+                          <!-- <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Observation Date</mat-label>
 
-      
-      <mat-form-field appearance="outline">
-        <mat-label>Start Date</mat-label>
-        <input matInput
-               [matDatepicker]="startPicker"
-               formControlName="start_date">
-        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-        <mat-datepicker #startPicker></mat-datepicker>
-      </mat-form-field>
+                            <input matInput [matDatepicker]="picker" formControlName="start_date"
+                              placeholder="MM/DD/YYYY" />
 
-     
-      <mat-form-field appearance="outline">
-        <mat-label>End Date</mat-label>
-        <input matInput
-               [matDatepicker]="endPicker"
-               formControlName="end_date">
-        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-        <mat-datepicker #endPicker></mat-datepicker>
-      </mat-form-field>
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                          </mat-form-field> -->
 
-      
-      <button mat-raised-button color="primary" type="submit">
-        Apply
-      </button>
-
-    </form> -->
-
-        </mat-card-content>
-    </mat-card>
-
-    <mat-card>
-        <mat-card-content>
-
-            <div class="project-header table-wrapper  ">
-
-                <table class="table table-bordered centered-table row-border-only" id="gaps">
-
-  <thead class="table-light">
-    <tr>
-      <th>MEDICAID ID</th>
-      <th>TYPE</th>
-      <th>DIAG CODE</th>
-      <th>DIAG DESC</th>
-      <th class="text-uppercase">Observation Date</th>
-      <th class="text-uppercase">Observation Year</th>
-      <th class="text-uppercase">Observation Code</th>
-      <th class="text-uppercase">CPT Modifier</th>
-      <th class="text-uppercase">Code Set</th>
-      <th class="text-uppercase">Result</th>
-      <th class="text-uppercase">Provider NPI</th>
-      <th class="text-uppercase">Taxonomy Code</th>
-      <th class="text-uppercase">Provider Name</th>
-      <th class="text-uppercase">Provider Type</th>
-      <th class="text-uppercase">RxProviderFlag</th>
-      <th class="text-uppercase">Group NPI</th>
-      <th class="text-uppercase">Group Taxonomy</th>
-      <th class="text-uppercase">Group Name</th>
-      <th class="text-uppercase">Source</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    @for (report of riskGapsReportList; track $index) {
-      <tr>
-        <td>{{ report.medicaid_id }}</td>
-        <td>{{ report.TYPE }}</td>
-        <td>{{ report.DIAG_CODE }}</td>
-        <td>{{ report.DIAG_DESC }}</td>
-        <td>{{ report.Observation_Date | date:'MM/dd/yyyy'  }}</td>
-        <td>{{ report.Observation_Year }}</td>
-        <td>{{ report.Observation_Code }}</td>
-        <td>{{ report.CPT_Code_Modifier }}</td>
-        <td>{{ report.Observation_Code_Set }}</td>
-        <td>{{ report.Observation_Result }}</td>
-        <td>{{ report.Service_Provider_NPI }}</td>
-        <td>{{ report.Service_Provider_Taxonomy_Code }}</td>
-        <td>{{ report.Service_Provider_Name }}</td>
-        <td>{{ report.Service_Provider_Type }}</td>
-        <td>{{ report.Service_Provider_RxProviderFlag }}</td>
-        <td>{{ report.Provider_Group_NPI }}</td>
-        <td>{{ report.Provider_Group_Taxonomy_Code }}</td>
-        <td>{{ report.Provider_Group_Name }}</td>
-        <td>{{ report.Source }}</td>
-      </tr>
-    }
-  </tbody>
-
-</table>
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="start_date">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+        
 
 
 
-            </div>
+          <mat-form-field appearance="outline">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="end_date">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
 
 
-        </mat-card-content>
-    </mat-card>
+          <button mat-raised-button color="primary" type="submit">
+              @if (!isLoading) {
+                Apply
+              } @else {
+                <mat-progress-spinner
+                  diameter="20"
+                  mode="indeterminate">
+                </mat-progress-spinner>
+              }
+          </button>
+          <button mat-raised-button color="primary" type="button"  (click)="downloadCsv()">
+              Download
+          </button>          
+
+      </form>
+
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-content>
+
+      <div class="project-header table-wrapper  ">
+        @if (isLoading) {
+          <div class="table-loader">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="50">
+            </mat-progress-spinner>
+          </div>
+        } @else {
+        <table class="table table-bordered centered-table row-border-only" id="gaps">
+
+          <thead class="table-light">
+            <tr>
+              <th>MEDICAID ID</th>
+              <th>TYPE</th>
+              <th>DIAG CODE</th>
+              <th>DIAG DESC</th>
+              <th class="text-uppercase">Observation Date</th>
+              <th class="text-uppercase">Observation Year</th>
+              <th class="text-uppercase">Observation Code</th>
+              <th class="text-uppercase">CPT Modifier</th>
+              <th class="text-uppercase">Code Set</th>
+              <th class="text-uppercase">Result</th>
+              <th class="text-uppercase">Provider NPI</th>
+              <th class="text-uppercase">Taxonomy Code</th>
+              <th class="text-uppercase">Provider Name</th>
+              <th class="text-uppercase">Provider Type</th>
+              <th class="text-uppercase">RxProviderFlag</th>
+              <th class="text-uppercase">Group NPI</th>
+              <th class="text-uppercase">Group Taxonomy</th>
+              <th class="text-uppercase">Group Name</th>
+              <th class="text-uppercase">Source</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (report of riskGapsReportList; track $index) {
+            <tr>
+              <td>{{ report.medicaid_id }}</td>
+              <td>{{ report.TYPE }}</td>
+              <td>{{ report.DIAG_CODE }}</td>
+              <td>{{ report.DIAG_DESC }}</td>
+              <td>{{ report.Observation_Date }}</td>
+              <td>{{ report.Observation_Year }}</td>
+              <td>{{ report.Observation_Code }}</td>
+              <td>{{ report.CPT_Code_Modifier }}</td>
+              <td>{{ report.Observation_Code_Set }}</td>
+              <td>{{ report.Observation_Result }}</td>
+              <td>{{ report.Service_Provider_NPI }}</td>
+              <td>{{ report.Service_Provider_Taxonomy_Code }}</td>
+              <td>{{ report.Service_Provider_Name }}</td>
+              <td>{{ report.Service_Provider_Type }}</td>
+              <td>{{ report.Service_Provider_RxProviderFlag }}</td>
+              <td>{{ report.Provider_Group_NPI }}</td>
+              <td>{{ report.Provider_Group_Taxonomy_Code }}</td>
+              <td>{{ report.Provider_Group_Name }}</td>
+              <td>{{ report.Source }}</td>
+            </tr>
+            }
+          </tbody>
+
+        </table>
+
+      }
+
+      </div>
+
+
+    </mat-card-content>
+  </mat-card>
 
 
 
