@@ -182,3 +182,8 @@ mat-error {
   font-size: 12px;               /* 👈 smaller text */
   font-weight: 600;
 }
+::ng-deep .mat-mdc-tab-body,
+::ng-deep .mat-mdc-tab-body-content {
+  overflow: visible !important;
+  height: auto !important;
+}

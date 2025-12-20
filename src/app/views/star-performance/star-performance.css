@@ -1,0 +1,45 @@
+.table-wrapper {
+  display: flex;
+  justify-content: center;   /* horizontal center */
+}
+
+.centered-table {
+  width: auto;               /* prevents full-width stretch */
+  margin: 0 auto;
+}
+.row-border-only {
+  border-collapse: collapse;
+  border: 1px solid #000;   /* outer table border */
+}
+
+/* Remove all default cell borders */
+.row-border-only td,
+.row-border-only th {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none;
+  border-bottom: none;
+}
+
+/* Add row borders only */
+.row-border-only tr {
+  border-bottom: 1px solid #000;
+}
+
+/* Optional: remove last row bottom double line */
+.row-border-only tr:last-child {
+  border-bottom: none;
+}
+.top-margin {
+  margin-top: 50px;   /* adjust as needed */
+}
+.mat-card-content {
+  text-align: center;
+}
+.filter-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;   /* ⬅ space between mat-form-fields */
+}

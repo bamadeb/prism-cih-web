@@ -8,7 +8,8 @@ import { MatDivider } from '@angular/material/divider';
 import { CommonModule } from '@angular/common'; 
 import { MatSidenav } from '@angular/material/sidenav';
 import { UserDataService } from '../../../services/user-data-service';
-
+import { HeaderService } from '../../../services/header.service';
+import { Observable } from 'rxjs/internal/Observable';
 
 
 @Component({
@@ -20,12 +21,14 @@ import { UserDataService } from '../../../services/user-data-service';
 export class Header {
  @Input() drawer!: MatSidenav;
 
-  pageTitle = 'Dashboard';
+  //pageTitle = 'Dashboard';
+  pageTitle$!: Observable<string>;
   userName: string | undefined;
  
-  constructor(private router: Router,private userData: UserDataService ) {}
+  constructor(private router: Router,private userData: UserDataService,private headerService: HeaderService ) {}
 
    ngOnInit(): void {
+    //this.pageTitle = this.headerService.title$;
       const user = this.userData.getUser(); 
       this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
       //console.log(user);

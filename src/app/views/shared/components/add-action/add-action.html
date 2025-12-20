@@ -1,6 +1,7 @@
-<h2 mat-dialog-title class="text-uppercase">ADD/UPDATE ACTION | {{ this.member_name }} - #{{ this.medicaid_id }} - {{ this.member_dob }}</h2>
+<h2 mat-dialog-title class="text-uppercase">ADD/UPDATE ACTION | {{ this.member_name }} - #{{ this.medicaid_id }} - {{
+  this.member_dob }}</h2>
 <mat-dialog-content>
-  <mat-tab-group  mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
     <mat-tab label="TO-DO/DONE">
       <div>
 
@@ -76,7 +77,7 @@
                     <mat-label>Type your text...</mat-label>
                     <textarea matInput formControlName="action_note" rows="2"></textarea>
                   </mat-form-field>
-                  
+
                 </div>
               </div>
             </div>
@@ -584,7 +585,22 @@
 
           <!-- SUBMIT BUTTON -->
           <div class="text-end mt-3">
-            <button mat-flat-button color="primary" type="submit">Submit</button>
+            <!-- <button mat-flat-button color="primary" type="submit">Submit</button> -->
+            <!-- <button mat-flat-button color="primary" type="submit" [disabled]="isProcessing">
+                    @if (!isProcessing) {
+                      Submit
+                    } @else {
+                      <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                    }
+            </button> -->
+            <button mat-flat-button color="primary" type="submit" [disabled]="isProcessing">
+
+              <span *ngIf="!isProcessing">Submit</span>
+
+              <mat-progress-spinner *ngIf="isProcessing" diameter="20" mode="indeterminate">
+              </mat-progress-spinner>
+
+            </button>
           </div>
 
         </form>
@@ -593,7 +609,42 @@
     </mat-tab>
 
     <mat-tab label="APPOINTMENT">
-      <p>Your profile information goes here.</p>
+      <div><form enctype="multipart/form-data" [formGroup]="appointmentFormGroup">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <input type="text" formControlName="vendor_name" placeholder="Search Vendor"
+                                                class="form-control text-uppercase" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <input type="date" formControlName="appointment_date" class="form-control"
+                                                placeholder="Appointment Date" required />
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <input type="time" formControlName="appointment_time"
+                                                class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <textarea class="form-control text-uppercase"
+                                                formControlName="appointment_note" placeholder="Note"
+                                                required></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button type="submit" class="btn btn-primary text-uppercase">
+                                            Submit
+                                        </button>
+                                    </div>
+                                </form></div>
     </mat-tab>
 
 
@@ -602,3 +653,6 @@
 <mat-dialog-actions>
   <button matButton mat-dialog-close>Close</button>
 </mat-dialog-actions>
+<!-- <div class="loader-backdrop" *ngIf="isLoading">
+  <mat-spinner diameter="60"></mat-spinner>
+</div> -->

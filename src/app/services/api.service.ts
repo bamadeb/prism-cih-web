@@ -6,6 +6,8 @@ import { commonPostApi } from '../utilities/functions';
 import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest, AlterPhoneListRequest, AlterAddressListRequest} from '../models/requests/dashboardRequest';   
 import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup } from '../models/requests/commonRequest' 
 import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
+import { StarPerformanceRequest } from '../models/requests/StarPerformanceRequest';
+import { RiskGapsRequest } from '../models/requests/RiskGapsRequest';
   
  
 @Injectable({
@@ -211,6 +213,22 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       this.httpClient,
       this.environmentService,
       'prismActionresultfollowup',
+      request   
+    );
+  }
+ async getStarPerformanceByYear<TResponse>(request: StarPerformanceRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetStarPerformanceByYear',
+      request   
+    );
+  }
+   async getGapsObservationData<TResponse>(request: RiskGapsRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetgapsobservationdata',
       request   
     );
   }
