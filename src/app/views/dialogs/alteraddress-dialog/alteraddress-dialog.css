@@ -1,0 +1,19 @@
+.dialog-title-center {
+  text-align: center;
+  width: 100%;
+  text-transform: uppercase;
+  font-weight: normal !important;   /* Removes bold */
+}
+
+.dialog-layout {
+  display: flex;
+  gap: 16px;
+}
+
+.left-card {
+  width: 35%;
+}
+
+.right-table {
+  width: 65%;
+}

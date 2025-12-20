@@ -3,27 +3,24 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } fro
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
-  selector: 'app-action-dialog',
+  selector: 'app-assignplan-dialog',
   imports: [MatDialogContent, MatDialogActions,MatButtonModule],
-  templateUrl: './action-dialog.html',
-  styleUrl: './action-dialog.css',
+  templateUrl: './assignplan-dialog.html',
+  styleUrl: './assignplan-dialog.css',
 })
+export class AssignplanDialog {
  
-export class ActionDialog {
 
-  title: string = '';
-  message: string = '';
-  htmlContent: string = '';
-
-  constructor(
-    private dialogRef: MatDialogRef<ActionDialog>,
+   constructor(
+    private dialogRef: MatDialogRef<AssignplanDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
-    this.title = data?.title;
-    this.htmlContent = data?.htmlContent;
+    //this.title = data?.title;
+    //this.htmlContent = data?.htmlContent;
   }
 
-  confirm() {
+close() {
     this.dialogRef.close(true);
   }
+
 }

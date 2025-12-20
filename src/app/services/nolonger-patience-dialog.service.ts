@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service'; 
-import { ConfirmDialog } from '../views/confirm-dialog/confirm-dialog';
+import { ConfirmDialog } from '../views/dialogs/confirm-dialog/confirm-dialog';
 import {MatIconModule} from '@angular/material/icon'
 import { ConfirmDialogResult } from '../models/requests/dashboardRequest';
 

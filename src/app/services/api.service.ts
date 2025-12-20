@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { AppEnvService } from './app-env.service';
 import { LoginRequest } from '../models/requests/loginRequest';  
 import { commonPostApi } from '../utilities/functions'; 
-import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest, AlterPhoneListRequest} from '../models/requests/dashboardRequest';   
+import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest, AlterPhoneListRequest, AlterAddressListRequest} from '../models/requests/dashboardRequest';   
 import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup } from '../models/requests/commonRequest' 
 import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
   
@@ -96,6 +96,15 @@ export class ConfigService {
   }
 
   async alternatephoneList<TResponse>(request: AlterPhoneListRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismMemberAllDetails',
+      request   
+    );
+  }
+
+  async alternateaddressList<TResponse>(request: AlterAddressListRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService, 

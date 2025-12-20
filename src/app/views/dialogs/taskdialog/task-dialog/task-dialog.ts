@@ -10,9 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
-import { ConfigService } from '../../../services/api.service'; 
-import { UserDataService } from '../../../services/user-data-service';
-import { LogRequest, TaskRequest,UpdateTaskRequest } from '../../../models/requests/dashboardRequest';
+import { ConfigService } from '../../../../services/api.service'; 
+import { UserDataService } from '../../../../services/user-data-service';
+import { LogRequest, TaskRequest,UpdateTaskRequest } from '../../../../models/requests/dashboardRequest';
 import { provideNativeDateAdapter } from '@angular/material/core';
 
 
@@ -32,17 +32,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,       // ✅ Provides DateAdapter
-    MatCardModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatCardModule
+    MatCardModule 
   ],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.css'

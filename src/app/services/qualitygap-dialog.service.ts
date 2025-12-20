@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service';
 import { QualitygapRequest } from '../models/requests/dashboardRequest';
-import { ActionDialog } from '../dialogs/action-dialog/action-dialog';
+import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
 
 @Injectable({
   providedIn: 'root'

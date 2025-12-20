@@ -1,14 +1,14 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { PhoneFormatPipe } from "../../pipes/phone-format.pipe";
-import { ConfigService } from '../../services/api.service'; 
-import { UserDataService } from '../../services/user-data-service';
+import { PhoneFormatPipe } from "../../../pipes/phone-format.pipe";
+import { ConfigService } from '../../../services/api.service'; 
+import { UserDataService } from '../../../services/user-data-service';
 import { CommonModule } from '@angular/common';
 import { MatCard, MatCardContent } from "@angular/material/card";
 import { MatFormField, MatError, MatFormFieldModule } from "@angular/material/form-field"; 
 import { FormBuilder, FormGroup, Validators,ReactiveFormsModule  } from '@angular/forms';
-import { AltphoneRequest, LogRequest } from '../../models/requests/dashboardRequest';
+import { AltphoneRequest, LogRequest } from '../../../models/requests/dashboardRequest';
 import { MatInputModule } from '@angular/material/input';
 
 @Component({
@@ -76,7 +76,7 @@ addAltphoneFormGroup!: FormGroup;
         // ✅ success
         this.afterSuccess();
     } catch (error) {
-      console.error('Alternative phone add failed', error);
+      console.error('Add alternative phone failed', error);
     } finally {
       this.isLoading = false;
     }

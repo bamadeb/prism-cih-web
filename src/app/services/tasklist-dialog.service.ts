@@ -1,6 +1,6 @@
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ConfigService } from './api.service';
-import { TaskDialog } from '../views/taskdialog/task-dialog/task-dialog';
+import { TaskDialog } from '../views/dialogs/taskdialog/task-dialog/task-dialog';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })

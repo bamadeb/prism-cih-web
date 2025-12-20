@@ -3,9 +3,9 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { UpdateMemberRequest,LogRequest } from '../../models/requests/dashboardRequest';
-import { ConfigService } from '../../services/api.service';
-import { UserDataService } from '../../services/user-data-service';
+import { UpdateMemberRequest,LogRequest } from '../../../models/requests/dashboardRequest';
+import { ConfigService } from '../../../services/api.service';
+import { UserDataService } from '../../../services/user-data-service';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 @Component({

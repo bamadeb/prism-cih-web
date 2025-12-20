@@ -64,6 +64,10 @@ export class AlterPhoneListRequest {
      medicaid_id?: number | null;
 }
 
+export class AlterAddressListRequest {
+     medicaid_id?: number | null;
+}
+
 export interface TaskInsertData {
   medicaid_id: number;
   action_id: number;
@@ -139,6 +143,21 @@ export interface AltphoneRequest {
 export interface AltphoneInsertData {
   medicaid_id: number;
   alt_phone_no: string; 
+  add_by: number;
+}
+
+export interface AltaddressRequest {
+  table_name: string;
+  insertDataArray: AltaddressInsertData[];
+}
+
+export interface AltaddressInsertData {
+  medicaid_id: number;
+  alt_address: string; 
+  alt_city: string; 
+  alt_state: string; 
+  alt_zip: string; 
+  add_date: string | Date; 
   add_by: number;
 }
 

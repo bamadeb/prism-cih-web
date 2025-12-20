@@ -16,13 +16,13 @@ import { Title } from '@angular/platform-browser';
 import { MatIcon } from "@angular/material/icon";
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatTabsModule } from '@angular/material/tabs'; 
-import { MatSelectModule } from '@angular/material/select'; 
+import { MatSelectChange, MatSelectModule } from '@angular/material/select'; 
 import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
 import { UserDataService } from '../../services/user-data-service';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
-import { ActionDialog } from '../../dialogs/action-dialog/action-dialog';
+import { ActionDialog } from '../dialogs/action-dialog/action-dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; 
 import { BenefitsDialogService } from '../../services/benefits-dialog.service'; 
 import { AddActionDialogService } from '../../services/add-action-dialog.service';
@@ -32,8 +32,11 @@ import { CallListDialogService } from '../../services/calllist-dialog.service';
 import { TaskListDialogService } from '../../services/tasklist-dialog.service'; 
 import { NolongerPatientDialogService } from '../../services/nolonger-patience-dialog.service';
 import { AlterPhoneDialogService } from '../../services/alternatephone-dialog.service';
+import { AlterAddressDialogService } from '../../services/alteraddress-dialog.service';
 import { AddAction } from '../shared/components/add-action/add-action';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SelectionModel } from '@angular/cdk/collections';
+import { ActionHandlerService } from '../../services/action.service'; 
  
 
 @Component({
@@ -104,7 +107,8 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   entry: any = {}; 
   alt_phone: any[] = []; 
   members: any[] = [];
- 
+  selection = new SelectionModel<any>(true, []); // true = multiple selection
+  selectedAction: string | null = null; 
 
   constructor(
     errorLogger: ErrorReportingService,
@@ -113,7 +117,9 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog, private sanitizer: DomSanitizer,private benefitsService: BenefitsDialogService,
     private addActionService: AddActionDialogService,private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
     private callListService:CallListDialogService,private taskListService:TaskListDialogService,
-    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService  
+    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService,
+    private alternateAddressListService:AlterAddressDialogService,
+    private actionService:ActionHandlerService  
 
   ) {
     super(errorLogger, matDialog);
@@ -122,6 +128,34 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.titleService.setTitle('PRISM :: DASHBOARD'); 
     this.loadTableData();
+  }
+
+  /** Whether all rows are selected */
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  /** Selects all rows if not all selected; otherwise clear selection */
+  masterToggle() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.dataSource.data.forEach(row => this.selection.select(row));
+    }
+  }
+
+  getSelectedRows(): any[] {
+  return this.selection.selected;
+}
+
+  /** Checkbox label (accessibility) */
+  checkboxLabel(row?: any): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row`;
   }
 
   ngAfterViewInit(): void {
@@ -278,7 +312,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     .finally(() => {
       this.isLoading = false;
     });
-}
+} 
 
 removeMemberFromTable(medicaidId: number): void {
   const updatedData = this.dataSource.data.filter(
@@ -290,10 +324,52 @@ removeMemberFromTable(medicaidId: number): void {
   this.dataSource._updateChangeSubscription();
 }
 
+onActionChange(event: MatSelectChange) {
+  if (!event.value) return;
+
+  const selectedRows = this.getSelectedRows(); 
+
+  if (!selectedRows.length) {
+    alert('Please select at least one member');
+    this.selectedAction = null;
+    return;
+  }
+
+  this.isLoading = true;
+
+  this.actionService
+    .handleAction(event.value, selectedRows) // 👈 PASS ROWS
+    .then(result => {
+      //if (result?.refresh) {
+        // refresh logic if needed
+      //}
+    })
+    .finally(() => {
+      this.isLoading = false;
+      this.selectedAction = null; // reset dropdown
+      this.selection.clear();     // clear selection
+    });
+}
+
+   
 
 
-  updatealterAddr(row: any){
-    alert('addr');
+
+  async addalterAddr(row: any){ 
+    this.isLoading = true;
+    try {
+      const dialogRef = await this.alternateAddressListService.showalterAddressListDialog(row);
+      dialogRef.afterClosed().subscribe(result => {
+      if (result?.refresh) {
+        // 🔁 Refresh member data 
+        this.syncMemberAltAddress(result.medicaid_id);
+      }
+    });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   async addalternativePhone(row: any){
@@ -321,6 +397,49 @@ removeMemberFromTable(medicaidId: number): void {
 //     this.alt_phone = res.data.prismMemberaltphone || [];
 //   });
 // }
+
+syncMemberAltAddress(medicaidId: number) {
+  console.log(medicaidId);
+  const request = { medicaid_id: medicaidId };
+
+  this.apiService.alternateaddressList<any>(request).then(res => {
+    const altAddressList = res.data.altaddress || [];
+    //console.log(res);
+    if (!altAddressList.length) return;
+
+    // ✅ take first record as-is (no sorting)
+    const addr = altAddressList[0];
+
+    // ✅ format full address
+    // const formattedAddress = [
+    //   addr.alt_address,
+    //   addr.alt_city,
+    //   addr.alt_state,
+    //   addr.alt_zip
+    // ].filter(Boolean).join(', ');
+
+    // console.log(formattedAddress);
+
+    // ✅ update member row in table
+    const index = this.dataSource.data.findIndex(
+      (m: any) => m.medicaid_id === medicaidId
+    );
+
+    if (index !== -1) {
+      this.dataSource.data[index] = {
+        ...this.dataSource.data[index],
+        latest_alt_address: addr.alt_address
+      };
+
+      // 🔁 refresh table UI
+      this.dataSource._updateChangeSubscription();
+      // OR (preferred)
+      // this.dataSource.data = [...this.dataSource.data];
+    }
+  });
+}
+
+
 
 syncMemberAltPhone(medicaidId: number) {
   const request = { medicaid_id: medicaidId };

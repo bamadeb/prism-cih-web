@@ -1,6 +1,6 @@
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ConfigService } from './api.service';
-import { AlterphoneDialog } from '../views/alterphone-dialog/alterphone-dialog';
+import { AlterphoneDialog } from '../views/dialogs/alterphone-dialog/alterphone-dialog';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
