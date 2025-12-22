@@ -100,7 +100,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   departmentList: any = {};
   recentActivity: any = {};
   referralList: any = {};
-  planList: any = {};
+  planList: any = {}; 
   NoLongerPatientList: any = {};
   navigatorList: any[] = [];
   performanceArray: Record<string, ProviderPerformance>[] = [];
@@ -329,12 +329,14 @@ removeMemberFromTable(medicaidId: number): void {
   this.dataSource.data = updatedData;
   // 🔁 refresh paginator & table
   this.dataSource._updateChangeSubscription();
-}
+} 
 
 onActionChange(event: MatSelectChange) {
   if (!event.value) return;
 
-  const selectedRows = this.getSelectedRows(); 
+  const selectedRows = this.getSelectedRows();
+  const planList = this.planList;
+  const departmentList = this.departmentList;
 
   if (!selectedRows.length) {
     alert('Please select at least one member');
@@ -345,18 +347,30 @@ onActionChange(event: MatSelectChange) {
   this.isLoading = true;
 
   this.actionService
-    .handleAction(event.value, selectedRows) // 👈 PASS ROWS
+    .handleAction(event.value, selectedRows, planList, departmentList)
     .then(result => {
-      //if (result?.refresh) {
-        // refresh logic if needed
-      //}
+      // ✅ ONLY after successful action
+      if (result?.refresh) {
+        this.removeRowsFromTable(selectedRows);
+      }
     })
     .finally(() => {
       this.isLoading = false;
-      this.selectedAction = null; // reset dropdown
-      this.selection.clear();     // clear selection
+      this.selectedAction = null;   // reset dropdown
+      this.selection.clear();       // clear checkbox selection
     });
-} 
+}
+
+
+removeRowsFromTable(rows: any[]): void {
+  const idsToRemove = rows.map(r => r.medicaid_id);
+
+  this.dataSource.data = this.dataSource.data.filter(
+    row => !idsToRemove.includes(row.medicaid_id)
+  );
+}
+
+
 
   async addalterAddr(row: any){ 
     this.isLoading = true;
@@ -604,9 +618,8 @@ async openAddActionDialog(
         this.ownSummary = res.data.ownRiskQualitySummary || [];
         this.navigatorList = res.data.navigatorList || [];
         this.recentActivity = res.data.recentActivity || [];
-        //this.referralList = res.data.referralList || [];
-        //this.planList = res.data.planList || [];
-        //this.NoLongerPatientList = res.data.NoLongerPatientList || [];
+        this.departmentList = res.data.departmentList || [];
+        this.planList = res.data.planList || []; 
         this.calculatePerformance(res.data);
         this.loadTransfertabledata(res.data.referralList);
         this.loadNopatienttabledata(res.data.NoLongerPatientList);

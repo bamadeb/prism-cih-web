@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { AppEnvService } from './app-env.service';
 import { LoginRequest } from '../models/requests/loginRequest';  
 import { commonPostApi } from '../utilities/functions'; 
-import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest, AlterPhoneListRequest, AlterAddressListRequest} from '../models/requests/dashboardRequest';   
+import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest, AlterPhoneListRequest, AlterAddressListRequest, PlanexistRequest, UserListRequest} from '../models/requests/dashboardRequest';   
 import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup } from '../models/requests/commonRequest' 
 import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
 import { StarPerformanceRequest } from '../models/requests/StarPerformanceRequest';
@@ -50,8 +50,7 @@ export class ConfigService {
       'prismOutreachmemberSP',
       request   
     ); 
-  }
-
+  } 
   async benefitsList<TResponse>(request: BenefitsRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
@@ -231,11 +230,23 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       'prismGetgapsobservationdata',
       request   
     );
+  } 
+
+  async checkplanexist<TResponse>(request: PlanexistRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismPlanexist',
+      request   
+    ); 
+  } 
+
+  async getUsersByDepartment<TResponse>(request: UserListRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetusersbydeptid',
+      request   
+    ); 
   }
-
-
-  
- 
-
-
 }

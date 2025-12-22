@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ConfigService } from '../../services/api.service';
 import { Title } from '@angular/platform-browser';
 import { MatCardModule } from "@angular/material/card";
-import { MatFormField, MatFormFieldModule } from "@angular/material/form-field";
+import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTableDataSource } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
@@ -11,7 +11,7 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
  
 @Component({
   selector: 'app-risks-gap-report',
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule, DatePipe, MatDatepickerModule,ReactiveFormsModule   ],
+  imports: [MatCardModule, MatFormFieldModule, MatSelectModule, DatePipe, MatDatepickerModule,ReactiveFormsModule   ],
   templateUrl: './risks-gap-report.html',
   styleUrl: './risks-gap-report.css',
 })

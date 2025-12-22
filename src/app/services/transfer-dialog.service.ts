@@ -6,15 +6,17 @@ import { TransferDialog } from '../views/dialogs/transfer-dialog/transfer-dialog
 export class TransferDialogService {
      constructor(private dialog: MatDialog) {}
     
-      open(rows: any[]): Promise<any> {
+      open(rows: any[],departmentList:any[]): Promise<any> {
+        //console.log(departmentList);
         const dialogRef: MatDialogRef<TransferDialog> =
           this.dialog.open(TransferDialog, {
             width: '700px',
             maxWidth: '90vw',
             disableClose: true,
             data: {
-              title: `ASSIGN PLAN (${rows.length})`,
-              members: rows
+              title: `${rows.length} MEMBER SELECTED FOR TRANSFER`,
+              members: rows,
+              departmentList
             }
           });
     

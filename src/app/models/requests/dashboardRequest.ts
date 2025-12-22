@@ -89,7 +89,7 @@ export interface UpdateTaskRequest {
     action_note?: string;
     status: string;
   };
-}
+} 
 
 export interface TaskRequest {
   table_name: string;
@@ -126,6 +126,7 @@ export interface UpdateMemberRequest {
   id_field_value: number;   // ✅ FIXED (was string)
   updateData: {
     NO_LONGER_PATIENT_FLAG: number;
+    //Care_Coordinator_id: number;
     NO_LONGER_PATIENT_DATE: string | Date; 
   };
 }
@@ -159,6 +160,48 @@ export interface AltaddressInsertData {
   alt_zip: string; 
   add_date: string | Date; 
   add_by: number;
+}
+
+export class PlanexistRequest {
+    medicaid_id?: number | null;
+    plan_id?: number | null;
+}
+
+export interface MemberplanRequest {
+  table_name: string;
+  insertDataArray: MemberplanInsertData[];
+}
+
+export interface MemberplanInsertData {
+  medicaid_id: number;
+  plan_id: number; 
+  added_by: number;
+}
+
+export interface TransferRequest {
+  table_name: string;
+  insertDataArray: TransferInsertData[];
+}
+
+export interface TransferInsertData {
+  medicaid_id: number;
+  department_id: number; 
+  referring_reason: string;
+  refer_to: number;
+  refer_by:number;
+}
+
+export class UserListRequest {
+    department_id?: number | null; 
+}
+
+export interface UpdateoutreachMemberRequest {
+  table_name: string;
+  id_field_name: string;
+  updates: {
+    medicaid_id: number;
+    Care_Coordinator_id: number;
+  }[];
 }
 
 

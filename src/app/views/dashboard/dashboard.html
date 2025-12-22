@@ -270,6 +270,9 @@
     </table>
   </div>
 
+
+  
+
   <mat-tab-group class="custom-tabs" mat-stretch-tabs style="margin-top: 30px;">
     <mat-tab label="MEMBERS">
       <div class="tab-content">
@@ -277,7 +280,25 @@
           <mat-card-content>
             <!-- Search box -->
             <div style="display:flex; justify-content:flex-end;">
+               <!-- ACTION BAR -->
+                <div class="action-bar">
+                  <mat-form-field appearance="outline" class="action-select">
+                    <mat-select
+                      placeholder="ACTION"
+                      [(value)]="selectedAction"
+                      [disabled]="selection.isEmpty()"
+                      (selectionChange)="onActionChange($event)">
+
+                      <mat-option value="transfer">TRANSFER</mat-option>
+                      <mat-option value="assign">ASSIGN PLAN</mat-option>
+
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                
               <div style="justify-content:left;">
+               
+
                 <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSizeOptions]="[10, 25, 50, 100]"
                   [pageSize]="10"></mat-paginator>
               </div>
@@ -469,24 +490,7 @@
         <mat-paginator #nolongerpatientPaginator [pageSize]="10"></mat-paginator>
 
       </div>
-    </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <div (click)="$event.stopPropagation()">
-          <mat-form-field appearance="outline">
-            <mat-select
-              placeholder="ACTION"
-              (selectionChange)="onActionChange($event)">
-              
-              <mat-option value="transfer">TRANSFER</mat-option>
-              <mat-option value="assign">ASSIGN PLAN</mat-option>
-
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </ng-template>
-    </mat-tab>
-
+    </mat-tab> 
   </mat-tab-group>
 
   <div class="half-screen">

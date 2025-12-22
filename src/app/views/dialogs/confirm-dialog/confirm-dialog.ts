@@ -6,14 +6,14 @@ import { CommonModule } from '@angular/common';
 import { UpdateMemberRequest,LogRequest } from '../../../models/requests/dashboardRequest';
 import { ConfigService } from '../../../services/api.service';
 import { UserDataService } from '../../../services/user-data-service';
-import { MatProgressSpinner } from "@angular/material/progress-spinner";
+//import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 @Component({
   selector: 'app-confirm-dialog',
   imports: [ CommonModule,
     MatDialogModule,     // ✅ REQUIRED
     MatButtonModule,
-    MatProgressSpinner,
+    //MatProgressSpinner,
     MatIconModule],
   templateUrl: './confirm-dialog.html',
   styleUrl: './confirm-dialog.css',

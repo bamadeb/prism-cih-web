@@ -1,24 +1,27 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AssignplanDialog } from '../views/dialogs/assignplan-dialog/assignplan-dialog';
+import { ConfigService } from './api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AssignPlanDialogService {
-    constructor(private dialog: MatDialog) {}
 
-  open(rows: any[]): Promise<any> {
-    const dialogRef: MatDialogRef<AssignplanDialog> =
-      this.dialog.open(AssignplanDialog, {
-        width: '700px',
-        maxWidth: '90vw',
-        disableClose: true,
-        data: {
-          title: `ASSIGN PLAN TO (${rows.length}) ${rows.length === 1 ? 'MEMBER' : 'MEMBERS'}`,
-          members: rows
-        }
-      });
-
-    return dialogRef.afterClosed().toPromise();
-  }
+    constructor(private dialog: MatDialog,private apiService: ConfigService) {}
+    
+    async open(rows: any[],planList:any[]): Promise<any> { 
+      //console.log(rows);
+      const dialogRef: MatDialogRef<AssignplanDialog> =
+        this.dialog.open(AssignplanDialog, {
+          width: '700px',
+          maxWidth: '90vw',
+          disableClose: true,
+          data: {
+            title: `ASSIGN PLAN TO (${rows.length}) ${rows.length === 1 ? 'MEMBER' : 'MEMBERS'}`,
+            members: rows,
+            planList
+          }
+        });
+      return dialogRef.afterClosed().toPromise();
+    }
 
 }

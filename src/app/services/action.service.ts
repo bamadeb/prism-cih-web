@@ -10,17 +10,17 @@ export class ActionHandlerService {
     private assignPlanService: AssignPlanDialogService
   ) {}
 
-  handleAction(action: string, rows: any[]): Promise<any> {
+  handleAction(action: string, rows: any[],planList: any[],departmentList:any[]): Promise<any> {
     if (!rows || rows.length === 0) {
       return Promise.resolve(null);
     }
 
     switch (action) {
       case 'transfer':
-        return this.transferService.open(rows);
+        return this.transferService.open(rows,departmentList);
 
       case 'assign':
-        return this.assignPlanService.open(rows);
+        return this.assignPlanService.open(rows,planList);
 
       default:
         return Promise.resolve(null);
