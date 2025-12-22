@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { Title } from '@angular/platform-browser';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { HeaderService } from '../../services/header.service';
 @Component({
   selector: 'app-star-performance',
   imports: [MatCardModule,
@@ -42,7 +43,8 @@ availableTins: string[] = [];
   constructor(
     private apiService: ConfigService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,private titleService: Title
+    private fb: FormBuilder,private titleService: Title,
+    private headerService: HeaderService 
   ) {
     this.starPerformanceFormGroup = this.fb.group({
       year: [2024],
@@ -54,6 +56,7 @@ availableTins: string[] = [];
   ngOnInit(): void {
     // initialize TINs for default plan
       this.titleService.setTitle('PRISM :: STAR PERFORMANCE');
+      this.headerService.setTitle('Star Performance Report');
     this.onPlanChange(this.starPerformanceFormGroup.value.plan);
 
     // listen to plan changes

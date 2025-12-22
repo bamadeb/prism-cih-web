@@ -67,7 +67,7 @@ export class Login {
         const roleId = user.role_id;
         console.log('roleId:',roleId);
         if (roleId == 7) {
-          alert('users');
+          //alert('users');
           this.router.navigate(['/users']);
         } else {
           this.router.navigate(['/dashboard']);
