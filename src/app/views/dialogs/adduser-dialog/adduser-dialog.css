@@ -1,3 +1,12 @@
+.email-field {
+  width: 64.5%;
+}
+
+
+.common-field {
+  width: 32%;
+}
+
 .loader-backdrop {
   position: fixed;
   top: 0;
@@ -11,4 +20,8 @@
 
   background: rgba(255, 255, 255, 0.6);
   z-index: 9999;
+}
+
+.mt-5{
+  margin-top: 5px;
 }

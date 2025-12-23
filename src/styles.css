@@ -24,6 +24,46 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   text-transform: uppercase;
   font-weight: normal !important;   /* Removes bold */
 }
+.left{
+  float: left;
+}
+.right{
+  float: right;
+}
+.mr{
+  margin-right: 5px;
+}
+
+.dialog-loader {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loader-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;     /* vertical center */
+  justify-content: center; /* horizontal center */
+
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 9999;
+}
+
+.mt-5{
+  margin-top: 5px;
+}
+
+
 
 
 

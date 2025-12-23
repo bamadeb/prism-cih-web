@@ -14,6 +14,7 @@ import { ConfigService } from '../../../../services/api.service';
 import { UserDataService } from '../../../../services/user-data-service';
 import { LogRequest, TaskRequest,UpdateTaskRequest } from '../../../../models/requests/dashboardRequest';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 
 
@@ -22,7 +23,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
   standalone: true,
    providers: [provideNativeDateAdapter()], // ✅ REQUIRED
   imports: [
-    CommonModule,              // Needed for *ngFor, *ngIf
+    CommonModule, // Needed for *ngFor, *ngIf
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -31,9 +32,10 @@ import { provideNativeDateAdapter } from '@angular/material/core';
     MatRadioModule,
     MatButtonModule,
     MatDatepickerModule,
-    MatNativeDateModule,       // ✅ Provides DateAdapter
-    MatCardModule 
-  ],
+    MatNativeDateModule, // ✅ Provides DateAdapter
+    MatCardModule,
+    MatProgressSpinner
+],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.css'
 })
@@ -106,7 +108,6 @@ export class TaskDialog implements OnInit {
   }
 
   async submitTask(): Promise<void> {
-
   if (this.addTaskFormGroup.invalid) {
     this.addTaskFormGroup.markAllAsTouched();
     return;
@@ -114,143 +115,120 @@ export class TaskDialog implements OnInit {
 
   this.isLoading = true;
   const v = this.addTaskFormGroup.value;
-  //console.log(v);
-  //console.log(this.isEditMode);
 
   try {
+    const user = this.userData.getUser();
+    this.loginid = user.ID;
 
     if (this.isEditMode) {
-      // ================= UPDATE =================
-      if (this.currentTaskId === null) {
-        console.error('No task selected for update');
-        return;
-      }
-      //alert(v.task_assign_to);
-      const payload: UpdateTaskRequest = {
-        table_name: 'MEM_TASK_FOLLOW_UP',
-        id_field_name: 'id',
-        id_field_value: this.currentTaskId,
-        updateData: {
-          action_id: v.task_next_panel_id,
-          assign_to: v.task_assign_to,
-          action_date: this.formatDateForApi(v.task_date),
-          action_note: v.task_action_note,
-          status: v.task_status
-        }
-      };
-       try {
-        // update task
-        await this.updateTask(payload); 
-        // add system log
-        const logpayload: LogRequest = {
-          table_name: 'MEM_SYSTEM_LOG',
-          insertDataArray: [{
-            medicaid_id: this.data.member.medicaid_id,
-            log_name: 'UPDATE TASK',
-            log_details: `UPDATE TASK FOR ${this.data.member.medicaid_id}`,
-            log_status: 'SUCCESS',
-            log_by: this.loginid,
-            action_type: 'UPDATE TASK'
-          }]
-        };
-       await this.add_system_log(logpayload);
-
-       // 🔁 update UI row
-      const index = this.data.taskList.findIndex(
-        (t: any) => t.id === this.currentTaskId
-      );
-
-      if (index !== -1) {
-        const activity = this.action_ativity_type.find(
-          a => a.id === v.task_next_panel_id
-        );
-        const navigator = this.navigatorList.find(
-          n => n.ID === v.task_assign_to
-        );
-
-        this.data.taskList[index] = {
-          ...this.data.taskList[index],
-          action_id: v.task_next_panel_id,
-          action_type: activity?.action_type || '',
-          task_date: this.formatDateForApi(v.task_date), // keep as Date
-          status: v.task_status,
-          assign_to: v.task_assign_to,
-          FistName: navigator?.FistName || '',
-          LastName: navigator?.LastName || '',
-          action_note: v.task_action_note
-        };
-      }
-
-
-      } catch (err) {
-        console.error('Update failed', err);
-        this.isLoading = false;
-      }  
-
+      await this.handleUpdate(v);
     } else {
-      // ================= INSERT =================
-      const user = this.userData.getUser();
-      this.loginid = user.ID;
-
-      const payload: TaskRequest = {
-        table_name: 'MEM_TASK_FOLLOW_UP',
-        insertDataArray: [{
-          medicaid_id: this.data.member.medicaid_id,
-          action_id: v.task_next_panel_id,
-          assign_to: v.task_assign_to,
-          action_date: this.formatDateForApi(v.task_date),
-          action_note: v.task_action_note || '',
-          status: v.task_status,
-          add_by: this.loginid
-        }]
-      };
-
-      await this.addTask(payload);
-      const logpayload: LogRequest = {
-        table_name: 'MEM_SYSTEM_LOG',
-        insertDataArray: [{
-          medicaid_id: this.data.member.medicaid_id,
-          log_name: 'ADD TASK',
-          log_details: `ADD TASK FOR ${this.data.member.medicaid_id}`,
-          log_status: 'Success',
-          log_by: this.loginid,
-          action_type: 'ADD TASK'
-        }]
-      };
-
-      await this.add_system_log(logpayload);
-
-       // 🔁 add new row to table
-      const activity = this.action_ativity_type.find(
-        a => a.id === v.task_next_panel_id
-      );
-      const navigator = this.navigatorList.find(
-        n => n.ID === v.task_assign_to
-      );
-
-      this.data.taskList.unshift({
-        id: Date.now(), // temp id until backend refresh
-        action_id: v.task_next_panel_id,
-        action_type: activity?.action_type || '',
-        task_date: this.formatDateForApi(v.task_date),
-        status: v.task_status,
-        assign_to: v.task_assign_to,
-        FistName: navigator?.FistName || '',
-        LastName: navigator?.LastName || '',
-        action_note: v.task_action_note
-      });
+      await this.handleInsert(v);
     }
 
-    // ✅ success
     this.afterSuccess();
 
-  } catch (error) {
-    console.error('Task submit failed', error);
+  } catch (err) {
+    console.error('Task submit failed', err);
+    alert('Something went wrong while saving task');
   } finally {
     this.isLoading = false;
   }
 }
 
+private async handleUpdate(v: any): Promise<void> {
+  if (!this.currentTaskId) {
+    throw new Error('No task selected for update');
+  }
+
+  const payload: UpdateTaskRequest = {
+    table_name: 'MEM_TASK_FOLLOW_UP',
+    id_field_name: 'id',
+    id_field_value: this.currentTaskId,
+    updateData: {
+      action_id: v.task_next_panel_id,
+      assign_to: v.task_assign_to,
+      action_date: this.formatDateForApi(v.task_date),
+      action_note: v.task_action_note,
+      status: v.task_status
+    }
+  };
+
+  await this.updateTask(payload);
+  await this.addTaskLog('UPDATE TASK');
+
+  // 🔁 Update UI row
+  const index = this.data.taskList.findIndex(
+    (t: any) => t.id === this.currentTaskId
+  );
+
+  if (index !== -1) {
+    const activity = this.action_ativity_type.find(a => a.id === v.task_next_panel_id);
+    const navigator = this.navigatorList.find(n => n.ID === v.task_assign_to);
+
+    this.data.taskList[index] = {
+      ...this.data.taskList[index],
+      action_id: v.task_next_panel_id,
+      action_type: activity?.action_type || '',
+      task_date: this.formatDateForApi(v.task_date),
+      status: v.task_status,
+      assign_to: v.task_assign_to,
+      FistName: navigator?.FistName || '',
+      LastName: navigator?.LastName || '',
+      action_note: v.task_action_note
+    };
+  }
+}
+
+private async handleInsert(v: any): Promise<void> {
+  const payload: TaskRequest = {
+    table_name: 'MEM_TASK_FOLLOW_UP',
+    insertDataArray: [{
+      medicaid_id: this.data.member.medicaid_id,
+      action_id: v.task_next_panel_id,
+      assign_to: v.task_assign_to,
+      action_date: this.formatDateForApi(v.task_date),
+      action_note: v.task_action_note || '',
+      status: v.task_status,
+      add_by: this.loginid
+    }]
+  };
+
+  await this.addTask(payload);
+  await this.addTaskLog('ADD TASK');
+
+  // 🔁 Add row to UI
+  const activity = this.action_ativity_type.find(a => a.id === v.task_next_panel_id);
+  const navigator = this.navigatorList.find(n => n.ID === v.task_assign_to);
+
+  this.data.taskList.unshift({
+    id: Date.now(),
+    action_id: v.task_next_panel_id,
+    action_type: activity?.action_type || '',
+    task_date: this.formatDateForApi(v.task_date),
+    status: v.task_status,
+    assign_to: v.task_assign_to,
+    FistName: navigator?.FistName || '',
+    LastName: navigator?.LastName || '',
+    action_note: v.task_action_note
+  });
+}
+
+private addTaskLog(type: 'ADD TASK' | 'UPDATE TASK'): Promise<any> {
+  const payload: LogRequest = {
+    table_name: 'MEM_SYSTEM_LOG',
+    insertDataArray: [{
+      medicaid_id: this.data.member.medicaid_id,
+      log_name: type,
+      log_details: `${type} FOR ${this.data.member.medicaid_id}`,
+      log_status: 'SUCCESS',
+      log_by: this.loginid,
+      action_type: type
+    }]
+  };
+
+  return this.add_system_log(payload);
+}
    
   updateTask(request: UpdateTaskRequest): Promise<any> {
     return this.apiService.update<any,UpdateTaskRequest>(request);

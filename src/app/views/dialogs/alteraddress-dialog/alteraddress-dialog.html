@@ -2,7 +2,7 @@
   {{ data.title }}
 </h2>
 
-<mat-dialog-content>
+<mat-dialog-content  style="max-height: 500px;">
 
   <div class="dialog-layout">
 
@@ -58,7 +58,7 @@
               matInput
               formControlName="alt_zip"
               placeholder="ALTERNATE ZIP"
-              maxlength="6"
+              maxlength="10"
               (input)="formatZip($event)"
             />
             <mat-error *ngIf="addAltaddressFormGroup.get('alt_zip')?.touched">
@@ -80,14 +80,8 @@
 
           <!-- BUTTON -->
           <div class="text-end">
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              [disabled]="isLoading"
-            >
-              SUBMIT
-            </button>
+            <div class="left"><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
+            <div class="right"><button mat-raised-button color="primary" (click)="close()">Close</button></div>
           </div>
 
         </form>
@@ -135,8 +129,8 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-raised-button color="primary" (click)="close()">
-    Close
-  </button>
-</mat-dialog-actions>
+
+
+<div class="dialog-loader" *ngIf="isLoading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>

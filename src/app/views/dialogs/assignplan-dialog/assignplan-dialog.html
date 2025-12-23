@@ -14,11 +14,22 @@
               {{ p.plan_name }} ({{ p.start_date }} - {{ p.end_date }})
             </mat-option>
           </mat-select>
+
+          <!-- REQUIRED -->
+          <mat-error *ngIf="assignPlanFormGroup.get('plan_id')?.hasError('required')">
+            Plan is required
+          </mat-error>
+
+          <!-- PLAN EXISTS -->
+          <mat-error *ngIf="assignPlanFormGroup.get('plan_id')?.hasError('exists')">
+            This plan is already assigned. Please choose another plan.
+          </mat-error>
         </mat-form-field> 
 
         <!-- BUTTON -->
         <div class="text-end mt-3">
-          <button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button>
+          <div class="left"><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
+          <div class="right"><button mat-raised-button color="primary" (click)="close()">Close</button></div>
         </div>
 
       </form>
@@ -27,7 +38,8 @@
    
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <!-- <button mat-button mat-dialog-close>Cancel</button> -->
-  <button mat-raised-button color="primary" (click)="close()">Close</button>
-</mat-dialog-actions>
+<div class="dialog-loader" *ngIf="isLoading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>
+
+ 

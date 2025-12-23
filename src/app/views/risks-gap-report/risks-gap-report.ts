@@ -10,13 +10,12 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from '@angular/material/core'; 
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DatePipe } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; 
 
 @Component({
   selector: 'app-risks-gap-report',
  
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule,DatePipe, MatDatepickerModule,ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule      ],
+  imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule, MatDatepickerModule,ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule      ],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],templateUrl: './risks-gap-report.html',

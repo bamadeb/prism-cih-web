@@ -8,6 +8,7 @@ import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRow
 import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
 import { StarPerformanceRequest } from '../models/requests/StarPerformanceRequest';
 import { RiskGapsRequest } from '../models/requests/RiskGapsRequest';
+import { UsernameRequest, UserRequest } from '../models/requests/userRequest';
   
  
 @Injectable({
@@ -41,6 +42,8 @@ export class ConfigService {
       request   
     );
   }
+
+ 
 
    async poweroverview<TResponse>(request: DashboardRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
@@ -140,6 +143,26 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       {}   
     );
   }
+
+  async users<TResponse>(): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismUserslist',
+      {}   
+    );
+  }
+
+  async checkuserexist<TResponse>(request: UsernameRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismAuthentication',
+      request   
+    );
+  }
+
+  
 
   async addActionMaster<TResponse>(): Promise<TResponse> {
     return await commonPostApi<TResponse>(

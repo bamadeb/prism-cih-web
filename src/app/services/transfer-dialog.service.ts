@@ -4,23 +4,27 @@ import { TransferDialog } from '../views/dialogs/transfer-dialog/transfer-dialog
 
 @Injectable({ providedIn: 'root' })
 export class TransferDialogService {
-     constructor(private dialog: MatDialog) {}
-    
-      open(rows: any[],departmentList:any[]): Promise<any> {
-        //console.log(departmentList);
-        const dialogRef: MatDialogRef<TransferDialog> =
-          this.dialog.open(TransferDialog, {
-            width: '700px',
-            maxWidth: '90vw',
-            disableClose: true,
-            data: {
-              title: `${rows.length} MEMBER SELECTED FOR TRANSFER`,
-              members: rows,
-              departmentList
-            }
-          });
-    
-        return dialogRef.afterClosed().toPromise();
-      }
 
+  constructor(private dialog: MatDialog) {}
+
+  async open(rows: any[], departmentList: any[]): Promise<any> {
+    try {
+      const dialogRef = this.dialog.open(TransferDialog, {
+        width: '700px',
+        maxWidth: '90vw',
+        disableClose: true,
+        data: {
+          title: `${rows.length} MEMBER SELECTED FOR TRANSFER`,
+          members: rows,
+          departmentList
+        }
+      });
+
+      return await dialogRef.afterClosed().toPromise();
+
+    } catch (error) {
+      console.error('Transfer dialog open failed', error);
+      return null;
+    }
+  }
 }

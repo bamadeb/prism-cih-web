@@ -7,6 +7,7 @@ import { Dashboard } from './views/dashboard/dashboard';
 import { Users } from './views/users/users';
 import { StarPerformance } from './views/star-performance/star-performance';
 import { RisksGapReport } from './views/risks-gap-report/risks-gap-report';
+import { Plans } from './views/plans/plans';
 
 export const routes: Routes = [
   {
@@ -29,6 +30,13 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'users', component: Users },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'plans', component: Plans },
     ]
   },
   {

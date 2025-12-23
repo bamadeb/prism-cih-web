@@ -33,16 +33,24 @@
           <input matInput [matDatepicker]="dp" formControlName="task_date">
           <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
           <mat-datepicker #dp></mat-datepicker>
+          <mat-error *ngIf="addTaskFormGroup.get('task_date')?.touched &&
+                          addTaskFormGroup.get('task_date')?.invalid">
+          Task date required
+        </mat-error> 
         </mat-form-field>
 
         <!-- ASSIGN -->
         <mat-form-field appearance="outline" class="w-100 mt-3" style="margin-right: 5px;">
           <mat-label>Assign To</mat-label>
           <mat-select formControlName="task_assign_to">
-            <mat-option *ngFor="let n of navigatorList" [value]="n.ID">
+            <mat-option *ngFor="let n of navigatorList" [value]="n.ID" class="txupper">
               {{ n.FistName }} {{ n.LastName }}
             </mat-option>
           </mat-select>
+          <mat-error *ngIf="addTaskFormGroup.get('task_assign_to')?.touched &&
+                          addTaskFormGroup.get('task_assign_to')?.invalid">
+          Assign to required
+        </mat-error> 
         </mat-form-field>
 
         <!-- STATUS -->
@@ -53,6 +61,10 @@
             <mat-option value="In-Process">IN-PROCESS</mat-option>
             <mat-option value="Successful">SUCCESSFUL</mat-option>
           </mat-select>
+          <mat-error *ngIf="addTaskFormGroup.get('task_status')?.touched &&
+                          addTaskFormGroup.get('task_status')?.invalid">
+         Task status required
+        </mat-error> 
         </mat-form-field><br>
 
         <!-- NOTE -->
@@ -75,7 +87,7 @@
   </mat-card>
 
   <!-- TASK LIST -->
-  <table class="table table-striped txupper" style="width: 100%;text-align: left;">
+  <table class="table table-striped txupper" style="width: 100%;text-align: left;margin-top: 10px;;">
     <thead>
       <tr>
         <th>Task</th>
@@ -110,5 +122,8 @@
   <div class="text-end mt-3" style="text-align: right;">
     <button mat-raised-button color="primary" (click)="close()">Close</button>
   </div>
-
 </mat-dialog-content>
+
+<div class="loader-backdrop" *ngIf="isLoading">
+  <mat-spinner diameter="60"></mat-spinner>
+</div>

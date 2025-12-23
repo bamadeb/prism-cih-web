@@ -5,9 +5,7 @@ import { ConfigService } from './api.service';
 import { QualitygapRequest } from '../models/requests/dashboardRequest';
 import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class QualitygapDialogService {
 
   constructor(
@@ -16,28 +14,54 @@ export class QualitygapDialogService {
     private sanitizer: DomSanitizer
   ) {}
 
-  showQualitygapDialog(row: any): Promise<void> {
-    const request: QualitygapRequest = {
-      medicaid_id: row.medicaid_id
-    };
+  // ============================
+  // SHOW QUALITY GAP DIALOG
+  // ============================
+  async showQualitygapDialog(row: any): Promise<void> {
+    try {
+      const request: QualitygapRequest = {
+        medicaid_id: row.medicaid_id
+      };
 
-    return this.apiService.gualitygapList<any>(request)
-      .then(res => {
-        const gualitygapList = res?.data || [];
-        this.openDialog(row, gualitygapList);
-      })
-      .catch(err => {
-        console.error('Quality gap error:', err);
-      });
+      const res = await this.apiService.gualitygapList<any>(request);
+      const qualitygapList = res?.data ?? [];
+
+      this.openDialog(row, qualitygapList);
+
+    } catch (error) {
+      console.error('Quality gap fetch failed', error);
+      alert('Unable to load quality gap list. Please try again.');
+    }
   }
 
-  private openDialog(row: any, qualitygapList: any[]) {
+  // ============================
+  // OPEN DIALOG
+  // ============================
+  private openDialog(row: any, qualitygapList: any[]): void {
+    const html = this.buildHtml(qualitygapList);
 
-  let html = '';
+    const title = `QUALITY GAPS LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
 
-  if (qualitygapList && qualitygapList.length) {
+    this.dialog.open(ActionDialog, {
+      width: '80vw',
+      maxWidth: '1000px',
+      panelClass: 'xl-dialog',
+      data: {
+        title,
+        htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
+      }
+    });
+  }
 
-    html = `
+  // ============================
+  // HTML BUILDER
+  // ============================
+  private buildHtml(qualitygapList: any[]): string {
+    if (!qualitygapList.length) {
+      return `<p style="text-align:center;color:#777">No quality gap list available</p>`;
+    }
+
+    return `
       <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;">
         <thead>
           <tr>
@@ -57,31 +81,17 @@ export class QualitygapDialogService {
               <td>${this.escapeHtml(q.SUB_MEASURE)}</td>
               <td>${this.escapeHtml(q.PROVIDER_ID)}</td>
               <td>${this.escapeHtml(q.PROVIDER_NAME)}</td>
-              <td>${q.PROCESS_STATUS == 1 ? 'Complete' : 'Open'}</td>
+              <td>${q.PROCESS_STATUS === 1 ? 'Complete' : 'Open'}</td>
             </tr>
           `).join('')}
         </tbody>
       </table>
     `;
-
-  } else {
-    html = `<p style="text-align:center;color:#777">No quality gap list available</p>`;
   }
 
-  const title = `QUALITY GAPS LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
-
-  this.dialog.open(ActionDialog, {
-    width: '80vw',
-    maxWidth: '900px',
-    panelClass: 'xl-dialog',
-    data: {
-      title,
-      htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
-    }
-  });
-}
-
-
+  // ============================
+  // HTML ESCAPER (XSS SAFE)
+  // ============================
   private escapeHtml(text: string = ''): string {
     return text
       .replace(/&/g, '&amp;')

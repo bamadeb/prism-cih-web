@@ -7,34 +7,46 @@
       <form [formGroup]="transferFormGroup" (ngSubmit)="transfer()"> 
 
         <!-- DEPARTMENT -->
-        <mat-form-field appearance="outline" style="width: 45%;margin-right: 5px;" >
+        <mat-form-field appearance="outline" style="width: 49.5%;margin-right: 5px;" >
           <mat-label>SELECT DEPARTMENT</mat-label>
           <mat-select formControlName="department_id"  class="txupper" (selectionChange)="onDepartmentChange($event.value)">
             <mat-option *ngFor="let p of data.departmentList" [value]="p.id"  class="txupper">
               {{ p.department }}
             </mat-option>
           </mat-select>
+          <mat-error *ngIf="
+            transferFormGroup.get('department_id')?.touched &&
+            transferFormGroup.get('department_id')?.invalid">
+            Department is required
+          </mat-error>
         </mat-form-field> 
 
          <!-- USER -->
-        <mat-form-field appearance="outline" style="width: 45%;" >
+        <mat-form-field appearance="outline" style="width: 49.5%;" >
           <mat-label>SELECT USER</mat-label>
           <mat-select formControlName="user_id"  class="txupper">
             <mat-option *ngFor="let user of userList" [value]="user.ID"  class="txupper">
               {{user.FistName}} {{user.LastName}}
             </mat-option>
           </mat-select>
+          <mat-error *ngIf="
+            transferFormGroup.get('user_id')?.touched &&
+            transferFormGroup.get('user_id')?.invalid">
+            User is required
+          </mat-error>
         </mat-form-field> 
 
         <!-- COMMENT -->
         <mat-form-field appearance="outline" style="width:100%;">
           <mat-label>TRANSFER REASON</mat-label>
           <textarea matInput rows="3" formControlName="referring_reason"></textarea>
+           
         </mat-form-field>
 
         <!-- BUTTON -->
         <div class="text-end mt-3">
-          <button mat-raised-button color="primary" type="submit">SUBMIT</button>
+         <div class="left"><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
+            <div class="right"><button mat-raised-button color="primary" (click)="close()">Close</button></div>
         </div>
 
       </form>
@@ -43,7 +55,8 @@
    
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <!-- <button mat-button mat-dialog-close>Cancel</button> -->
-  <button mat-raised-button color="primary" (click)="close()">Close</button>
-</mat-dialog-actions>
+ 
+
+<div class="loader-backdrop" *ngIf="isLoading">
+  <mat-spinner diameter="60"></mat-spinner>
+</div>

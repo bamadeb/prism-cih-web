@@ -8,7 +8,7 @@ import {
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard, MatCardContent } from "@angular/material/card";
-import { MatFormField, MatLabel } from "@angular/material/form-field";
+import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
 import { MatSelect, MatOption } from "@angular/material/select";
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -19,33 +19,24 @@ import {
   MemberplanRequest,
   PlanexistRequest
 } from '../../../models/requests/dashboardRequest';
+import { MatProgressSpinner } from "@angular/material/progress-spinner";
 
 @Component({
   selector: 'app-assignplan-dialog',
   standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatButtonModule,
-    MatCard,
-    MatCardContent,
-    MatFormField,
-    MatLabel,
-    MatSelect,
-    MatOption
-  ],
+    CommonModule, ReactiveFormsModule, MatDialogTitle, MatDialogContent, MatDialogActions,
+    MatButtonModule, MatCard, MatCardContent, MatFormField, MatLabel, MatSelect, MatOption,
+    MatError,
+    MatProgressSpinner
+],
   templateUrl: './assignplan-dialog.html',
-  styleUrl: './assignplan-dialog.css',
+  styleUrls: ['./assignplan-dialog.css'],
 })
 export class AssignplanDialog implements OnInit {
 
-  isLoading = false;
   assignPlanFormGroup!: FormGroup;
-
-  // 🔹 ACTION dropdown (outside form)
+  isLoading = false;
   selectedAction: string | null = null;
 
   @ViewChild('actionSelect') actionSelect!: MatSelect;
@@ -68,110 +59,126 @@ export class AssignplanDialog implements OnInit {
     });
   }
 
+  // ============================
+  // ASSIGN PLAN
+  // ============================
   async assignPlan(): Promise<void> {
+  if (this.assignPlanFormGroup.invalid) {
+    this.assignPlanFormGroup.markAllAsTouched();
+    return;
+  }
 
-    if (this.assignPlanFormGroup.invalid) {
-      this.assignPlanFormGroup.markAllAsTouched();
-      return;
-    }
+  const { plan_id } = this.assignPlanFormGroup.value;
 
-    const { plan_id } = this.assignPlanFormGroup.value;
+  this.isLoading = true;
 
-    if (!plan_id) {
-      alert('⚠️ Please select a plan.');
-      return;
-    }
+  try {
+    const user = this.userData.getUser();
+    const members = Array.isArray(this.data.members)
+      ? this.data.members
+      : [this.data.members];
 
-    this.isLoading = true;
+    // 1️⃣ VERIFY PLAN
+    const planExists = await this.verifyPlanExists(members, plan_id);
 
-    try {
-      const user = this.userData.getUser();
-
-      // 🔹 Normalize members (single / multiple)
-      const members = Array.isArray(this.data.members)
-        ? this.data.members
-        : [this.data.members];
-
-      // 🔹 1️⃣ VERIFY PLAN EXISTS
-      await Promise.all(
-        members.map(async (m: any) => {
-          const params: PlanexistRequest = {
-            medicaid_id: m.medicaid_id,
-            plan_id
-          };
-
-          const res = await this.varifyplan(params);
-
-          if (res?.data?.length > 0) {
-            throw new Error(`Plan already exists for member #${m.medicaid_id}`);
-          }
-        })
-      );
-
-      // 🔹 2️⃣ INSERT PLAN
-      const payload: MemberplanRequest = {
-        table_name: 'MEM_PLAN_MEMBERS',
-        insertDataArray: members.map((m: any) => ({
-          medicaid_id: m.medicaid_id,
-          plan_id,
-          added_by: user.ID
-        }))
-      };
-
-      await this.addplanMember(payload);
-
-      // 🔹 3️⃣ INSERT LOGS
-      const logPayload: LogRequest = {
-        table_name: 'MEM_SYSTEM_LOG',
-        insertDataArray: members.map((m: any) => ({
-          medicaid_id: m.medicaid_id,
-          log_name: 'ASSIGN PLAN',
-          log_details: `PLAN ASSIGNED TO ${m.medicaid_id}`,
-          log_status: 'Success',
-          log_by: user.ID,
-          action_type: 'ASSIGN PLAN'
-        }))
-      };
-
-      await this.add_system_log(logPayload);
-
-      this.afterSuccess();
-
-    } catch (err: any) {
-      alert(err?.message || 'Something went wrong');
-      console.warn(err);
-    } finally {
+    if (planExists) { 
       this.isLoading = false;
+      return;
+    }
+
+    // 2️⃣ INSERT PLAN
+    await this.insertPlan(members, plan_id, user.ID);
+
+    // 3️⃣ LOG SYSTEM
+    await this.logPlanAssignment(members, user.ID);
+
+    // ✅ SUCCESS
+    this.afterSuccess();
+
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong while assigning plan.');
+  } finally {
+    this.isLoading = false;
+  }
+}
+
+
+  // ============================
+  // VERIFY PLAN EXISTS
+  // ============================
+private async verifyPlanExists(
+  members: any[],
+  plan_id: any
+): Promise<boolean> {
+
+  for (const m of members) {
+    const res = await this.apiService.checkplanexist<any>({
+      medicaid_id: m.medicaid_id,
+      plan_id
+    });
+
+    if (res?.data?.length > 0) {
+      // ✅ Set form error
+      this.assignPlanFormGroup
+        .get('plan_id')
+        ?.setErrors({ exists: true });
+
+      return true; // ⛔ PLAN EXISTS
     }
   }
 
-  // ✅ AFTER SUCCESS
+  return false; // ✅ PLAN DOES NOT EXIST
+}
+
+
+  // ============================
+  // INSERT PLAN
+  // ============================
+  private insertPlan(members: any[], plan_id: any, userId: any): Promise<any> {
+    const payload: MemberplanRequest = {
+      table_name: 'MEM_PLAN_MEMBERS',
+      insertDataArray: members.map(m => ({
+        medicaid_id: m.medicaid_id,
+        plan_id,
+        added_by: userId
+      }))
+    };
+    return this.apiService.insert(payload);
+  }
+
+  // ============================
+  // LOG ASSIGNMENT
+  // ============================
+  private logPlanAssignment(members: any[], userId: any): Promise<any> {
+    const logPayload: LogRequest = {
+      table_name: 'MEM_SYSTEM_LOG',
+      insertDataArray: members.map(m => ({
+        medicaid_id: m.medicaid_id,
+        log_name: 'ASSIGN PLAN',
+        log_details: `PLAN ASSIGNED TO ${m.medicaid_id}`,
+        log_status: 'Success',
+        log_by: userId,
+        action_type: 'ASSIGN PLAN'
+      }))
+    };
+    return this.apiService.insert(logPayload);
+  }
+
+  // ============================
+  // AFTER SUCCESS
+  // ============================
   private afterSuccess(): void {
     this.resetForm();
     this.dialogRef.close({ refresh: true });
   }
 
-  // ✅ RESET FORM + ACTION DROPDOWN
   private resetForm(): void {
     this.assignPlanFormGroup.reset({ plan_id: null });
-    this.selectedAction = null; // resets ACTION dropdown
+    this.selectedAction = null;
   }
 
-
-addplanMember(request: MemberplanRequest): Promise<any> {
-     return this.apiService.insert<any, MemberplanRequest>(request);
-  }
-
-varifyplan(request: PlanexistRequest): Promise<any> {
-  return this.apiService.checkplanexist<any>(request);
-}
-
-add_system_log(request: LogRequest): Promise<any> {
-    return this.apiService.insert<any, LogRequest>(request);
-  }
-
-close() {
+  close(): void {
     this.dialogRef.close(true);
   }
-
 }

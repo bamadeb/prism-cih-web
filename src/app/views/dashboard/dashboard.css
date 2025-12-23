@@ -175,6 +175,15 @@ mat-form-field {
   cursor: pointer; 
 }
 
+.address-text {
+  cursor: pointer;
+}
+
+.mat-menu-panel {
+  min-height: 15px !important;
+  padding: 0;
+}
+
 
 
 

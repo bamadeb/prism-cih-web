@@ -65,13 +65,13 @@ export class Login {
         const user = result.data[0]; 
         this.userData.setUser(user); 
         const roleId = user.role_id;
-        console.log('roleId:',roleId);
-        if (roleId == 7) {
-          alert('users');
-          this.router.navigate(['/users']);
-        } else {
+        //console.log('roleId:',roleId);
+        //if (roleId == 7) {
+          //alert('users');
+          //this.router.navigate(['/users']);
+        //} else {
           this.router.navigate(['/dashboard']);
-        }
+       // }
         //this.router.navigate(['/dashboard']);
       }
       else{

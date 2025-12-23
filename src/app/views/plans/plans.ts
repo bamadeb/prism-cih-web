@@ -19,8 +19,8 @@ import { HeaderService } from '../../services/header.service';
 import { UsersDialogService } from '../../services/users-dialog.service';
 
 @Component({
-  selector: 'app-users',
-  standalone: true,
+  selector: 'app-plans',
+   standalone: true,
   imports: [
     CommonModule,
     MatCardModule,
@@ -35,11 +35,10 @@ import { UsersDialogService } from '../../services/users-dialog.service';
     MatTooltipModule,
     MatProgressSpinner
   ],
-  templateUrl: './users.html',
-  styleUrl: './users.css'
+  templateUrl: './plans.html',
+  styleUrl: './plans.css',
 })
-export class Users implements OnInit, AfterViewInit {
-
+export class Plans implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
     'firstName',
     'lastName',
@@ -151,4 +150,5 @@ export class Users implements OnInit, AfterViewInit {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
   }
+
 }
