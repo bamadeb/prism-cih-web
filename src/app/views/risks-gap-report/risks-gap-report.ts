@@ -11,6 +11,7 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from '@angular/material/core'; 
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; 
+import { HeaderService } from '../../services/header.service';
 
 @Component({
   selector: 'app-risks-gap-report',
@@ -48,7 +49,8 @@ export class RisksGapReport {
     private apiService: ConfigService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
-     private titleService: Title,
+    private headerService: HeaderService ,
+    private titleService: Title,
     
   ) {
     const today = new Date();
@@ -62,7 +64,9 @@ export class RisksGapReport {
     });
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void { 
+    this.titleService.setTitle('PRISM :: RISK GAPS');
+    this.headerService.setTitle('RISK GAPS');
     // initialize TINs for default plan
     // this.titleService.setTitle('PRISM :: STAR PERFORMANCE');
     // this.onPlanChange(this.starPerformanceFormGroup.value.plan);

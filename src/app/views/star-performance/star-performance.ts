@@ -56,7 +56,7 @@ availableTins: string[] = [];
   ngOnInit(): void {
     // initialize TINs for default plan
       this.titleService.setTitle('PRISM :: STAR PERFORMANCE');
-      this.headerService.setTitle('Star Performance Report');
+      this.headerService.setTitle('STAR PERFORMANCE');
     this.onPlanChange(this.starPerformanceFormGroup.value.plan);
 
     // listen to plan changes

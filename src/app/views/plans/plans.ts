@@ -69,8 +69,8 @@ export class Plans implements OnInit, AfterViewInit {
   /* ---------------- LIFE CYCLE ---------------- */
 
   ngOnInit(): void {
-    this.titleService.setTitle('PRISM :: USERS');
-    this.headerService.setTitle('Users');
+    this.titleService.setTitle('PRISM :: MANAGE PLANS');
+    this.headerService.setTitle('MANAGE PLANS');
     this.loadTableData();
   }
 

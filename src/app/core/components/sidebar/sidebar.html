@@ -11,16 +11,19 @@
   </a>
 
   @if (userRole == 7 || userRole == 20) {
-    <a mat-list-item routerLink="/starperformance">STAR PERFORMANCE</a>
-    <a mat-list-item routerLink="/riskgapsreport" >RISK GAPS REPORT</a>
-    <a mat-list-item disabled>MEMBER RISK PROFILE</a>
-    <a mat-list-item disabled>ACTION LOG REPORT</a>
-    <a mat-list-item routerLink="/users"><mat-icon>users</mat-icon>USERS MANAGE</a>
-    <a mat-list-item disabled>PLANS MANAGE</a>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>MANAGE</mat-panel-title>
+      </mat-expansion-panel-header>
+      <a mat-list-item routerLink="/users">USERS</a>
+      <a mat-list-item routerLink="/plans">PLANS</a> 
+    </mat-expansion-panel>
+    
+    
   }
 
   @if (userRole == 7) {
-    <mat-expansion-panel>
+    <mat-expansion-panel class="mt-5">
       <mat-expansion-panel-header>
         <mat-panel-title>PROCESS FILE</mat-panel-title>
       </mat-expansion-panel-header>
@@ -29,7 +32,20 @@
       <a mat-list-item disabled>PROCESS RISK GAPS FILE</a>
       <a mat-list-item disabled>PROCESS QUALITY GAPS FILE</a>
       <a mat-list-item disabled>PROCESS FILE LOG REPORT</a>
+    </mat-expansion-panel> 
+  }
+  @if (userRole == 7 || userRole == 20) {
+    <mat-expansion-panel class="mt-5">
+      <mat-expansion-panel-header>
+        <mat-panel-title>REPORTS</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <a mat-list-item routerLink="/starperformance">STAR PERFORMANCE</a>
+      <a mat-list-item routerLink="/riskgapsreport" >RISK GAPS REPORT</a>
+      <a mat-list-item disabled>MEMBER RISK PROFILE</a>
+      <a mat-list-item disabled>ACTION LOG REPORT</a>
     </mat-expansion-panel>
+
   }
 
 </mat-nav-list>
