@@ -8,5 +8,6 @@ export class HeaderService {
 
   setTitle(title: string) {
     this.titleSource.next(title);
+    console.log('title :: ',title);
   }
 }

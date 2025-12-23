@@ -21,14 +21,16 @@ import { Observable } from 'rxjs/internal/Observable';
 export class Header {
  @Input() drawer!: MatSidenav;
 
-  //pageTitle = 'Dashboard';
-  pageTitle$!: Observable<string>;
+  pageTitle = 'Dashboard';
+  //pageTitle$!: Observable<string>;
   userName: string | undefined;
- 
+  title$!: Observable<string>;
   constructor(private router: Router,private userData: UserDataService,private headerService: HeaderService ) {}
 
    ngOnInit(): void {
-    //this.pageTitle = this.headerService.title$;
+    const abc = this.headerService.title$;
+    console.log(abc);
+     this.title$ = this.headerService.title$;
       const user = this.userData.getUser(); 
       this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
       //console.log(user);
