@@ -44,7 +44,7 @@ export class QualitygapDialogService {
 
     this.dialog.open(ActionDialog, {
       width: '80vw',
-      maxWidth: '1000px',
+      maxWidth: '1200px',
       panelClass: 'xl-dialog',
       data: {
         title,

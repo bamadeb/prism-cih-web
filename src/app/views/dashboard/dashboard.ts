@@ -35,8 +35,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { ActionHandlerService } from '../../services/action.service'; 
 import { HeaderService } from '../../services/header.service'; 
 import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
-
+import { MatButtonModule } from '@angular/material/button'; 
 
 @Component({
   selector: 'app-dashboard',
@@ -94,6 +93,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   transferlist: any[] = [];
   totalArray: any = {};
   loginUserId: number | null = null;
+  loginRoleId: number | null = null;
   isLoading = false;
   isOpen = false;
   overallSummary: any = {};
@@ -133,6 +133,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.titleService.setTitle('PRISM :: DASHBOARD');
     this.headerService.setTitle('Dashboard');
+    
     this.loadTableData();
   }
 
@@ -194,34 +195,9 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     this.nolongerpatientdataSource.paginator = this.nolongerpatientPaginator;
     this.nolongerpatientdataSource.sort = this.nolongerpatientSort;
 
-    this.dataSource.sortingDataAccessor = (item, property) => {
-      switch (property) {
-        case 'MEM_INFO':
-          // Sort by MEM_NO, change if you want different sorting
-          return item.medicaid_id;
-        default:
-          return item[property];
-      }
-    };
-    this.transferdataSource.sortingDataAccessor = (item, property) => {
-      switch (property) {
-        case 'MEM_INFO':
-          // Sort by MEM_NO, change if you want different sorting
-          return item.medicaid_id;
-        default:
-          return item[property];
-      }
-    };
-
-    this.nolongerpatientdataSource.sortingDataAccessor = (item, property) => {
-      switch (property) {
-        case 'MEM_INFO':
-          // Sort by MEM_NO, change if you want different sorting
-          return item.medicaid_id;
-        default:
-          return item[property];
-      }
-    };
+    this.dataSource.sortingDataAccessor = this.defaultSortingAccessor;
+    this.transferdataSource.sortingDataAccessor = this.defaultSortingAccessor;
+    this.nolongerpatientdataSource.sortingDataAccessor = this.defaultSortingAccessor;
 
     this.attachTableFeatures();
     this.attachTableFeaturestransfer();
@@ -235,6 +211,7 @@ async loadTableData(): Promise<void> {
     this.loginUserId =
       this.selectedNavigatorId ??
       (user.role_id === 7 ? 0 : user.ID);
+       this.loginRoleId =user.role_id;
 
     const request: DashboardRequest = { user_id: this.loginUserId };
 
@@ -266,15 +243,26 @@ async loadTableData(): Promise<void> {
     }));
 
     this.selection.clear();
-    this.dataSource._updateChangeSubscription();
+    //this.dataSource._updateChangeSubscription();
+    this.dataSource.data = [...this.dataSource.data];
 
     await this.loadprojectoverviewData();
   });
 }
 
 showRiskgaps(row: any) {
-  this.withLoader(() => this.riskgapsService.showRiskgapDialog(row));
+  this.riskgapsService.showRiskgapDialog(row);
 }
+
+
+
+private defaultSortingAccessor(item: any, property: string) {
+  if (property === 'MEM_INFO') {
+    return item.medicaid_id;
+  }
+  return item[property];
+}
+
 
 showQualitygaps(row: any) {
   this.withLoader(() => this.qualitygapsService.showQualitygapDialog(row));
@@ -293,8 +281,30 @@ confirmAction(row: any) {
     const result = await this.noLongerPatientService.confirmbox(row);
     if (result?.refresh) {
       this.removeMemberFromTable(row.medicaid_id);
+      // 2️⃣ add to no longer patient table
+      
+      this.nolongerpatientdataSource.data = [
+      {
+        medicaid_id: row.medicaid_id,
+        FIRST_NAME: row.FIRST_NAME,
+        LAST_NAME: row.LAST_NAME,
+        NO_LONGER_PATIENT_DATE: this.formatMDY(new Date())
+      },
+      ...this.nolongerpatientdataSource.data
+    ];
+
+    // refresh table
+    this.nolongerpatientdataSource._updateChangeSubscription();
+
     }
   });
+}
+
+formatMDY(date: Date): string {
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${m}/${d}/${y}`;
 }
 
 removeMemberFromTable(medicaidId: number): void {
@@ -506,7 +516,7 @@ onNavigatorChange(navigatorId: number): void {
         this.overallSummary = res.data.overallRiskQualitySummary || [];
         this.ownSummary = res.data.ownRiskQualitySummary || [];
         this.navigatorList = res.data.navigatorList || []; 
-        this.recentActivity = res.data.recentActivity || [];
+        //this.recentActivity = res.data.recentActivity || [];
         this.departmentList = res.data.departmentList || [];
         this.planList = res.data.planList || []; 
         this.calculatePerformance(res.data);

@@ -26,20 +26,7 @@
       <mat-error *ngIf="riskGapsFormGroup.hasError('dateRangeInvalid') && riskGapsFormGroup.get('end_date')?.touched">
         End Date must be after Start Date
       </mat-error>
-      </mat-form-field>
-
-
-
-          <!-- <button mat-raised-button color="primary" type="submit">
-              @if (!isLoading) {
-                Apply
-              } @else {
-                <mat-progress-spinner
-                  diameter="20"
-                  mode="indeterminate">
-                </mat-progress-spinner>
-              }
-          </button> -->
+      </mat-form-field> 
           <button mat-raised-button color="primary" [disabled]="riskGapsFormGroup.invalid" (click)="applyFilter()">
           @if (!isLoading) {
                 Search
@@ -70,18 +57,14 @@
       </mat-form-field>
       </div>
 
-      <div class="project-header table-wrapper  ">
-        @if (isLoading) {
-          <div class="table-loader">
-            <mat-progress-spinner
-              mode="indeterminate"
-              diameter="50">
-            </mat-progress-spinner>
-          </div>
-        } @else {
-          
+      <!-- LOADER -->
+      <div class="table-loader" *ngIf="isLoading">
+          <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      </div>
 
-        <table   mat-table  [dataSource]="dataSource"  matSort  class="mat-elevation-z1 txupper">
+      <div class="project-header table-wrapper" [hidden]="isLoading">        
+
+        <table   mat-table  [dataSource]="dataSource"  matSort  class="mat-elevation-z1 txupper" [hidden]="isLoading">
           <ng-container matColumnDef="medicaid_id" sticky>
           <th mat-header-cell *matHeaderCellDef mat-sort-header> MEDICAID ID </th>
           <td mat-cell *matCellDef="let row">{{ row.medicaid_id }}</td>
@@ -180,23 +163,17 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
-        </table>
+        <!-- NO DATA ROW -->
+        <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" >
+            No record found
+            </td>
+        </tr>
 
-      }
+        </table>       
 
       </div>
     </mat-card-content>
-  </mat-card>
-
-
-
-
-
-
-
-
-
-
-
+  </mat-card> 
 
 </div>

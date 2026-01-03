@@ -9,6 +9,8 @@ import { Title } from '@angular/platform-browser';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HeaderService } from '../../../services/header.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PROVIDER_TIN_MAP } from '../../../constants/constant';
+
 @Component({
   selector: 'app-star-performance',
   imports: [MatCardModule,
@@ -31,11 +33,11 @@ export class StarPerformance {
   measurementYear = 2025;
   providerGroup = 'Collective Impact Health';
 
-  providerTinNameMapping: Record<string, string> = {
-  '200807794': 'Mercado Medical Practice',
-  '237082074': 'GPHA',
-  '273160687': 'Dr. Milbourne',
-};
+//   providerTinNameMapping: Record<string, string> = {
+//   '200807794': 'Mercado Medical Practice',
+//   '237082074': 'GPHA',
+//   '273160687': 'Dr. Milbourne',
+// };
 
   years = [2026,2025, 2024, 2023, 2022];
     plans = [
@@ -63,31 +65,34 @@ availableTins: string[] = [];
   }
 
   getProviderGroupByTin(tin: string): string {
-  const providerName = this.providerTinNameMapping[tin];
+  const providerName = PROVIDER_TIN_MAP[tin];
   return providerName
     ? `${this.providerGroup} (${providerName})`
     : this.providerGroup;
 }
 
 
-  ngOnInit(): void { 
+  ngOnInit(): void {
+  this.isLoading = true;
+
   this.starPerformanceFormGroup.patchValue({
     year: this.measurementYear
   });
-    // initialize TINs for default plan
-      this.titleService.setTitle('PRISM :: STAR PERFORMANCE');
-      this.headerService.setTitle('STAR PERFORMANCE');
-    this.onPlanChange(this.starPerformanceFormGroup.value.plan);
 
-    // listen to plan changes
-    this.starPerformanceFormGroup
-      .get('plan')
-      ?.valueChanges
-      .subscribe((planId: string) => {
-        this.onPlanChange(planId);
-      });  
-    this.applyFilter();
-  }
+  this.titleService.setTitle('PRISM :: STAR PERFORMANCE');
+  this.headerService.setTitle('STAR PERFORMANCE');
+
+  this.onPlanChange(this.starPerformanceFormGroup.value.plan);
+
+  this.starPerformanceFormGroup
+    .get('plan')
+    ?.valueChanges
+    .subscribe(planId => this.onPlanChange(planId));
+
+  this.applyFilter();
+}
+
+
 onPlanChange(planId: string) {
   this.availableTins = this.planTinMap[planId] || [];
 
@@ -96,29 +101,32 @@ onPlanChange(planId: string) {
     tins: []
   });
 }
-  async applyFilter() {
-    const { year, plan, tins } = this.starPerformanceFormGroup.value;
 
-    this.isLoading = true;
-    this.measurementYear = year;
-    const payload = {
-      year,
-      plan,
-      tins
-    };
+async applyFilter() {
+  const { year, plan, tins } = this.starPerformanceFormGroup.value;
 
+  this.isLoading = true;
+
+  try {
+    const payload = { year, plan, tins };
     const result = await this.apiService.getStarPerformanceByYear<any>(payload);
 
     this.starReportList = result?.data || [];
-    this.isLoading = false;
 
-    this.cdr.detectChanges();
+  } catch (error) {
+    this.starReportList = [];
+  } finally {
+    this.isLoading = false;
+    this.cdr.detectChanges(); // 🔑 force UI update
   }
-get selectedTins(): string[] {
-  return this.starPerformanceFormGroup?.value?.tins?.length
-    ? this.starPerformanceFormGroup.value.tins
-    : this.availableTins;
 }
+
+
+  get selectedTins(): string[] {
+    return this.starPerformanceFormGroup?.value?.tins?.length
+      ? this.starPerformanceFormGroup.value.tins
+      : this.availableTins;
+  }
 
 }
 

@@ -170,7 +170,8 @@ private async verifyPlanExists(
   // ============================
   private afterSuccess(): void {
     this.resetForm();
-    this.dialogRef.close({ refresh: true });
+    this.close();
+    //this.dialogRef.close({ refresh: true });
   }
 
   private resetForm(): void {

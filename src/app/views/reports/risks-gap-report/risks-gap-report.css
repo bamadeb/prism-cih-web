@@ -69,5 +69,18 @@ table {
   background: #fff;
   z-index: 2;
   min-width: 140px;
+} 
+
+.table-container {
+  position: relative;
+  min-height: 300px;
 }
+
+.table-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
 

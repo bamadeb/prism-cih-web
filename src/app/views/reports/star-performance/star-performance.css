@@ -53,9 +53,11 @@
 
 .table-loader {
   display: flex;
-  justify-content: center;   /* horizontal */
-  align-items: center;       /* vertical */
-  min-height: 200px;         /* give space to center vertically */
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
 }
+
+
  
 

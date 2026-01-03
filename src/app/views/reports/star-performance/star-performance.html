@@ -38,24 +38,16 @@
                 <button mat-raised-button color="primary" type="submit">
                     SEARCH
                 </button>
-
             </form>
-
         </mat-card-content>
     </mat-card>
-    
-
     <mat-card>
         <mat-card-content>
-
             <!-- LOADER -->
-        <div class="table-loader" *ngIf="isLoading" >
-            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-        </div>
-
-        <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
-       
-
+            <div class="table-loader" *ngIf="isLoading">
+                <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+            </div>
+            <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
             <div class="project-header table-wrapper" [hidden]="isLoading" style="font-size:20px !important;">
 
                 @if (!isLoading && starReportList.length > 0) {
@@ -63,25 +55,21 @@
                     <tr>
                         <td width="40%">Measurement Year</td>
                         @for (tin of selectedTins; track tin) {
-                        <td>{{ measurementYear }}</td>
+                          <td>{{ starPerformanceFormGroup.get('year')?.value }}</td>
                         }
                     </tr>
-
                     <tr>
-                    <td>PROVIDER GROUP</td>
-                    @for (tin of selectedTins; track tin) {
+                        <td>PROVIDER GROUP</td>
+                        @for (tin of selectedTins; track tin) {
                         <td>{{ getProviderGroupByTin(tin) }}</td>
-                    }
+                        }
                     </tr>
-
-
                     <tr>
                         <td>TIN</td>
                         @for (tin of selectedTins; track tin) {
                         <td>{{ tin }}</td>
                         }
                     </tr>
-
                     @for (report of starReportList; track $index) {
                     <tr [style.background-color]="report.BG_COLOR">
                         <td>{{ report.MEASURE_CODE }} {{ report.Metric }}</td>
@@ -94,18 +82,12 @@
 
                 </table>
                 }@else if (!isLoading) {
-                    <div class="text-center p-4 text-muted">
-                        <strong>Data not found</strong>
-                    </div>
-                    }
+                <div class="text-center p-4 text-muted">
+                    <p>No record found</p>
+                </div>
+                }
 
             </div>
-
-
         </mat-card-content>
-    </mat-card> 
-    
- 
-
-
+    </mat-card>
 </div>

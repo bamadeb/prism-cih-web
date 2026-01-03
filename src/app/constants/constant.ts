@@ -85,3 +85,9 @@ export const CONFIRMED = 'confirmed';
 export const NOT_REGISTERED = 'not_registered';
 export const UNCONFIRMED = 'unconfirmed';
 export const UNKNOWN = 'unknown';
+
+export const PROVIDER_TIN_MAP: Record<string, string> = {
+    '200807794': 'Mercado Medical Practice',
+    '237082074': 'GPHA',
+    '273160687': 'Dr. Milbourne'
+ };

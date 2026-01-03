@@ -11,7 +11,7 @@
         </a>
 
         <!-- Right button -->
-        <mat-form-field appearance="outline" class="navigator-select txupper">
+        <mat-form-field appearance="outline" class="navigator-select txupper" *ngIf="loginRoleId === 7">
         <mat-select
           placeholder="ALL NAVIGATOR"
           [value]="selectedNavigatorId"
@@ -515,42 +515,7 @@
 
       </div>
     </mat-tab> 
-  </mat-tab-group>
-
-  <div class="half-screen">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-subtitle>Recent Activity | Today</mat-card-subtitle>
-      </mat-card-header>
-
-      <mat-card-content>
-
-        <div *ngFor="let recent of recentActivity; let i = index" class="activity-item">
-
-          <div class="activity-row">
-
-            <!-- Date -->
-            <div class="activity-date">
-              {{ recent.add_date | date: 'M/d/yyyy' }}
-            </div>
-
-            <!-- Material Icon -->
-            <mat-icon class="activity-dot" color="primary">fiber_manual_record</mat-icon>
-
-            <!-- Activity Text -->
-            <div class="activity-text">
-              #{{ recent.medicaid_id }}: {{ recent.log_name }}, {{ recent.log_details }}
-            </div>
-
-          </div>
-
-          <mat-divider></mat-divider>
-
-        </div>
-
-      </mat-card-content>
-    </mat-card>
-  </div>
+  </mat-tab-group> 
 </div>
 
 <div class="loader-backdrop" *ngIf="isLoading">

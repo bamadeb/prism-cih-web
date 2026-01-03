@@ -81,10 +81,13 @@
 
     <mat-card>
         <mat-card-content>
+
         <!-- LOADER -->
         <div class="table-loader" *ngIf="isLoading" >
             <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
         </div>
+
+        
 
         <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
         <div [hidden]="isLoading">
@@ -145,6 +148,13 @@
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            
+            <!-- NO DATA ROW -->
+            <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" style="text-align: center;">
+                No record found
+                </td>
+            </tr>
         </table>
         </div>
 
