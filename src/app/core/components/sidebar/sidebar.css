@@ -25,7 +25,8 @@ a.active {
 }
 
 .logo {
-  width: 120px;
+ height: 48px;
+ width: auto;
 }
 
 mat-nav-list a {
@@ -43,4 +44,8 @@ mat-expansion-panel-header {
 }
 .mt-5{
   margin-top: 5px;
+}
+
+.hidden {
+  display: none;
 }

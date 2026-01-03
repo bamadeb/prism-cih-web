@@ -13,10 +13,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Title } from '@angular/platform-browser';
-
 import { ConfigService } from '../../services/api.service';
 import { HeaderService } from '../../services/header.service';
-import { UsersDialogService } from '../../services/users-dialog.service';
+import { PlansDialogService } from '../../services/plans-dialog.service';
+import { FileAttachService } from '../../services/fileattach.service';
 
 @Component({
   selector: 'app-plans',
@@ -40,28 +40,24 @@ import { UsersDialogService } from '../../services/users-dialog.service';
 })
 export class Plans implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
-    'firstName',
-    'lastName',
-    'email',
-    'department',
-    'role',
+    'plan_name',
+    'start_date',
+    'end_date',
     'status',
     '1'
   ];
 
   dataSource = new MatTableDataSource<any>([]);
-  selection = new SelectionModel<any>(true, []);
-
-  roles: any[] = [];
-  departments: any[] = [];
+  selection = new SelectionModel<any>(true, []); 
+  attachments: any[] = []; 
   isLoading = false;
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
     private apiService: ConfigService,
-    private usersDialogService: UsersDialogService,
+    private plansDialogService: PlansDialogService,
+    private fileAttachService: FileAttachService,
     private titleService: Title,
     private headerService: HeaderService
   ) {}
@@ -79,7 +75,7 @@ export class Plans implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
 
     this.dataSource.sortingDataAccessor = (item, property) =>
-      property === 'firstName' ? item.firstName : item[property];
+      property === 'plan_name' ? item.plan_name : item[property];
   }
 
   /* ---------------- API ---------------- */
@@ -88,24 +84,17 @@ export class Plans implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     try {
-      const res = await this.apiService.users<any>();
-      const users = res?.data?.users ?? [];
-
-      this.roles = res?.data?.roles ?? [];
-      this.departments = res?.data?.department ?? [];
-      //console.log(users);
-      this.dataSource.data = users.map((u: any) => ({
-        ID: u.ID,
-        firstName: u.FistName ?? '',
-        lastName: u.LastName ?? '',
-        email: u.EmailID ?? '',
-        password: u.Password,
-        department_id: u.department_id,
-        department: u.department ?? '—',
-        role: u.ROLE_NAME ?? '—',
-        roleId: u.role_id,
-        member_status: u.member_status,
-        status: u.status === 1 ? 'Inactive' : 'Active',
+      const res = await this.apiService.plans<any>();
+      const plans = res?.data?.plans ?? []; 
+      //this.attachments = res?.data?.attachments ?? []; 
+      //console.log(res.data);
+      this.dataSource.data = plans.map((u: any) => ({ 
+        id: u.id,
+        plan_name: u.plan_name ?? '',
+        start_date: u.start_date ?? '',
+        end_date: u.end_date ?? '', 
+        status: u.status,
+        planstatus: u.status === 1 ? 'In-active' : 'Active',
       }));
 
       this.selection.clear();
@@ -119,36 +108,50 @@ export class Plans implements OnInit, AfterViewInit {
 
   /* ---------------- DIALOGS ---------------- */
 
-  addUser(): void {
-    this.openUserDialog();
+  addPlan(): void {
+    this.openPlanDialog();
+  }  
+
+  editPlan(plan: any): void {
+    this.openPlanDialog(plan);
   }
 
-  editUser(user: any): void {
-    this.openUserDialog(user);
-  }
-
-  private openUserDialog(user?: any): void {
+  attach(entity: any, type: string): void {
     this.isLoading = true;
+    this.fileAttachService
+      .openAttachDialog({ entity, type })
+      .then(dialogRef =>
+        dialogRef.afterClosed().subscribe(result => {
+          this.isLoading = false;
 
-    const dialogRef = user
-      ? this.usersDialogService.editUsersDialog(this.roles, this.departments, user)
-      : this.usersDialogService.addUsersDialog(this.roles, this.departments);
+          if (result?.uploaded) {
+            console.info('📎 File attached successfully');
+          }
+        })
+      )
+      .catch(() => (this.isLoading = false));
+  }
+
+  private openPlanDialog(plan?: any): void {
+    this.isLoading = true;
+    const dialogRef = plan
+      ? this.plansDialogService.editPlansDialog(plan)
+      : this.plansDialogService.addPlansDialog();
 
     dialogRef.afterClosed().subscribe(result => {
       this.isLoading = false;
 
       if (result?.refresh) {
-        console.info('🔄 Reloading users');
+        console.info('🔄 Reloading plans');
         this.loadTableData();
       }
     });
-  }
+  } 
 
   /* ---------------- FILTER ---------------- */
-
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
-  }
+  } 
 
 }

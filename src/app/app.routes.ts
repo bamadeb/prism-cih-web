@@ -5,9 +5,11 @@ import { Login } from './views/auth/login/login';
 import { MainLayout } from './core/layout/main-layout/main-layout';
 import { Dashboard } from './views/dashboard/dashboard';
 import { Users } from './views/users/users';
-import { StarPerformance } from './views/star-performance/star-performance';
-import { RisksGapReport } from './views/risks-gap-report/risks-gap-report';
+import { StarPerformance } from './views/reports/star-performance/star-performance';
+import { RisksGapReport } from './views/reports/risks-gap-report/risks-gap-report';
 import { Plans } from './views/plans/plans';
+import { Logreport } from './views/reports/logreport/logreport';
+import { RiskProfile } from './views/reports/risk-profile/risk-profile';
 
 export const routes: Routes = [
   {
@@ -44,6 +46,18 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'starperformance', component: StarPerformance },
+    ]
+  },{
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'logreport', component: Logreport },
+    ]
+  },{
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'risk-profile', component: RiskProfile },
     ]
   },
   {

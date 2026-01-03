@@ -1,7 +1,19 @@
 .table-wrapper {
-  display: flex;
-  justify-content: center;   /* horizontal center */
+  width: 100%;
+  overflow-x: auto;        /* ✅ allow horizontal scroll */
 }
+
+table {
+  width: 100%;
+  min-width: 1600px;       /* ✅ prevents first column collapse */
+  border-collapse: collapse;
+}
+
+.mat-header-cell,
+.mat-cell {
+  white-space: nowrap;     /* ✅ prevents text wrapping */
+}
+
 
 .centered-table {
   width: auto;               /* prevents full-width stretch */
@@ -43,3 +55,19 @@
   flex-wrap: wrap;
   gap: 20px;   /* ⬅ space between mat-form-fields */
 }
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between; /* ✅ important */
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.mat-column-medicaid_id {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+  min-width: 140px;
+}
+

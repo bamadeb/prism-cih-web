@@ -17,3 +17,6 @@ export class Actionresultfollowup {
   scheduled_type?: string;
   role_id?: any;
 }
+export class navigatorListRequest { 
+  role_id?: string;
+}

@@ -6,7 +6,7 @@
 
                 <!-- Year -->
                 <mat-form-field appearance="outline">
-                    <mat-label>Year</mat-label>
+                    <mat-label>YEAR</mat-label>
                     <mat-select formControlName="year">
                         @for (y of years; track y) {
                         <mat-option [value]="y">{{ y }}</mat-option>
@@ -16,7 +16,7 @@
 
                 <!-- Plan -->
                 <mat-form-field appearance="outline">
-                    <mat-label>Plan</mat-label>
+                    <mat-label>PLAN</mat-label>
                     <mat-select formControlName="plan">
                         @for (p of plans; track p.id) {
                         <mat-option [value]="p.id">{{ p.name }}</mat-option>
@@ -36,18 +36,27 @@
 
                 <!-- Apply -->
                 <button mat-raised-button color="primary" type="submit">
-                    Apply
+                    SEARCH
                 </button>
 
             </form>
 
         </mat-card-content>
     </mat-card>
+    
 
     <mat-card>
         <mat-card-content>
 
-            <div class="project-header table-wrapper  " style="font-size:20px !important;">
+            <!-- LOADER -->
+        <div class="table-loader" *ngIf="isLoading" >
+            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        </div>
+
+        <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
+       
+
+            <div class="project-header table-wrapper" [hidden]="isLoading" style="font-size:20px !important;">
 
                 @if (!isLoading && starReportList.length > 0) {
                 <table class="table table-bordered centered-table row-border-only">
@@ -59,11 +68,12 @@
                     </tr>
 
                     <tr>
-                        <td>PROVIDER GROUP</td>
-                        @for (tin of selectedTins; track tin) {
-                        <td>{{ providerGroup }}</td>
-                        }
+                    <td>PROVIDER GROUP</td>
+                    @for (tin of selectedTins; track tin) {
+                        <td>{{ getProviderGroupByTin(tin) }}</td>
+                    }
                     </tr>
+
 
                     <tr>
                         <td>TIN</td>
@@ -93,17 +103,9 @@
 
 
         </mat-card-content>
-    </mat-card>
-
-
-
-
-
-
-
-
-
-
+    </mat-card> 
+    
+ 
 
 
 </div>

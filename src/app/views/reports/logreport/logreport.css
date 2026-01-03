@@ -1,0 +1,40 @@
+.table-loader {
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
+  min-height: 200px;         /* give space to center vertically */
+}
+.wd{
+  width: 20%;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+mat-card {
+  text-align: center;
+}
+
+mat-card h2 {
+  color: #1e88e5;
+  font-size: 28px;
+  margin: 0;
+}
+
+mat-card p {
+  margin: 4px 0 0;
+  color: #1e88e5;
+  font-weight: 500;
+}
+.fbold{
+  font-weight: bold;
+}
+
+.fnormal{
+  font-weight: normal;
+}
+
+

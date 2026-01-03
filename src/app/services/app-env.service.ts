@@ -31,6 +31,9 @@ export class AppEnvService {
     envType(): string {
         return this.config.envType ?? 'unknown';
     }
+    s3bucket(): string {
+        return 'cih-plan-document';
+    }
     async load(): Promise<void> {
         try {
             const env: any = await firstValueFrom(this.http.get('/assets/environment.json'));

@@ -4,11 +4,13 @@ import { AppEnvService } from './app-env.service';
 import { LoginRequest } from '../models/requests/loginRequest';  
 import { commonPostApi } from '../utilities/functions'; 
 import { BenefitsRequest,CallListRequest,TaskRequest,TaskListRequest, QualitygapRequest,RiskgapRequest, DashboardRequest, AlterPhoneListRequest, AlterAddressListRequest, PlanexistRequest, UserListRequest} from '../models/requests/dashboardRequest';   
-import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup } from '../models/requests/commonRequest' 
+import { UserIdRequest, MedicaidIdRequest, MultipleRowInsertRequest, MultipleRowAndFieldUpdateRequest, Actionresultfollowup, navigatorListRequest } from '../models/requests/commonRequest' 
 import { unSetMemberGapsStatusRequest, updategapRequest, updatequalitygapRequest } from '../models/requests/memberGapsRequest';
 import { StarPerformanceRequest } from '../models/requests/StarPerformanceRequest';
-import { RiskGapsRequest } from '../models/requests/RiskGapsRequest';
+import { RiskGapApiResponse, RiskGapReport, RiskGapsRequest } from '../models/requests/RiskGapsRequest';
 import { UsernameRequest, UserRequest } from '../models/requests/userRequest';
+import { attachmentRequest, attchFileremoveRequest, fileAttachRequest } from '../models/requests/planRequest';
+import { actionLogRequest } from '../models/requests/actionLogRequest';
   
  
 @Injectable({
@@ -153,6 +155,15 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }
 
+  async plans<TResponse>(): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prsmPlandetails',
+      {}   
+    );
+  }
+
   async checkuserexist<TResponse>(request: UsernameRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
@@ -246,14 +257,14 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   }
-   async getGapsObservationData<TResponse>(request: RiskGapsRequest): Promise<TResponse> {
-    return await commonPostApi<TResponse>(
+   async getGapsObservationData(request: RiskGapsRequest): Promise<RiskGapApiResponse> {
+    return await commonPostApi<RiskGapApiResponse>(
       this.httpClient,
       this.environmentService,
       'prismGetgapsobservationdata',
-      request   
+      request
     );
-  } 
+  }
 
   async checkplanexist<TResponse>(request: PlanexistRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
@@ -272,4 +283,58 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     ); 
   }
+
+  async s3fileupload<TResponse>(request: fileAttachRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismUploadplandocument',
+      request   
+    ); 
+  }
+
+  async attachments<TResponse>(request: attachmentRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetattachmentListbytypeId',
+      request   
+    ); 
+  }
+
+  async deleteAttachment<TResponse>(request: attchFileremoveRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismdeleteAttachment',
+      request   
+    ); 
+  }
+
+  async navigatorList<TResponse>(request: navigatorListRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismUsers',
+      request   
+    ); 
+  }
+
+  async getActionlogData<TResponse>(request: actionLogRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismLogbyuserid',
+      request   
+    );
+  } 
+
+  async getmemberRiskData<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismMemberriskprofile',
+      request   
+    );
+  } 
 }

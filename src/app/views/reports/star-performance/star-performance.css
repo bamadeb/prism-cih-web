@@ -43,3 +43,19 @@
   flex-wrap: wrap;
   gap: 20px;   /* ⬅ space between mat-form-fields */
 }
+
+.loader-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* adjust if needed */
+}
+
+.table-loader {
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
+  min-height: 200px;         /* give space to center vertically */
+}
+ 
+

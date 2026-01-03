@@ -1,0 +1,72 @@
+.table-loader {
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
+  min-height: 200px;         /* give space to center vertically */
+}
+.wd{
+  width: 20%;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+mat-card {
+  text-align: center;
+}
+
+mat-card h2 {
+  color: #1e88e5;
+  font-size: 28px;
+  margin: 0;
+}
+
+mat-card p {
+  margin: 4px 0 0;
+  color: #1e88e5;
+  font-weight: 500;
+}
+.fbold{
+  font-weight: bold;
+}
+
+.fnormal{
+  font-weight: normal;
+}
+
+.child-table {
+  width: 100%;
+  background: #fafafa;
+  margin: 10px 0;
+}
+
+.link {
+  cursor: pointer;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.risk-high {
+  background: #fde2e2;
+  color: #b71c1c;
+  font-weight: 600;
+}
+
+.risk-medium {
+  background: #fff4cc;
+  color: #8a6d00;
+  font-weight: 600;
+}
+
+.risk-low {
+  background: #e6f4ea;
+  color: #1b5e20;
+  font-weight: 600;
+}
+
+
+
+

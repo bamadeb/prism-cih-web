@@ -1,13 +1,14 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
-import { ConfigService } from '../../services/api.service';
+import { ConfigService } from '../../../services/api.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { Title } from '@angular/platform-browser';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { HeaderService } from '../../services/header.service';
+import { HeaderService } from '../../../services/header.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @Component({
   selector: 'app-star-performance',
   imports: [MatCardModule,
@@ -15,6 +16,7 @@ import { HeaderService } from '../../services/header.service';
     MatFormFieldModule,
     MatButtonModule,
     ReactiveFormsModule,
+    MatProgressSpinnerModule,
   MatDatepickerModule],
   templateUrl: './star-performance.html',
   styleUrl: './star-performance.css',
@@ -26,10 +28,16 @@ export class StarPerformance {
 
   starReportList: any[] = [];
 
-  measurementYear = '2024';
-  providerGroup = 'Collective Impact Health (CIH)';
+  measurementYear = 2025;
+  providerGroup = 'Collective Impact Health';
 
-  years = [2025, 2024, 2023, 2022];
+  providerTinNameMapping: Record<string, string> = {
+  '200807794': 'Mercado Medical Practice',
+  '237082074': 'GPHA',
+  '273160687': 'Dr. Milbourne',
+};
+
+  years = [2026,2025, 2024, 2023, 2022];
     plans = [
     { id: 'AHC', name: 'AHC' },
     { id: 'Independence', name: 'Independence' }
@@ -38,22 +46,34 @@ export class StarPerformance {
     AHC: ['237082074', '273160687', '200807794'],   // CHI → 3 TINs
     'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
   };
-
+ 
 availableTins: string[] = [];
   constructor(
     private apiService: ConfigService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,private titleService: Title,
     private headerService: HeaderService 
-  ) {
-    this.starPerformanceFormGroup = this.fb.group({
-      year: [2024],
+  ) {     
+     
+    this.starPerformanceFormGroup = this.fb.group({      
+      year: [],
       plan: ['AHC'],
       tins: [[]]     // multi-select
     });
   }
 
-  ngOnInit(): void {
+  getProviderGroupByTin(tin: string): string {
+  const providerName = this.providerTinNameMapping[tin];
+  return providerName
+    ? `${this.providerGroup} (${providerName})`
+    : this.providerGroup;
+}
+
+
+  ngOnInit(): void { 
+  this.starPerformanceFormGroup.patchValue({
+    year: this.measurementYear
+  });
     // initialize TINs for default plan
       this.titleService.setTitle('PRISM :: STAR PERFORMANCE');
       this.headerService.setTitle('STAR PERFORMANCE');

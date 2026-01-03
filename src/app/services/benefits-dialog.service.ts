@@ -67,13 +67,17 @@ export class BenefitsDialogService {
           ${this.escapeHtml(b.plan_name)}
           (${b.start_date} - ${b.end_date})
         </div>
-        <ul>
-          <li>
-            <a href="${b.file_name}" target="_blank" rel="noopener noreferrer">
-              View Link
-            </a>
-          </li>
-        </ul>
+          ${b.file_name ? `
+          <ul>
+            <li>
+              <a href="${this.escapeHtml(b.file_name)}"
+                target="_blank"
+                rel="noopener noreferrer">
+                View Link
+              </a>
+            </li>
+          </ul>
+        ` : ``}
       </div>
     `).join('');
   }

@@ -59,12 +59,12 @@
   position: absolute;
   top: 2px;
   right: 2px;
-  background: #0d6efd;
-  color: #fff;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
   font-size: 10px;
-  padding: 0 5px;
-  border-radius: 10px;
 }
+
 
 .badge-success {
   background: #198754;
@@ -95,4 +95,41 @@
   align-items: center;
   gap: 10px;
 }
+
+.header-title-text {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+mat-toolbar.header-toolbar {
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
+  padding: 0 16px;
+}
+
+@media (max-width: 599px) {
+  mat-toolbar.header-toolbar {
+    height: 56px;
+    min-height: 56px;
+  }
+}
+
+.logo-img {
+  height: 40px;
+  width: auto;
+}
+
+.profile-img {
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+}
+
+
+
+
 
