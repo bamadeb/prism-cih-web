@@ -212,7 +212,8 @@ export class AddAction {
     // }
     // alert(2);
     //const user = this.auth.getUser();
-    const formValues = this.addActionFormGroup.value;
+    //const formValues = this.addActionFormGroup.value;
+    const formValues = this.addActionFormGroup.getRawValue();
     const action_id = formValues.update_action_id;
     //console.log(formValues);
     this.isProcessing = true; // 🔹 show loader
@@ -450,6 +451,8 @@ private async updateQualityAndRiskData(
        STEP 2: UPDATE RISK STATUS
     -----------------------------------*/
         const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
+        //alert(diagVal);
+        //return;
         const paramsupdate = {
           medicaid_id: medicaid_id,
           diag_codes: diagVal,
@@ -575,88 +578,189 @@ private async updateQualityAndRiskData(
    
   }
   setRiskGapsData(riskGapsdata: any) {
-    // Clear existing transactions
-    this.riskGapsList.clear();
+  this.riskGapsList.clear();
 
-    if (riskGapsdata && Array.isArray(riskGapsdata)) {
-      riskGapsdata.forEach((t: any) => {
-        this.riskGapsList.push(this.fb.group({
-          DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
-          DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
-          PROCESS_STATUS: [t.PROCESS_STATUS === 1],
-          risk_gap_id: [t.id],
-          Type: ['risk'],
-          Gap_Code: [this.sanitize(t.Gap_Code)],
-          Observation_Date: [
-            (t.Observation_Date && t.Observation_Date !== '1900-01-01T00:00:00.000Z' && t.Observation_Date !== '01/01/1900')
-              ? new Date(t.Observation_Date)
-              : ''
-          ],
-          Observation_Year: [this.sanitize(t.Observation_Year)],
-          Observation_Code: [this.sanitize(t.Observation_Code)],
-          CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
-          Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
-          Observation_Result: [this.sanitize(t.Observation_Result)],
-          Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
-          Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
-          Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
-          Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
-          Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
-          Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
-          Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
-          Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
-          note: [this.sanitize(t.note)]
-        }));
+  if (riskGapsdata && Array.isArray(riskGapsdata)) {
+    riskGapsdata.forEach((t: any) => {
+
+      const fg = this.fb.group({
+        DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
+        DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
+
+        PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
+
+        risk_gap_id: [t.id],
+        Type: ['risk'],
+        Gap_Code: [this.sanitize(t.Gap_Code)],
+
+        Observation_Date: [
+          (t.Observation_Date &&
+            t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
+            t.Observation_Date !== '01/01/1900')
+            ? new Date(t.Observation_Date)
+            : ''
+        ],
+
+        Observation_Year: [this.sanitize(t.Observation_Year)],
+        Observation_Code: [this.sanitize(t.Observation_Code)],
+        CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
+        Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
+        Observation_Result: [this.sanitize(t.Observation_Result)],
+        Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
+        Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
+        Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
+        Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
+        Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
+        Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
+        Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
+        Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
+        note: [this.sanitize(t.note)]
       });
-      //console.log(riskGapsdata);
-    }
+
+      // 🔥 Auto-toggle checkbox based on Observation Result
+      fg.get('Observation_Result')?.valueChanges.subscribe(value => {
+        fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
+      });
+
+      this.riskGapsList.push(fg);
+    });
   }
+}
+  // setRiskGapsData(riskGapsdata: any) {
+  //   // Clear existing transactions
+  //   this.riskGapsList.clear();
+
+  //   if (riskGapsdata && Array.isArray(riskGapsdata)) {
+  //     riskGapsdata.forEach((t: any) => {
+  //       this.riskGapsList.push(this.fb.group({
+  //         DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
+  //         DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
+  //         PROCESS_STATUS: [t.PROCESS_STATUS === 1],
+  //         risk_gap_id: [t.id],
+  //         Type: ['risk'],
+  //         Gap_Code: [this.sanitize(t.Gap_Code)],
+  //         Observation_Date: [
+  //           (t.Observation_Date && t.Observation_Date !== '1900-01-01T00:00:00.000Z' && t.Observation_Date !== '01/01/1900')
+  //             ? new Date(t.Observation_Date)
+  //             : ''
+  //         ],
+  //         Observation_Year: [this.sanitize(t.Observation_Year)],
+  //         Observation_Code: [this.sanitize(t.Observation_Code)],
+  //         CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
+  //         Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
+  //         Observation_Result: [this.sanitize(t.Observation_Result)],
+  //         Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
+  //         Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
+  //         Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
+  //         Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
+  //         Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
+  //         Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
+  //         Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
+  //         Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
+  //         note: [this.sanitize(t.note)]
+  //       }));
+  //     });
+  //     //console.log(riskGapsdata);
+  //   }
+  // }
   sanitize(value: any) {
     return value === null || value === undefined || value === 'null' ? '' : value;
   }
   setQualityGapsData(qualityGapsdata: any) {
-    // Clear existing list
-    this.qualityGapsList.clear();
+  // Clear existing list
+  this.qualityGapsList.clear();
 
-    if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
-      qualityGapsdata.forEach((t: any) => {
-        this.qualityGapsList.push(
-          this.fb.group({
-            SUB_MEASURE: [this.sanitize(t.SUB_MEASURE)],
-            MEASURE_NAME: [this.sanitize(t.MEASURE_NAME)],
-            PROCESS_STATUS: [t.PROCESS_STATUS === 1],
-            quality_gap_id: [t.id],
-            Type: ['quality'],
-            Gap_Code: [this.sanitize(t.Gap_Code)],
+  if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
+    qualityGapsdata.forEach((t: any) => {
 
-            // Handle invalid dates
-            Observation_Date: [
-              t.Observation_Date &&
-                t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
-                t.Observation_Date !== '01/01/1900'
-                ? t.Observation_Date
-                : ''
-            ],
+      const fg = this.fb.group({
+        SUB_MEASURE: [this.sanitize(t.SUB_MEASURE)],
+        MEASURE_NAME: [this.sanitize(t.MEASURE_NAME)],
 
-            Observation_Year: [this.sanitize(t.Observation_Year)],
-            Observation_Code: [this.sanitize(t.Observation_Code)],
-            CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
-            Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
-            Observation_Result: [this.sanitize(t.Observation_Result)],
-            Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
-            Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
-            Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
-            Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
-            Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
-            Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
-            Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
-            Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
-            note: [this.sanitize(t.note)]
-          })
-        );
+        // 🔒 Disabled checkbox, auto-controlled
+        PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
+
+        quality_gap_id: [t.id],
+        Type: ['quality'],
+        Gap_Code: [this.sanitize(t.Gap_Code)],
+
+        Observation_Date: [
+          t.Observation_Date &&
+          t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
+          t.Observation_Date !== '01/01/1900'
+            ? t.Observation_Date
+            : ''
+        ],
+
+        Observation_Year: [this.sanitize(t.Observation_Year)],
+        Observation_Code: [this.sanitize(t.Observation_Code)],
+        CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
+        Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
+        Observation_Result: [this.sanitize(t.Observation_Result)],
+        Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
+        Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
+        Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
+        Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
+        Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
+        Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
+        Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
+        Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
+        note: [this.sanitize(t.note)]
       });
-    }
+
+      // 🔁 Auto-check based on Observation_Result
+      fg.get('Observation_Result')?.valueChanges.subscribe(value => {
+        fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
+      });
+
+      this.qualityGapsList.push(fg);
+    });
   }
+}
+
+  // setQualityGapsData(qualityGapsdata: any) {
+  //   // Clear existing list
+  //   this.qualityGapsList.clear();
+
+  //   if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
+  //     qualityGapsdata.forEach((t: any) => {
+  //       this.qualityGapsList.push(
+  //         this.fb.group({
+  //           SUB_MEASURE: [this.sanitize(t.SUB_MEASURE)],
+  //           MEASURE_NAME: [this.sanitize(t.MEASURE_NAME)],
+  //           PROCESS_STATUS: [t.PROCESS_STATUS === 1],
+  //           quality_gap_id: [t.id],
+  //           Type: ['quality'],
+  //           Gap_Code: [this.sanitize(t.Gap_Code)],
+
+  //           // Handle invalid dates
+  //           Observation_Date: [
+  //             t.Observation_Date &&
+  //               t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
+  //               t.Observation_Date !== '01/01/1900'
+  //               ? t.Observation_Date
+  //               : ''
+  //           ],
+
+  //           Observation_Year: [this.sanitize(t.Observation_Year)],
+  //           Observation_Code: [this.sanitize(t.Observation_Code)],
+  //           CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
+  //           Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
+  //           Observation_Result: [this.sanitize(t.Observation_Result)],
+  //           Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
+  //           Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
+  //           Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
+  //           Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
+  //           Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
+  //           Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
+  //           Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
+  //           Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
+  //           note: [this.sanitize(t.note)]
+  //         })
+  //       );
+  //     });
+  //   }
+  // }
   formatDateToMDY(dateStr: string): string {
     if (!dateStr) return '';
 
