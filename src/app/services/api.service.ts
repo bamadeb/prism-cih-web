@@ -356,4 +356,22 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   } 
+
+  async getTempRiskGapsBySeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetTempRiskGapsBySeccionID',
+      request   
+    );
+  } 
+
+  async processRiskGapsSeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismProcessRiskGapsSeccionID',
+      request   
+    );
+  } 
 }

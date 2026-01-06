@@ -55,13 +55,11 @@ import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
 })
 export class MemberFile {
 
-  /* ---------------------------- FORM & FILE ---------------------------- */
-
+  /* ---------- FORM & FILE ---------------------------- */
   processMembersFormGroup!: FormGroup;
   selectedFile: File | null = null;
 
-  /* ---------------------------- TABLE ---------------------------- */
-
+  /* ----------- TABLE --------------------------------- */
   dataSource = new MatTableDataSource<any>([]);
   displayedColumns: string[] = [
     'SUBSCRIBER_ID',
