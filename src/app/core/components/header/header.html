@@ -2,7 +2,7 @@
 
   <!-- Left Section -->
   <div class="header-left d-flex align-items-center ps-2">
-    <button mat-icon-button (click)="drawer?.toggle()">
+     <button mat-icon-button (click)="drawer?.toggle()" style="color:#fff!important;">
       <mat-icon>menu</mat-icon>
     </button>
 
@@ -21,11 +21,11 @@
     <span class="spacer"></span>
 
   <!-- Right Section -->
-  <div class="header-right d-flex align-items-center">
+   <div class="header-right d-flex align-items-center">
 
     <!-- Notifications -->
-    <button mat-icon-button [matMenuTriggerFor]="notificationMenu">
-      <mat-icon>notifications</mat-icon>
+    <button mat-icon-button [matMenuTriggerFor]="notificationMenu" >
+      <mat-icon style="color:#fff!important;">notifications</mat-icon>
       <span class="badge-circle">0</span>
     </button>
 
@@ -39,19 +39,19 @@
 
     <!-- Messages -->
     <button mat-icon-button [matMenuTriggerFor]="messageMenu">
-      <mat-icon>chat</mat-icon>
+       <mat-icon style="color:#fff!important;">chat</mat-icon>
       <span class="badge-circle badge-success">3</span>
     </button>
 
     <mat-menu #messageMenu="matMenu" class="message-menu">
-      <div class="menu-header">
+      <div class="menu-header" style="padding:0px 10px!important;">
         You have 3 new messages
       </div>
       <mat-divider></mat-divider>
 
       <button mat-menu-item class="message-item">
-        <img src="assets/images/messages-1.jpg" class="rounded-circle me-2" />
-        <div>
+        <div style="float:left;"><img src="assets/images/messages-1.jpg" class="rounded-circle me-2" /></div>
+        <div class="text_mes">
           <strong>Maria Hudson</strong>
           <div class="msg-text">Velit asperiores et ducimus...</div>
           <small>4 hrs. ago</small>
@@ -59,8 +59,8 @@
       </button>
 
       <button mat-menu-item class="message-item">
-        <img src="assets/images/messages-2.jpg" class="rounded-circle me-2" />
-        <div>
+        <div style="float:left;"><img src="assets/images/messages-2.jpg" class="rounded-circle me-2" /></div>
+        <div class="text_mes">
           <strong>Anna Nelson</strong>
           <div class="msg-text">Velit asperiores et ducimus...</div>
           <small>6 hrs. ago</small>
@@ -68,8 +68,8 @@
       </button>
 
       <button mat-menu-item class="message-item">
-        <img src="assets/images/messages-3.jpg" class="rounded-circle me-2" />
-        <div>
+        <div style="float:left;"><img src="assets/images/messages-3.jpg" class="rounded-circle me-2" /></div>
+      <div class="text_mes">
           <strong>David Muldon</strong>
           <div class="msg-text">Velit asperiores et ducimus...</div>
           <small>8 hrs. ago</small>
@@ -81,11 +81,15 @@
     </mat-menu>
 
     <!-- Profile Menu -->
-    <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-btn">
-      <img src="assets/images/noimage.jpg" class="profile-img" />
-      <span class="d-none d-md-inline text-capitalize ms-2" style="margin: 7px;">{{ userName }}</span>
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
+    <div mat-button [matMenuTriggerFor]="profileMenu" class="profile-btn">
+      <div style="display: inline-flex;">
+        <div> <div style="margin-top: 5px;"><mat-icon style="color:#fff!important;">arrow_drop_down</mat-icon></div></div>
+        <div><img src="assets/images/noimage.jpg" class="profile-img" /></div>
+      <div><span class="d-none d-md-inline text-capitalize ms-2" style="margin: 7px;color:#fff!important;font-size:14px!important;">{{ userName }}</span></div>
+      
+      </div>
+                 
+    </div>
 
     <mat-menu #profileMenu="matMenu">
       <!-- <div class="menu-header text-center">
@@ -117,6 +121,7 @@
     </mat-menu>
 
   </div>
+   
 </mat-toolbar>
 
 

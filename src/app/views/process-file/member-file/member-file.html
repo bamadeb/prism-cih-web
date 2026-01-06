@@ -1,0 +1,219 @@
+<div class="pagecontent">
+
+  <!-- FILE UPLOAD CARD -->
+  <mat-card class="mb-1">
+    <mat-card-content>
+
+      <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="membersFileSubmit()"
+        enctype="multipart/form-data">
+
+        <!-- <mat-label class="file-label">Select Member File</mat-label> -->
+
+        <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
+          <mat-icon>upload</mat-icon>
+          CHOOSE MEMBER FILE
+        </button>
+
+        <div class="file-preview" *ngIf="selectedFile">
+          <mat-icon>attach_file</mat-icon>
+          <span [title]="selectedFile.name">
+            {{ selectedFile.name | slice:0:30 }}{{ selectedFile.name.length > 30 ? '…' : '' }}
+          </span>
+        </div>
+
+        <input #fileInput type="file" hidden (change)="onFileSelect($event)" />
+
+        <mat-error *ngIf="processMembersFormGroup.get('file')?.touched &&
+                 processMembersFormGroup.get('file')?.invalid">
+          File is required
+        </mat-error>
+
+        <button mat-raised-button color="primary" type="submit"
+          [disabled]="processMembersFormGroup.invalid || isLoading">
+
+          <ng-container *ngIf="!isLoading; else uploadLoader">
+            UPLOAD
+          </ng-container>
+
+          <ng-template #uploadLoader>
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          </ng-template>
+
+        </button>
+
+      </form>
+
+      <!-- SUMMARY -->
+      <div *ngIf="totalRecords > 0" class="summary-row">
+        <span>Total Members: <b>{{ totalRecords }}</b></span>
+
+        <span *ngIf="error_count > 0">
+          Errors: <b>{{ error_count }}</b>
+        </span>
+
+        <span *ngIf="exist_count > 0">
+          Existing: <b>{{ exist_count }}</b>
+        </span>
+      </div>
+
+      <!-- PROCESS BUTTON -->
+      <div class="mt-1" *ngIf="totalRecords > 0">
+        <button mat-raised-button color="primary" (click)="processMembers()" [disabled]="isProcessing">
+
+          <ng-container *ngIf="!isProcessing; else processLoader">
+            PROCESS
+          </ng-container>
+
+          <ng-template #processLoader>
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          </ng-template>
+        </button>
+      </div>
+
+      <!-- SAMPLE FILE -->
+      <div *ngIf="totalRecords === 0" class="sample-link">
+        <a href="assets/sample_file/Member_sample_file.csv" target="_blank">
+          Member Sample File
+        </a>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+  <!-- TABLE CARD -->
+  <mat-card>
+    <mat-card-content>
+
+      <!-- TOOLBAR -->
+      <div class="table-toolbar" *ngIf="tempMemberList && tempMemberList.length > 0">
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="filter($event)" placeholder="Search records">
+        </mat-form-field>
+
+        <mat-paginator #mainPaginator [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]">
+        </mat-paginator>
+      </div>
+
+      <!-- LOADER -->
+      <div class="table-loader" *ngIf="isLoading">
+        <mat-progress-spinner diameter="50" mode="indeterminate"></mat-progress-spinner>
+      </div>
+
+      <!-- TABLE -->
+      <div class="table-wrapper txupper" *ngIf="!isLoading">
+        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1" *ngIf="tempMemberList && tempMemberList.length > 0">
+          <ng-container matColumnDef="SUBSCRIBER_ID" sticky>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> SUBSCRIBER ID </th>
+            <td mat-cell *matCellDef="let row">{{ row.SUBSCRIBER_ID }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="FIRST_NM">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>FIRST NM</th>
+            <td mat-cell *matCellDef="let row">{{ row.FIRST_NM }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="MIDDLE_NM">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>MIDDLE NM</th>
+            <td mat-cell *matCellDef="let row">{{ row.MIDDLE_NM }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="LAST_NM">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>LAST NM</th>
+            <td mat-cell *matCellDef="let row">{{ row.LAST_NM }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="MEDICARE_ID">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICARE ID</th>
+            <td mat-cell *matCellDef="let row">{{ row.MEDICARE_ID }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="MEDICAID_ID">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICAID ID</th>
+            <td mat-cell *matCellDef="let row">{{ row.MEDICAID_ID }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="DT_OF_BIRTH">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>DATE OF BIRTH</th>
+            <td mat-cell *matCellDef="let row">{{ row.DT_OF_BIRTH | date:'MM/dd/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="SEX">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>SEX</th>
+            <td mat-cell *matCellDef="let row">{{ row.SEX }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="HOME_TELEPHONE">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>HOME TELEPHONE</th>
+            <td mat-cell *matCellDef="let row">{{ row.HOME_TELEPHONE }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="PCP_TAX_ID">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>PCP TAX ID</th>
+            <td mat-cell *matCellDef="let row">{{ row.PCP_TAX_ID }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="STATUS">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              STATUS
+            </th>
+
+            <td mat-cell *matCellDef="let row" [ngStyle]="{
+                  'background-color':
+                    (!row.SUBSCRIBER_ID || row.SUBSCRIBER_ID.trim() === '') ? 'red' :
+                    row.exist_member ? 'yellow' : 'transparent'
+                }">
+              <ng-container *ngIf="row.exist_member">
+                Member already exists
+              </ng-container>
+
+              <ng-container *ngIf="!row.exist_member && (!row.SUBSCRIBER_ID || row.SUBSCRIBER_ID.trim() === '')">
+                Subscriber ID is missing
+              </ng-container>
+
+              <ng-container *ngIf="!row.exist_member && row.SUBSCRIBER_ID && row.SUBSCRIBER_ID.trim() !== ''">
+                {{ row.STATUS }}
+              </ng-container>
+            </td>
+          </ng-container>
+
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <tr *matNoDataRow>
+            <td class="no-data" [attr.colspan]="displayedColumns.length">
+              No record found
+            </td>
+          </tr>
+        </table>
+        <div *ngIf="processLogList && processLogList.length > 0"> 
+        <h2 style="text-align: center;">Member File Upload Process Details</h2>
+          <table style="width: 50%;margin-left: 30%;text-align: left;" class="mat-elevation-z1" >
+            <thead class="table-light">
+              <tr>
+                <th>PROCESS MESSAGE</th>
+                <th>COUNT</th>
+                <th>DATE / TIME</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (log of processLogList; track log) {
+                <tr [ngStyle]="{ color: log.LOG_TYPE === 'Error' ? 'red' : 'inherit' }">
+                  <td>{{ log.MESSAGE }}</td>
+                  <td>{{ log.RECORD_COUNT || '' }}</td>
+                  <td>{{ log.LOG_DATE | date: 'short' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          </div>
+
+
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+
+</div>

@@ -1,11 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
-
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .pagecontent{
-    margin-top: 60px;
+margin-top: 50px;
+margin-left: 15px;
+margin-right: 15px;
 }
-
 .project-header {
   display: flex;
   justify-content: space-between;  /* left + right */
@@ -17,13 +16,47 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .text-center{
   text-align: center;
 }
-
 .dialog-title-center {
   text-align: center;
   width: 100%;
   text-transform: uppercase;
   font-weight: normal !important;   /* Removes bold */
 }
+
+.mat-mdc-tab-label-container{
+  flex-grow: 0!important;
+}
+.mat-mdc-form-field-subscript-wrapper
+{height:1px!important;}
+
+.mat-mdc-text-field-wrapper {
+flex:none!important;
+height: min-content;
+}
+
+.mdc-notched-outline
+{height:75%!important;}
+.mdc-text-field--outlined .mat-mdc-form-field-infix, .mdc-text-field--no-label .mat-mdc-form-field-infix {
+    padding-top: var(--mat-form-field-container-vertical-padding, 10px)!important;
+    padding-bottom: var(--mat-form-field-container-vertical-padding, 16px);
+}
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
+    top: calc(var(--mat-form-field-container-height, 44px) / 2)!important;
+}
+.mat-mdc-form-field-infix {
+    
+    height: 52px!important;
+}
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
+    --mat-mdc-form-field-label-transform: translateY(calc(calc(6.75px + var(--mat-form-field-container-height, 46px) / 2) * -1)) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75))!important;
+    transform: var(--mat-mdc-form-field-label-transform);
+}
+.mat-mdc-paginator-range-actions {
+    margin-top:-11px;
+}
+
+
+
 .left{
   float: left;
 }

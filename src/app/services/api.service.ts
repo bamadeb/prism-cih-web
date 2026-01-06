@@ -337,4 +337,23 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   } 
+
+   async getTempMembersBySeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetTempMembersBySeccionID',
+      request   
+    );
+  } 
+
+
+  async processmembersSeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismProcessMembersSeccionID',
+      request   
+    );
+  } 
 }

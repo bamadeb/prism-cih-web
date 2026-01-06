@@ -277,10 +277,7 @@
         </td>
       </tr>
     </table>
-  </div>
-
-
-  
+  </div> 
 
   <mat-tab-group class="custom-tabs" mat-stretch-tabs style="margin-top: 30px;">
     <mat-tab label="MEMBERS">
@@ -305,9 +302,7 @@
                   </mat-form-field>
                 </div>
                 
-              <div style="justify-content:left;">
-               
-
+              <div style="justify-content:left;">     
                 <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSizeOptions]="[10, 25, 50, 100]"
                   [pageSize]="10"></mat-paginator>
               </div>
@@ -472,7 +467,7 @@
           <mat-header-row *matHeaderRowDef="displayedColumnsTransfer"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumnsTransfer"></mat-row>
         </mat-table>
-        <mat-paginator #transferPaginator [pageSize]="10"></mat-paginator>
+        <!-- <mat-paginator #transferPaginator [pageSize]="10"></mat-paginator> -->
 
       </div>
     </mat-tab>
@@ -511,7 +506,7 @@
           <mat-header-row *matHeaderRowDef="displayedColumnsNolongerpatient"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumnsNolongerpatient"></mat-row>
         </mat-table>
-        <mat-paginator #nolongerpatientPaginator [pageSize]="10"></mat-paginator>
+        <!-- <mat-paginator #nolongerpatientPaginator [pageSize]="10"></mat-paginator> -->
 
       </div>
     </mat-tab> 

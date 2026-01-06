@@ -66,7 +66,7 @@ export class Login {
         this.userData.setUser(user); 
         const roleId = user.role_id;
      
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/users']);
        // }
         //this.router.navigate(['/dashboard']);
       }
