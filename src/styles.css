@@ -99,6 +99,10 @@ height: min-content;
   margin-top: 10px;
 }
 
+.mdc-data-table__cell, .mdc-data-table__header-cell {
+    padding: 0 2px!important;
+}
+
 
 
 

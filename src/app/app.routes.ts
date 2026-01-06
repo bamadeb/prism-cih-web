@@ -11,6 +11,7 @@ import { Plans } from './views/plans/plans';
 import { Logreport } from './views/reports/logreport/logreport';
 import { RiskProfile } from './views/reports/risk-profile/risk-profile';
 import { MemberFile } from './views/process-file/member-file/member-file';
+import { RiskgapsFile } from './views/process-file/riskgaps-file/riskgaps-file';
 
 export const routes: Routes = [
   {
@@ -66,6 +67,13 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'process-member-file', component: MemberFile },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'process-riskgaps-file', component: RiskgapsFile },
     ]
   },
   {

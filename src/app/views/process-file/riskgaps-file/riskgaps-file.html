@@ -4,14 +4,14 @@
   <mat-card class="mb-1">
     <mat-card-content>
 
-      <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="membersFileSubmit()"
+      <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="riskGapsFileSubmit()"
         enctype="multipart/form-data">
 
         <!-- <mat-label class="file-label">Select Member File</mat-label> -->
 
         <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
           <mat-icon>upload</mat-icon>
-          CHOOSE MEMBER FILE
+          CHOOSE RISK GAPS FILE
         </button>
 
         <div class="file-preview" *ngIf="selectedFile">
@@ -28,13 +28,14 @@
           File is required
         </mat-error>
 
-        <button mat-raised-button color="primary" type="submit" [disabled]="processMembersFormGroup.invalid || isLoading">
+        <button mat-raised-button color="primary" type="submit"
+          [disabled]="processMembersFormGroup.invalid || isLoading">
 
-          @if (isUpload) {
+            @if (isUpload) {
              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
           } @else {
             UPLOAD
-          }          
+          } 
 
         </button>
 
@@ -42,35 +43,34 @@
 
       <!-- SUMMARY -->
       <div *ngIf="totalRecords > 0" class="summary-row">
-        <span>Total Members: <b>{{ totalRecords }}</b></span>
+        <span>Total  risk gaps: <b>{{ totalRecords }}</b></span>
 
         <span *ngIf="error_count > 0">
           Errors: <b>{{ error_count }}</b>
         </span>
 
         <span *ngIf="exist_count > 0">
-          Existing: <b>{{ exist_count }}</b>
+          Existing risk gaps: <b>{{ exist_count }}</b>
         </span>
       </div>
 
       <!-- PROCESS BUTTON -->
       <div class="mt-1" *ngIf="totalRecords > 0">
-        <button mat-raised-button color="primary" (click)="processMembers()" [disabled]="isProcessing">
+        <button mat-raised-button color="primary" (click)="processRiskGaps()" [disabled]="isProcessing">
 
-          <ng-container *ngIf="!isProcessing; else processLoader">
-            PROCESS
-          </ng-container>
-
-          <ng-template #processLoader>
-            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-          </ng-template>
+            @if (isProcessing) {
+                <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+            } @else {
+                PROCESS
+            }
+         
         </button>
       </div>
 
       <!-- SAMPLE FILE -->
       <div *ngIf="totalRecords === 0" class="sample-link">
-        <a href="assets/sample_file/Member_sample_file.csv" target="_blank">
-          Member Sample File
+        <a href="assets/sample_file/Riskgaps_sample_file.csv" target="_blank">
+          Risk Gaps Sample File
         </a>
       </div>
 
@@ -98,79 +98,71 @@
       </div>
 
       <!-- TABLE -->
-      <div class="table-wrapper txupper" *ngIf="!isLoading">
+      <div class="table-wrapper" *ngIf="!isLoading">
         <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1" *ngIf="tempMemberList && tempMemberList.length > 0">
-          <ng-container matColumnDef="SUBSCRIBER_ID" sticky>
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> SUBSCRIBER ID </th>
-            <td mat-cell *matCellDef="let row">{{ row.SUBSCRIBER_ID }}</td>
+          <ng-container matColumnDef="MBR_ID" sticky>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> MBR ID </th>
+            <td mat-cell *matCellDef="let row">{{ row.MBR_ID }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="FIRST_NM">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>FIRST NM</th>
-            <td mat-cell *matCellDef="let row">{{ row.FIRST_NM }}</td>
+          <ng-container matColumnDef="PRODUCT_TYPE">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>PRODUCT TYPE</th>
+            <td mat-cell *matCellDef="let row">{{ row.PRODUCT_TYPE }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="MIDDLE_NM">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>MIDDLE NM</th>
-            <td mat-cell *matCellDef="let row">{{ row.MIDDLE_NM }}</td>
+          <ng-container matColumnDef="HCC_CATEGORY">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>HCC CATEGORY</th>
+            <td mat-cell *matCellDef="let row">{{ row.HCC_CATEGORY }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="LAST_NM">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>LAST NM</th>
-            <td mat-cell *matCellDef="let row">{{ row.LAST_NM }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="MEDICARE_ID">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICARE ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.MEDICARE_ID }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="MEDICAID_ID">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICAID ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.MEDICAID_ID }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="DT_OF_BIRTH">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>DATE OF BIRTH</th>
-            <td mat-cell *matCellDef="let row">{{ row.DT_OF_BIRTH | date:'MM/dd/yyyy' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="SEX">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>SEX</th>
-            <td mat-cell *matCellDef="let row">{{ row.SEX }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="HOME_TELEPHONE">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>HOME TELEPHONE</th>
-            <td mat-cell *matCellDef="let row">{{ row.HOME_TELEPHONE }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="PCP_TAX_ID">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>PCP TAX ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.PCP_TAX_ID }}</td>
+          <ng-container matColumnDef="HCC_MODEL">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>HCC MODEL</th>
+            <td mat-cell *matCellDef="let row">{{ row.HCC_MODEL }}</td>
           </ng-container>
 
           <ng-container matColumnDef="STATUS">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>STATUS</th>
+            <td mat-cell *matCellDef="let row">{{ row.STATUS }}</td>
+          </ng-container> 
+
+          <ng-container matColumnDef="RELEVANT_DATE">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>RELEVANT DATE</th>
+            <td mat-cell *matCellDef="let row">{{ row.RELEVANT_DATE | date:'MM/dd/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="DIAG_SOURCE">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>DIAG SOURCE</th>
+            <td mat-cell *matCellDef="let row">{{ row.DIAG_SOURCE }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="DIAG_CODE">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>DIAG CODE</th>
+            <td mat-cell *matCellDef="let row">{{ row.DIAG_CODE }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="DIAG_DESC">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>DIAG DESC</th>
+            <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="1">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>
-              STATUS
+              RECORD STATUS
             </th>
 
             <td mat-cell *matCellDef="let row" [ngStyle]="{
                   'background-color':
-                    (!row.SUBSCRIBER_ID || row.SUBSCRIBER_ID.trim() === '') ? 'red' :
-                    row.exist_member ? 'yellow' : 'transparent'
+                    (!row.MBR_ID || row.MBR_ID.trim() === '' || !row.member_exist) ? 'red' :
+                    row.exist_gap ? 'yellow' : 'transparent'
                 }">
-              <ng-container *ngIf="row.exist_member">
-                Member already exists
+              <ng-container *ngIf="row.exist_gap">
+                Find duplicate risk gaps
               </ng-container>
 
-              <ng-container *ngIf="!row.exist_member && (!row.SUBSCRIBER_ID || row.SUBSCRIBER_ID.trim() === '')">
-                Subscriber ID is missing
+              <ng-container *ngIf="!row.member_exist">
+                Member not exist for this risk gap
               </ng-container>
-
-              <ng-container *ngIf="!row.exist_member && row.SUBSCRIBER_ID && row.SUBSCRIBER_ID.trim() !== ''">
-                {{ row.STATUS }}
-              </ng-container>
+               
             </td>
           </ng-container>
 
@@ -184,8 +176,8 @@
             </td>
           </tr>
         </table>
-        <div *ngIf="processLogList && processLogList.length > 0"> 
-        <h2 style="text-align: center;">Member File Upload Process Details</h2>
+        <div class="txupper" *ngIf="processLogList && processLogList.length > 0"> 
+        <h2 style="text-align: center;">Risk Gaps File Upload Process Details</h2>
           <table style="width: 50%;margin-left: 30%;text-align: left;" class="mat-elevation-z1" >
             <thead class="table-light">
               <tr>

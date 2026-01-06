@@ -530,7 +530,7 @@ onNavigatorChange(navigatorId: number): void {
 
   }
 
-  loadTransfertabledata(transferlist: any) {
+  loadTransfertabledata(transferlist: any) { 
     if (transferlist.length > 0) {
       //console.log(transferlist); 
       const transferDATA = transferlist.map((r: any, index: number) => ({
