@@ -183,6 +183,13 @@ mat-form-field {
   min-height: 15px !important;
   padding: 0;
 }
+.txcenter{
+  text-align: center;
+}
+
+.txright{
+  text-align: right;
+}
 
 
 
