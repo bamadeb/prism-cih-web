@@ -43,11 +43,9 @@ export class ConfigService {
       'prismGetUserMemberList',
       request   
     );
-  }
+  } 
 
- 
-
-   async poweroverview<TResponse>(request: DashboardRequest): Promise<TResponse> {
+  async poweroverview<TResponse>(request: DashboardRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
@@ -171,9 +169,7 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       'prismAuthentication',
       request   
     );
-  }
-
-  
+  }  
 
   async addActionMaster<TResponse>(): Promise<TResponse> {
     return await commonPostApi<TResponse>(
@@ -371,6 +367,24 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       this.httpClient,
       this.environmentService,
       'prismProcessRiskGapsSeccionID',
+      request   
+    );
+  } 
+
+   async getTempQualityGapsBySeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetTempQualityGapsBySeccionID',
+      request   
+    );
+  } 
+
+  async processQualityGapsSeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismProcessQualityGapsSeccionID',
       request   
     );
   } 

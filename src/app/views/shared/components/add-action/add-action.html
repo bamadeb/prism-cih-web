@@ -1,5 +1,5 @@
-<h2 mat-dialog-title class="text-uppercase">ADD/UPDATE ACTION | {{ this.member_name }} - #{{ this.medicaid_id }} - {{
-  this.member_dob }}</h2>
+<h3 mat-dialog-title class="text-uppercase" style="font-size: 20px;">ADD/UPDATE ACTION | {{ this.member_name }} - #{{ this.medicaid_id }} - {{
+  this.member_dob }}</h3>
 <mat-dialog-content>
   <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
     <mat-tab label="TO-DO/DONE">
@@ -19,7 +19,7 @@
                 <!-- Category -->
                 <div class="mb-3">
                   <label class="form-label text-uppercase fw-bold">Category:</label>
-                  <mat-radio-group formControlName="action_id">
+                  <mat-radio-group formControlName="action_id" class="text-uppercase">
                     @for (reagon of action_activity_category; track reagon.id) {
                     <mat-radio-button class="me-3" [value]="reagon.id">
                       {{ reagon.Panel_Name }}
@@ -31,7 +31,7 @@
                 <!-- Type -->
                 <div class="mb-3">
                   <label class="form-label text-uppercase fw-bold">Type:</label>
-                  <mat-radio-group formControlName="panel_id">
+                  <mat-radio-group formControlName="panel_id" class="text-uppercase">
                     @for (type of action_ativity_type; track type.id) {
                     <mat-radio-button class="me-3" [value]="type.id">
                       {{ type.action_type }}
@@ -43,27 +43,27 @@
                 <!-- Action Date / Status / Result -->
                 <div class="action-row mb-3">
                   <mat-form-field appearance="fill" class="w-100 flex-item">
-                    <mat-label>Action Date</mat-label>
+                    <mat-label>ACTION DATE</mat-label>
                     <input matInput [matDatepicker]="picker" formControlName="action_date" placeholder="Select date" />
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                   </mat-form-field>
 
                   <mat-form-field appearance="fill" class="w-100 flex-item">
-                    <mat-label>Action Status</mat-label>
-                    <mat-select formControlName="action_status">
-                      <mat-option value="Scheduled">Scheduled</mat-option>
-                      <mat-option value="Success">Success</mat-option>
-                      <mat-option value="Failure">Failure</mat-option>
+                    <mat-label>ACTION STATUS</mat-label>
+                    <mat-select formControlName="action_status" class="text-uppercase">
+                      <mat-option value="Scheduled" class="text-uppercase">Scheduled</mat-option>
+                      <mat-option value="Success" class="text-uppercase">Success</mat-option>
+                      <mat-option value="Failure" class="text-uppercase">Failure</mat-option>
                     </mat-select>
                   </mat-form-field>
 
                   <mat-form-field appearance="fill" class="w-100 flex-item">
-                    <mat-label>Action Result</mat-label>
-                    <mat-select formControlName="action_result_id">
-                      <mat-option value="">-- ACTION STATUS --</mat-option>
+                    <mat-label>ACTION RESULT</mat-label>
+                    <mat-select formControlName="action_result_id" class="text-uppercase">
+                      <mat-option value="">-- ACTION RESULT --</mat-option>
                       @for (result of actionresult_followup_list; track result.id) {
-                      <mat-option [value]="result.id">
+                      <mat-option [value]="result.id" class="text-uppercase" style="font-size: 14px;">
                         {{ result.action_result }}
                       </mat-option>
                       }
@@ -73,7 +73,7 @@
 
                 <!-- Notes -->
                 <div class="mb-3">
-                  <mat-form-field appearance="fill" class="w-100">
+                  <mat-form-field appearance="fill" class="w-100 textarea-no-ripple ">
                     <mat-label>Type your text...</mat-label>
                     <textarea matInput formControlName="action_note" rows="2"></textarea>
                   </mat-form-field>
@@ -91,7 +91,7 @@
               <!-- Next Type -->
               <div class="mb-3">
                 <label class="form-label text-uppercase fw-bold">Next Type:</label>
-                <mat-radio-group formControlName="next_panel_id" class="ms-2">
+                <mat-radio-group formControlName="next_panel_id" class="ms-2 text-uppercase" >
                   @for (type of action_ativity_type; track type.id) {
                   <mat-radio-button class="me-3" [value]="type.id">
                     {{ type.action_type }}
@@ -103,7 +103,7 @@
               <!-- Next Date -->
               <div class="next-row mb-3">
                 <mat-form-field appearance="fill" class="flex-item w-100">
-                  <mat-label>Next Date</mat-label>
+                  <mat-label>NEXT DATE</mat-label>
                   <input matInput [matDatepicker]="nextPicker" formControlName="next_action_date"
                     placeholder="Next Action Date" />
                   <mat-datepicker-toggle matSuffix [for]="nextPicker"></mat-datepicker-toggle>
@@ -113,7 +113,7 @@
 
               <!-- Next Action Note -->
               <div class="mb-3">
-                <mat-form-field appearance="fill" class="w-100">
+                <mat-form-field appearance="fill" class="w-100 textarea-no-ripple">
                   <mat-label>Type your text...</mat-label>
                   <textarea matInput formControlName="next_action_note" rows="3"></textarea>
                 </mat-form-field>
@@ -121,7 +121,7 @@
 
               <!-- MATERIAL TASK TABLE -->
               <div class="mb-3">
-                <table mat-table [dataSource]="memberTaskList" class="mat-elevation-z8 full-width">
+                <table mat-table [dataSource]="memberTaskList" class="mat-elevation-z8 full-width text-uppercase">
 
                   <!-- Task Type Column -->
                   <ng-container matColumnDef="action_type">
@@ -273,7 +273,7 @@
                           </mat-checkbox>
                         </mat-panel-title>
 
-                        <mat-panel-description class="panel-desc-90">
+                        <mat-panel-description class="panel-desc-90 text-uppercase">
                           {{ gap.get('DIAG_DESC')?.value }}
                         </mat-panel-description>
                       </mat-expansion-panel-header>
@@ -443,7 +443,7 @@
                           </mat-checkbox>
                         </mat-panel-title>
 
-                        <mat-panel-description class="panel-desc-90">
+                        <mat-panel-description class="panel-desc-90 text-uppercase">
                           {{ qgap.get('MEASURE_NAME')?.value }}
                         </mat-panel-description>
                       </mat-expansion-panel-header>

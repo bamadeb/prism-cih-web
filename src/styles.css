@@ -103,6 +103,22 @@ height: min-content;
     padding: 0 2px!important;
 }
 
+.mat-mdc-form-field textarea.mdc-text-field__input {
+  padding-top: 32px !important;
+  padding-bottom: 32px !important;
+  line-height: 1.5 !important;
+  }
+ 
+.mat-mdc-form-field:has(textarea):focus-within
+.mdc-line-ripple {
+  display: none !important;
+}
+
+.textarea-no-ripple
+.mdc-line-ripple {
+  display: none !important;
+}
+
 
 
 

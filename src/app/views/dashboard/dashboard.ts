@@ -67,6 +67,10 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['2', 'MEM_INFO', 'PHONE', 'PCP_TAX_ID', 'PCP_VISIT_FLAG', 'PRIORITY_FLAG', 'upcoming_task_date', 'Call_count', 'risk_gap_count', 'risk_comp_count', 'risk_perf', 'quality_count', 'quality_comp_count', 'quality_perf', '1'];
   displayedColumnsTransfer: string[] = [
     'medicaid_id',
+    'memberName',
+    'BIRTH',
+    'phone',
+    'address',
     'refer_by_name',
     'refer_to_name',
     'added_date',
@@ -74,9 +78,11 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   ];
   displayedColumnsNolongerpatient: string[] = [
     'medicaid_id',
-    'FIRST_NAME',
-    'LAST_NAME',
-    'NO_LONGER_PATIENT_DATE'
+    'memberName',
+    'BIRTH',
+    'phone',
+    'address', 
+    'NO_LONGER_PATIENT_DATE','1'
   ];
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   transferdataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
@@ -299,6 +305,59 @@ confirmAction(row: any) {
     }
   });
 }
+
+confirmboxUndo(row: any) {
+  console.log(row);
+  this.withLoader(async () => {
+    const result = await this.noLongerPatientService.confirmboxUndo(row);
+    if (result?.refresh) {
+      this.removeNolongerFromTable(row.medicaid_id);
+      // 2️⃣ add to no longer patient table
+      console.log(row);
+      this.dataSource.data = [
+      {
+        medicaid_id: row.medicaid_id,
+        MEM_NO: row.MEM_NO,
+        FIRST_NAME: row.FIRST_NAME,
+        LAST_NAME: row.LAST_NAME,
+        BIRTH: row.BIRTH,
+        OTHER_ADDR1: row.OTHER_ADDR1,
+        OTHER_PHONE: row.OTHER_PHONE,
+        latest_alt_address: row.latest_alt_address,
+        latest_alt_phone: row.latest_alt_phone,
+        PCP_TAX_ID: row.PCP_TAX_ID,
+        PCP_VISIT_DATE: row.PCP_VISIT_DATE,
+        PCP_VISIT_FLAG: row.PCP_VISIT_FLAG,
+        PRIORITY_FLAG: row.PRIORITY_FLAG,
+        upcoming_task_date: row.upcoming_task_date || 'N/A',
+        Call_count: row.Call_count,
+        risk_gap_count: row.risk_gap_count,
+        risk_comp_count: row.risk_comp_count,
+        risk_perf: row.risk_perf,
+        quality_count: row.quality_count,
+        quality_comp_count: row.quality_comp_count,
+        quality_perf: row.quality_perf
+      },
+      ...this.dataSource.data
+    ];
+
+    // refresh table
+    this.dataSource._updateChangeSubscription();
+
+    }
+  });
+}
+
+
+removeNolongerFromTable(medicaidId: number): void {
+  const updatedData = this.nolongerpatientdataSource.data.filter(
+    nolongerpatientlist => nolongerpatientlist.medicaid_id !== medicaidId
+  );
+
+  this.nolongerpatientdataSource.data = updatedData;
+  // 🔁 refresh paginator & table
+  this.nolongerpatientdataSource._updateChangeSubscription();
+} 
 
 formatMDY(date: Date): string {
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -536,12 +595,16 @@ onNavigatorChange(navigatorId: number): void {
       //console.log(transferlist); 
       const transferDATA = transferlist.map((r: any, index: number) => ({
         medicaid_id: r.medicaid_id,
+        memberName: r.memberName,
+        BIRTH: r.BIRTH,
+        phone: r.phone,
+        address: r.address,
         added_date: r.added_date,
         refer_by_name: r.refer_by_name,
         refer_to_name: r.refer_to_name,
         referring_reason: r.referring_reason
       }));
-      //console.log(DATA);
+      //console.log(transferDATA);
       this.transferdataSource.data = transferDATA;
     }
   }
@@ -550,11 +613,24 @@ onNavigatorChange(navigatorId: number): void {
     if (nolongerpatientlist.length > 0) {
       const nopatientDATA = nolongerpatientlist.map((r: any, index: number) => ({
         medicaid_id: r.medicaid_id,
+        memberName: r.memberName,
+        BIRTH: r.BIRTH,
+        phone: r.phone,
+        address: r.address,
         FIRST_NAME: r.FIRST_NAME,
         LAST_NAME: r.LAST_NAME,
+        MEM_NO: r.MEM_NO,         
+        OTHER_ADDR1: r.OTHER_ADDR1,
+        OTHER_PHONE: r.OTHER_PHONE,
+        latest_alt_address: r.latest_alt_address,
+        latest_alt_phone: r.latest_alt_phone,
+        PCP_TAX_ID: r.PCP_TAX_ID,
+        PCP_VISIT_DATE: r.PCP_VISIT_DATE,
+        PCP_VISIT_FLAG: r.PCP_VISIT_FLAG,
+        PRIORITY_FLAG: r.PRIORITY_FLAG,
         NO_LONGER_PATIENT_DATE: r.NO_LONGER_PATIENT_DATE
       }));
-      //console.log(DATA);
+      //console.log(nopatientDATA);
       this.nolongerpatientdataSource.data = nopatientDATA;
     }
   }

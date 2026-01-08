@@ -93,6 +93,7 @@ export class AddAction {
   taskColumns: string[] = ['action_type', 'action_date', 'status', 'initial', 'action_note'];
   isProcessing: boolean = false;
   userId: string | null = null;
+  role_id: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
   member_dob: string | null = null;
@@ -151,12 +152,16 @@ export class AddAction {
   async ngOnInit(): Promise<void> {
     const user = this.userData.getUser();
     this.userId = user.ID;
+    //this.role_id = user.role_id;
     const result = await this.apiService.addActionMaster<any>();
     this.action_activity_category = result.data.actionActivityCategory || [];
     this.action_ativity_type = result.data.actionActivityType || [];
     this.navigatorList = result.data.navigatorList || [];
-   this.setScheduledActionStatus('17');
+    this.setScheduledActionStatus('17');
     this.cdr.detectChanges();
+    if (user.role_id === 9) {
+      this.addActionFormGroup.get('panel_id')?.setValue(18);
+    }
     // this.form = this.fb.group({
     //   riskGapsList: this.fb.array([])
     // });qualityGapsList
@@ -237,8 +242,13 @@ export class AddAction {
         insertDataArray: [insert_data],
       };
       try {
-        const result = await this.apiService.multipleRowInsert<any>(apiPayload);
-        const action_id = result.insertedIds;
+        if(formValues.action_result_id){
+          const result = await this.apiService.multipleRowInsert<any>(apiPayload);
+          const action_id = result.insertedIds;
+        }else{
+           const action_id =0;
+        }
+        
         const next_panel_id = formValues.next_panel_id;
 
         // ✅ 2️⃣ Insert NEXT TASK (if exists)
@@ -262,6 +272,9 @@ export class AddAction {
         }
         //this.insertSystemLog(formValues);
         await this.updateQualityAndRiskData(formValues, action_id);
+
+      this.getMemberTaskList(formValues.medicaid_id);
+      this.getMemberGapsList(formValues.medicaid_id);
         this.isProcessing = false;
         //alert(44);
         this.cdr.detectChanges();
@@ -325,7 +338,7 @@ private async updateQualityAndRiskData(
         medicaid_id,
         Type: riskGap.Type,
         Gap_Code: riskGap.DIAG_CODE,
-        Observation_Date: riskGap.Observation_Date,
+        Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
         Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
         Observation_Code: riskGap.Observation_Code,
         CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
@@ -397,7 +410,7 @@ private async updateQualityAndRiskData(
         medicaid_id,
         Type: qualityGap.Type,
         Gap_Code: qualityGap.SUB_MEASURE,
-        Observation_Date: qualityGap.Observation_Date,
+        Observation_Date: this.formatDateOnly(qualityGap.Observation_Date),
         Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
         Observation_Code: qualityGap.Observation_Code,
         CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
@@ -422,13 +435,42 @@ private async updateQualityAndRiskData(
           updated_date: new Date()
         });
       } else {
-        const hasValue = Object.values(commonData).some(v => v);
-        if (hasValue) {
+
+        const observationFieldsquality = [
+            qualityGap.Observation_Date,
+            qualityGap.Observation_Code,
+            qualityGap.CPT_Code_Modifier,
+            qualityGap.Observation_Code_Set,
+            qualityGap.Observation_Result,
+            qualityGap.Service_Provider_NPI,
+            qualityGap.Service_Provider_Taxonomy_Code,
+            qualityGap.Service_Provider_Name,
+            qualityGap.Service_Provider_Type,
+            qualityGap.Service_Provider_RxProviderFlag,
+            qualityGap.Provider_Group_NPI,
+            qualityGap.Provider_Group_Taxonomy_Code,
+            qualityGap.Provider_Group_Name,
+            qualityGap.note
+          ];
+
+          // TRUE if ANY value is non-null, non-empty
+          const hasAnyValue = observationFieldsquality.some(v => v !== null && v !== undefined && v !== "");
+
+        //const hasValue = Object.values(commonData).some(v => v);
+        if (hasAnyValue) {
           riskObsInsertArray.push({
             ...commonData,
             added_date: new Date()
           });
         }
+
+        // const hasValue = Object.values(commonData).some(v => v);
+        // if (hasValue) {
+        //   riskObsInsertArray.push({
+        //     ...commonData,
+        //     added_date: new Date()
+        //   });
+        // }
       }
     });
   }
@@ -458,7 +500,10 @@ private async updateQualityAndRiskData(
           diag_codes: diagVal,
           action_id: action_id
         };   
-     const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);         
+        if(diagVal){
+          const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);      
+        }
+        
     // await this.apiService.post('prismUpdategapStatus', {
     //   medicaid_id,
     //   diag_codes: diagCodes.length ? `'${diagCodes.join("','")}'` : '',
@@ -474,7 +519,10 @@ private async updateQualityAndRiskData(
           measur_code_val: subMeasureVal,
           action_id: action_id
         };    
-     const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);  
+        if(subMeasureVal){
+           const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);  
+        }
+    
      /// await this.apiService.post('prismUpdatequalityStatus', {
     //   medicaid_id,
     //   measur_code_val: qualitySubMeasures.length
@@ -761,6 +809,20 @@ private async updateQualityAndRiskData(
   //     });
   //   }
   // }
+
+   private formatDateOnly(date: Date | string | null | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+
+
   formatDateToMDY(dateStr: string): string {
     if (!dateStr) return '';
 

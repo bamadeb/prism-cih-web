@@ -21,7 +21,7 @@ import { PROVIDER_TIN_MAP } from '../../../constants/constant';
     MatProgressSpinnerModule,
   MatDatepickerModule],
   templateUrl: './star-performance.html',
-  styleUrl: './star-performance.css',
+  styleUrl: './star-performance.css'
 })
 export class StarPerformance {
 

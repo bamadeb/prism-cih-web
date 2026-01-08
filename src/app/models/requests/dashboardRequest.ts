@@ -126,7 +126,7 @@ export interface UpdateMemberRequest {
   id_field_value: number;   // ✅ FIXED (was string)
   updateData: {
     NO_LONGER_PATIENT_FLAG: number;
-    //Care_Coordinator_id: number;
+    NO_LONGER_PATIENT_NOTE: string;
     NO_LONGER_PATIENT_DATE: string | Date; 
   };
 }
