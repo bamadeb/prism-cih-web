@@ -170,6 +170,174 @@
 
             </div>
           </div>
+ 
+<!-- PCP VISIT SECTION -->
+<div class="pcp-visit-container mat-elevation-z2">
+
+  <!-- HEADER: TITLE + ICONS -->
+  <div class="pcp-visit-header" style="display: flex; align-items: center; gap: 4px;">
+
+    <span class="pcp-title">PCP Visit</span>
+  <!-- SUCCESS MESSAGE -->
+@if (pcpSuccessMessage()) {
+  <span class="pcp-success-msg">
+    <mat-icon class="pcp-success-icon">check_circle</mat-icon>
+    {{ pcpSuccessMessage() }}
+  </span>
+}
+
+    <!-- Icon Buttons Group -->
+    <div class="pcp-icon-buttons" style="display: flex; align-items: center; gap: 4px; margin-left: auto;">
+      
+      <!-- Toggle Add Form -->
+      <button
+        mat-icon-button
+        type="button"
+        color="primary"
+        (click)="togglePcpVisit()"
+        aria-label="Add PCP Visit">
+        <mat-icon>
+          {{ showPcpVisitForm() ? 'remove' : 'add' }}
+        </mat-icon>
+      </button>
+
+      <!-- Show Visit History -->
+      <button
+        mat-icon-button
+        type="button"
+        color="accent"
+        (click)="togglePcpHistory()"
+        aria-label="Show PCP Visit History">
+        <mat-icon>history</mat-icon>
+      </button>
+
+    </div>
+  </div>
+
+
+<!-- ADD FORM -->
+@if (showPcpVisitForm()) {
+  <div class="pcp-visit-row">
+
+    <mat-checkbox formControlName="pcp_visited">
+      PCP Visited
+    </mat-checkbox>
+
+    <mat-form-field appearance="fill" class="pcp-date">
+      <mat-label>Visit Date</mat-label>
+      <input
+        matInput
+        [matDatepicker]="pcpPicker"
+        formControlName="pcp_visit_date"
+        [disabled]="!addActionFormGroup.get('pcp_visited')?.value">
+      <mat-datepicker-toggle matSuffix [for]="pcpPicker"></mat-datepicker-toggle>
+      <mat-datepicker #pcpPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="pcp-message">
+      <mat-label>Message</mat-label>
+      <input
+        matInput
+        formControlName="pcp_visit_message"
+        placeholder="PCP visit note"
+        [disabled]="!addActionFormGroup.get('pcp_visited')?.value">
+    </mat-form-field>
+
+    <!-- SAVE BUTTON (OUTSIDE MESSAGE) -->
+<button
+  mat-flat-button
+  type="button"
+  color="primary"
+  class="pcp-save-btn"
+  (click)="savePcpVisit()"
+  [disabled]="isSavingPcpVisit() || !addActionFormGroup.get('pcp_visited')?.value">
+
+  @if (isSavingPcpVisit()) {
+    <mat-progress-spinner
+      diameter="20"
+      mode="indeterminate">
+    </mat-progress-spinner>
+  } @else {
+    Save
+  }
+
+</button>
+
+
+  </div>
+}
+<!-- PCP VISIT HISTORY SECTION -->
+@if (showPcpHistory()) {
+  <div class="pcp-history-row mat-elevation-z1">
+
+    <h5 class="pcp-history-title">PCP Visit History</h5>
+    <!-- LOADER -->
+    @if (isLoadingPcpHistory()) {
+      <div class="pcp-history-loader">
+        <mat-progress-spinner
+          diameter="32"
+          mode="indeterminate">
+        </mat-progress-spinner>
+      </div>
+    }
+        <!-- TABLE -->
+    @if (!isLoadingPcpHistory()) {
+    <table
+      mat-table
+      [dataSource]="memberPCPVisitList"
+      class="mat-elevation-z0 pcp-history-table">
+
+      <!-- Visit Date -->
+      <ng-container matColumnDef="visit_date">
+        <th mat-header-cell *matHeaderCellDef>Visit Date</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.VISIT_DATE | date:'MM/dd/yyyy' }}
+        </td>
+      </ng-container>
+
+      <!-- Message -->
+      <ng-container matColumnDef="message">
+        <th mat-header-cell *matHeaderCellDef>Message</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.MESSAGE }}
+        </td>
+      </ng-container>
+
+      <!-- Added By -->
+      <ng-container matColumnDef="added_user_name">
+        <th mat-header-cell *matHeaderCellDef>Added By</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.added_user_name }}
+        </td>
+      </ng-container>
+
+      <!-- Added Date -->
+      <ng-container matColumnDef="added_date">
+        <th mat-header-cell *matHeaderCellDef>Added Date</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.ADDED_DATE | date:'MM/dd/yyyy' }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="PCPVisitDisplayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: PCPVisitDisplayedColumns;"></tr>
+
+    </table>
+  }
+    @if (!memberPCPVisitList.length) {
+      <div class="pcp-no-data">
+        No PCP visit history available.
+      </div>
+    }
+
+  </div>
+}
+
+
+</div>
+
+
+
 
           <!-- PCR TABLE INSIDE FORM -->
           <div class="p-3 mt-3">

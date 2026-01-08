@@ -187,3 +187,92 @@ mat-error {
   overflow: visible !important;
   height: auto !important;
 }
+.pcp-visit-container {
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.pcp-visit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+}
+
+.pcp-title {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pcp-visit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.pcp-date {
+  width: 220px;
+}
+
+.pcp-message {
+  flex: 1;
+  min-width: 260px;
+}
+
+.pcp-save-btn {
+  height: 56px; /* matches mat-form-field height */
+  margin-top: 6px;
+}
+.pcp-success-msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  color: #2e7d32;              /* Material success green */
+  background-color: #e8f5e9;  /* Light success background */
+  padding: 2px 8px;
+  border-radius: 12px;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pcp-success-icon {
+  font-size: 16px;
+}
+.pcp-history-row {
+  padding: 12px;
+  margin-top: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.pcp-history-title {
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.pcp-history-table {
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 260px; 
+}
+
+.mat-header-cell {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.mat-cell {
+  font-size: 13px;
+}
+
+.pcp-no-data {
+  padding: 12px;
+  text-align: center;
+  color: #757575;
+  font-size: 13px;
+}

@@ -374,4 +374,12 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   } 
+   async getMemberVisitList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetMemberPCPVisitList',
+      request   
+    );
+  }
 }

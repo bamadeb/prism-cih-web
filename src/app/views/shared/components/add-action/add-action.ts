@@ -12,7 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 // //import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 // import { MatNativeDateModule } from '@angular/material/core';
-import { ChangeDetectorRef, Inject } from '@angular/core';
+import { ChangeDetectorRef, Inject, signal } from '@angular/core';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -31,6 +31,9 @@ import { UserDataService } from '../../../../services/user-data-service';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatIconModule } from "@angular/material/icon";
+import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
+
 @Component({
   selector: 'app-add-action',
   imports: [
@@ -54,8 +57,9 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
     MatExpansionModule,
     ReactiveFormsModule,
     CommonModule,
-    MatProgressSpinner
-],
+    MatProgressSpinner,
+    MatIconModule
+  ],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],
@@ -65,7 +69,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 })
 export class AddAction {
   addActionFormGroup!: FormGroup;
-  appointmentFormGroup!: FormGroup;  
+  appointmentFormGroup!: FormGroup;
   action_activity_category: any[] = [];
   action_ativity_type: any[] = [];
   navigatorList: any[] = [];
@@ -73,8 +77,24 @@ export class AddAction {
   memberTaskList: any[] = [];
   memberGapList: any[] = [];
   memberQualityList: any[] = [];
-  //riskGapsList: any[] = [];
 
+  memberPCPVisitList: any[] = [];
+  PCPVisitDisplayedColumns: string[] = [
+  'visit_date',
+  'message',
+  'added_user_name',
+  'added_date'
+];
+  showPcpVisitForm = signal(false);
+  showPcpHistory = signal(false);
+  isSavingPcpVisit = signal(false);
+  pcpSuccessMessage = signal('');
+  isLoadingPcpHistory = signal(false);
+  // Sample history data
+  // pcpVisitHistory: any[] = [
+  //   { visit_date: new Date('2025-12-01'), message: 'Routine checkup' },
+  //   { visit_date: new Date('2026-01-01'), message: 'Follow-up visit' },
+  // ];
   //await
   cihpcrList: any[] = [];
   pcrColumns: string[] = [
@@ -92,6 +112,7 @@ export class AddAction {
   ];
   taskColumns: string[] = ['action_type', 'action_date', 'status', 'initial', 'action_note'];
   isProcessing: boolean = false;
+  //userId: string | null = null;
   userId: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
@@ -126,6 +147,10 @@ export class AddAction {
       //Member level
       medicaid_id: [''],
       action_type_source: ['Member Action'],
+      //  PCP VISIT
+      pcp_visited: [false],
+      pcp_visit_date: [{ value: null, disabled: true }],
+      pcp_visit_message: [{ value: '', disabled: true }],
       // RISK GAPS
       riskGapsList: this.fb.array([]),
       qualityGapsList: this.fb.array([])
@@ -155,7 +180,25 @@ export class AddAction {
     this.action_activity_category = result.data.actionActivityCategory || [];
     this.action_ativity_type = result.data.actionActivityType || [];
     this.navigatorList = result.data.navigatorList || [];
-   this.setScheduledActionStatus('17');
+    this.setScheduledActionStatus('17');
+    this.addActionFormGroup
+      .get('pcp_visited')
+      ?.valueChanges.subscribe((visited: boolean) => {
+        const dateCtrl = this.addActionFormGroup.get('pcp_visit_date');
+        const msgCtrl = this.addActionFormGroup.get('pcp_visit_message');
+
+        if (visited) {
+          dateCtrl?.enable();
+          msgCtrl?.enable();
+        } else {
+          dateCtrl?.disable();
+          msgCtrl?.disable();
+          dateCtrl?.reset();
+          msgCtrl?.reset();
+        }
+      });
+
+
     this.cdr.detectChanges();
     // this.form = this.fb.group({
     //   riskGapsList: this.fb.array([])
@@ -168,16 +211,91 @@ export class AddAction {
     return this.addActionFormGroup.get('qualityGapsList') as FormArray;
   }
   async setScheduledActionStatus(id: string) {
-   const user = this.userData.getUser();
+    const user = this.userData.getUser();
     //console.log('Dashboard:', user);
-   // if(user.role_id == 7){
+    // if(user.role_id == 7){
     const role_id = user.role_id;
     const payload = { scheduled_type: id, role_id: role_id };
     const result = await this.apiService.getActionresultfollowup<any>(payload);
     //console.log(payload);
     this.actionresult_followup_list = result.data;
-    
+
+  }
+  togglePcpVisit() {
+    this.showPcpVisitForm.update(v => !v);
+  }
+  async savePcpVisit() {
+    if (!this.addActionFormGroup.get('pcp_visited')?.value) return;
+
+    this.isSavingPcpVisit.set(true);
+
+    const insert_data = {
+      MEDICAID_ID: this.addActionFormGroup.value.medicaid_id,
+      VISIT_DATE: this.formatDateToYMD(this.addActionFormGroup.value.pcp_visit_date),
+      MESSAGE: this.addActionFormGroup.value.pcp_visit_message,
+      ADDED_BY: this.userId
+    };
+
+    const apiPayload = {
+      table_name: 'MEM_MEMBER_PCP_VISIT',
+      insertDataArray: [insert_data],
+    };
+
+    try {
+      await this.apiService.multipleRowInsert<any>(apiPayload);
+      await this.addTaskLog('ADD PCP VISIT',this.addActionFormGroup.value.pcp_visit_message);
+      // ✅ Success message
+      this.pcpSuccessMessage.set('PCP visit saved successfully');
+
+      // 🧹 Reset form fields
+      this.addActionFormGroup.patchValue({
+        pcp_visited: false,
+        pcp_visit_date: null,
+        pcp_visit_message: ''
+      });
+
+      // 🔽 Close add panel
+      this.showPcpVisitForm.set(false);
+      this.setPCPVisitHistory();
+      // ⏳ Auto-hide success message
+      setTimeout(() => {
+        this.pcpSuccessMessage.set('');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error saving PCP visit:', error);
+    } finally {
+      this.isSavingPcpVisit.set(false);
+    }
+  }
+  async setPCPVisitHistory() {
+    if (!this.medicaid_id) return;
+    this.isLoadingPcpHistory.set(true);
+    const payload: MedicaidIdRequest = {
+      medicaid_id: this.medicaid_id
+    };
+
+    try {
+      const result = await this.apiService.getMemberVisitList<any>(payload);
+      this.memberPCPVisitList = result.data || [];
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.isLoadingPcpHistory.set(false);
+    }
   }  
+
+  togglePcpHistory() {
+    const willOpen = !this.showPcpHistory();
+    this.showPcpHistory.set(willOpen);
+
+    // ✅ Load history ONLY when opening
+    if (willOpen) {
+      this.setPCPVisitHistory();
+    }
+  }
+
   createRiskGapForm(gap: any): FormGroup {
     return this.fb.group({
       PROCESS_STATUS: [false],
@@ -213,6 +331,7 @@ export class AddAction {
     // alert(2);
     //const user = this.auth.getUser();
     //const formValues = this.addActionFormGroup.value;
+    //console.log('add_update_action_submit');
     const formValues = this.addActionFormGroup.getRawValue();
     const action_id = formValues.update_action_id;
     //console.log(formValues);
@@ -298,58 +417,58 @@ export class AddAction {
     }
 
   }
-private async updateQualityAndRiskData(
-  formValues: any,
-  action_id: number
-): Promise<void> {
+  private async updateQualityAndRiskData(
+    formValues: any,
+    action_id: number
+  ): Promise<void> {
 
-  const medicaid_id = formValues.medicaid_id;
+    const medicaid_id = formValues.medicaid_id;
 
-  const diagCodes: string[] = [];
-  const qualitySubMeasures: string[] = [];
-  const riskObsInsertArray: any[] = [];
-  const riskObsUpdateArray: any[] = [];
+    const diagCodes: string[] = [];
+    const qualitySubMeasures: string[] = [];
+    const riskObsInsertArray: any[] = [];
+    const riskObsUpdateArray: any[] = [];
 
-  /* ----------------------------------
-     BUILD RISK GAP DATA
-  -----------------------------------*/
-  if (formValues.riskGapsList?.length) {
-    formValues.riskGapsList.forEach((riskGap: any) => {
+    /* ----------------------------------
+       BUILD RISK GAP DATA
+    -----------------------------------*/
+    if (formValues.riskGapsList?.length) {
+      formValues.riskGapsList.forEach((riskGap: any) => {
 
-      const processStatus = riskGap.PROCESS_STATUS;
-      if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
-        diagCodes.push(riskGap.DIAG_CODE);
-      }
+        const processStatus = riskGap.PROCESS_STATUS;
+        if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
+          diagCodes.push(riskGap.DIAG_CODE);
+        }
 
-      const commonData = {
-        medicaid_id,
-        Type: riskGap.Type,
-        Gap_Code: riskGap.DIAG_CODE,
-        Observation_Date: riskGap.Observation_Date,
-        Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
-        Observation_Code: riskGap.Observation_Code,
-        CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
-        Observation_Code_Set: riskGap.Observation_Code_Set,
-        Observation_Result: riskGap.Observation_Result,
-        Service_Provider_NPI: riskGap.Service_Provider_NPI,
-        Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
-        Service_Provider_Name: riskGap.Service_Provider_Name,
-        Service_Provider_Type: riskGap.Service_Provider_Type,
-        Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
-        Provider_Group_NPI: riskGap.Provider_Group_NPI,
-        Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
-        Provider_Group_Name: riskGap.Provider_Group_Name,
-        Source: 'CIH',
-        note: riskGap.note
-      };
-      console.log("riskGap",riskGap);
-      if (riskGap.risk_gap_id) {
-        riskObsUpdateArray.push({
-          ...commonData,
-          id: riskGap.risk_gap_id,
-          updated_date: new Date()
-        });
-      } else {
+        const commonData = {
+          medicaid_id,
+          Type: riskGap.Type,
+          Gap_Code: riskGap.DIAG_CODE,
+          Observation_Date: riskGap.Observation_Date,
+          Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
+          Observation_Code: riskGap.Observation_Code,
+          CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
+          Observation_Code_Set: riskGap.Observation_Code_Set,
+          Observation_Result: riskGap.Observation_Result,
+          Service_Provider_NPI: riskGap.Service_Provider_NPI,
+          Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
+          Service_Provider_Name: riskGap.Service_Provider_Name,
+          Service_Provider_Type: riskGap.Service_Provider_Type,
+          Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
+          Provider_Group_NPI: riskGap.Provider_Group_NPI,
+          Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
+          Provider_Group_Name: riskGap.Provider_Group_Name,
+          Source: 'CIH',
+          note: riskGap.note
+        };
+        console.log("riskGap", riskGap);
+        if (riskGap.risk_gap_id) {
+          riskObsUpdateArray.push({
+            ...commonData,
+            id: riskGap.risk_gap_id,
+            updated_date: new Date()
+          });
+        } else {
 
           const observationFields = [
             riskGap.Observation_Date,
@@ -371,173 +490,149 @@ private async updateQualityAndRiskData(
           // TRUE if ANY value is non-null, non-empty
           const hasAnyValue = observationFields.some(v => v !== null && v !== undefined && v !== "");
 
-        //const hasValue = Object.values(commonData).some(v => v);
-        if (hasAnyValue) {
-          riskObsInsertArray.push({
-            ...commonData,
-            added_date: new Date()
-          });
+          //const hasValue = Object.values(commonData).some(v => v);
+          if (hasAnyValue) {
+            riskObsInsertArray.push({
+              ...commonData,
+              added_date: new Date()
+            });
+          }
         }
-      }
-    });
-  }
-
-  /* ----------------------------------
-     BUILD QUALITY GAP DATA
-  -----------------------------------*/
-  if (formValues.qualityGapsList?.length) {
-    formValues.qualityGapsList.forEach((qualityGap: any) => {
-
-      const processStatus = qualityGap.PROCESS_STATUS;
-      if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
-        qualitySubMeasures.push(qualityGap.SUB_MEASURE);
-      }
-
-      const commonData = {
-        medicaid_id,
-        Type: qualityGap.Type,
-        Gap_Code: qualityGap.SUB_MEASURE,
-        Observation_Date: qualityGap.Observation_Date,
-        Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
-        Observation_Code: qualityGap.Observation_Code,
-        CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
-        Observation_Code_Set: qualityGap.Observation_Code_Set,
-        Observation_Result: qualityGap.Observation_Result,
-        Service_Provider_NPI: qualityGap.Service_Provider_NPI,
-        Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
-        Service_Provider_Name: qualityGap.Service_Provider_Name,
-        Service_Provider_Type: qualityGap.Service_Provider_Type,
-        Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
-        Provider_Group_NPI: qualityGap.Provider_Group_NPI,
-        Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
-        Provider_Group_Name: qualityGap.Provider_Group_Name,
-        Source: 'CIH',
-        note: qualityGap.note
-      };
-
-      if (qualityGap.quality_gap_id) {
-        riskObsUpdateArray.push({
-          ...commonData,
-          id: qualityGap.quality_gap_id,
-          updated_date: new Date()
-        });
-      } else {
-        const hasValue = Object.values(commonData).some(v => v);
-        if (hasValue) {
-          riskObsInsertArray.push({
-            ...commonData,
-            added_date: new Date()
-          });
-        }
-      }
-    });
-  }
-
-  try {
-    /* ----------------------------------
-       STEP 1: UNSET MEMBER GAP STATUS
-    -----------------------------------*/
-    const paramsunsetq = {
-      medicaid_id: medicaid_id,
-      action_id: action_id
-    };
-     const result = await this.apiService.unSetMemberGapsStatus<any>(paramsunsetq);
-    // await this.apiService.post('prismUnSetMemberGapsStatus', {
-    //   medicaid_id,
-    //   action_id
-    // }).toPromise();
-
-    /* ----------------------------------
-       STEP 2: UPDATE RISK STATUS
-    -----------------------------------*/
-        const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
-        //alert(diagVal);
-        //return;
-        const paramsupdate = {
-          medicaid_id: medicaid_id,
-          diag_codes: diagVal,
-          action_id: action_id
-        };   
-     const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);         
-    // await this.apiService.post('prismUpdategapStatus', {
-    //   medicaid_id,
-    //   diag_codes: diagCodes.length ? `'${diagCodes.join("','")}'` : '',
-    //   action_id
-    // }).toPromise();
-
-    /* ----------------------------------
-       STEP 3: UPDATE QUALITY STATUS
-    -----------------------------------*/
-        const subMeasureVal = qualitySubMeasures.length > 0 ? `'${qualitySubMeasures.join("','")}'` : '';
-        const qualityparamsupdate = {
-          medicaid_id: medicaid_id,
-          measur_code_val: subMeasureVal,
-          action_id: action_id
-        };    
-     const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);  
-     /// await this.apiService.post('prismUpdatequalityStatus', {
-    //   medicaid_id,
-    //   measur_code_val: qualitySubMeasures.length
-    //     ? `'${qualitySubMeasures.join("','")}'`
-    //     : '',
-    //   action_id
-    // }).toPromise();
-
-    /* ----------------------------------
-       STEP 4: UPDATE OBSERVATIONS
-    -----------------------------------*/
-    if (riskObsUpdateArray.length) {
-          const apiparamUpdate = {
-            table_name: "MEM_GAP_OBSERVATION_DATA",
-            id_field_name: "id",
-            updates: riskObsUpdateArray
-          };
-     const updatequalitygapresult = await this.apiService.multipleRowAndFieldUpdate<any>(apiparamUpdate);            
-      // await this.apiService.post(
-      //   'prismMultipleRowAndFieldUpdate',
-      //   {
-      //     table_name: 'MEM_GAP_OBSERVATION_DATA',
-      //     id_field_name: 'id',
-      //     updates: riskObsUpdateArray
-      //   }
-      // ).toPromise();
-    }
-
-    /* ----------------------------------
-       STEP 5: INSERT OBSERVATIONS
-    -----------------------------------*/
-    if (riskObsInsertArray.length) {
-      await this.apiService.multipleRowInsert({
-        table_name: 'MEM_GAP_OBSERVATION_DATA',
-        insertDataArray: riskObsInsertArray
       });
     }
-//alert('Successfuly to save data');
-//this.isLoading = false;
-//alert(this.isLoading);
+
     /* ----------------------------------
-       FINAL UI CLEANUP
+       BUILD QUALITY GAP DATA
     -----------------------------------*/
-    // this.showFlash('Saved Successfully!');
-    // this.modalInstance?.hide();
+    if (formValues.qualityGapsList?.length) {
+      formValues.qualityGapsList.forEach((qualityGap: any) => {
 
-    // setTimeout(() => {
-    //   this.openModal(medicaid_id, this.member_name, this.dbirth);
-    // }, 300);
+        const processStatus = qualityGap.PROCESS_STATUS;
+        if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
+          qualitySubMeasures.push(qualityGap.SUB_MEASURE);
+        }
 
-  } catch (error) {
-    console.error('❌ Error updating quality/risk data:', error);
-    //alert('Failed to save data');
-    //this.isLoading = false;
+        const commonData = {
+          medicaid_id,
+          Type: qualityGap.Type,
+          Gap_Code: qualityGap.SUB_MEASURE,
+          Observation_Date: qualityGap.Observation_Date,
+          Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
+          Observation_Code: qualityGap.Observation_Code,
+          CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
+          Observation_Code_Set: qualityGap.Observation_Code_Set,
+          Observation_Result: qualityGap.Observation_Result,
+          Service_Provider_NPI: qualityGap.Service_Provider_NPI,
+          Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
+          Service_Provider_Name: qualityGap.Service_Provider_Name,
+          Service_Provider_Type: qualityGap.Service_Provider_Type,
+          Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
+          Provider_Group_NPI: qualityGap.Provider_Group_NPI,
+          Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
+          Provider_Group_Name: qualityGap.Provider_Group_Name,
+          Source: 'CIH',
+          note: qualityGap.note
+        };
 
-  } finally {
-    //alert('finally to save data');
-    this.isProcessing = false;
-    //alert(this.isProcessing);
+        if (qualityGap.quality_gap_id) {
+          riskObsUpdateArray.push({
+            ...commonData,
+            id: qualityGap.quality_gap_id,
+            updated_date: new Date()
+          });
+        } else {
+          const hasValue = Object.values(commonData).some(v => v);
+          if (hasValue) {
+            riskObsInsertArray.push({
+              ...commonData,
+              added_date: new Date()
+            });
+          }
+        }
+      });
+    }
+
+    try {
+      /* ----------------------------------
+         STEP 1: UNSET MEMBER GAP STATUS
+      -----------------------------------*/
+      const paramsunsetq = {
+        medicaid_id: medicaid_id,
+        action_id: action_id
+      };
+      const result = await this.apiService.unSetMemberGapsStatus<any>(paramsunsetq);
+      // await this.apiService.post('prismUnSetMemberGapsStatus', {
+      //   medicaid_id,
+      //   action_id
+      // }).toPromise();
+
+      /* ----------------------------------
+         STEP 2: UPDATE RISK STATUS
+      -----------------------------------*/
+      const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
+      //alert(diagVal);
+      //return;
+      const paramsupdate = {
+        medicaid_id: medicaid_id,
+        diag_codes: diagVal,
+        action_id: action_id
+      };
+      const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
+      // await this.apiService.post('prismUpdategapStatus', {
+      //   medicaid_id,
+      //   diag_codes: diagCodes.length ? `'${diagCodes.join("','")}'` : '',
+      //   action_id
+      // }).toPromise();
+
+      /* ----------------------------------
+         STEP 3: UPDATE QUALITY STATUS
+      -----------------------------------*/
+      const subMeasureVal = qualitySubMeasures.length > 0 ? `'${qualitySubMeasures.join("','")}'` : '';
+      const qualityparamsupdate = {
+        medicaid_id: medicaid_id,
+        measur_code_val: subMeasureVal,
+        action_id: action_id
+      };
+      const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
+
+
+      /* ----------------------------------
+         STEP 4: UPDATE OBSERVATIONS
+      -----------------------------------*/
+      if (riskObsUpdateArray.length) {
+        const apiparamUpdate = {
+          table_name: "MEM_GAP_OBSERVATION_DATA",
+          id_field_name: "id",
+          updates: riskObsUpdateArray
+        };
+        const updatequalitygapresult = await this.apiService.multipleRowAndFieldUpdate<any>(apiparamUpdate);
+ 
+      }
+
+      /* ----------------------------------
+         STEP 5: INSERT OBSERVATIONS
+      -----------------------------------*/
+      if (riskObsInsertArray.length) {
+        await this.apiService.multipleRowInsert({
+          table_name: 'MEM_GAP_OBSERVATION_DATA',
+          insertDataArray: riskObsInsertArray
+        });
+      }
+
+
+    } catch (error) {
+      console.error('❌ Error updating quality/risk data:', error);
+      //alert('Failed to save data');
+      //this.isLoading = false;
+
+    } finally {
+      //alert('finally to save data');
+      this.isProcessing = false;
+      //alert(this.isProcessing);
+    }
+    //this.isProcessing = false;
+
   }
-  //this.isProcessing = false;
-
-}
 
   toggleRiskGaps() {
 
@@ -555,8 +650,7 @@ private async updateQualityAndRiskData(
   }
   async getMemberGapsList(medicaid_id: string) {
     const payload = { medicaid_id: medicaid_id };
-    //console.log(payload);getMemberTaskList
-    //this.isLoading = true;
+  
     const request: MedicaidIdRequest = {
       medicaid_id: medicaid_id
     };
@@ -575,192 +669,114 @@ private async updateQualityAndRiskData(
     //this.riskGapsList.clear();
     this.setRiskGapsData(this.memberGapList);
     this.setQualityGapsData(this.memberQualityList);
-   
+
   }
   setRiskGapsData(riskGapsdata: any) {
-  this.riskGapsList.clear();
+    this.riskGapsList.clear();
 
-  if (riskGapsdata && Array.isArray(riskGapsdata)) {
-    riskGapsdata.forEach((t: any) => {
+    if (riskGapsdata && Array.isArray(riskGapsdata)) {
+      riskGapsdata.forEach((t: any) => {
 
-      const fg = this.fb.group({
-        DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
-        DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
+        const fg = this.fb.group({
+          DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
+          DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
 
-        PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
+          PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
-        risk_gap_id: [t.id],
-        Type: ['risk'],
-        Gap_Code: [this.sanitize(t.Gap_Code)],
+          risk_gap_id: [t.id],
+          Type: ['risk'],
+          Gap_Code: [this.sanitize(t.Gap_Code)],
 
-        Observation_Date: [
-          (t.Observation_Date &&
-            t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
-            t.Observation_Date !== '01/01/1900')
-            ? new Date(t.Observation_Date)
-            : ''
-        ],
+          Observation_Date: [
+            (t.Observation_Date &&
+              t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
+              t.Observation_Date !== '01/01/1900')
+              ? new Date(t.Observation_Date)
+              : ''
+          ],
 
-        Observation_Year: [this.sanitize(t.Observation_Year)],
-        Observation_Code: [this.sanitize(t.Observation_Code)],
-        CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
-        Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
-        Observation_Result: [this.sanitize(t.Observation_Result)],
-        Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
-        Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
-        Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
-        Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
-        Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
-        Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
-        Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
-        Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
-        note: [this.sanitize(t.note)]
+          Observation_Year: [this.sanitize(t.Observation_Year)],
+          Observation_Code: [this.sanitize(t.Observation_Code)],
+          CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
+          Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
+          Observation_Result: [this.sanitize(t.Observation_Result)],
+          Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
+          Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
+          Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
+          Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
+          Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
+          Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
+          Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
+          Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
+          note: [this.sanitize(t.note)]
+        });
+
+        // 🔥 Auto-toggle checkbox based on Observation Result
+        fg.get('Observation_Result')?.valueChanges.subscribe(value => {
+          fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
+        });
+
+        this.riskGapsList.push(fg);
       });
-
-      // 🔥 Auto-toggle checkbox based on Observation Result
-      fg.get('Observation_Result')?.valueChanges.subscribe(value => {
-        fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
-      });
-
-      this.riskGapsList.push(fg);
-    });
+    }
   }
-}
-  // setRiskGapsData(riskGapsdata: any) {
-  //   // Clear existing transactions
-  //   this.riskGapsList.clear();
 
-  //   if (riskGapsdata && Array.isArray(riskGapsdata)) {
-  //     riskGapsdata.forEach((t: any) => {
-  //       this.riskGapsList.push(this.fb.group({
-  //         DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
-  //         DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
-  //         PROCESS_STATUS: [t.PROCESS_STATUS === 1],
-  //         risk_gap_id: [t.id],
-  //         Type: ['risk'],
-  //         Gap_Code: [this.sanitize(t.Gap_Code)],
-  //         Observation_Date: [
-  //           (t.Observation_Date && t.Observation_Date !== '1900-01-01T00:00:00.000Z' && t.Observation_Date !== '01/01/1900')
-  //             ? new Date(t.Observation_Date)
-  //             : ''
-  //         ],
-  //         Observation_Year: [this.sanitize(t.Observation_Year)],
-  //         Observation_Code: [this.sanitize(t.Observation_Code)],
-  //         CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
-  //         Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
-  //         Observation_Result: [this.sanitize(t.Observation_Result)],
-  //         Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
-  //         Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
-  //         Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
-  //         Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
-  //         Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
-  //         Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
-  //         Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
-  //         Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
-  //         note: [this.sanitize(t.note)]
-  //       }));
-  //     });
-  //     //console.log(riskGapsdata);
-  //   }
-  // }
   sanitize(value: any) {
     return value === null || value === undefined || value === 'null' ? '' : value;
   }
   setQualityGapsData(qualityGapsdata: any) {
-  // Clear existing list
-  this.qualityGapsList.clear();
+    // Clear existing list
+    this.qualityGapsList.clear();
 
-  if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
-    qualityGapsdata.forEach((t: any) => {
+    if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
+      qualityGapsdata.forEach((t: any) => {
 
-      const fg = this.fb.group({
-        SUB_MEASURE: [this.sanitize(t.SUB_MEASURE)],
-        MEASURE_NAME: [this.sanitize(t.MEASURE_NAME)],
+        const fg = this.fb.group({
+          SUB_MEASURE: [this.sanitize(t.SUB_MEASURE)],
+          MEASURE_NAME: [this.sanitize(t.MEASURE_NAME)],
 
-        // 🔒 Disabled checkbox, auto-controlled
-        PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
+          // 🔒 Disabled checkbox, auto-controlled
+          PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
-        quality_gap_id: [t.id],
-        Type: ['quality'],
-        Gap_Code: [this.sanitize(t.Gap_Code)],
+          quality_gap_id: [t.id],
+          Type: ['quality'],
+          Gap_Code: [this.sanitize(t.Gap_Code)],
 
-        Observation_Date: [
-          t.Observation_Date &&
-          t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
-          t.Observation_Date !== '01/01/1900'
-            ? t.Observation_Date
-            : ''
-        ],
+          Observation_Date: [
+            t.Observation_Date &&
+              t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
+              t.Observation_Date !== '01/01/1900'
+              ? t.Observation_Date
+              : ''
+          ],
 
-        Observation_Year: [this.sanitize(t.Observation_Year)],
-        Observation_Code: [this.sanitize(t.Observation_Code)],
-        CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
-        Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
-        Observation_Result: [this.sanitize(t.Observation_Result)],
-        Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
-        Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
-        Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
-        Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
-        Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
-        Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
-        Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
-        Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
-        note: [this.sanitize(t.note)]
+          Observation_Year: [this.sanitize(t.Observation_Year)],
+          Observation_Code: [this.sanitize(t.Observation_Code)],
+          CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
+          Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
+          Observation_Result: [this.sanitize(t.Observation_Result)],
+          Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
+          Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
+          Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
+          Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
+          Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
+          Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
+          Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
+          Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
+          note: [this.sanitize(t.note)]
+        });
+
+        // 🔁 Auto-check based on Observation_Result
+        fg.get('Observation_Result')?.valueChanges.subscribe(value => {
+          fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
+        });
+
+        this.qualityGapsList.push(fg);
       });
-
-      // 🔁 Auto-check based on Observation_Result
-      fg.get('Observation_Result')?.valueChanges.subscribe(value => {
-        fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
-      });
-
-      this.qualityGapsList.push(fg);
-    });
+    }
   }
-}
 
-  // setQualityGapsData(qualityGapsdata: any) {
-  //   // Clear existing list
-  //   this.qualityGapsList.clear();
 
-  //   if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
-  //     qualityGapsdata.forEach((t: any) => {
-  //       this.qualityGapsList.push(
-  //         this.fb.group({
-  //           SUB_MEASURE: [this.sanitize(t.SUB_MEASURE)],
-  //           MEASURE_NAME: [this.sanitize(t.MEASURE_NAME)],
-  //           PROCESS_STATUS: [t.PROCESS_STATUS === 1],
-  //           quality_gap_id: [t.id],
-  //           Type: ['quality'],
-  //           Gap_Code: [this.sanitize(t.Gap_Code)],
-
-  //           // Handle invalid dates
-  //           Observation_Date: [
-  //             t.Observation_Date &&
-  //               t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
-  //               t.Observation_Date !== '01/01/1900'
-  //               ? t.Observation_Date
-  //               : ''
-  //           ],
-
-  //           Observation_Year: [this.sanitize(t.Observation_Year)],
-  //           Observation_Code: [this.sanitize(t.Observation_Code)],
-  //           CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
-  //           Observation_Code_Set: [this.sanitize(t.Observation_Code_Set)],
-  //           Observation_Result: [this.sanitize(t.Observation_Result)],
-  //           Service_Provider_NPI: [this.sanitize(t.Service_Provider_NPI)],
-  //           Service_Provider_Taxonomy_Code: [this.sanitize(t.Service_Provider_Taxonomy_Code)],
-  //           Service_Provider_Name: [this.sanitize(t.Service_Provider_Name)],
-  //           Service_Provider_Type: [this.sanitize(t.Service_Provider_Type)],
-  //           Service_Provider_RxProviderFlag: [this.sanitize(t.Service_Provider_RxProviderFlag)],
-  //           Provider_Group_NPI: [this.sanitize(t.Provider_Group_NPI)],
-  //           Provider_Group_Taxonomy_Code: [this.sanitize(t.Provider_Group_Taxonomy_Code)],
-  //           Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
-  //           note: [this.sanitize(t.note)]
-  //         })
-  //       );
-  //     });
-  //   }
-  // }
   formatDateToMDY(dateStr: string): string {
     if (!dateStr) return '';
 
@@ -781,5 +797,27 @@ private async updateQualityAndRiskData(
 
     return `${year}-${month}-${day}`; // m/d/Y format
   }
+  add_system_log(request: LogRequest): Promise<any> {
+    return this.apiService.insert<any, LogRequest>(request);
+  }
+  private addTaskLog(type: string,note: string): Promise<any> {
+    if (!this.medicaid_id) {
+      return Promise.reject('medicaid_id is required');
+    }
+  const payload: LogRequest = {
+    table_name: 'MEM_SYSTEM_LOG',
+    insertDataArray: [{
+      medicaid_id: this.medicaid_id,
+      log_name: type,
+      log_details: `${type} FOR ${this.medicaid_id} - ${note}`,
+      log_status: 'SUCCESS',
+      log_by: Number(this.userId),
+      action_type: type
+    }]
+  };
+
+  return this.add_system_log(payload);
+}
+
 }
 
