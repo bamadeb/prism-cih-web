@@ -114,6 +114,7 @@ export class AddAction {
   isProcessing: boolean = false;
   //userId: string | null = null;
   userId: string | null = null;
+  role_id: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
   member_dob: string | null = null;
@@ -176,11 +177,13 @@ export class AddAction {
   async ngOnInit(): Promise<void> {
     const user = this.userData.getUser();
     this.userId = user.ID;
+    //this.role_id = user.role_id;
     const result = await this.apiService.addActionMaster<any>();
     this.action_activity_category = result.data.actionActivityCategory || [];
     this.action_ativity_type = result.data.actionActivityType || [];
     this.navigatorList = result.data.navigatorList || [];
     this.setScheduledActionStatus('17');
+
     this.addActionFormGroup
       .get('pcp_visited')
       ?.valueChanges.subscribe((visited: boolean) => {
@@ -199,7 +202,11 @@ export class AddAction {
       });
 
 
+
     this.cdr.detectChanges();
+    if (user.role_id === 9) {
+      this.addActionFormGroup.get('panel_id')?.setValue(18);
+    }
     // this.form = this.fb.group({
     //   riskGapsList: this.fb.array([])
     // });qualityGapsList
@@ -356,8 +363,13 @@ export class AddAction {
         insertDataArray: [insert_data],
       };
       try {
-        const result = await this.apiService.multipleRowInsert<any>(apiPayload);
-        const action_id = result.insertedIds;
+        if(formValues.action_result_id){
+          const result = await this.apiService.multipleRowInsert<any>(apiPayload);
+          const action_id = result.insertedIds;
+        }else{
+           const action_id =0;
+        }
+        
         const next_panel_id = formValues.next_panel_id;
 
         // ✅ 2️⃣ Insert NEXT TASK (if exists)
@@ -381,6 +393,9 @@ export class AddAction {
         }
         //this.insertSystemLog(formValues);
         await this.updateQualityAndRiskData(formValues, action_id);
+
+      this.getMemberTaskList(formValues.medicaid_id);
+      this.getMemberGapsList(formValues.medicaid_id);
         this.isProcessing = false;
         //alert(44);
         this.cdr.detectChanges();
@@ -440,35 +455,37 @@ export class AddAction {
           diagCodes.push(riskGap.DIAG_CODE);
         }
 
-        const commonData = {
-          medicaid_id,
-          Type: riskGap.Type,
-          Gap_Code: riskGap.DIAG_CODE,
-          Observation_Date: riskGap.Observation_Date,
-          Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
-          Observation_Code: riskGap.Observation_Code,
-          CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
-          Observation_Code_Set: riskGap.Observation_Code_Set,
-          Observation_Result: riskGap.Observation_Result,
-          Service_Provider_NPI: riskGap.Service_Provider_NPI,
-          Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
-          Service_Provider_Name: riskGap.Service_Provider_Name,
-          Service_Provider_Type: riskGap.Service_Provider_Type,
-          Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
-          Provider_Group_NPI: riskGap.Provider_Group_NPI,
-          Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
-          Provider_Group_Name: riskGap.Provider_Group_Name,
-          Source: 'CIH',
-          note: riskGap.note
-        };
-        console.log("riskGap", riskGap);
-        if (riskGap.risk_gap_id) {
-          riskObsUpdateArray.push({
-            ...commonData,
-            id: riskGap.risk_gap_id,
-            updated_date: new Date()
-          });
-        } else {
+
+      const commonData = {
+        medicaid_id,
+        Type: riskGap.Type,
+        Gap_Code: riskGap.DIAG_CODE,
+        Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
+        Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
+        Observation_Code: riskGap.Observation_Code,
+        CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
+        Observation_Code_Set: riskGap.Observation_Code_Set,
+        Observation_Result: riskGap.Observation_Result,
+        Service_Provider_NPI: riskGap.Service_Provider_NPI,
+        Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
+        Service_Provider_Name: riskGap.Service_Provider_Name,
+        Service_Provider_Type: riskGap.Service_Provider_Type,
+        Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
+        Provider_Group_NPI: riskGap.Provider_Group_NPI,
+        Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
+        Provider_Group_Name: riskGap.Provider_Group_Name,
+        Source: 'CIH',
+        note: riskGap.note
+      };
+      console.log("riskGap",riskGap);
+      if (riskGap.risk_gap_id) {
+        riskObsUpdateArray.push({
+          ...commonData,
+          id: riskGap.risk_gap_id,
+          updated_date: new Date()
+        });
+      } else {
+
 
           const observationFields = [
             riskGap.Observation_Date,
@@ -498,6 +515,7 @@ export class AddAction {
             });
           }
         }
+
       });
     }
 
@@ -775,6 +793,22 @@ export class AddAction {
       });
     }
   }
+
+
+
+
+   private formatDateOnly(date: Date | string | null | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+
 
 
   formatDateToMDY(dateStr: string): string {

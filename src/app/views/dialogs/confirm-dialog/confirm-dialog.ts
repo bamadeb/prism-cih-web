@@ -7,17 +7,21 @@ import { UpdateMemberRequest,LogRequest } from '../../../models/requests/dashboa
 import { ConfigService } from '../../../services/api.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
-//import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe'; 
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';  
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
   imports: [
-    CommonModule,
+    CommonModule,MatTableModule,MatFormFieldModule,MatInputModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinner
+    MatProgressSpinner,PhoneFormatPipe,ReactiveFormsModule
 ],
   templateUrl: './confirm-dialog.html',
   styleUrl: './confirm-dialog.css'
@@ -25,18 +29,23 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 export class ConfirmDialog {
 
   isLoading = false;
+  noteForm!: FormGroup;
 
   constructor(
     private dialogRef: MatDialogRef<ConfirmDialog>,
-    private apiService: ConfigService,
+    private apiService: ConfigService,private fb: FormBuilder,
     private userData: UserDataService,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
+  ) {
+    this.noteForm = this.fb.group({
+      note: ['', Validators.required]
+    });
+  }
 
   // ============================
   // CONFIRM ACTION
   // ============================
-  async confirm(result: boolean, medicaidId: number): Promise<void> {
+  async confirm(result: boolean, medicaidId: number, type: number): Promise<void> {
     if (!result) {
       this.dialogRef.close({ refresh: false });
       return;
@@ -45,8 +54,10 @@ export class ConfirmDialog {
     this.isLoading = true;
 
     try {
-      await this.markNoLongerPatient(medicaidId);
-      await this.logAction(medicaidId);
+      const note = this.noteForm.value.note.trim();
+
+      await this.markNoLongerPatient(medicaidId,type,note);
+      await this.logAction(medicaidId,type);
 
       // ✅ notify parent
       this.dialogRef.close({
@@ -66,14 +77,15 @@ export class ConfirmDialog {
   // ============================
   // UPDATE MEMBER
   // ============================
-  private markNoLongerPatient(medicaidId: number): Promise<any> {
+  private markNoLongerPatient(medicaidId: number,type:number,note:string): Promise<any> {
     const payload: UpdateMemberRequest = {
       table_name: 'MEM_MEMBERS',
       id_field_name: 'RECIP_NO',
       id_field_value: medicaidId,
       updateData: {
-        NO_LONGER_PATIENT_FLAG: 1,
-        NO_LONGER_PATIENT_DATE: new Date().toISOString().slice(0, 10)
+        NO_LONGER_PATIENT_FLAG: type,
+        NO_LONGER_PATIENT_DATE: new Date().toISOString().slice(0, 10),
+        NO_LONGER_PATIENT_NOTE: note
       }
     };
 
@@ -83,15 +95,21 @@ export class ConfirmDialog {
   // ============================
   // SYSTEM LOG
   // ============================
-  private logAction(medicaidId: number): Promise<any> {
+  private logAction(medicaidId: number,type:number): Promise<any> {
+
     const user = this.userData.getUser();
+    if(type == 1){
+      var msg = "MARK AS NO LONGER PATIENT - ";
+    }else{
+      var msg = "MARK AS CURRENT PATIENT - ";
+    }
 
     const logPayload: LogRequest = {
       table_name: 'MEM_SYSTEM_LOG',
       insertDataArray: [{
         medicaid_id: medicaidId,
         log_name: 'UPDATE MEMBER',
-        log_details: `MARK AS NO LONGER PATIENT - ${medicaidId}`,
+        log_details: msg+` ${medicaidId}`,
         log_status: 'SUCCESS',
         log_by: user.ID,
         action_type: 'UPDATE MEMBER'

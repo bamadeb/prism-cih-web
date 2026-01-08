@@ -159,8 +159,7 @@ mat-form-field {
 }
 
 .txlink{
-  cursor: pointer;
-  text-decoration: underline;
+  cursor: pointer; 
 }
 
 ::ng-deep .xl-dialog .mat-dialog-container {
