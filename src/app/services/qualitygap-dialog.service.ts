@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service';
-import { QualitygapRequest } from '../models/requests/dashboardRequest';
-import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
+import { QualitygapRequest } from '../models/requests/dashboardRequest'; 
+import { QualitygapsDialog } from '../views/dialogs/qualitygaps-dialog/qualitygaps-dialog';
 
 @Injectable({ providedIn: 'root' })
 export class QualitygapDialogService {
@@ -38,17 +38,18 @@ export class QualitygapDialogService {
   // OPEN DIALOG
   // ============================
   private openDialog(row: any, qualitygapList: any[]): void {
-    const html = this.buildHtml(qualitygapList);
+    //const html = this.buildHtml(qualitygapList);
 
     const title = `QUALITY GAPS LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
 
-    this.dialog.open(ActionDialog, {
+    this.dialog.open(QualitygapsDialog, {
       width: '80vw',
       maxWidth: '1200px',
       panelClass: 'xl-dialog',
       data: {
         title,
-        htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
+        qualitygapList
+        //htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
       }
     });
   }
@@ -56,48 +57,66 @@ export class QualitygapDialogService {
   // ============================
   // HTML BUILDER
   // ============================
-  private buildHtml(qualitygapList: any[]): string {
-    if (!qualitygapList.length) {
-      return `<p style="text-align:center;color:#777">No quality gap list available</p>`;
-    }
+  // private buildHtml(qualitygapList: any[]): string {
+  //   if (!qualitygapList.length) {
+  //     return `<p style="text-align:center;color:#777">No quality gap list available</p>`;
+  //   }
 
-    return `
-      <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>SL. NO</th>
-            <th>MEASURE NAME</th>
-            <th>SUB MEASURE</th>
-            <th>PROVIDER ID</th>
-            <th>PROVIDER NAME</th>
-            <th>STATUS</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${qualitygapList.map((q, i) => `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${this.escapeHtml(q.MEASURE_NAME)}</td>
-              <td>${this.escapeHtml(q.SUB_MEASURE)}</td>
-              <td>${this.escapeHtml(q.PROVIDER_ID)}</td>
-              <td>${this.escapeHtml(q.PROVIDER_NAME)}</td>
-              <td>${q.PROCESS_STATUS === 1 ? 'Complete' : 'Open'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  }
+  //   return `
+  //     <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;text-align:left;">
+  //       <thead>
+  //         <tr>
+  //           <th>SL. NO</th>
+  //           <th>MEASURE NAME</th>
+  //           <th>SUB MEASURE</th>
+  //           <th>PROVIDER ID</th>
+  //           <th>PROVIDER NAME</th>
+  //           <th>STATUS</th>
+  //           <th>PROCESS DATE</th>
+  //         </tr>
+  //       </thead>
+  //       <tbody>
+  //         ${qualitygapList.map((q, i) => `
+  //           <tr>
+  //             <td>${i + 1}</td>
+  //             <td>${this.escapeHtml(q.MEASURE_NAME)}</td>
+  //             <td>${this.escapeHtml(q.SUB_MEASURE)}</td>
+  //             <td>${this.escapeHtml(q.PROVIDER_ID)}</td>
+  //             <td>${this.escapeHtml(q.PROVIDER_NAME)}</td>
+  //             <td>${q.PROCESS_STATUS === 1 ? 'Complete' : 'Open'}</td>
+  //             <td>${this.formatDate(q.ADDED_DATE)}</td>
+  //           </tr>
+  //         `).join('')}
+  //       </tbody>
+  //     </table>
+  //   `;
+  // }
 
   // ============================
   // HTML ESCAPER (XSS SAFE)
   // ============================
-  private escapeHtml(text: string = ''): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+  // private escapeHtml(text: string = ''): string {
+  //   return text
+  //     .replace(/&/g, '&amp;')
+  //     .replace(/</g, '&lt;')
+  //     .replace(/>/g, '&gt;')
+  //     .replace(/"/g, '&quot;')
+  //     .replace(/'/g, '&#039;');
+  // }
+
+  // ============================
+  // DATE FORMATTER
+  // ============================
+  // private formatDate(date: any): string {
+  //   if (!date) return '';
+
+  //   const d = new Date(date);
+  //   if (isNaN(d.getTime())) return '';
+
+  //   return d.toLocaleDateString('en-US', {
+  //     month: '2-digit',
+  //     day: '2-digit',
+  //     year: 'numeric'
+  //   });
+  // }
 }

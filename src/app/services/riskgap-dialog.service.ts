@@ -3,7 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service';
 import { RiskgapRequest } from '../models/requests/dashboardRequest';
-import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
+//import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
+import { RiskgapsDialog } from '../views/dialogs/riskgaps-dialog/riskgaps-dialog';
 
 @Injectable({ providedIn: 'root' })
 export class RiskgapDialogService {
@@ -38,16 +39,17 @@ export class RiskgapDialogService {
   // OPEN DIALOG
   // ============================
   private openDialog(row: any, riskgapList: any[]): void {
-    const html = this.buildHtml(riskgapList);
+    //const html = this.buildHtml(riskgapList);
 
     const title = `RISK GAPS LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
 
-    this.dialog.open(ActionDialog, {
+    this.dialog.open(RiskgapsDialog, {
       width: '80vw',
       maxWidth: '1300px',
       data: {
         title,
-        htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
+        riskgapList 
+        //htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
       }
     });
   }
@@ -55,66 +57,68 @@ export class RiskgapDialogService {
   // ============================
   // HTML BUILDER
   // ============================
-  private buildHtml(riskgapList: any[]): string {
-    if (!riskgapList.length) {
-      return `<p style="text-align:center;color:#777">No risk gap list available</p>`;
-    }
+  // private buildHtml(riskgapList: any[]): string {
+  //   if (!riskgapList.length) {
+  //     return `<p style="text-align:center;color:#777">No risk gap list available</p>`;
+  //   }
 
-    return `
-      <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>SL. NO</th>
-            <th>RELEVANT DATE</th>
-            <th>HCC CATEGORY</th>
-            <th>HCC MODEL</th>
-            <th>DIAG CODE</th>
-            <th>DIAG DESC</th>
-            <th>STATUS</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${riskgapList.map((q, i) => `
-            <tr>
-              <td>${i + 1}</td>
-              <td>${this.formatDate(q.RELEVANT_DATE)}</td>
-              <td>${this.escapeHtml(q.HCC_CATEGORY)}</td>
-              <td>${this.escapeHtml(q.HCC_MODEL)}</td>
-              <td>${this.escapeHtml(q.DIAG_CODE)}</td>
-              <td>${this.escapeHtml(q.DIAG_DESC)}</td>
-              <td>${q.PROCESS_STATUS === 1 ? 'COMPLETE' : 'OPEN'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  }
+  //   return `
+  //     <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;text-align:left;">
+  //       <thead>
+  //         <tr>
+  //           <th>SL. NO</th>
+  //           <th>RELEVANT DATE</th>
+  //           <th>HCC CATEGORY</th>
+  //           <th>HCC MODEL</th>
+  //           <th>DIAG CODE</th>
+  //           <th>DIAG DESC</th>
+  //           <th>STATUS</th>
+  //           <th>PROCESS DATE</th>
+  //         </tr>
+  //       </thead>
+  //       <tbody>
+  //         ${riskgapList.map((q, i) => `
+  //           <tr>
+  //             <td>${i + 1}</td>
+  //             <td>${this.formatDate(q.RELEVANT_DATE)}</td>
+  //             <td>${this.escapeHtml(q.HCC_CATEGORY)}</td>
+  //             <td>${this.escapeHtml(q.HCC_MODEL)}</td>
+  //             <td>${this.escapeHtml(q.DIAG_CODE)}</td>
+  //             <td>${this.escapeHtml(q.DIAG_DESC)}</td>
+  //             <td>${q.PROCESS_STATUS === 1 ? 'COMPLETE' : 'OPEN'}</td>
+  //             <td>${this.formatDate(q.ADDED_ON)}</td>
+  //           </tr>
+  //         `).join('')}
+  //       </tbody>
+  //     </table>
+  //   `;
+  // }
 
-  // ============================
-  // DATE FORMATTER
-  // ============================
-  private formatDate(date: any): string {
-    if (!date) return '';
+  // // ============================
+  // // DATE FORMATTER
+  // // ============================
+  // private formatDate(date: any): string {
+  //   if (!date) return '';
 
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
+  //   const d = new Date(date);
+  //   if (isNaN(d.getTime())) return '';
 
-    return d.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
-    });
-  }
+  //   return d.toLocaleDateString('en-US', {
+  //     month: '2-digit',
+  //     day: '2-digit',
+  //     year: 'numeric'
+  //   });
+  // }
 
-  // ============================
-  // HTML ESCAPER (XSS SAFE)
-  // ============================
-  private escapeHtml(text: string = ''): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+  // // ============================
+  // // HTML ESCAPER (XSS SAFE)
+  // // ============================
+  // private escapeHtml(text: string = ''): string {
+  //   return text
+  //     .replace(/&/g, '&amp;')
+  //     .replace(/</g, '&lt;')
+  //     .replace(/>/g, '&gt;')
+  //     .replace(/"/g, '&quot;')
+  //     .replace(/'/g, '&#039;');
+  // }
 }
