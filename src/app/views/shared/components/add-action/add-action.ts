@@ -852,6 +852,16 @@ export class AddAction {
 
   return this.add_system_log(payload);
 }
+isValidPcpVisitDate(): boolean {
+  const value = this.addActionFormGroup.get('pcp_visit_date')?.value;
 
+  if (!value) {
+    return false;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  return !isNaN(date.getTime());
+}
 }
 

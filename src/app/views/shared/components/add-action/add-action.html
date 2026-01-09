@@ -229,7 +229,7 @@
         matInput
         [matDatepicker]="pcpPicker"
         formControlName="pcp_visit_date"
-        [disabled]="!addActionFormGroup.get('pcp_visited')?.value">
+        [disabled]="!addActionFormGroup.get('pcp_visited')?.value" readonly>
       <mat-datepicker-toggle matSuffix [for]="pcpPicker"></mat-datepicker-toggle>
       <mat-datepicker #pcpPicker></mat-datepicker>
     </mat-form-field>
@@ -250,7 +250,7 @@
   color="primary"
   class="pcp-save-btn"
   (click)="savePcpVisit()"
-  [disabled]="isSavingPcpVisit() || !addActionFormGroup.get('pcp_visited')?.value">
+  [disabled]="isSavingPcpVisit() || !addActionFormGroup.get('pcp_visited')?.value || !addActionFormGroup.get('pcp_visit_date')?.value || !isValidPcpVisitDate()">
 
   @if (isSavingPcpVisit()) {
     <mat-progress-spinner
