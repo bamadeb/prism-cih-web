@@ -31,7 +31,7 @@ export class AddActionDialogService {
   //   });
   //   //return dialogRef.afterOpened().toPromise();
   // }
-showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: string): Promise<void> {
+showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: string): Promise<boolean> {
 
   const dialogRef = this.dialog.open(AddAction, {
     width: '95vw',
@@ -40,7 +40,7 @@ showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: stri
     data: { medicaid_id, member_name, member_dob }
   });
 
-  return firstValueFrom(dialogRef.afterOpened());
+  return firstValueFrom(dialogRef.afterClosed());
 }
 
   // private openDialog(medicaid_id: string, member_name: string,member_dob: string) {
