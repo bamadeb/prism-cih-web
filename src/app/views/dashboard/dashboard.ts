@@ -213,14 +213,19 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 /** Load dashboard data from API */
 async loadTableData(): Promise<void> {
   await this.withLoader(async () => {
-    const user = this.userData.getUser();
-    this.loginUserId =
-      this.selectedNavigatorId ??
-      (user.role_id === 7 ? 0 : user.ID);
-       this.loginRoleId =user.role_id;
-
+    const user = this.userData.getUser();      
+    if(user.role_id == 7){
+      this.loginUserId =this.selectedNavigatorId ?? 0;
+    }else{
+       this.loginUserId=user.ID;
+    }
+    this.loginRoleId =user.role_id;
+    //console.log(user);
+    //this.loginUserId = this.selectedNavigatorId ?? (user.role_id == 7 ? 0 : user.ID);
+    
+    //console.log('loginUserId: '+this.loginUserId);
+    //console.log('loginRoleId: '+this.loginRoleId);
     const request: DashboardRequest = { user_id: this.loginUserId };
-
     const result = await this.apiService.dashboard<any>(request);
     const members = result?.data || [];
 
@@ -558,6 +563,7 @@ fallbackCopy(text: string) {
 } 
 
 onNavigatorChange(navigatorId: number): void {
+  //alert(navigatorId);
   this.selectedNavigatorId = navigatorId;
   this.loadTableData();
 }
