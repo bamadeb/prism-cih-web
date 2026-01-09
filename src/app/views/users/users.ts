@@ -106,7 +106,7 @@ export class Users implements OnInit, AfterViewInit {
         role: u.ROLE_NAME ?? '—',
         roleId: u.role_id,
         member_status: u.member_status,
-        status: u.status === 1 ? 'Inactive' : 'Active',
+        status: u.status,
       }));
 
       this.selection.clear();
