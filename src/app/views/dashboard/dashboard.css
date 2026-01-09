@@ -190,6 +190,13 @@ mat-form-field {
   text-align: right;
 }
 
+.mat-column-referring_reason {
+  flex: 0 0 30%;   /* fixed width */
+  width: 30%;
+  max-width: 30%;
+  word-wrap: break-word;
+  white-space: normal;
+}
 
 
 
