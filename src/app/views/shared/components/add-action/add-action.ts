@@ -1,7 +1,7 @@
 //import { Component } from '@angular/core';
 // import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 // import {MatButtonModule} from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 // import {MatGridListModule} from '@angular/material/grid-list';
 import { MatRadioModule } from '@angular/material/radio';
@@ -125,7 +125,7 @@ export class AddAction {
     private cdr: ChangeDetectorRef,
     private userData: UserDataService,
     @Inject(MAT_DIALOG_DATA) public data: any,
-
+    private dialogRef: MatDialogRef<AddAction>,
     private fb: FormBuilder
   ) {
     // this.form = this.fb.group({
@@ -273,6 +273,7 @@ export class AddAction {
       console.error('Error saving PCP visit:', error);
     } finally {
       this.isSavingPcpVisit.set(false);
+      //this.dialogRef.close(true);
     }
   }
   async setPCPVisitHistory() {

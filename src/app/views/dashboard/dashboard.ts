@@ -519,11 +519,12 @@ async openAddActionDialog(
   //alert(medicaid_id);
 
   try {
-    await this.addActionService.showAddActionDialog(
+    const actionSaved = await this.addActionService.showAddActionDialog(
       medicaid_id,
       member_name,
       member_db
     );
+    this.loadTableData();
     this.isLoading = false;
   } catch (err) {
     console.error(err);
