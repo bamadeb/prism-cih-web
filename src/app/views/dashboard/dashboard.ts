@@ -82,7 +82,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     'BIRTH',
     'phone',
     'address', 
-    'NO_LONGER_PATIENT_DATE','1'
+    'NO_LONGER_PATIENT_DATE','NO_LONGER_PATIENT_NOTE','1'
   ];
   dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   transferdataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
@@ -256,11 +256,9 @@ async loadTableData(): Promise<void> {
   });
 }
 
-showRiskgaps(row: any) {
-  this.riskgapsService.showRiskgapDialog(row);
+showRiskgaps(row: any) { 
+   this.withLoader(() => this.riskgapsService.showRiskgapDialog(row));
 }
-
-
 
 private defaultSortingAccessor(item: any, property: string) {
   if (property === 'MEM_INFO') {
@@ -573,6 +571,7 @@ onNavigatorChange(navigatorId: number): void {
       const res = await this.apiService.poweroverview<any>(request);
       //console.log('Power Overview:', res);  
       if (res.data) {
+        //console.log(res.data.NoLongerPatientList);
         this.overallSummary = res.data.overallRiskQualitySummary || [];
         this.ownSummary = res.data.ownRiskQualitySummary || [];
         this.navigatorList = res.data.navigatorList || []; 
@@ -628,7 +627,8 @@ onNavigatorChange(navigatorId: number): void {
         PCP_VISIT_DATE: r.PCP_VISIT_DATE,
         PCP_VISIT_FLAG: r.PCP_VISIT_FLAG,
         PRIORITY_FLAG: r.PRIORITY_FLAG,
-        NO_LONGER_PATIENT_DATE: r.NO_LONGER_PATIENT_DATE
+        NO_LONGER_PATIENT_DATE: r.NO_LONGER_PATIENT_DATE,
+        NO_LONGER_PATIENT_NOTE: r.NO_LONGER_PATIENT_NOTE
       }));
       //console.log(nopatientDATA);
       this.nolongerpatientdataSource.data = nopatientDATA;
