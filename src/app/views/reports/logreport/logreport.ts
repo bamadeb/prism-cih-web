@@ -177,7 +177,7 @@ async loadLogreport() {
   this.isLoading = true;
 
   try {
-    const result = await this.apiService.addActionMaster<any>();
+    const result = await this.apiService.addActionMaster<any>('0010143576');
 
     const activityTypes = result.data?.actionActivityType ?? [];
     this.navigatorList = result.data?.usersList ?? [];

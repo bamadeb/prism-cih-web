@@ -1,5 +1,5 @@
-<h3 mat-dialog-title class="text-uppercase" style="font-size: 20px;">ADD/UPDATE ACTION | {{ this.member_name }} - #{{ this.medicaid_id }} - {{
-  this.member_dob }}</h3>
+<h3 mat-dialog-title class="text-uppercase" style="font-size: 20px;"> {{ data.member_name }} :: #{{ this.medicaid_id }}
+  :: {{ this.member_dob }} :: {{ data.addr }} :: {{ data.phone | phoneFormat }} :: {{ data.practice }}</h3>
 <mat-dialog-content>
   <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
     <mat-tab label="TO-DO/DONE">
@@ -44,7 +44,7 @@
                 <div class="action-row mb-3">
                   <mat-form-field appearance="fill" class="w-100 flex-item">
                     <mat-label>ACTION DATE</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="action_date" placeholder="Select date" />
+                    <input matInput [matDatepicker]="picker" formControlName="action_date" placeholder="Select date" readonly />
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                   </mat-form-field>
@@ -91,7 +91,7 @@
               <!-- Next Type -->
               <div class="mb-3">
                 <label class="form-label text-uppercase fw-bold">Next Type:</label>
-                <mat-radio-group formControlName="next_panel_id" class="ms-2 text-uppercase" >
+                <mat-radio-group formControlName="next_panel_id" class="ms-2 text-uppercase">
                   @for (type of action_ativity_type; track type.id) {
                   <mat-radio-button class="me-3" [value]="type.id">
                     {{ type.action_type }}
@@ -105,7 +105,7 @@
                 <mat-form-field appearance="fill" class="flex-item w-100">
                   <mat-label>NEXT DATE</mat-label>
                   <input matInput [matDatepicker]="nextPicker" formControlName="next_action_date"
-                    placeholder="Next Action Date" />
+                    placeholder="Next Action Date" readonly />
                   <mat-datepicker-toggle matSuffix [for]="nextPicker"></mat-datepicker-toggle>
                   <mat-datepicker #nextPicker></mat-datepicker>
                 </mat-form-field>
@@ -170,171 +170,145 @@
 
             </div>
           </div>
- 
-<!-- PCP VISIT SECTION -->
-<div class="pcp-visit-container mat-elevation-z2">
 
-  <!-- HEADER: TITLE + ICONS -->
-  <div class="pcp-visit-header" style="display: flex; align-items: center; gap: 4px;">
+          <!-- PCP VISIT SECTION -->
+          <div class="pcp-visit-container mat-elevation-z2">
 
-    <span class="pcp-title">PCP Visit</span>
-  <!-- SUCCESS MESSAGE -->
-@if (pcpSuccessMessage()) {
-  <span class="pcp-success-msg">
-    <mat-icon class="pcp-success-icon">check_circle</mat-icon>
-    {{ pcpSuccessMessage() }}
-  </span>
-}
+            <!-- HEADER: TITLE + ICONS -->
+            <div class="pcp-visit-header" style="display: flex; align-items: center; gap: 4px;">
 
-    <!-- Icon Buttons Group -->
-    <div class="pcp-icon-buttons" style="display: flex; align-items: center; gap: 4px; margin-left: auto;">
-      
-      <!-- Toggle Add Form -->
-      <button
-        mat-icon-button
-        type="button"
-        color="primary"
-        (click)="togglePcpVisit()"
-        aria-label="Add PCP Visit">
-        <mat-icon>
-          {{ showPcpVisitForm() ? 'remove' : 'add' }}
-        </mat-icon>
-      </button>
+              <span class="pcp-title">PCP VISIT</span>
+              <!-- SUCCESS MESSAGE -->
+              @if (pcpSuccessMessage()) {
+              <span class="pcp-success-msg">
+                <mat-icon class="pcp-success-icon">check_circle</mat-icon>
+                {{ pcpSuccessMessage() }}
+              </span>
+              }
 
-      <!-- Show Visit History -->
-      <button
-        mat-icon-button
-        type="button"
-        color="accent"
-        (click)="togglePcpHistory()"
-        aria-label="Show PCP Visit History">
-        <mat-icon>history</mat-icon>
-      </button>
+              <!-- Icon Buttons Group -->
+              <div class="pcp-icon-buttons" style="display: flex; align-items: center; gap: 4px; margin-left: auto;">
 
-    </div>
-  </div>
+                <!-- Toggle Add Form -->
+                <button mat-icon-button type="button" color="primary" (click)="togglePcpVisit()"
+                  aria-label="Add PCP Visit">
+                  <mat-icon>
+                    {{ showPcpVisitForm() ? 'remove' : 'add' }}
+                  </mat-icon>
+                </button>
+
+                <!-- Show Visit History -->
+                <button mat-icon-button type="button" color="accent" (click)="togglePcpHistory()"
+                  aria-label="Show PCP Visit History">
+                  <mat-icon>history</mat-icon>
+                </button>
+
+              </div>
+            </div>
 
 
-<!-- ADD FORM -->
-@if (showPcpVisitForm()) {
-  <div class="pcp-visit-row">
+            <!-- ADD FORM -->
+            @if (showPcpVisitForm()) {
+            <div class="pcp-visit-row">
 
-    <mat-checkbox formControlName="pcp_visited">
-      PCP Visited
-    </mat-checkbox>
+              <mat-checkbox formControlName="pcp_visited">
+                PCP VISITED
+              </mat-checkbox>
 
-    <mat-form-field appearance="fill" class="pcp-date">
-      <mat-label>Visit Date</mat-label>
-      <input
-        matInput
-        [matDatepicker]="pcpPicker"
-        formControlName="pcp_visit_date"
-        [disabled]="!addActionFormGroup.get('pcp_visited')?.value" readonly>
-      <mat-datepicker-toggle matSuffix [for]="pcpPicker"></mat-datepicker-toggle>
-      <mat-datepicker #pcpPicker></mat-datepicker>
-    </mat-form-field>
+              <mat-form-field appearance="fill" class="pcp-date">
+                <mat-label>VISIT DATE</mat-label>
+                <input matInput [matDatepicker]="pcpPicker" formControlName="pcp_visit_date"
+                    readonly>
+                <mat-datepicker-toggle matSuffix [for]="pcpPicker"></mat-datepicker-toggle>
+                <mat-datepicker #pcpPicker></mat-datepicker>
+              </mat-form-field>
 
-    <mat-form-field appearance="fill" class="pcp-message">
-      <mat-label>Message</mat-label>
-      <input
-        matInput
-        formControlName="pcp_visit_message"
-        placeholder="PCP visit note"
-        [disabled]="!addActionFormGroup.get('pcp_visited')?.value">
-    </mat-form-field>
+              <mat-form-field appearance="fill" class="pcp-message">
+                <mat-label>MESSAGE</mat-label>
+                <input matInput formControlName="pcp_visit_message" placeholder="PCP VISIT NOTE"
+                  >
+              </mat-form-field>
 
-    <!-- SAVE BUTTON (OUTSIDE MESSAGE) -->
-<button
-  mat-flat-button
-  type="button"
-  color="primary"
-  class="pcp-save-btn"
-  (click)="savePcpVisit()"
-  [disabled]="isSavingPcpVisit() || !addActionFormGroup.get('pcp_visited')?.value || !addActionFormGroup.get('pcp_visit_date')?.value || !isValidPcpVisitDate()">
+              <!-- SAVE BUTTON (OUTSIDE MESSAGE) -->
+              <button mat-flat-button type="button" color="primary" class="pcp-save-btn" (click)="savePcpVisit()"
+                [disabled]="isSavingPcpVisit() || !addActionFormGroup.get('pcp_visited')?.value || !addActionFormGroup.get('pcp_visit_date')?.value || !isValidPcpVisitDate()">
 
-  @if (isSavingPcpVisit()) {
-    <mat-progress-spinner
-      diameter="20"
-      mode="indeterminate">
-    </mat-progress-spinner>
-  } @else {
-    Save
-  }
+                @if (isSavingPcpVisit()) {
+                <mat-progress-spinner diameter="20" mode="indeterminate">
+                </mat-progress-spinner>
+                } @else {
+                SAVE
+                }
 
-</button>
+              </button>
 
 
-  </div>
-}
-<!-- PCP VISIT HISTORY SECTION -->
-@if (showPcpHistory()) {
-  <div class="pcp-history-row mat-elevation-z1">
+            </div>
+            }
+            <!-- PCP VISIT HISTORY SECTION -->
+            @if (showPcpHistory()) {
+            <div class="pcp-history-row mat-elevation-z1">
 
-    <h5 class="pcp-history-title">PCP Visit History</h5>
-    <!-- LOADER -->
-    @if (isLoadingPcpHistory()) {
-      <div class="pcp-history-loader">
-        <mat-progress-spinner
-          diameter="32"
-          mode="indeterminate">
-        </mat-progress-spinner>
-      </div>
-    }
-        <!-- TABLE -->
-    @if (!isLoadingPcpHistory()) {
-    <table
-      mat-table
-      [dataSource]="memberPCPVisitList"
-      class="mat-elevation-z0 pcp-history-table">
+              <h5 class="pcp-history-title">PCP Visit History</h5>
+              <!-- LOADER -->
+              @if (isLoadingPcpHistory()) {
+              <div class="pcp-history-loader">
+                <mat-progress-spinner diameter="32" mode="indeterminate">
+                </mat-progress-spinner>
+              </div>
+              }
+              <!-- TABLE -->
+              @if (!isLoadingPcpHistory()) {
+              <table mat-table [dataSource]="memberPCPVisitList" class="mat-elevation-z0 pcp-history-table">
 
-      <!-- Visit Date -->
-      <ng-container matColumnDef="visit_date">
-        <th mat-header-cell *matHeaderCellDef>Visit Date</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.VISIT_DATE | date:'MM/dd/yyyy' }}
-        </td>
-      </ng-container>
+                <!-- Visit Date -->
+                <ng-container matColumnDef="visit_date">
+                  <th mat-header-cell *matHeaderCellDef>VISIT DATE</th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ row.VISIT_DATE | date:'MM/dd/yyyy' }}
+                  </td>
+                </ng-container>
 
-      <!-- Message -->
-      <ng-container matColumnDef="message">
-        <th mat-header-cell *matHeaderCellDef>Message</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.MESSAGE }}
-        </td>
-      </ng-container>
+                <!-- Message -->
+                <ng-container matColumnDef="message">
+                  <th mat-header-cell *matHeaderCellDef>MESSAGE</th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ row.MESSAGE }}
+                  </td>
+                </ng-container>
 
-      <!-- Added By -->
-      <ng-container matColumnDef="added_user_name">
-        <th mat-header-cell *matHeaderCellDef>Added By</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.added_user_name }}
-        </td>
-      </ng-container>
+                <!-- Added By -->
+                <ng-container matColumnDef="added_user_name">
+                  <th mat-header-cell *matHeaderCellDef>ADDED BY</th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ row.added_user_name }}
+                  </td>
+                </ng-container>
 
-      <!-- Added Date -->
-      <ng-container matColumnDef="added_date">
-        <th mat-header-cell *matHeaderCellDef>Added Date</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.ADDED_DATE | date:'MM/dd/yyyy' }}
-        </td>
-      </ng-container>
+                <!-- Added Date -->
+                <ng-container matColumnDef="added_date">
+                  <th mat-header-cell *matHeaderCellDef>ADDED DATE</th>
+                  <td mat-cell *matCellDef="let row">
+                    {{ row.ADDED_DATE | date:'MM/dd/yyyy' }}
+                  </td>
+                </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="PCPVisitDisplayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: PCPVisitDisplayedColumns;"></tr>
+                <tr mat-header-row *matHeaderRowDef="PCPVisitDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: PCPVisitDisplayedColumns;"></tr>
 
-    </table>
-  }
-    @if (!memberPCPVisitList.length) {
-      <div class="pcp-no-data">
-        No PCP visit history available.
-      </div>
-    }
+              </table>
+              }
+              @if (!memberPCPVisitList.length) {
+              <div class="pcp-no-data">
+                No PCP visit history available.
+              </div>
+              }
 
-  </div>
-}
+            </div>
+            }
 
 
-</div>
+          </div>
 
 
 
@@ -434,10 +408,7 @@
                           <!-- <mat-checkbox formControlName="PROCESS_STATUS" (click)="$event.stopPropagation()"
                             (keydown)="$event.stopPropagation()" class="me-2">
                           </mat-checkbox> -->
-                          <mat-checkbox
-                            formControlName="PROCESS_STATUS"
-                            [disabled]="true"
-                            class="me-2">
+                          <mat-checkbox formControlName="PROCESS_STATUS" [disabled]="true" class="me-2">
                           </mat-checkbox>
                         </mat-panel-title>
 
@@ -455,7 +426,7 @@
                             <mat-label>Observation Date</mat-label>
 
                             <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
-                              placeholder="MM/DD/YYYY" />
+                              placeholder="MM/DD/YYYY" readonly />
 
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                             <mat-datepicker #picker></mat-datepicker>
@@ -604,10 +575,7 @@
                           <!-- <mat-checkbox formControlName="PROCESS_STATUS" (click)="$event.stopPropagation()"
                             (keydown)="$event.stopPropagation()" class="me-2">
                           </mat-checkbox> -->
-                          <mat-checkbox
-                            formControlName="PROCESS_STATUS"
-                            [disabled]="true"
-                            class="me-2">
+                          <mat-checkbox formControlName="PROCESS_STATUS" [disabled]="true" class="me-2">
                           </mat-checkbox>
                         </mat-panel-title>
 
@@ -625,7 +593,7 @@
                             <mat-label>Observation Date</mat-label>
 
                             <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
-                              placeholder="MM/DD/YYYY" />
+                              placeholder="MM/DD/YYYY" readonly/>
 
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                             <mat-datepicker #picker></mat-datepicker>
@@ -785,50 +753,184 @@
     </mat-tab>
 
     <mat-tab label="APPOINTMENT">
-      <div><form enctype="multipart/form-data" [formGroup]="appointmentFormGroup">
-                                    <div class="row mb-3">
-                                        <div class="col-sm-12">
-                                            <input type="text" formControlName="vendor_name" placeholder="Search Vendor"
-                                                class="form-control text-uppercase" />
-                                        </div>
-                                    </div>
+      <div>
+        <form enctype="multipart/form-data" [formGroup]="appointmentFormGroup">
+          <div class="row mb-3">
+            <div class="col-sm-12">
+              <input type="text" formControlName="vendor_name" placeholder="Search Vendor"
+                class="form-control text-uppercase" />
+            </div>
+          </div>
 
-                                    <div class="row mb-3">
-                                        <div class="col-sm-12">
-                                            <input type="date" formControlName="appointment_date" class="form-control"
-                                                placeholder="Appointment Date" required />
-                                        </div>
-                                    </div>
+          <div class="row mb-3">
+            <div class="col-sm-12">
+              <input type="date" formControlName="appointment_date" class="form-control" placeholder="Appointment Date"
+                required />
+            </div>
+          </div>
 
-                                    <div class="row mb-3">
-                                        <div class="col-sm-12">
-                                            <input type="time" formControlName="appointment_time"
-                                                class="form-control" />
-                                        </div>
-                                    </div>
+          <div class="row mb-3">
+            <div class="col-sm-12">
+              <input type="time" formControlName="appointment_time" class="form-control" />
+            </div>
+          </div>
 
-                                    <div class="row mb-3">
-                                        <div class="col-sm-12">
-                                            <textarea class="form-control text-uppercase"
-                                                formControlName="appointment_note" placeholder="Note"
-                                                required></textarea>
-                                        </div>
-                                    </div>
+          <div class="row mb-3">
+            <div class="col-sm-12">
+              <textarea class="form-control text-uppercase" formControlName="appointment_note" placeholder="Note"
+                required></textarea>
+            </div>
+          </div>
 
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-primary text-uppercase">
-                                            Submit
-                                        </button>
-                                    </div>
-                                </form></div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary text-uppercase">
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+    <mat-tab label="STAR PERFORMANCE">
+      <div>
+        <div class="comparison-wrapper">
+
+          <!-- FILE TABLE -->
+          <mat-card class="comparison-card">
+            <h3 class="table-title">FILE</h3>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>CODE (MASTER)</th>
+                  <th>CODE (FILE)</th>
+                  <th>TIN</th>
+                  <th>NUMERATOR GAP</th>
+                  <th>ADDED DATE</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (star of starperformanceList; track star.medicaid_id) {
+                @if (star.TYPE === 'FILE') {
+                <tr>
+                  <td>{{ star.MEASURE_CODE }}</td>
+                  <td>{{ star.SUB_MEASURE }}</td>
+                  <td>{{ star.PCP_TAX_ID }}</td>
+                  <td>{{ star.NUMERATOR_GAP === 1 ? 'COMPLIANT' : 'NON-COMPLIANT' }}</td>
+                  <td>{{ star.ADDED_DATE | date:'MM/dd/yyyy' }}</td>
+                </tr>
+                }
+                }
+              </tbody>
+            </table>
+          </mat-card>
+
+          <!-- PRISM TABLE -->
+          <mat-card class="comparison-card">
+
+            <form *ngIf="showContent" [formGroup]="measureForm" (ngSubmit)="addMeasure()">
+               <mat-error *ngIf="measureForm.get('MEASURE')?.hasError('duplicateMeasure')">
+                This measure already exists for this member and TIN.
+               </mat-error>
+              <mat-form-field appearance="outline" class="mr">
+                <mat-label>MEASURE</mat-label>
+                <mat-select formControlName="MEASURE" class="txupper">
+                  @for (measure of measureList; track measure) {
+                  <mat-option [value]="measure.MEASURE_CODE" class="txupper">{{ measure.MEASURE_CODE }} </mat-option>
+                  }
+                </mat-select>
+
+                <mat-error *ngIf="measureForm.get('MEASURE')?.invalid">
+                  Measure is required
+                </mat-error> 
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="mr">
+                <mat-label>MEASURE YEAR</mat-label> 
+                <mat-select formControlName="MEASURE_YEAR" class="txupper">                  
+                  <mat-option [value]="2026">2026</mat-option>
+                  <mat-option [value]="2025">2025</mat-option>
+                  <mat-option [value]="2024">2024</mat-option>
+                </mat-select>
+                <!-- <input matInput formControlName="MEASURE_YEAR"> -->
+                <mat-error *ngIf="measureForm.get('MEASURE_YEAR')?.invalid">
+                  Measure year is required
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="mr" style="width: 33%;">
+                <mat-label>TIN</mat-label>
+                <mat-select formControlName="PCP_TAX_ID" class="txupper">
+                  @for (tin of availableTins; track tin) {
+                  <mat-option [value]="tin" class="txupper">{{ getProviderGroupByTin(tin) }} ({{tin}})</mat-option>
+                  }
+                </mat-select>
+                <mat-error *ngIf="measureForm.get('PCP_TAX_ID')?.invalid">
+                  TIN is required
+                </mat-error>
+              </mat-form-field>
+
+              <div>
+                <mat-radio-group formControlName="NUM_COUNT">
+                  <!-- <mat-radio-button [value]="0">NON-COMPLIANCE</mat-radio-button> -->
+                  <mat-radio-button [value]="1">COMPLIANT</mat-radio-button>
+                </mat-radio-group>
+
+                <mat-error *ngIf="measureForm.get('NUM_COUNT')?.invalid">
+                  Field is required
+                </mat-error>
+                <div style="float: right;">
+                  <button mat-raised-button class="mr" color="primary" type="submit" [disabled]="measureForm.invalid">
+                     @if (!isLoading) {
+                      SUBMIT
+                    } @else {
+                      <mat-progress-spinner
+                        diameter="20"
+                        mode="indeterminate">
+                      </mat-progress-spinner>
+                    }
+                  </button>
+                  <button mat-raised-button (click)="toggleContent()">CANCEL</button>
+                </div> 
+              </div>  
+            </form>
+
+            <div>
+              <h3 class="table-title">PRISM <a
+                  style="text-decoration: underline;cursor:pointer;font-weight: normal;float: right;"
+                  *ngIf="!showContent" (click)="toggleContent()">+Add</a></h3>
+            </div>
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>MEASURE</th>
+                  <th>TIN</th>
+                  <th>NUMERATOR GAP</th>
+                  <th>ADDED DATE</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (star of starperformanceList; track star.medicaid_id) {
+                  @if (star.TYPE === 'PRISM') {
+                  <tr>
+                    <td>{{ star.SUB_MEASURE }}</td>
+                    <td>{{ star.PCP_TAX_ID }}</td>
+                    <td>{{ star.NUMERATOR_GAP == '1' ? 'COMPLIANT' : 'NON-COMPLIANT' }}</td>
+                    <td>{{ star.ADDED_DATE | date:'MM/dd/yyyy' }}</td>
+                  </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </mat-card>
+
+        </div>
+
+      </div>
+
     </mat-tab>
 
 
   </mat-tab-group>
 </mat-dialog-content>
+
 <mat-dialog-actions>
-  <button matButton mat-dialog-close>Close</button>
+  <button matButton mat-dialog-close>CLOSE</button>
 </mat-dialog-actions>
-<!-- <div class="loader-backdrop" *ngIf="isLoading">
-  <mat-spinner diameter="60"></mat-spinner>
-</div> -->

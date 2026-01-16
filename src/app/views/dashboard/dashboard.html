@@ -19,12 +19,8 @@
               {{ n.FistName }} {{ n.LastName }}
             </mat-option>
           </mat-select>
-        </mat-form-field>
-
-
-
+        </mat-form-field> 
       </div>
-
     </mat-card-content>
   </mat-card>
 
@@ -348,7 +344,7 @@
                       
                       <!-- <a style="margin-left: 15px;" class="txlink" (click)="showErrorPopup()">D</a> -->
                   
-                        <mat-icon class="txlink"  (click)="openAddActionDialog(row.MEM_NO, row.FIRST_NAME + ' ' + row.LAST_NAME,row.BIRTH)">
+                        <mat-icon class="txlink"  (click)="openAddActionDialog(row.MEM_NO, row.FIRST_NAME + ' ' + row.LAST_NAME,row.BIRTH,row.latest_alt_address || row.OTHER_ADDR1,row.latest_alt_phone || row.OTHER_PHONE,providerTinNameMapping[row.PCP_TAX_ID],row.PCP_TAX_ID)">
                          
                           <div style="margin-left: 2px;">add</div>
                         </mat-icon>
@@ -359,9 +355,9 @@
                 <ng-container matColumnDef="MEM_INFO">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>#MEM ID / NAME / DOB</th>
                   <td mat-cell *matCellDef="let row">{{ row.MEM_NO }}<br><mat-icon>accessibility</mat-icon>
-                    <strong style="cursor: pointer;" (click)="copyToClipboard(row.FIRST_NAME + ' ' + row.LAST_NAME)">{{ row.FIRST_NAME }} {{
+                    <strong style="cursor: pointer;" title="Click to copy" (click)="copyToClipboard(row.FIRST_NAME + ' ' + row.LAST_NAME)">{{ row.FIRST_NAME }} {{
                       row.LAST_NAME }}</strong><br>
-                    <div style="display:flex;cursor: pointer;"><mat-icon>date_range</mat-icon><span
+                    <div style="display:flex;cursor: pointer;"><mat-icon>date_range</mat-icon><span title="Click to copy"
                         (click)="copyToClipboard(row.BIRTH)">{{ row.BIRTH }}</span></div>
                   </td>
                 </ng-container>
@@ -370,7 +366,7 @@
                   <td mat-cell *matCellDef="let row"><mat-icon>home</mat-icon>
                     <!-- <span matTooltip="Edit" class="pointer" (click)="addalterAddr(row);copyToClipboard(row.latest_alt_address || row.OTHER_ADDR1);" matTooltipPosition="right">{{
                       row.latest_alt_address || row.OTHER_ADDR1 }} </span> -->
-                    <span class="pointer address-text" style="color:blue;"
+                    <span class="pointer address-text" style="color:blue;" title="Click to copy"
                       (click)="copyToClipboard(row.latest_alt_address || row.OTHER_ADDR1)"
                       [matMenuTriggerFor]="editMenu">
                       {{ row.latest_alt_address || row.OTHER_ADDR1 }}</span>
@@ -382,7 +378,7 @@
                     </mat-menu>
 
                     <br><mat-icon> phone</mat-icon>
-                    <span class="pointer address-text" style="color:blue;"
+                    <span class="pointer address-text" style="color:blue;" title="Click to copy"
                       (click)="copyToClipboard(row.latest_alt_phone || row.OTHER_PHONE);"
                       [matMenuTriggerFor]="editMenu1">{{ row.latest_alt_phone || row.OTHER_PHONE | phoneFormat }}</span>
 

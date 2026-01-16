@@ -19,6 +19,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { PROVIDER_TIN_MAP } from '../../../../constants/constant';
 import {
   MatDialog,
   MatDialogActions,
@@ -28,11 +29,13 @@ import {
 } from '@angular/material/dialog';
 import { UserIdRequest, MedicaidIdRequest } from '../../../../models/requests/commonRequest';
 import { UserDataService } from '../../../../services/user-data-service';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
 import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
+import { PhoneFormatPipe } from "../../../../pipes/phone-format.pipe";
+import { MatCard } from "@angular/material/card";
 
 @Component({
   selector: 'app-add-action',
@@ -58,7 +61,9 @@ import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
     ReactiveFormsModule,
     CommonModule,
     MatProgressSpinner,
-    MatIconModule
+    MatIconModule,
+    PhoneFormatPipe,
+    MatCard
   ],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
@@ -69,22 +74,25 @@ import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
 })
 export class AddAction {
   addActionFormGroup!: FormGroup;
+  measureForm!: FormGroup;
   appointmentFormGroup!: FormGroup;
   action_activity_category: any[] = [];
   action_ativity_type: any[] = [];
   navigatorList: any[] = [];
+  starperformanceList: any[] = [];
+  measureList: any[] = [];
   actionresult_followup_list: any[] = [];
   memberTaskList: any[] = [];
   memberGapList: any[] = [];
   memberQualityList: any[] = [];
-
+  isLoading = false;
   memberPCPVisitList: any[] = [];
   PCPVisitDisplayedColumns: string[] = [
-  'visit_date',
-  'message',
-  'added_user_name',
-  'added_date'
-];
+    'visit_date',
+    'message',
+    'added_user_name',
+    'added_date'
+  ];
   showPcpVisitForm = signal(false);
   showPcpHistory = signal(false);
   isSavingPcpVisit = signal(false);
@@ -97,6 +105,7 @@ export class AddAction {
   // ];
   //await
   cihpcrList: any[] = [];
+  availableTins: any[] = [];
   pcrColumns: string[] = [
     'DISCHARGE_CC_DESC_1',
     'DISCHARGE_CC_DESC_2',
@@ -110,10 +119,15 @@ export class AddAction {
     'READMT_ADMIT_DT',
     'READMT_DISCH_DT'
   ];
+  planTinMap: Record<string, string[]> = {
+    AHC: ['237082074', '273160687', '200807794'],   // CHI → 3 TINs
+    'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
+  };
   taskColumns: string[] = ['action_type', 'action_date', 'status', 'initial', 'action_note'];
   isProcessing: boolean = false;
   //userId: string | null = null;
   userId: string | null = null;
+  showContent = false;
   role_id: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
@@ -162,9 +176,24 @@ export class AddAction {
       appointment_time: [''],
       appointment_note: ['']
     });
+
+    
+
+    this.measureForm = this.fb.group({
+      MEASURE: ['', Validators.required],
+      MEASURE_YEAR: ['', Validators.required],
+      NUM_COUNT: ['', Validators.required],
+      PCP_TAX_ID: ['', Validators.required]
+    });
+    //console.log(data);
     this.medicaid_id = data?.medicaid_id;
     this.member_name = data?.member_name;
     this.member_dob = data?.member_dob;
+    this.measureForm.patchValue({
+      PCP_TAX_ID: data.PCP_TAX_ID,
+      MEASURE_YEAR: 2026,
+      NUM_COUNT:1
+    });
     if (this.medicaid_id) {
       this.addActionFormGroup.patchValue({
         medicaid_id: this.medicaid_id
@@ -174,15 +203,23 @@ export class AddAction {
     }
     //alert(this.medicaid_id);
   }
+
+
   async ngOnInit(): Promise<void> {
     const user = this.userData.getUser();
     this.userId = user.ID;
     //this.role_id = user.role_id;
-    const result = await this.apiService.addActionMaster<any>();
+    const payload = { medicaid_id: this.medicaid_id };
+    const result = await this.apiService.addActionMaster<any>(payload);
     this.action_activity_category = result.data.actionActivityCategory || [];
     this.action_ativity_type = result.data.actionActivityType || [];
     this.navigatorList = result.data.navigatorList || [];
+    this.starperformanceList = result.data.starperformanceList || [];
+    this.measureList = result.data.measureList || [];
+    //console.log(this.starperformanceList);
     this.setScheduledActionStatus('17');
+
+   
 
     this.addActionFormGroup
       .get('pcp_visited')
@@ -250,7 +287,7 @@ export class AddAction {
 
     try {
       await this.apiService.multipleRowInsert<any>(apiPayload);
-      await this.addTaskLog('ADD PCP VISIT',this.addActionFormGroup.value.pcp_visit_message);
+      await this.addTaskLog('ADD PCP VISIT', this.addActionFormGroup.value.pcp_visit_message);
       // ✅ Success message
       this.pcpSuccessMessage.set('PCP visit saved successfully');
 
@@ -292,7 +329,7 @@ export class AddAction {
     } finally {
       this.isLoadingPcpHistory.set(false);
     }
-  }  
+  }
 
   togglePcpHistory() {
     const willOpen = !this.showPcpHistory();
@@ -350,7 +387,7 @@ export class AddAction {
       const insert_data = {
         medicaid_id: formValues.medicaid_id,
         action_type_source: formValues.action_type_source,
-        action_id: formValues.action_id,
+        action_id: this.formatDateOnly(formValues.action_id),
         panel_id: formValues.panel_id,
         action_date: formValues.action_date,
         action_status: formValues.action_status,
@@ -364,13 +401,13 @@ export class AddAction {
         insertDataArray: [insert_data],
       };
       try {
-        if(formValues.action_result_id){
+        if (formValues.action_result_id) {
           const result = await this.apiService.multipleRowInsert<any>(apiPayload);
           const action_id = result.insertedIds;
-        }else{
-           const action_id =0;
+        } else {
+          const action_id = 0;
         }
-        
+
         const next_panel_id = formValues.next_panel_id;
 
         // ✅ 2️⃣ Insert NEXT TASK (if exists)
@@ -381,7 +418,7 @@ export class AddAction {
               {
                 medicaid_id: formValues.medicaid_id,
                 action_id: next_panel_id,
-                action_date: formValues.next_action_date,
+                action_date: this.formatDateOnly(formValues.next_action_date),
                 action_note: formValues.next_action_note,
                 status: 'Open',
                 assign_to: this.userId,
@@ -395,8 +432,8 @@ export class AddAction {
         //this.insertSystemLog(formValues);
         await this.updateQualityAndRiskData(formValues, action_id);
 
-      this.getMemberTaskList(formValues.medicaid_id);
-      this.getMemberGapsList(formValues.medicaid_id);
+        this.getMemberTaskList(formValues.medicaid_id);
+        this.getMemberGapsList(formValues.medicaid_id);
         this.isProcessing = false;
         //alert(44);
         this.cdr.detectChanges();
@@ -433,6 +470,7 @@ export class AddAction {
     }
 
   }
+ 
   private async updateQualityAndRiskData(
     formValues: any,
     action_id: number
@@ -457,35 +495,35 @@ export class AddAction {
         }
 
 
-      const commonData = {
-        medicaid_id,
-        Type: riskGap.Type,
-        Gap_Code: riskGap.DIAG_CODE,
-        Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
-        Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
-        Observation_Code: riskGap.Observation_Code,
-        CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
-        Observation_Code_Set: riskGap.Observation_Code_Set,
-        Observation_Result: riskGap.Observation_Result,
-        Service_Provider_NPI: riskGap.Service_Provider_NPI,
-        Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
-        Service_Provider_Name: riskGap.Service_Provider_Name,
-        Service_Provider_Type: riskGap.Service_Provider_Type,
-        Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
-        Provider_Group_NPI: riskGap.Provider_Group_NPI,
-        Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
-        Provider_Group_Name: riskGap.Provider_Group_Name,
-        Source: 'CIH',
-        note: riskGap.note
-      };
-      console.log("riskGap",riskGap);
-      if (riskGap.risk_gap_id) {
-        riskObsUpdateArray.push({
-          ...commonData,
-          id: riskGap.risk_gap_id,
-          updated_date: new Date()
-        });
-      } else {
+        const commonData = {
+          medicaid_id,
+          Type: riskGap.Type,
+          Gap_Code: riskGap.DIAG_CODE,
+          Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
+          Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
+          Observation_Code: riskGap.Observation_Code,
+          CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
+          Observation_Code_Set: riskGap.Observation_Code_Set,
+          Observation_Result: riskGap.Observation_Result,
+          Service_Provider_NPI: riskGap.Service_Provider_NPI,
+          Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
+          Service_Provider_Name: riskGap.Service_Provider_Name,
+          Service_Provider_Type: riskGap.Service_Provider_Type,
+          Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
+          Provider_Group_NPI: riskGap.Provider_Group_NPI,
+          Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
+          Provider_Group_Name: riskGap.Provider_Group_Name,
+          Source: 'CIH',
+          note: riskGap.note
+        };
+        //console.log("riskGap", riskGap);
+        if (riskGap.risk_gap_id) {
+          riskObsUpdateArray.push({
+            ...commonData,
+            id: riskGap.risk_gap_id,
+            updated_date: new Date()
+          });
+        } else {
 
 
           const observationFields = [
@@ -625,7 +663,7 @@ export class AddAction {
           updates: riskObsUpdateArray
         };
         const updatequalitygapresult = await this.apiService.multipleRowAndFieldUpdate<any>(apiparamUpdate);
- 
+
       }
 
       /* ----------------------------------
@@ -665,11 +703,11 @@ export class AddAction {
     };
     const result = await this.apiService.getMemberTaskList<any>(request);
     this.memberTaskList = result.data || [];
-    console.log('Task result:', result);
+    //console.log('Task result:', result);
   }
   async getMemberGapsList(medicaid_id: string) {
     const payload = { medicaid_id: medicaid_id };
-  
+
     const request: MedicaidIdRequest = {
       medicaid_id: medicaid_id
     };
@@ -795,74 +833,180 @@ export class AddAction {
     }
   }
 
+  toggleContent() {
+    this.availableTins = this.planTinMap['AHC'] || [];
+    //console.log(this.availableTins);
+    this.showContent = !this.showContent;
+  }
+
+  getProviderGroupByTin(tin: string): string {
+    const providerName = PROVIDER_TIN_MAP[tin];
+    return `${providerName}`;
+  }
+
+  async addMeasure() {
+    if (this.measureForm.invalid) {
+      this.measureForm.markAllAsTouched();
+    }     
+
+    // 🚫 DUPLICATE CHECK 
+    //alert(this.isDuplicateMeasure());
+    if (this.isDuplicateMeasure()) {
+       this.measureForm.get('MEASURE')?.setErrors({ duplicateMeasure: true });
+       this.measureForm.markAllAsTouched();
+      //alert('This measure already exists for this member and TIN.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    try {
+      const payload = this.buildAddressPayload(); 
+      await this.apiService.insert(payload);
+
+      await this.logSuccess();
+
+      // ✅ ADD ROW TO TABLE (OPTIMISTIC UPDATE)
+      this.addStarPerformanceRow();
+
+      // ✅ RESET FORM
+      this.measureForm.reset();
+      this.showContent = false;
+
+    } catch (error) {
+      console.error('Add measure failed', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private addStarPerformanceRow() {
+    const f = this.measureForm.value;
+    this.starperformanceList = [
+      ...this.starperformanceList,
+      {
+        TYPE: 'PRISM',
+        RECIP_NO: this.medicaid_id,
+        SUB_MEASURE: f.MEASURE,
+        PCP_TAX_ID: f.PCP_TAX_ID,
+        NUMERATOR_GAP: f.NUM_COUNT,
+        ADDED_DATE: new Date()
+      }
+    ];
+  }
+
+  private isDuplicateMeasure(): boolean {
+    const f = this.measureForm.value;  
+
+  //   this.starperformanceList.forEach(row => {
+  //   console.log({
+  //     rowMedicaid: row.RECIP_NO,
+  //     rowMeasure: row.SUB_MEASURE,
+  //     rowTin: row.PCP_TAX_ID,
+  //     formMedicaid: this.medicaid_id,
+  //     formMeasure: f.MEASURE,
+  //     formTin: f.PCP_TAX_ID
+  //   });
+  // });
 
 
+    return this.starperformanceList.some(row =>
+      row.RECIP_NO == this.medicaid_id &&
+      row.SUB_MEASURE == f.MEASURE &&
+      row.PCP_TAX_ID == f.PCP_TAX_ID
+    );
+  }
+ 
 
-   private formatDateOnly(date: Date | string | null | undefined): string {
+  private buildAddressPayload() {
+    const user = this.userData.getUser();
+    const f = this.measureForm.value;
+    return {
+      table_name: 'MEM_STAR_PERFORMANCE_PRISM_DATA',
+      insertDataArray: [{
+        MEDICAID_ID: this.medicaid_id,
+        MEASURE: f.MEASURE,
+        MEASURE_YEAR: f.MEASURE_YEAR,
+        NUM_COUNT: f.NUM_COUNT,
+        PCP_TAX_ID: f.PCP_TAX_ID,
+        ADDED_BY: user.ID
+      }]
+    };
+  }
+
+  private logSuccess(): Promise<any> {
+    const user = this.userData.getUser();
+    if (!this.medicaid_id) {
+      throw new Error('medicaid_id is missing');
+    }
+    const logpayload: LogRequest = {
+      table_name: 'MEM_SYSTEM_LOG',
+      insertDataArray: [{
+        medicaid_id: this.medicaid_id,
+        log_name: 'ADD NUM COUNT',
+        log_details: `ADD NUM COUNT FOR ${this.medicaid_id}`,
+        log_status: 'SUCCESS',
+        log_by: user.ID,
+        action_type: 'ADD NUM COUNT'
+      }]
+    };
+    return this.apiService.insert(logpayload);
+  }
+
+  private formatDateOnly(date: Date | string | null | undefined): string {
     if (!date) return '';
     const d = new Date(date);
     if (isNaN(d.getTime())) return '';
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-
     return `${year}-${month}-${day}`;
-}
-
-
-
+  }
 
   formatDateToMDY(dateStr: string): string {
     if (!dateStr) return '';
-
     const date = new Date(dateStr);
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const year = date.getFullYear();
-
     return `${month}/${day}/${year}`; // m/d/Y format
   }
   formatDateToYMD(dateStr: string): string {
     if (!dateStr) return '';
-
     const date = new Date(dateStr);
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const year = date.getFullYear();
-
     return `${year}-${month}-${day}`; // m/d/Y format
   }
   add_system_log(request: LogRequest): Promise<any> {
     return this.apiService.insert<any, LogRequest>(request);
   }
-  private addTaskLog(type: string,note: string): Promise<any> {
+  private addTaskLog(type: string, note: string): Promise<any> {
     if (!this.medicaid_id) {
       return Promise.reject('medicaid_id is required');
     }
-  const payload: LogRequest = {
-    table_name: 'MEM_SYSTEM_LOG',
-    insertDataArray: [{
-      medicaid_id: this.medicaid_id,
-      log_name: type,
-      log_details: `${type} FOR ${this.medicaid_id} - ${note}`,
-      log_status: 'SUCCESS',
-      log_by: Number(this.userId),
-      action_type: type
-    }]
-  };
-
-  return this.add_system_log(payload);
-}
-isValidPcpVisitDate(): boolean {
-  const value = this.addActionFormGroup.get('pcp_visit_date')?.value;
-
-  if (!value) {
-    return false;
+    const payload: LogRequest = {
+      table_name: 'MEM_SYSTEM_LOG',
+      insertDataArray: [{
+        medicaid_id: this.medicaid_id,
+        log_name: type,
+        log_details: `${type} FOR ${this.medicaid_id} - ${note}`,
+        log_status: 'SUCCESS',
+        log_by: Number(this.userId),
+        action_type: type
+      }]
+    };
+    return this.add_system_log(payload);
   }
+  isValidPcpVisitDate(): boolean {
+    const value = this.addActionFormGroup.get('pcp_visit_date')?.value;
+    if (!value) {
+      return false;
+    }
 
-  const date = value instanceof Date ? value : new Date(value);
-
-  return !isNaN(date.getTime());
-}
+    const date = value instanceof Date ? value : new Date(value);
+    return !isNaN(date.getTime());
+  }
 }
 

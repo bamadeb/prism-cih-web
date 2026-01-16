@@ -171,12 +171,12 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }  
 
-  async addActionMaster<TResponse>(): Promise<TResponse> {
+  async addActionMaster<TResponse>(request: any): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
       'prismGetAddActionMasterData',
-      {}   
+      request   
     );
   }
 

@@ -10,10 +10,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HeaderService } from '../../../services/header.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PROVIDER_TIN_MAP } from '../../../constants/constant';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-star-performance',
-  imports: [MatCardModule,
+  imports: [MatCardModule,CommonModule,
     MatSelectModule,
     MatFormFieldModule,
     MatButtonModule,
@@ -50,6 +51,7 @@ export class StarPerformance {
   };
  
 availableTins: string[] = [];
+currentYear: any;
   constructor(
     private apiService: ConfigService,
     private cdr: ChangeDetectorRef,
@@ -67,7 +69,7 @@ availableTins: string[] = [];
   getProviderGroupByTin(tin: string): string {
   const providerName = PROVIDER_TIN_MAP[tin];
   return providerName
-    ? `${this.providerGroup} (${providerName})`
+    ? `${providerName}`
     : this.providerGroup;
 }
 
@@ -104,12 +106,14 @@ onPlanChange(planId: string) {
 
 async applyFilter() {
   const { year, plan, tins } = this.starPerformanceFormGroup.value;
-
   this.isLoading = true;
-
   try {
-    const payload = { year, plan, tins };
+    const currentYear = new Date().getFullYear();
+    const payload = { year, plan, tins ,currentYear};  
+    this.currentYear = currentYear;
+    //alert(currentYear);
     const result = await this.apiService.getStarPerformanceByYear<any>(payload);
+    //console.log(result.data);
 
     this.starReportList = result?.data || [];
 

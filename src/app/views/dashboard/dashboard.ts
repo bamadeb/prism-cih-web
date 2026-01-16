@@ -310,13 +310,13 @@ confirmAction(row: any) {
 }
 
 confirmboxUndo(row: any) {
-  console.log(row);
+  //console.log(row);
   this.withLoader(async () => {
     const result = await this.noLongerPatientService.confirmboxUndo(row);
     if (result?.refresh) {
       this.removeNolongerFromTable(row.medicaid_id);
       // 2️⃣ add to no longer patient table
-      console.log(row);
+      //console.log(row);
       this.dataSource.data = [
       {
         medicaid_id: row.medicaid_id,
@@ -518,7 +518,11 @@ showTasklist(row: any) {
 async openAddActionDialog(
   medicaid_id: string,
   member_name: string,
-  member_db: string
+  member_db: string,
+  addr: string,
+  phone: string,
+  practice: string,
+  PCP_TAX_ID: number,
 ) {
   this.isLoading = true;
   //alert(medicaid_id);
@@ -527,7 +531,10 @@ async openAddActionDialog(
     const actionSaved = await this.addActionService.showAddActionDialog(
       medicaid_id,
       member_name,
-      member_db
+      member_db,
+      addr,
+      phone,
+      practice,PCP_TAX_ID
     );
     this.loadTableData();
     this.isLoading = false;

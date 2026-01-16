@@ -30,7 +30,7 @@
         <!-- DATE -->
         <mat-form-field appearance="outline" class="w-100 mt-2" style="margin-right: 5px;">
           <mat-label>Task Date</mat-label>
-          <input matInput [matDatepicker]="dp" formControlName="task_date">
+          <input matInput [matDatepicker]="dp" formControlName="task_date" readonly>
           <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
           <mat-datepicker #dp></mat-datepicker>
           <mat-error *ngIf="addTaskFormGroup.get('task_date')?.touched &&

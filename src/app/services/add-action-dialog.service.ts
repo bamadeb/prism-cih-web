@@ -31,13 +31,13 @@ export class AddActionDialogService {
   //   });
   //   //return dialogRef.afterOpened().toPromise();
   // }
-showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: string): Promise<boolean> {
+showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: string,addr: string,  phone: string,  practice: string,PCP_TAX_ID:number): Promise<boolean> {
 
   const dialogRef = this.dialog.open(AddAction, {
     width: '95vw',
     maxWidth: '100vw',
     panelClass: 'add-action-dialog',
-    data: { medicaid_id, member_name, member_dob }
+    data: { medicaid_id, member_name, member_dob,addr, phone, practice,PCP_TAX_ID }
   });
 
   return firstValueFrom(dialogRef.afterClosed());

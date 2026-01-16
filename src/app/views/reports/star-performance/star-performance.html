@@ -19,17 +19,17 @@
                     <mat-label>PLAN</mat-label>
                     <mat-select formControlName="plan">
                         @for (p of plans; track p.id) {
-                        <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                        <mat-option [value]="p.id" class="txupper">{{ p.name }}</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
 
                 <!-- TINs -->
-                <mat-form-field appearance="outline">
-                    <mat-label>TINs</mat-label>
+                <mat-form-field appearance="outline" style="width: 17%;">
+                    <mat-label>TINS</mat-label>
                     <mat-select formControlName="tins" multiple>
                         @for (tin of availableTins; track tin) {
-                        <mat-option [value]="tin">{{ tin }}</mat-option>
+                        <mat-option [value]="tin" class="txupper">{{ getProviderGroupByTin(tin) }} ({{ tin }})</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>
@@ -51,31 +51,49 @@
             <div class="project-header table-wrapper" [hidden]="isLoading" style="font-size:20px !important;">
 
                 @if (!isLoading && starReportList.length > 0) {
-                <table class="table table-bordered centered-table row-border-only">
-                    <tr>
-                        <td width="40%">Measurement Year</td>
-                        @for (tin of selectedTins; track tin) {
-                          <td>{{ starPerformanceFormGroup.get('year')?.value }}</td>
-                        }
-                    </tr>
-                    <tr>
-                        <td>PROVIDER GROUP</td>
-                        @for (tin of selectedTins; track tin) {
-                        <td>{{ getProviderGroupByTin(tin) }}</td>
-                        }
-                    </tr>
-                    <tr>
-                        <td>TIN</td>
-                        @for (tin of selectedTins; track tin) {
-                        <td>{{ tin }}</td>
-                        }
-                    </tr>
-                    @for (report of starReportList; track $index) {
-                    <tr [style.background-color]="report.BG_COLOR">
-                        <td>{{ report.MEASURE_CODE }} {{ report.Metric }}</td>
+                <table class="star-table" >
+                    <!-- ===== HEADER : ROW 1 ===== -->
+                    <thead>
+                        <!-- <tr class="header-row">
+                       
 
                         @for (tin of selectedTins; track tin) {
+                            <th colspan="3" class="tin-group">
+                            {{ tin }}
+                            </th>
+                        }
+                        </tr> -->
+                        <tr class="header-row txupper"> 
+                             <th rowspan="3" class="sticky-col">MEASURE</th>
+                            @for (tin of selectedTins; track tin) {
+                                <th colspan="3">{{ getProviderGroupByTin(tin) }} ({{ tin }})</th>
+                            }
+                        </tr>
+
+                        <!-- ===== HEADER : ROW 2 ===== -->
+                        <tr class="sub-header-row">
+                        @for (tin of selectedTins; track tin) {
+                            <th>{{ starPerformanceFormGroup.get('year')?.value }}</th>
+                            <th>{{ currentYear }}</th>
+                            <th>PRISM</th>
+                        }
+                        </tr> 
+                    </thead>
+
+                    @for (report of starReportList; track $index) {
+                    <tr [style.background-color]="report.BG_COLOR">
+                        <td style="text-align: left;">{{ report.MEASURE_CODE }} {{ report.Metric }}</td>
+
+                        @for (tin of selectedTins; track tin) {
+                            
+                        <!-- SELECTED YEAR -->
                         <td>{{ report[tin] }}</td>
+
+                         <!-- CURRENT YEAR -->
+                        <td>{{ report[tin + '_1'] ?? '-' }}</td>
+
+                         <!-- PRISM YEAR -->
+                         <td>{{ report[tin + '_2'] ?? '-' }}</td>
                         }
                     </tr>
                     }
