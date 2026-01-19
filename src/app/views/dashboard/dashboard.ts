@@ -134,6 +134,8 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   ) {
     super(errorLogger, matDialog);
+    //const user1 = this.userData.getUser();
+   // console.log(user1); 
   }
 
   ngOnInit(): void {
@@ -152,7 +154,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     return await task();
   } catch (err) {
     console.error(err);
-    onError?.(err);
+    //onError?.(err);
     this.displayError('Something went wrong', 'Please try again');
     return undefined;
   } finally {
@@ -179,7 +181,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   getSelectedRows(): any[] {
   return this.selection.selected;
-}
+  }
 
   /** Checkbox label (accessibility) */
   checkboxLabel(row?: any): string {

@@ -9,7 +9,10 @@ import { CommonModule } from '@angular/common';
 import { MatSidenav } from '@angular/material/sidenav';
 import { UserDataService } from '../../../services/user-data-service';
 import { HeaderService } from '../../../services/header.service';
+import { SystemLogService } from '../../../services/system-log';
 import { Observable } from 'rxjs/internal/Observable';
+import { USER_KEY } from '../../../constants/constant';
+import { IdleTimeoutService } from '../../../services/idle-timeout';
 
 
 @Component({
@@ -24,20 +27,39 @@ export class Header {
   pageTitle = 'Dashboard';
   //pageTitle$!: Observable<string>;
   userName: string | undefined;
+  userId!: number;
+  userEmail!: string;
   title$!: Observable<string>;
-  constructor(private router: Router,private userData: UserDataService,private headerService: HeaderService ) {}
+  constructor(private router: Router,private userData: UserDataService,private headerService: HeaderService,private idleService: IdleTimeoutService, private systemLogService:SystemLogService ) {}
 
    ngOnInit(): void {
     const abc = this.headerService.title$;
-    console.log(abc);
+    //console.log(abc);
      this.title$ = this.headerService.title$;
       const user = this.userData.getUser(); 
+    if (!user) {
+      //alert('User not logged in!');
+      this.router.navigate(['/login']);
+      return;
+    }
       this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
+      this.userId = user.ID;
+      this.userEmail = user.EmailID;
       //console.log(user);
   }  
 
   logout() {
-    localStorage.removeItem('user');
+    this.systemLogService.addSystemLog({
+      log_name: 'LOGOUT',
+      log_details: `Logout by ${this.userEmail}`,
+      log_status: 'SUCCESS',
+      log_by: this.userId,
+      action_type: this.userEmail
+    }).catch(() => {});
+    localStorage.removeItem(USER_KEY);
+    this.idleService.stopWatching();
+    //console.log('logout');
     this.router.navigate(['/login']);
+    return;
   }
 }

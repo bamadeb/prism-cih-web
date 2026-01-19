@@ -5,8 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { Title } from '@angular/platform-browser';
-import { ConfigService } from '../../../services/api.service'; 
+import { Title } from '@angular/platform-browser'; 
+import { ConfigService } from '../../../services/api.service';  
+import { IdleTimeoutService } from '../../../services/idle-timeout'; 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
 import { LoginRequest } from '../../../models/requests/loginRequest';
@@ -34,8 +35,10 @@ export class Login {
   isLoading = false;
   errorMessage = '';
   errorMsg: any;
-
-  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title,private apiService: ConfigService) {}
+ 
+ 
+  constructor(private router: Router,private apiService: ConfigService,private authService: Auth, private userData: UserDataService,private titleService: Title,private idleService: IdleTimeoutService) {}
+ 
   bgImages = [
       'assets/images/1.jpg',
       'assets/images/2.jpg',
@@ -65,10 +68,13 @@ export class Login {
       if(result.data.length>0){
         const user = result.data[0]; 
         this.userData.setUser(user); 
+ 
         const roleId = user.role_id; 
         this.userId = user.ID; 
+        this.idleService.startWatching();
         this.addloginHistory();
-        this.router.navigate(['/dashboard']); 
+        this.router.navigate(['/dashboard']);  
+  
       }
       else{
         this.errorMessage = 'Invalid login credentials';
