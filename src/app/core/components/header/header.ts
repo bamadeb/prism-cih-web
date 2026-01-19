@@ -10,6 +10,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { UserDataService } from '../../../services/user-data-service';
 import { HeaderService } from '../../../services/header.service';
 import { Observable } from 'rxjs/internal/Observable';
+import { USER_KEY } from '../../../constants/constant';
 
 
 @Component({
@@ -29,15 +30,22 @@ export class Header {
 
    ngOnInit(): void {
     const abc = this.headerService.title$;
-    console.log(abc);
+    //console.log(abc);
      this.title$ = this.headerService.title$;
       const user = this.userData.getUser(); 
+    if (!user) {
+      //alert('User not logged in!');
+      this.router.navigate(['/login']);
+      return;
+    }
       this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
       //console.log(user);
   }  
 
   logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem(USER_KEY);
+    //console.log('logout');
     this.router.navigate(['/login']);
+    return;
   }
 }
