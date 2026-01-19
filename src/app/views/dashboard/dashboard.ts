@@ -134,8 +134,8 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   ) {
     super(errorLogger, matDialog);
-    const user1 = this.userData.getUser();
-    console.log(user1); 
+    //const user1 = this.userData.getUser();
+   // console.log(user1); 
   }
 
   ngOnInit(): void {

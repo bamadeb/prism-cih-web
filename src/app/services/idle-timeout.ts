@@ -20,8 +20,11 @@ export class IdleTimeoutService {
     private systemLogService:SystemLogService
   ) {
       const user = this.userData.getUser(); 
-      this.userId = user.ID;
-      this.userEmail = user.EmailID;
+      if(user){
+        this.userId = user.ID;
+        this.userEmail = user.EmailID;
+
+      }
   }
 
   startWatching() {
