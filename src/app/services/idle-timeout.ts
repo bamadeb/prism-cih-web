@@ -18,14 +18,7 @@ export class IdleTimeoutService {
     private userData: UserDataService,
     private ngZone: NgZone,
     private systemLogService:SystemLogService
-  ) {
-      const user = this.userData.getUser(); 
-      if(user){
-        this.userId = user.ID;
-        this.userEmail = user.EmailID;
-
-      }
-  }
+  ) { }
 
   startWatching() {
     // User activity events
@@ -36,7 +29,12 @@ export class IdleTimeoutService {
       fromEvent(document, 'scroll'),
       fromEvent(document, 'touchstart')
     );
+      const user = this.userData.getUser(); 
+      if(user){
+        this.userId = user.ID;
+        this.userEmail = user.EmailID;
 
+      }
     this.ngZone.runOutsideAngular(() => {
       this.subscription = activityEvents$
         .pipe(switchMap(() => timer(this.idleTime)))

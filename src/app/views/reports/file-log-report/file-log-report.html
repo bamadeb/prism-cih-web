@@ -1,104 +1,83 @@
 <div class="pagecontent">
-    <mat-card>
-        <mat-card-content style="text-align:center">           
+  <mat-card>
+    <mat-card-content>
 
-            <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
-                <!-- NAVIGATORS -->
-                <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
-                    <mat-label>SELECT FILE TYPE</mat-label>
-                    <mat-select formControlName="process_type" (change)="onProcessTypeChange()">
-                        <mat-option class="txupper" value="Member Process">Member File Process</mat-option>
-                        <mat-option class="txupper" value="Risk Gaps Process">Risk Gaps File Process</mat-option>
-                        <mat-option class="txupper" value="Quality Gaps Process">Quality Gaps File Process</mat-option> 
-                    </mat-select>
-                </mat-form-field> 
+      <form [formGroup]="actionLogFormGroup">
 
-                <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
-                    <mat-label>SELECT PROCESS</mat-label>
-                    <mat-select formControlName="process_type" (change)="onProcessSelect()">
-                        @for (row of processList; track row.SESSION_ID) {
-                            <mat-option class="txupper" [value]="row.SESSION_ID">{{ formatDateTime(row.MIN_LOG_DATE) }}</mat-option> 
-                        }
-                    </mat-select>
-                </mat-form-field> 
-
-                 
-            </form>
-        </mat-card-content>
-    </mat-card>
-
-    <mat-card>
-        <mat-card-content>
-
-        <!-- LOADER -->
-        <div class="table-loader" *ngIf="isLoading" >
-            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-        </div>        
-
-        <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
-        <div [hidden]="isLoading" class="table-toolbar">
-
-        <mat-paginator style="background-color: #f4f3f3;"
-            #mainPaginator
-            [pageSize]="10"
-            [pageSizeOptions]="[10, 25, 50, 100]">
-        </mat-paginator>
-        <mat-form-field appearance="outline" >
-          <mat-label>Search</mat-label>
-          <input matInput (keyup)="filter($event)" placeholder="Search records">
+        <!-- FILE TYPE -->
+        <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
+          <mat-label>SELECT FILE TYPE</mat-label>
+          <mat-select   formControlName="process_type"  (selectionChange)="onProcessTypeChange()">
+            <mat-option class="txupper" value="Member Process">Member File Process</mat-option>
+            <mat-option class="txupper" value="Risk Gaps Process">Risk Gaps File Process</mat-option>
+            <mat-option class="txupper" value="Quality Gaps Process">Quality Gaps File Process</mat-option>
+          </mat-select>
         </mat-form-field>
 
-        <table mat-table
-                [dataSource]="dataSource"
-                matSort
-                #mainSort="matSort"
-                class="txupper">
+        <!-- PROCESS LIST -->
+        <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
+          <mat-label>SELECT PROCESS</mat-label>
+          <mat-select
+            formControlName="process_list"
+            (selectionChange)="onProcessSelect()">
 
-            <!-- MEDICAID ID -->
-            <ng-container matColumnDef="medicaid_id">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICAID ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.medicaid_id }}</td>
-            </ng-container>
+            @for (row of processList; track row.SESSION_ID) {
+              <mat-option [value]="row.SESSION_ID">
+                {{ formatDateTime(row.MIN_LOG_DATE) }}
+              </mat-option>
+            }
 
-            <!-- ACTIVITY CATEGORY -->
-            <ng-container matColumnDef="log_name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG NAME</th>
-            <td mat-cell *matCellDef="let row">{{ row.log_name }}</td>
-            </ng-container>
+          </mat-select>
+        </mat-form-field>
 
-            <!-- ACTIVITY TYPE -->
-            <ng-container matColumnDef="log_details">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG DETAILS</th>
-            <td mat-cell *matCellDef="let row">{{ row.log_details }}</td>
-            </ng-container>
-
-            <!-- ACTION RESULT -->
-            <ng-container matColumnDef="log_status">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG STATUS</th>
-            <td mat-cell *matCellDef="let row">{{ row.log_status }}</td>
-            </ng-container> 
-
-            <!-- ACTION DATE -->
-            <ng-container matColumnDef="add_date">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG DATE</th>
-            <td mat-cell *matCellDef="let row">{{ row.add_date }}</td>
-            </ng-container> 
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            
-            <!-- NO DATA ROW -->
-            <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" style="text-align: center;">
-                No record found
+      </form>
+      <table mat-table  [dataSource]="logDetails" class="txupper"> 
+            <!-- SL NO -->
+            <ng-container matColumnDef="slno">
+                <th mat-header-cell *matHeaderCellDef> Sl No </th>
+                <td mat-cell *matCellDef="let row; let i = index">
+                {{ i + 1 }}
                 </td>
-            </tr>
-        </table>
-        </div>
+            </ng-container>
+
+            <!-- PROCESS MESSAGE -->
+            <ng-container matColumnDef="message">
+                <th mat-header-cell *matHeaderCellDef> PROCESS MESSAGE </th>
+                <td mat-cell *matCellDef="let row">
+                {{ row.MESSAGE }}
+                </td>
+            </ng-container>
+
+            <!-- COUNT -->
+            <ng-container matColumnDef="count">
+                <th mat-header-cell *matHeaderCellDef> COUNT </th>
+                <td mat-cell *matCellDef="let row">
+                {{ row.RECORD_COUNT }}
+                </td>
+            </ng-container>
+
+            <!-- DATE -->
+            <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef> DATE </th>
+                <td mat-cell *matCellDef="let row">
+                {{ formatDateTime(row.LOG_DATE) }}
+                </td>
+            </ng-container>
+
+            <!-- HEADER -->
+            <tr mat-header-row *matHeaderRowDef="logDisplayedColumns"></tr>
+
+            <!-- ROWS -->
+            <tr mat-row *matRowDef="let row; columns: logDisplayedColumns"></tr> 
+
+            </table>
 
 
-             
+      <!-- LOADING -->
+      <div  *ngIf="isLoading" style="text-align: center;">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
 
-        </mat-card-content>
-    </mat-card>
+    </mat-card-content>
+  </mat-card>
 </div>
