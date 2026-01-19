@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Title } from '@angular/platform-browser';
-
+import { IdleTimeoutService } from '../../../services/idle-timeout';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
 import { LoginRequest } from '../../../models/requests/loginRequest';
@@ -33,7 +33,7 @@ export class Login {
   errorMessage = '';
   errorMsg: any;
 
-  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title) {}
+  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title,private idleService: IdleTimeoutService) {}
   bgImages = [
       'assets/images/1.jpg',
       'assets/images/2.jpg',
@@ -65,7 +65,7 @@ export class Login {
         const user = result.data[0]; 
         this.userData.setUser(user); 
         const roleId = user.role_id;
-     
+        this.idleService.startWatching();
         this.router.navigate(['/dashboard']);
        // }
         //this.router.navigate(['/dashboard']);
