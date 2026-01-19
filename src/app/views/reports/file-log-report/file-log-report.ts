@@ -24,7 +24,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
-  selector: 'app-logreport',
+  selector: 'app-file-log-report',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -42,31 +42,18 @@ import { SelectionModel } from '@angular/cdk/collections';
     MatProgressSpinnerModule
   ],
   providers: [provideNativeDateAdapter()],
-  templateUrl: './logreport.html',
-  styleUrl: './logreport.css',
+  templateUrl: './file-log-report.html',
+  styleUrl: './file-log-report.css',
 })
-export class Logreport implements OnInit, AfterViewInit {
+export class FileLogReport implements OnInit, AfterViewInit {
+
   displayedColumns: string[] = [
       'medicaid_id',
-      'Panel_Name',
-      'action_type',
-      'action_result',
-      'action_status',
-      'action_date',
-      'action_note'
+      'log_name',
+      'log_details',
+      'log_status', 
+      'add_date' 
   ];
-
-private activityLabelMap: Record<string, string> = {
-  'Call received': 'Calls received',
-  'Phone call': 'Phone calls',
-  'Home visit': 'Home Visits',
-  'Text sent': 'Text sent',
-  'Letter sent': 'Letters sent'
-};
-
-getActivityLabel(type: string): string {
-  return this.activityLabelMap[type] ?? type;
-}
 
 dataSource = new MatTableDataSource<any>([]);
 selection = new SelectionModel<any>(true, []);
@@ -75,19 +62,10 @@ selection = new SelectionModel<any>(true, []);
 @ViewChild('mainSort') sort!: MatSort;
 
 actionLogFormGroup!: FormGroup;
-isLoading = false;
-totalCount = 0;
-activityCount: Record<string, number> = [] as any;
-actionLogReportList: any[] = [];
-navigatorList: any[] = [];
-action_ativity_type: any[] = [];  
-
-  // ✅ Status constants
-  ACTION_STATUS = {
-    SUCCESS: 'SUCCESS',
-    SCHEDULED: 'SCHEDULED',
-    FAILURE: 'FAILURE'
-  };
+isLoading = false;     
+navigatorList: any[] = [];  
+processList: any[] = []; 
+logDetails: any[] = [];
 
   constructor(
     private apiService: ConfigService,
@@ -102,17 +80,15 @@ action_ativity_type: any[] = [];
 
     // ✅ All required controls added
     this.actionLogFormGroup = this.fb.group({
-      navigator_id: [null],
-      activity_type: [null],
-      action_status: [null],
+      user_id: [3],      
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required],
     },{ validators: this.dateRangeValidator });
   }
 
   async ngOnInit() {
-  this.titleService.setTitle('PRISM :: ACTION LOG REPORT');
-  this.headerService.setTitle('ACTION LOG REPORT');
+  this.titleService.setTitle('PRISM :: FILE PROCESS LOG REPORT');
+  this.headerService.setTitle('FILE PROCESS REPORT');
 
   await this.loadLogreport();   // must come first
   await this.applyFilter();
@@ -128,6 +104,23 @@ action_ativity_type: any[] = [];
     };
   }
 
+  async onProcessTypeChange() {
+    const log_for = this.actionLogFormGroup.get('process_type')?.value;
+    this.processList = [];
+    this.logDetails = [];
+    this.actionLogFormGroup.get('process_list')?.setValue('');
+    //alert(log_for);
+    if (!log_for) return;
+      //console.log(this.processLogForm.get('process_list')?.value);
+    //console.log(this.process_list);
+    const getApiData = { log_for: log_for };
+    const result = await this.apiService.getFIleprocesslist<any>(getApiData);
+    const rawData = result?.data ?? [];
+    this.processList = result.data;  
+    this.isLoading = false
+     
+  }
+
   async applyFilter() {
   this.isLoading = true;
 
@@ -136,66 +129,50 @@ action_ativity_type: any[] = [];
       ...this.actionLogFormGroup.value,
       start_date: this.formatYMD(this.actionLogFormGroup.value.start_date),
       end_date: this.formatYMD(this.actionLogFormGroup.value.end_date),
-    };
+    }; 
 
-    const result = await this.apiService.getActionlogData<any>(payload);
-    const rawData = result?.data ?? [];
-
-    this.totalCount = rawData.length;
-
-    // 🔹 Reset counts
-    Object.keys(this.activityCount).forEach(k => this.activityCount[k] = 0);
-
-    // 🔹 Map + count in one loop
-    this.dataSource.data = rawData.map((u: any) => {
-      const type = u.action_type;
-      if (this.activityCount[type] !== undefined) {
-        this.activityCount[type]++;
-      }
-
-      return {
-        medicaid_id: u.medicaid_id,
-        Panel_Name: u.Panel_Name ?? '',
-        action_type: type ?? '',
-        action_result: u.action_result ?? '',
-        action_status: u.action_status ?? '',
-        action_date: u.action_date ?? '',
-        action_note: u.action_note ?? ''
-      };
-    });
+    const result = await this.apiService.getSystemlog<any>(payload);
+    const rawData = Array.isArray(result?.data)
+  ? result.data
+  : Array.isArray(result?.data?.data)
+    ? result.data.data
+    : []; 
+     this.dataSource.data = rawData.map((u: any) => ({
+        medicaid_id: u.medicaid_id ?? '',
+        log_name: u.log_name ?? '',
+        log_details: u.log_details ?? '',
+        log_status: u.log_status ?? '',
+        add_date: u.add_date ?? ''
+      }));
 
     this.selection.clear();
-
   } finally {
     this.isLoading = false;
     this.cdr.markForCheck(); // ✅ OnPush safe
   }
 }
 
+async onProcessSelect() {
+    const session_id = this.actionLogFormGroup.get('process_list')?.value;
+    this.logDetails = [];
+
+    if (!session_id) return;
+
+    this.isLoading = true;
+    const payload = { 
+      session_id: session_id 
+    };
+    const result = await this.apiService.getfileprocessLoglist<any>(payload); 
+     const rawData = result?.data ?? [];
+    this.logDetails = result.data; 
+    this.isLoading = false 
+  }
 
 async loadLogreport() {
   this.isLoading = true;
-
   try {
-    const result = await this.apiService.addActionMaster<any>('0');
-
-    const activityTypes = result.data?.actionActivityType ?? [];
-    this.navigatorList = result.data?.usersList ?? [];
-
-    // 🔹 Enrich activity types with display labels
-    this.action_ativity_type = activityTypes.map((a: any) => ({
-      ...a,
-      display_label: this.getActivityLabel(a.action_type)
-    }));
-
-    // 🔹 Initialize counts dynamically
-    this.activityCount = this.action_ativity_type.reduce(
-      (acc: Record<string, number>, cur: any) => {
-        acc[cur.action_type] = 0;
-        return acc;
-      },
-      {}
-    );
+    const result = await this.apiService.addActionMaster<any>('0'); 
+    this.navigatorList = result.data?.allusersList ?? [];      
 
   } finally {
     this.isLoading = false;
@@ -203,17 +180,30 @@ async loadLogreport() {
   }
 }
 
-dateRangeValidator(control: AbstractControl) {
-  const start = control.get('start_date')?.value;
-  const end = control.get('end_date')?.value;
+  ////////////////////// Helper ///////////////////////////
+  formatDateTime(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
 
-  if (!start || !end) return null; // skip if not set yet
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const seconds = d.getSeconds().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const month = d.getMonth() + 1;
+    return `${month}/${d.getDate()}/${d.getFullYear()} ${hours}:${minutes}:${seconds} ${ampm}`;
+  }
+  dateRangeValidator(control: AbstractControl) {
+    const start = control.get('start_date')?.value;
+    const end = control.get('end_date')?.value;
 
-  return new Date(end).getTime() >= new Date(start).getTime()
-    ? null
-    : { dateRangeInvalid: true }; // error key
-}
+    if (!start || !end) return null; // skip if not set yet
 
+    return new Date(end).getTime() >= new Date(start).getTime()
+      ? null
+      : { dateRangeInvalid: true }; // error key
+  }
 
   formatYMD(date:Date) {
     const d = new Date(date);
@@ -227,4 +217,5 @@ dateRangeValidator(control: AbstractControl) {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
   }
+
 }

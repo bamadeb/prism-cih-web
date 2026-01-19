@@ -28,17 +28,14 @@
                     File is required
                 </mat-error>
 
-                <button mat-raised-button color="primary" type="submit"
-                    [disabled]="processMembersFormGroup.invalid || isLoading">
-
+                 <button mat-raised-button color="primary" type="submit"
+                    [disabled]="isUpload || !processMembersFormGroup.valid">
                     @if (isUpload) {
-                    <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+                        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
                     } @else {
-                    UPLOAD
+                        UPLOAD
                     }
-
-                </button>
-
+                </button> 
             </form>
 
             <!-- SUMMARY -->
@@ -101,80 +98,84 @@
             <div class="table-wrapper" *ngIf="!isLoading">
                 <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1"
                     *ngIf="tempMemberList && tempMemberList.length > 0">
-                    <ng-container matColumnDef="MBR_ID" sticky>
+                    <ng-container matColumnDef="Subscriber_ID" sticky>
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>SUBSCRIBER ID </th>
-                        <td mat-cell *matCellDef="let row">{{ row.MBR_ID }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Subscriber_ID }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="PRODUCT_TYPE">
+                    <ng-container matColumnDef="Measure_Name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>MEASURE NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.PRODUCT_TYPE }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Measure_Name }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="HCC_CATEGORY">
+                    <ng-container matColumnDef="Submeasure">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>SUBMEASURE</th>
-                        <td mat-cell *matCellDef="let row">{{ row.HCC_CATEGORY }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Submeasure }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="HCC_MODEL">
+                    <ng-container matColumnDef="First_Name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>FIRST NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.HCC_MODEL }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.First_Name }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="STATUS">
+                    <ng-container matColumnDef="Middle_Name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>MIDDLE NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.STATUS }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Middle_Name }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="RELEVANT_DATE">
+                    <ng-container matColumnDef="Last_Name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>LAST NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.RELEVANT_DATE }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Last_Name }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_SOURCE">
+                    <ng-container matColumnDef="Medicare_ID">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICARE ID</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_SOURCE }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Medicare_ID }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_CODE">
+                    <ng-container matColumnDef="Medicaid_ID">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICAID ID</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_CODE }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Medicaid_ID }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_DESC">
+                    <ng-container matColumnDef="Date_of_Birth">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>DATE OF BIRTH</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Date_of_Birth }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_DESC">
+                    <ng-container matColumnDef="Sex">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>SEX</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Sex }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_DESC">
+                    <ng-container matColumnDef="Provider_ID">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>PROVIDER ID</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Provider_ID }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="Provider_TIN">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>PROVIDER TIN</th>
+                        <td mat-cell *matCellDef="let row">{{ row.Provider_TIN }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_DESC">
+                    <ng-container matColumnDef="Provider_Name">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>PROVIDER NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Provider_Name }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="DIAG_DESC">
+                    <ng-container matColumnDef="Numerator_Gap">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>NUMERATOR GAP</th>
-                        <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
-                    </ng-container>
+                        <td mat-cell *matCellDef="let row">{{ row.Numerator_Gap }}</td>
+                    </ng-container>                   
 
                     <ng-container matColumnDef="1">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>STATUS</th>
 
                         <td mat-cell *matCellDef="let row" [ngStyle]="{
                   'background-color':
-                    (!row.MBR_ID || row.MBR_ID.trim() === '' || !row.member_exist) ? 'red' :
-                    row.exist_gap ? 'yellow' : 'transparent'
+                    (!row.Subscriber_ID || row.Subscriber_ID.trim() === '' || !row.member_exist) ? 'red' :
+                    row.quality_gaps_exist ? 'yellow' : 'transparent'
                 }">
-                            <ng-container *ngIf="row.exist_gap">
+                            <ng-container *ngIf="row.quality_gaps_exist">
                                 Find duplicate quality gaps
                             </ng-container>
 

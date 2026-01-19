@@ -29,6 +29,9 @@ import { HeaderService } from '../../../services/header.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
 import * as Papa from 'papaparse';
+
+
+
  const expectedHeaders = [
       'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
       'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
@@ -69,7 +72,7 @@ export class QualitygapsFile {
         'Medicare_ID',
         'Medicaid_ID', 
         'Date_of_Birth',
-        'Sex','Provider_ID','Provider_Name','Numerator_Gap'
+        'Sex','Provider_ID','Provider_Name','Numerator_Gap','1'
       ];  
     
       @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -145,63 +148,96 @@ export class QualitygapsFile {
         this.selectedFile = null;
       }
     
-      /* ============================ UPLOAD ============================ */
-     
-    async qualityFileSubmit(): Promise<void> {
-      // ------------------ Initial validation ------------------
-      if (!this.processMembersFormGroup.valid || !this.selectedFile) {
-        this.processMembersFormGroup.markAllAsTouched();
-        return;
-      }
-    
-      if (this.isUpload) return;
-      this.isUpload = true;
-    
-      const file = this.selectedFile;
-      this.processLogList = [];
-    
-      // ------------------ File extension check ------------------
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      if (ext !== 'csv') {
-        alert('Only .csv files are allowed.');
-        this.resetFile();
-        this.isUpload = false;
-        return;
-      }
-    
-      try {
-        // ------------------ Read file ------------------
-        const rows = await this.readCsvFile(file); 
-        console.log(rows);
-        this.sessionId = Math.floor(Date.now() / 1000).toString();
-    
-        // ------------------ Header parsing ------------------
-        const headers = this.parseAndValidateHeaders(rows[0], expectedHeaders);
-    
-        // ------------------ Data parsing ------------------
-        const insertDataArray = this.parseCsvDataRows(rows, headers, this.sessionId);
-    
+/* ============================ UPLOAD ============================ */
+async qualityFileSubmit(): Promise<void> {
+
+  if (!this.processMembersFormGroup.valid || !this.selectedFile) {
+    this.processMembersFormGroup.markAllAsTouched();
+    return;
+  }
+
+  if (this.isUpload) return;
+  this.isUpload = true;
+  this.processLogList = [];
+
+  const file = this.selectedFile;
+  const ext = file.name.split('.').pop()?.toLowerCase();
+
+  if (ext !== 'csv') {
+    alert('Only .csv files are allowed.');
+    this.resetFile();    
+    this.isUpload = false; 
+    return;
+  }
+
+  try {
+    this.sessionId = Math.floor(Date.now() / 1000).toString();
+
+    // Parse CSV using PapaParse
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: false,
+
+      complete: async (result) => {
+        const rows: any[] = result.data;  
+        const parsedHeaders: string[] = result.meta.fields || [];
+
+        const expectedHeaders = [
+          'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
+          'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
+          'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
+        ];         
+
+        // Validate header
+        if (JSON.stringify(parsedHeaders) !== JSON.stringify(expectedHeaders)) {
+          alert("File header mismatch.");
+          this.isUpload = false;
+          return;
+        }
+
+        // Build array for inserting
+        const insertDataArray: any[] = [];
+
+        rows.forEach((row: any) => {
+          if (!row || Object.keys(row).length === 0) return;
+
+          if (row.Date_of_Birth) {
+            row.Date_of_Birth = this.cleanDate(row.Date_of_Birth);
+          }
+
+          row.INSERT_SESSION_ID = this.sessionId;
+          insertDataArray.push(row);
+        });
+
+        //console.log("Insert Data:", insertDataArray);
         // ------------------ Batch processing ------------------
-        
-        await this.uploadInBatches(insertDataArray); 
-    
+        await this.uploadInBatches(insertDataArray);  
+
         // ------------------ Fetch temp members ------------------
         await this.loadTempMembers();
-    
-        // ------------------ Reset form ------------------
+
+        // Reset form + file
         this.processMembersFormGroup.reset();
         this.selectedFile = null;
         this.resetFile();
-    
-      } catch (error) {
-        console.error('Error reading or uploading CSV:', error);
-        alert('Error processing risk gaps file. Please check your CSV format.');
-      } finally {
         this.isUpload = false;
-        console.log('finally');
+      },
+
+      error: (err) => {
+        console.error("CSV Parse Error:", err);
+        alert("Unable to read CSV file.");
+        this.isUpload = false;
       }
-    } 
-    
+    });
+
+  } catch (error) {
+    console.error("Unexpected Error:", error);
+    alert("Unexpected error while processing quality gaps file.");
+    this.isUpload = false;
+  }
+}
+       
     /* ============================ PROCESS FILE ============================ */
     
     async processQualityGaps(): Promise<void> {
@@ -218,6 +254,13 @@ export class QualitygapsFile {
           this.isProcessing = false;
         }
       }
+
+      private clearResults(): void {
+        this.tempMemberList = [];
+        this.dataSource.data = [];
+        this.totalRecords = this.exist_count = this.error_count = 0;
+      }
+    
       
     
       /* ============================ API ============================ */
@@ -259,52 +302,11 @@ export class QualitygapsFile {
       this.dataSource.data = this.tempMemberList;
     
       this.totalRecords = this.tempMemberList.length;
-      this.exist_count = this.tempMemberList.filter(m => m.exist_gap).length;
-      this.error_count = this.tempMemberList.filter(m => !m.SUBSCRIBER_ID).length;
+      this.exist_count = this.tempMemberList.filter(m => m.quality_gaps_exist).length;
+      this.error_count = this.tempMemberList.filter(m => !m.member_exist).length;
     }
      
-      /* ============================ CSV HELPERS ============================ */
-    
-      private parseCsvDataRows(
-      rows: string[],
-      headers: string[],
-      sessionId: string
-    ): any[] {
-      const insertDataArray: any[] = [];
-    
-      //const dateFields = ['RELEVANT_DATE'];
-      // const removeDateFields = [
-      //   'PCP_EFF_DT_E',
-      //   'PLAN_DT_S',
-      //   'PLAN_DT_E',
-      //   'DISENROLL_DT'
-      // ];
-    
-      for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i].split(',').map(c => c.trim());
-        if (cols.length !== headers.length) continue;
-    
-        const row: any = {};
-        headers.forEach((header, index) => {
-          row[header] = cols[index] || null;
-        });
-    
-        // Format required date fields
-        // dateFields.forEach(field => {
-        //   if (row[field]) {
-        //     row[field] = this.cleanDate(row[field]);
-        //   }
-        // });
-    
-        // Remove unwanted date fields
-        //removeDateFields.forEach(field => delete row[field]);
-    
-        row.INSERT_SESSION_ID = sessionId;
-        insertDataArray.push(row);
-      }
-    
-      return insertDataArray;
-    }
+       
     
     
       private parseAndValidateHeaders(
@@ -322,33 +324,10 @@ export class QualitygapsFile {
         return headers;
     }
     
-    
-      private async readCsvFile(file: File): Promise<string[]> {
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      if (ext !== 'csv') {
-        throw new Error('INVALID_FILE_TYPE');
-      }
-    
-      const text = await file.text();
-      const rows = text
-        .split(/\r?\n/)
-        .filter(line => line.trim());
-    
-      if (rows.length < 2) {
-        throw new Error('EMPTY_OR_INVALID_FILE');
-      }
-    
-      return rows;
-    }   
-    
+     
        /* ============================ UTILS ============================ */
     
-      private clearResults(): void {
-        this.tempMemberList = [];
-        this.dataSource.data = [];
-        this.totalRecords = this.exist_count = this.error_count = 0;
-      }
-    
+      
       private chunkArray<T>(arr: T[], size: number): T[][] {
         const chunks: T[][] = [];
         for (let i = 0; i < arr.length; i += size) {

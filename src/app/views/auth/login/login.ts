@@ -6,12 +6,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Title } from '@angular/platform-browser';
-
+import { ConfigService } from '../../../services/api.service'; 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
 import { LoginRequest } from '../../../models/requests/loginRequest';
 import { MatIconModule } from '@angular/material/icon';
 import { UserDataService } from '../../../services/user-data-service';
+import { LogRequest } from '../../../models/requests/dashboardRequest';
 @Component({
   selector: 'app-login',
   imports: [
@@ -29,11 +30,12 @@ import { UserDataService } from '../../../services/user-data-service';
 export class Login {
   username = '';
   password = '';
+  userId: number = 0;
   isLoading = false;
   errorMessage = '';
   errorMsg: any;
 
-  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title) {}
+  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title,private apiService: ConfigService) {}
   bgImages = [
       'assets/images/1.jpg',
       'assets/images/2.jpg',
@@ -49,8 +51,7 @@ export class Login {
         this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
       }, 4000); // 4 seconds
     }
-  async onSubmit() {
-    //this.errorMessage = '';
+  async onSubmit() { 
     this.isLoading = true;
     this.clearError();
     const request: LoginRequest = {
@@ -64,24 +65,36 @@ export class Login {
       if(result.data.length>0){
         const user = result.data[0]; 
         this.userData.setUser(user); 
-        const roleId = user.role_id;
-     
-        this.router.navigate(['/dashboard']);
-       // }
-        //this.router.navigate(['/dashboard']);
+        const roleId = user.role_id; 
+        this.userId = user.ID; 
+        this.addloginHistory();
+        this.router.navigate(['/dashboard']); 
       }
       else{
         this.errorMessage = 'Invalid login credentials';
-      }
-      //this.router.navigate(['/dashboard']);
+      } 
     } catch (error) {
       this.errorMessage = 'Invalid login credentials';
     } finally {
       this.isLoading = false;
     }
   }
-  clearError() {
-    //alert(1);
+  clearError() { 
     this.errorMessage = '';
+  }
+
+  addloginHistory(){
+    const logpayload: LogRequest = {
+      table_name: 'MEM_SYSTEM_LOG',
+      insertDataArray: [{
+        medicaid_id: 0,
+        log_name: 'LOGIN',
+        log_details: `Login By ${this.username}`,
+        log_status: 'SUCCESS',
+        log_by: this.userId,
+        action_type: `${this.username}`
+      }]
+    };
+    return this.apiService.insert(logpayload);
   }
 }
