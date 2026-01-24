@@ -11,16 +11,18 @@ import { HeaderService } from '../../../services/header.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PROVIDER_TIN_MAP } from '../../../constants/constant';
 import { CommonModule } from '@angular/common';
+import { MatIcon } from "@angular/material/icon";
+
 
 @Component({
   selector: 'app-star-performance',
-  imports: [MatCardModule,CommonModule,
+  imports: [MatCardModule, CommonModule,
     MatSelectModule,
     MatFormFieldModule,
     MatButtonModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
-  MatDatepickerModule],
+    MatDatepickerModule, MatIcon],
   templateUrl: './star-performance.html',
   styleUrl: './star-performance.css'
 })

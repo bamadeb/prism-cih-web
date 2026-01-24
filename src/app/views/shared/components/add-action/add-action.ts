@@ -12,14 +12,14 @@ import { MatSelectModule } from '@angular/material/select';
 // //import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 // import { MatNativeDateModule } from '@angular/material/core';
-import { ChangeDetectorRef, Inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Inject, signal, ViewChild } from '@angular/core';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { PROVIDER_TIN_MAP } from '../../../../constants/constant';
+import { PROVIDER_TIN_MAP } from '../../../../constants/constant';  
 import {
   MatDialog,
   MatDialogActions,
@@ -36,24 +36,24 @@ import { MatIconModule } from "@angular/material/icon";
 import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
 import { PhoneFormatPipe } from "../../../../pipes/phone-format.pipe";
 import { MatCard } from "@angular/material/card";
+import { MatPaginator,MatPaginatorModule  } from "@angular/material/paginator";
+import { MatTableDataSource } from '@angular/material/table'; 
+import { MatSort, MatSortModule } from '@angular/material/sort';
+
 
 @Component({
   selector: 'app-add-action',
-  imports: [
+  imports: [  
     MatButtonModule,
     MatDialogModule,
-    MatTabsModule,
-    // MatGridListModule, 
-    MatRadioModule,
+    MatTabsModule, 
+    MatPaginatorModule ,
+    MatSortModule,     
+    MatRadioModule, 
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatDatepickerModule,
-    // MatNativeDateModule,
-    // MatDialogActions,
-    // MatDialogClose,
-    // MatDialogContent,
-    // MatDialogTitle
+    MatDatepickerModule,     
     MatTableModule,
     MatExpansionModule,
     MatCheckboxModule,
@@ -63,8 +63,9 @@ import { MatCard } from "@angular/material/card";
     MatProgressSpinner,
     MatIconModule,
     PhoneFormatPipe,
-    MatCard
-  ],
+    MatCard,
+    MatPaginator
+],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],
@@ -74,30 +75,41 @@ import { MatCard } from "@angular/material/card";
 })
 export class AddAction {
   addActionFormGroup!: FormGroup;
+  pcpVisitFormGroup!: FormGroup;
   measureForm!: FormGroup;
   appointmentFormGroup!: FormGroup;
   action_activity_category: any[] = [];
   action_ativity_type: any[] = [];
   navigatorList: any[] = [];
+  appointmentList: any[] = [];
   starperformanceList: any[] = [];
   measureList: any[] = [];
+  providerList: any[] = [];
+  vendorLocationList: any[] = [];
   actionresult_followup_list: any[] = [];
   memberTaskList: any[] = [];
   memberGapList: any[] = [];
   memberQualityList: any[] = [];
   isLoading = false;
   memberPCPVisitList: any[] = [];
+  pcpType: any[] = [];vendorList: any[] = [];
   PCPVisitDisplayedColumns: string[] = [
     'visit_date',
+    'visit_type',
     'message',
     'added_user_name',
     'added_date'
-  ];
+  ]; 
+  pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]); 
+  @ViewChild('mainPaginator') mainPaginator!: MatPaginator;
+  @ViewChild('mainSort') mainSort!: MatSort;
   showPcpVisitForm = signal(false);
   showPcpHistory = signal(false);
   isSavingPcpVisit = signal(false);
   pcpSuccessMessage = signal('');
+  appSuccessMessage = signal('');
   isLoadingPcpHistory = signal(false);
+  isLoadingappHistory = signal(false);
   // Sample history data
   // pcpVisitHistory: any[] = [
   //   { visit_date: new Date('2025-12-01'), message: 'Routine checkup' },
@@ -161,22 +173,27 @@ export class AddAction {
 
       //Member level
       medicaid_id: [''],
-      action_type_source: ['Member Action'],
-      //  PCP VISIT
-      pcp_visited: [false],
-      pcp_visit_date: [{ value: null, disabled: true }],
-      pcp_visit_message: [{ value: '', disabled: true }],
+      action_type_source: ['Member Action'], 
       // RISK GAPS
       riskGapsList: this.fb.array([]),
       qualityGapsList: this.fb.array([])
     });
     this.appointmentFormGroup = this.fb.group({
-      vendor_name: [''],
-      appointment_date: [''],
-      appointment_time: [''],
+      vendor_id: [null, Validators.required],
+      provider_id: [{ value: null, disabled: true }, Validators.required],
+      appointment_date: [null, Validators.required],
+      appointment_time: ['', Validators.required],
+      action_status: [null, Validators.required],
+      place_of_appointment: [{ value: null, disabled: true }, Validators.required],
+      appointment_type: [null, Validators.required],
       appointment_note: ['']
     });
 
+    this.pcpVisitFormGroup = this.fb.group({
+      pcp_visit_date: [null, Validators.required],
+      visit_type: [null, Validators.required],
+      pcp_visit_message: ['']
+    });
     
 
     this.measureForm = this.fb.group({
@@ -211,35 +228,19 @@ export class AddAction {
     //this.role_id = user.role_id;
     const payload = { medicaid_id: this.medicaid_id };
     const result = await this.apiService.addActionMaster<any>(payload);
+    
     this.action_activity_category = result.data.actionActivityCategory || [];
     this.action_ativity_type = result.data.actionActivityType || [];
     this.navigatorList = result.data.navigatorList || [];
     this.starperformanceList = result.data.starperformanceList || [];
     this.measureList = result.data.measureList || [];
-    //console.log(this.starperformanceList);
+    this.pcpType = result.data.pcpType || [];
+    this.vendorList = result.data.vendorList || [];
+    this.appointmentHistory(); 
     this.setScheduledActionStatus('17');
-
-   
-
-    this.addActionFormGroup
-      .get('pcp_visited')
-      ?.valueChanges.subscribe((visited: boolean) => {
-        const dateCtrl = this.addActionFormGroup.get('pcp_visit_date');
-        const msgCtrl = this.addActionFormGroup.get('pcp_visit_message');
-
-        if (visited) {
-          dateCtrl?.enable();
-          msgCtrl?.enable();
-        } else {
-          dateCtrl?.disable();
-          msgCtrl?.disable();
-          dateCtrl?.reset();
-          msgCtrl?.reset();
-        }
-      });
-
-
-
+    // pcp visit history
+    this.setPCPVisitHistory(); 
+ 
     this.cdr.detectChanges();
     if (user.role_id === 9) {
       this.addActionFormGroup.get('panel_id')?.setValue(18);
@@ -247,6 +248,19 @@ export class AddAction {
     // this.form = this.fb.group({
     //   riskGapsList: this.fb.array([])
     // });qualityGapsList
+
+    this.appointmentFormGroup
+  .get('appointment_time')
+  ?.valueChanges.subscribe(() => {
+    this.cdr.detectChanges();
+  });
+ 
+
+  }
+
+  ngAfterViewInit() {
+    this.pcpVisitDataSource.paginator = this.mainPaginator;
+    this.pcpVisitDataSource.sort = this.mainSort;
   }
   get riskGapsList(): FormArray {
     return this.addActionFormGroup.get('riskGapsList') as FormArray;
@@ -263,83 +277,182 @@ export class AddAction {
     const result = await this.apiService.getActionresultfollowup<any>(payload);
     //console.log(payload);
     this.actionresult_followup_list = result.data;
-
   }
-  togglePcpVisit() {
-    this.showPcpVisitForm.update(v => !v);
-  }
-  async savePcpVisit() {
-    if (!this.addActionFormGroup.get('pcp_visited')?.value) return;
 
-    this.isSavingPcpVisit.set(true);
+  async onVendorChange(vendorId: string) {
+  if (!vendorId) return;
 
-    const insert_data = {
-      MEDICAID_ID: this.addActionFormGroup.value.medicaid_id,
-      VISIT_DATE: this.formatDateToYMD(this.addActionFormGroup.value.pcp_visit_date),
-      MESSAGE: this.addActionFormGroup.value.pcp_visit_message,
-      ADDED_BY: this.userId
-    };
+  // 🔄 Reset dependent fields
+  this.providerList = [];
+  this.vendorLocationList = [];
 
-    const apiPayload = {
-      table_name: 'MEM_MEMBER_PCP_VISIT',
-      insertDataArray: [insert_data],
-    };
+  this.appointmentFormGroup.get('provider_id')?.reset();
+  this.appointmentFormGroup.get('place_of_appointment')?.reset();
 
-    try {
-      await this.apiService.multipleRowInsert<any>(apiPayload);
-      await this.addTaskLog('ADD PCP VISIT', this.addActionFormGroup.value.pcp_visit_message);
-      // ✅ Success message
-      this.pcpSuccessMessage.set('PCP visit saved successfully');
+  this.appointmentFormGroup.get('provider_id')?.disable();
+  this.appointmentFormGroup.get('place_of_appointment')?.disable();
 
-      // 🧹 Reset form fields
-      this.addActionFormGroup.patchValue({
-        pcp_visited: false,
-        pcp_visit_date: null,
-        pcp_visit_message: ''
-      });
+  try {
+    const result = await this.apiService.getProviderList<any>({
+      vendor_id: vendorId
+    });
 
-      // 🔽 Close add panel
-      this.showPcpVisitForm.set(false);
-      this.setPCPVisitHistory();
-      // ⏳ Auto-hide success message
-      setTimeout(() => {
-        this.pcpSuccessMessage.set('');
-      }, 3000);
+    this.providerList = result.data.providerList || [];
+    this.vendorLocationList = result.data.vendorLocationList || [];
 
-    } catch (error) {
-      console.error('Error saving PCP visit:', error);
-    } finally {
-      this.isSavingPcpVisit.set(false);
-      //this.dialogRef.close(true);
+    // ✅ Enable once data arrives
+    if (this.providerList.length) {
+      this.appointmentFormGroup.get('provider_id')?.enable();
     }
+    if (this.vendorLocationList.length) {
+      this.appointmentFormGroup.get('place_of_appointment')?.enable();
+    }
+
+    this.cdr.detectChanges(); // OnPush
+
+  } catch (error) {
+    console.error('Vendor change failed', error);
   }
+}
+
+async addAppointment() {
+  if (this.appointmentFormGroup.invalid) {
+    this.appointmentFormGroup.markAllAsTouched();
+    return;
+  }
+
+  const formValue = this.appointmentFormGroup.getRawValue(); 
+
+  try {
+
+    await this.insertappiontment(formValue); 
+    await this.applogSuccess();
+    await this.appointmentHistory();
+
+    this.appSuccessMessage.set('Appointment added successfully');
+    this.appointmentFormGroup.reset();
+
+    // 🔒 Disable dependent fields again
+    this.appointmentFormGroup.get('provider_id')?.disable();
+    this.appointmentFormGroup.get('place_of_appointment')?.disable();
+
+    setTimeout(() => this.appSuccessMessage.set(''), 3000);
+
+  } catch (error) {
+    console.error('Error saving appointment:', error);
+  }
+}
+
+private async insertappiontment(form: any): Promise<void> {
+    const payload = {
+      table_name: 'MEM_SCHEDULE_APPOINTMENT_ACTION',
+      insertDataArray: [{
+        medicaid_id: this.medicaid_id,
+        action_date: this.formatDateToYMD(form.appointment_date),
+        action_time:  form.appointment_time,
+        status: form.action_status,
+        appiontment_type: form.appointment_type,
+        vendor_id: form.vendor_id,
+        provider_id: form.provider_id,
+        note: form.appointment_note,
+        place_of_appointment: form.place_of_appointment,
+        added_by: this.userId
+      }]
+    };
+
+    await this.apiService.insert(payload);
+  }
+
+
+
+  async savePcpVisit() {
+  if (this.pcpVisitFormGroup.invalid || this.isSavingPcpVisit()) {
+    return;
+  }
+
+  this.isSavingPcpVisit.set(true);
+
+  const form = this.pcpVisitFormGroup.value;
+
+  const insert_data = {
+    MEDICAID_ID: this.medicaid_id,
+    VISIT_DATE: this.formatDateToYMD(form.pcp_visit_date),
+    MESSAGE: form.pcp_visit_message,
+    VISIT_TYPE: form.visit_type,
+    ADDED_BY: this.userId
+  };
+
+  try {
+    await this.apiService.multipleRowInsert({
+      table_name: 'MEM_MEMBER_PCP_VISIT',
+      insertDataArray: [insert_data]
+    });
+
+    await this.addTaskLog('ADD PCP VISIT', form.pcp_visit_message);
+
+    this.pcpSuccessMessage.set('PCP visit saved successfully');
+
+    this.pcpVisitFormGroup.reset();
+    await this.setPCPVisitHistory();
+
+    setTimeout(() => this.pcpSuccessMessage.set(''), 3000);
+
+  } catch (error) {
+    console.error('Error saving PCP visit:', error);
+  } finally {
+    this.isSavingPcpVisit.set(false);
+  }
+}
+applyFilter(event: Event) {
+  const filterValue = (event.target as HTMLInputElement).value;
+  this.pcpVisitDataSource.filter = filterValue.trim().toLowerCase();
+
+  // 🔥 REQUIRED for paginator count update
+  if (this.pcpVisitDataSource.paginator) {
+    this.pcpVisitDataSource.paginator.firstPage();
+    this.cdr.detectChanges();
+  }
+}
+
+
   async setPCPVisitHistory() {
     if (!this.medicaid_id) return;
-    this.isLoadingPcpHistory.set(true);
-    const payload: MedicaidIdRequest = {
-      medicaid_id: this.medicaid_id
-    };
 
+    this.isLoadingPcpHistory.set(true);
     try {
-      const result = await this.apiService.getMemberVisitList<any>(payload);
-      this.memberPCPVisitList = result.data || [];
-      this.cdr.detectChanges();
+      const result = await this.apiService.getMemberVisitList<any>({
+        medicaid_id: this.medicaid_id
+      });
+      const data = result.data ?? [];
+      this.pcpVisitDataSource.data = data;
     } catch (error) {
       console.error(error);
     } finally {
       this.isLoadingPcpHistory.set(false);
+      this.cdr.detectChanges();
     }
-  }
+  } 
 
-  togglePcpHistory() {
-    const willOpen = !this.showPcpHistory();
-    this.showPcpHistory.set(willOpen);
+   async appointmentHistory() {
+    if (!this.medicaid_id) return;
 
-    // ✅ Load history ONLY when opening
-    if (willOpen) {
-      this.setPCPVisitHistory();
+    this.isLoadingappHistory.set(true);
+    try {
+      const result = await this.apiService.getAppointmentList<any>({
+        medicaid_id: this.medicaid_id
+      });
+      this.appointmentList = result.data ?? []; 
+      console.log(this.appointmentList);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.isLoadingappHistory.set(false);
+      this.cdr.detectChanges();
     }
-  }
+  } 
+
+
+  
 
   createRiskGapForm(gap: any): FormGroup {
     return this.fb.group({
@@ -948,6 +1061,25 @@ export class AddAction {
         log_status: 'SUCCESS',
         log_by: user.ID,
         action_type: 'ADD NUM COUNT'
+      }]
+    };
+    return this.apiService.insert(logpayload);
+  }
+
+  private applogSuccess(): Promise<any> {
+    const user = this.userData.getUser();
+    if (!this.medicaid_id) {
+      throw new Error('medicaid_id is missing');
+    }
+    const logpayload: LogRequest = {
+      table_name: 'MEM_SYSTEM_LOG',
+      insertDataArray: [{
+        medicaid_id: this.medicaid_id,
+        log_name: 'APPOINTMENT',
+        log_details: `APPOINTMENT CREATED FOR ${this.medicaid_id}`,
+        log_status: 'SUCCESS',
+        log_by: user.ID,
+        action_type: 'APPOINTMENT CREATED'
       }]
     };
     return this.apiService.insert(logpayload);

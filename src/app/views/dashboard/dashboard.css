@@ -1,10 +1,9 @@
-
 table {
   width: 100%;
 }
 
 mat-form-field {
-  width: 100%;
+  width:200px;
 }
 
 .text-uppercase {
@@ -25,20 +24,19 @@ mat-form-field {
   text-transform: uppercase;
 }
 
-.tab-content {
-  padding: 15px;
-}
+
 
 .action-bar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 10px;
+  
 }
 
 .project-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  
 }
 
 .grid-two {
@@ -61,6 +59,7 @@ mat-form-field {
 
 .navigator-select {
   width: 250px;
+ 
 }
 
 .red {
@@ -159,7 +158,8 @@ mat-form-field {
 }
 
 .txlink{
-  cursor: pointer; 
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 ::ng-deep .xl-dialog .mat-dialog-container {
@@ -173,6 +173,9 @@ mat-form-field {
 .pointer {
   cursor: pointer; 
 }
+
+.project-header2
+{text-decoration: underline;cursor: pointer; font-size: 18px;line-height:20px;margin-left:20px;margin-right:20px;}
 
 .address-text {
   cursor: pointer;
@@ -197,6 +200,45 @@ mat-form-field {
   word-wrap: break-word;
   white-space: normal;
 }
+
+.pcp-cell {
+  text-align: center;
+}
+
+.dot-wrapper {
+  display: flex;
+  flex-direction: column;   /* stack rows vertically */
+  gap: 4px;
+  align-items: center;      /* center the rows */
+}
+
+.dot-row {
+  display: flex;
+  align-items: center;      /* align dot + date */
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.green {
+  background-color: #2e7d32;
+}
+
+.red {
+  background-color: #c62828;
+}
+
+.date-text {
+  display: inline-block;
+  width: 78px;          /* fixed width for MM/dd */
+  text-align: left;  
+  line-height: 1.2;
+}
+
 
 
 

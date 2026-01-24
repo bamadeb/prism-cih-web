@@ -4,7 +4,7 @@
     <mat-card class="mb-1">
         <mat-card-content>
 
-            <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="qualityFileSubmit()"
+            <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="pcrFileSubmit()"
                 enctype="multipart/form-data">
 
                 <!-- <mat-label class="file-label">Select Member File</mat-label> -->
@@ -53,7 +53,7 @@
 
             <!-- PROCESS BUTTON -->
             <div class="mt-1" *ngIf="totalRecords > 0">
-                <button mat-raised-button color="primary" (click)="processQualityGaps()" [disabled]="isProcessing">
+                <button mat-raised-button color="primary" (click)="processPCRFile()" [disabled]="isProcessing">
 
                     @if (isProcessing) {
                     <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
@@ -98,89 +98,91 @@
             <div class="table-wrapper" *ngIf="!isLoading">
                 <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1"
                     *ngIf="tempMemberList && tempMemberList.length > 0">
-                    <ng-container matColumnDef="Subscriber_ID" sticky>
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>SUBSCRIBER ID </th>
-                        <td mat-cell *matCellDef="let row">{{ row.Subscriber_ID }}</td>
+                    <ng-container matColumnDef="MEMBERKEY" sticky>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MEMBER KEY </th>
+                        <td mat-cell *matCellDef="let row">{{ row.MEMBERKEY }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Measure_Name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MEASURE NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Measure_Name }}</td>
+                    <ng-container matColumnDef="MEASURE_KEY">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MEASURE KEY</th>
+                        <td mat-cell *matCellDef="let row">{{ row.MEASURE_KEY }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Submeasure">
+                    <ng-container matColumnDef="SUBMEASURE_KEY">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>SUBMEASURE</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Submeasure }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.SUBMEASURE_KEY }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="First_Name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>FIRST NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.First_Name }}</td>
+                    <ng-container matColumnDef="MEMBER_NAME">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MEMBER NAME</th>
+                        <td mat-cell *matCellDef="let row">{{ row.MEMBER_NAME }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Middle_Name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MIDDLE NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Middle_Name }}</td>
+                    <ng-container matColumnDef="PCP_TIN">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>PCP TIN</th>
+                        <td mat-cell *matCellDef="let row">{{ row.PCP_TIN }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Last_Name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>LAST NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Last_Name }}</td>
+                    <ng-container matColumnDef="PCP_Name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>PCP NAME</th>
+                        <td mat-cell *matCellDef="let row">{{ row.PCP_Name }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Medicare_ID">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICARE ID</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Medicare_ID }}</td>
+                    <ng-container matColumnDef="DENOM">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>DENOM</th>
+                        <td mat-cell *matCellDef="let row">{{ row.DENOM }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Medicaid_ID">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICAID ID</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Medicaid_ID }}</td>
+                    <ng-container matColumnDef="DISCH_ORDER">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>DISCH ORDER</th>
+                        <td mat-cell *matCellDef="let row">{{ row.DISCH_ORDER }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Date_of_Birth">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>DATE OF BIRTH</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Date_of_Birth }}</td>
+                    <ng-container matColumnDef="INDEX_ADMIT_DT">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>ADMIT DT</th>
+                        <td mat-cell *matCellDef="let row">{{ row.INDEX_ADMIT_DT }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Sex">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>SEX</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Sex }}</td>
+                    <ng-container matColumnDef="INDEX_DISCH_DT">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>DISCH DT</th>
+                        <td mat-cell *matCellDef="let row">{{ row.INDEX_DISCH_DT }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Provider_ID">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>PROVIDER ID</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Provider_ID }}</td>
+                    <ng-container matColumnDef="INDEX_STAY">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>INDEX STAY</th>
+                        <td mat-cell *matCellDef="let row">{{ row.INDEX_STAY }}</td>
                     </ng-container>
-                    <ng-container matColumnDef="Provider_TIN">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>PROVIDER TIN</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Provider_TIN }}</td>
-                    </ng-container>
-
-                    <ng-container matColumnDef="Provider_Name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>PROVIDER NAME</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Provider_Name }}</td>
+                    <ng-container matColumnDef="NUMER">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>NUMER</th>
+                        <td mat-cell *matCellDef="let row">{{ row.NUMER }}</td>
                     </ng-container>
 
-                    <ng-container matColumnDef="Numerator_Gap">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>NUMERATOR GAP</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Numerator_Gap }}</td>
-                    </ng-container>                   
+                    <ng-container matColumnDef="READMISSION">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>READMISSION</th>
+                        <td mat-cell *matCellDef="let row">{{ row.READMISSION }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="READMT_ADMIT_DT">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>READMT ADMIT DT</th>
+                        <td mat-cell *matCellDef="let row">{{ row.READMT_ADMIT_DT }}</td>
+                    </ng-container>   
+                    
+                    <ng-container matColumnDef="READMT_DISCH_DT">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>READMT DISCH DT</th>
+                        <td mat-cell *matCellDef="let row">{{ row.READMT_DISCH_DT }}</td>
+                    </ng-container> 
 
                     <ng-container matColumnDef="1">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>STATUS</th>
 
                         <td mat-cell *matCellDef="let row" [ngStyle]="{
-                  'background-color':
-                    (!row.Subscriber_ID || row.Subscriber_ID.trim() === '' || !row.member_exist) ? 'red' :
-                    row.quality_gaps_exist ? 'yellow' : 'transparent'
-                }">
-                            <ng-container *ngIf="row.quality_gaps_exist">
-                                Find duplicate quality gaps
+                  'background-color': row.pcr_exist ? 'yellow' :  (!row.member_exist) ? 'red' : 'transparent' }">
+                            <ng-container *ngIf="row.pcr_exist">
+                                Find duplicate record
                             </ng-container>
 
                             <ng-container *ngIf="!row.member_exist">
-                                Member not exist for this quality gap
+                                Member not exist
                             </ng-container>
 
                         </td>
@@ -197,7 +199,7 @@
                     </tr>
                 </table>
                 <div class="txupper" *ngIf="processLogList && processLogList.length > 0">
-                    <h2 style="text-align: center;">Quality Gaps File Upload Process Details</h2>
+                    <h2 style="text-align: center;">PCR File Upload Process Details</h2>
                     <table style="width: 50%;margin-left: 30%;text-align: left;" class="mat-elevation-z1">
                         <thead class="table-light">
                             <tr>

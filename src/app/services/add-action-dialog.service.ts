@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service';
-//import { MedicaidIdRequest } from '../models/requests/commonRequest';
+//import { MedicaidIdRequest } from '../models/requests/commonRequest'; 
 import { AddAction } from '../views/shared/components/add-action/add-action';
 import { firstValueFrom } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
 export class AddActionDialogService {
-
+  isLoading = false;
   constructor(
     //private apiService: ConfigService,
     private dialog: MatDialog,
@@ -32,7 +32,7 @@ export class AddActionDialogService {
   //   //return dialogRef.afterOpened().toPromise();
   // }
 showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: string,addr: string,  phone: string,  practice: string,PCP_TAX_ID:number): Promise<boolean> {
-
+  this.isLoading = true;
   const dialogRef = this.dialog.open(AddAction, {
     width: '95vw',
     maxWidth: '100vw',
