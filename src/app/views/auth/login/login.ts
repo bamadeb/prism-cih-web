@@ -12,6 +12,7 @@ import { Auth } from '../../../services/auth';
 import { LoginRequest } from '../../../models/requests/loginRequest';
 import { MatIconModule } from '@angular/material/icon';
 import { UserDataService } from '../../../services/user-data-service';
+import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-login',
   imports: [
@@ -33,7 +34,12 @@ export class Login {
   errorMessage = '';
   errorMsg: any;
 
-  constructor(private router: Router,private authService: Auth, private userData: UserDataService,private titleService: Title,private idleService: IdleTimeoutService) {}
+  constructor(private router: Router,
+    private authService: Auth, 
+    private userData: UserDataService,
+    private titleService: Title,
+    private idleService: IdleTimeoutService,
+    private auth: AuthService) {}
   bgImages = [
       'assets/images/1.jpg',
       'assets/images/2.jpg',
@@ -59,6 +65,7 @@ export class Login {
     };
 
     try {
+      await this.auth.login(this.username, this.password);
       const result = await this.authService.login<any>(request);
       //console.log('✅ Login success:', result);
       if(result.data.length>0){
