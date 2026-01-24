@@ -10,7 +10,7 @@ import { SystemLogService } from './system-log';
 export class IdleTimeoutService {
   userId!: number;
   userEmail!: string;
-  private idleTime = 10 * 60 * 1000; // 10 minutes
+  private idleTime = 1 * 60 * 1000; // 10 minutes
   private subscription!: Subscription;
 
   constructor(
@@ -18,7 +18,14 @@ export class IdleTimeoutService {
     private userData: UserDataService,
     private ngZone: NgZone,
     private systemLogService:SystemLogService
-  ) { }
+
+  ) { 
+        const user = this.userData.getUser(); 
+    if(user){
+      this.userId = user.ID;
+      this.userEmail = user.EmailID;
+    }
+   }
 
   startWatching() {
     // User activity events
