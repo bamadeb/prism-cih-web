@@ -11,7 +11,7 @@
 
                 <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
                     <mat-icon>upload</mat-icon>
-                    CHOOSE QUALITY GAPS FILE
+                    CHOOSE PCR DATA FILE
                 </button>
 
                 <div class="file-preview" *ngIf="selectedFile">
@@ -40,14 +40,14 @@
 
             <!-- SUMMARY -->
             <div *ngIf="totalRecords > 0" class="summary-row">
-                <span>Total quality gaps: <b>{{ totalRecords }}</b></span>
+                <span>Total pcr data: <b>{{ totalRecords }}</b></span>
 
                 <span *ngIf="error_count > 0">
                     Errors: <b>{{ error_count }}</b>
                 </span>
 
                 <span *ngIf="exist_count > 0">
-                    Existing quality gaps: <b>{{ exist_count }}</b>
+                    Existing pcr data: <b>{{ exist_count }}</b>
                 </span>
             </div>
 
@@ -66,8 +66,8 @@
 
             <!-- SAMPLE FILE -->
             <div *ngIf="totalRecords === 0" class="sample-link">
-                <a href="assets/sample_file/Qualitygaps_sample_file.csv" target="_blank">
-                    Quality Gaps Sample File
+                <a href="assets/sample_file/CIH_PCR_File.csv" target="_blank">
+                    PCR Data Sample File
                 </a>
             </div>
 

@@ -13,6 +13,9 @@ import { RiskProfile } from './views/reports/risk-profile/risk-profile';
 import { MemberFile } from './views/process-file/member-file/member-file';
 import { RiskgapsFile } from './views/process-file/riskgaps-file/riskgaps-file';
 import { QualitygapsFile } from './views/process-file/qualitygaps-file/qualitygaps-file';
+import { SystemLog } from './views/reports/system-log/system-log';
+import { FileLogReport } from './views/reports/file-log-report/file-log-report';
+import { PcrFile } from './views/process-file/pcr-file/pcr-file';
 
 export const routes: Routes = [
   {
@@ -60,6 +63,18 @@ export const routes: Routes = [
     path: '',
     component: MainLayout,
     children: [
+      { path: 'systemlogreport', component: SystemLog },
+    ]
+  },{
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'filelogreport', component: FileLogReport },
+    ]
+  },{
+    path: '',
+    component: MainLayout,
+    children: [
       { path: 'risk-profile', component: RiskProfile },
     ]
   },
@@ -82,6 +97,13 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'process-qualitygaps-file', component: QualitygapsFile },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'process-pcr-file', component: PcrFile },
     ]
   },
   {

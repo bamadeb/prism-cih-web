@@ -1,0 +1,118 @@
+<div class="pagecontent">
+    <mat-card>
+        <mat-card-content style="text-align:center">           
+
+            <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+                <!-- NAVIGATORS -->
+                <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
+                    <!-- <mat-label>ALL USERS</mat-label> -->
+                    <mat-select formControlName="user_id">
+                        <!-- <mat-option class="txupper" [value]="">ALL USERS</mat-option> -->
+                        <mat-option class="txupper" *ngFor="let d of navigatorList" [value]="d.ID">
+                            {{ d.FistName }} {{ d.LastName }} - ({{ d.ROLE_NAME }})
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field> 
+
+                <mat-form-field appearance="outline">
+                <mat-label>START DATE</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+                <mat-error *ngIf="actionLogFormGroup.get('start_date')?.hasError('required')">
+                    Start date is required
+                </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="mr">
+                <mat-label>END DATE</mat-label>
+                <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
+                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+                <mat-error *ngIf="actionLogFormGroup.get('end_date')?.hasError('required')">
+                    End date is required
+                </mat-error>
+                <mat-error *ngIf="actionLogFormGroup.hasError('dateRangeInvalid')">
+                    End date must be after Start Date
+                </mat-error>
+                </mat-form-field>
+                <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid">SEARCH</button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+        <mat-card-content>
+
+        <!-- LOADER -->
+        <div class="table-loader" *ngIf="isLoading" >
+            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        </div>        
+
+        <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
+        <div [hidden]="isLoading" class="table-toolbar">
+
+        <mat-paginator style="background-color: #f4f3f3;"
+            #mainPaginator
+            [pageSize]="10"
+            [pageSizeOptions]="[10, 25, 50, 100]">
+        </mat-paginator>
+        <mat-form-field appearance="outline" >
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="filter($event)" placeholder="Search records">
+        </mat-form-field>
+
+        <table mat-table
+                [dataSource]="dataSource"
+                matSort
+                #mainSort="matSort"
+                class="txupper">
+
+            <!-- MEDICAID ID -->
+            <ng-container matColumnDef="medicaid_id">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>MEDICAID ID</th>
+            <td mat-cell *matCellDef="let row">{{ row.medicaid_id == 0 ? '' : row.medicaid_id }}</td>
+            </ng-container>
+
+            <!-- ACTIVITY CATEGORY -->
+            <ng-container matColumnDef="log_name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG NAME</th>
+            <td mat-cell *matCellDef="let row">{{ row.log_name }}</td>
+            </ng-container>
+
+            <!-- ACTIVITY TYPE -->
+            <ng-container matColumnDef="log_details">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG DETAILS</th>
+            <td mat-cell *matCellDef="let row">{{ row.log_details }}</td>
+            </ng-container>
+
+            <!-- ACTION RESULT -->
+            <ng-container matColumnDef="log_status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG STATUS</th>
+            <td mat-cell *matCellDef="let row">{{ row.log_status }}</td>
+            </ng-container> 
+
+            <!-- ACTION DATE -->
+            <ng-container matColumnDef="add_date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>LOG DATE</th>
+            <td mat-cell *matCellDef="let row">{{ row.add_date }}</td>
+            </ng-container> 
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            
+            <!-- NO DATA ROW -->
+            <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" style="text-align: center;">
+                No record found
+                </td>
+            </tr>
+        </table>
+        </div>
+
+
+             
+
+        </mat-card-content>
+    </mat-card>
+</div>

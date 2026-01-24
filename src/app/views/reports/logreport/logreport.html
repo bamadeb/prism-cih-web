@@ -90,13 +90,17 @@
         
 
         <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
-        <div [hidden]="isLoading">
+        <div [hidden]="isLoading" class="table-toolbar">
 
-        <mat-paginator
+        <mat-paginator style="background-color: #f4f3f3;"
             #mainPaginator
             [pageSize]="10"
             [pageSizeOptions]="[10, 25, 50, 100]">
         </mat-paginator>
+         <mat-form-field appearance="outline" >
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="filter($event)" placeholder="Search records">
+      </mat-form-field>
 
         <table mat-table
                 [dataSource]="dataSource"

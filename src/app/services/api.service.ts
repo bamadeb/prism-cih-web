@@ -399,4 +399,31 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   } 
 
+  async getSystemlog<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismLogdetailsbymedicaid',
+      request   
+    );
+  } 
+
+  async getFIleprocesslist<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismFileProcesslistByType',
+      request   
+    );
+  } 
+
+  async getfileprocessLoglist<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismFileProcessLoglistBySession',
+      request   
+    );
+  } 
+
 }
