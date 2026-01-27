@@ -1,124 +1,95 @@
-.table-wrapper {
-  display: flex;
-  justify-content: center;   /* horizontal center */
+/* FILTER */
+.filter-card {
+  margin-bottom: 16px;
 }
 
-.centered-table {
-  width: auto;               /* prevents full-width stretch */
-  margin: 0 auto;
-}
-.row-border-only {
-  border-collapse: collapse;
-  border: 1px solid #000;   /* outer table border */
-}
-
-/* Remove all default cell borders */
-.row-border-only td,
-.row-border-only th {
-  border-left: none !important;
-  border-right: none !important;
-  border-top: none;
-  border-bottom: none;
-}
-
-/* Add row borders only */
-.row-border-only tr {
-  border-bottom: 1px solid #000;
-}
-
-/* Optional: remove last row bottom double line */
-.row-border-only tr:last-child {
-  border-bottom: none;
-}
-.top-margin {
-  margin-top: 50px;   /* adjust as needed */
-}
-.mat-card-content {
-  text-align: center;
-}
 .filter-row {
   display: flex;
+  gap: 16px; 
+  flex-wrap: wrap; 
   justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;   /* ⬅ space between mat-form-fields */
 }
 
-.loader-card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px; /* adjust if needed */
+.tin-field {
+  min-width: 280px;
 }
 
-.table-loader {
-  display: flex;
-  align-items: center;
+.search-btn {
+  height: 56px;
+}
+
+/* TABLE */
+.table-card {
+  margin-top: 12px;
+}
+
+.table-wrapper {
+   display: flex;
   justify-content: center;
-  min-height: 300px;
+  overflow-x: auto;
 }
 
 .star-table {
   width: 80%;
   border-collapse: collapse;
   font-size: 14px;
+  margin: 0 auto;            /* centers table */
+  text-align: center; 
 }
 
 .star-table th,
 .star-table td {
-  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
   text-align: center;
-  border-bottom: 1px solid #e0e0e0;
-  white-space: nowrap;
 }
 
-.star-table thead th {
-  background: #f5f7fa;
-  font-weight: 600;
-  border-bottom: 2px solid #cfd8dc;
-}
-
-.header-row th {
-  background: #e3f2fd;
-  font-size: 15px;
+.header-row th {  
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 .sub-header-row th {
-  background: #f1f5f9;
-  font-size: 13px;
-}
-
-.tin-group {
-  border-left: 2px solid #cfd8dc;
-  border-right: 2px solid #cfd8dc;
-}
-
-.measure-cell {
-  text-align: left;
-  font-weight: 500;
-}
-
-tbody tr:hover {
-  background-color: #f9fafb !important;
-}
-
-/* Sticky first column */
+  background: #e3f2fd;
+  font-weight: bold;
+} 
+/* Sticky column */
 .sticky-col {
   position: sticky;
   left: 0;
-  background: #ffffff;
-  z-index: 2;
-  border-right: 2px solid #e0e0e0;
-}
-
-/* Sticky header */
-thead th {
-  position: sticky;
-  top: 0;
+  background: #fafafa;
   z-index: 3;
+  text-align: left; 
 }
 
+/* Measure cell */
+.measure-cell {
+  text-align: left;
+}
 
-
+.metric-text {
+  font-size: 12px;
+  color: #666;
+} 
  
+.prism {
+  background: #f1f8e9;
+}
 
+/* Zebra rows */
+tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Loader */
+.table-loader {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 32px;
+  color: #777;
+}

@@ -244,6 +244,8 @@ async loadTableData(): Promise<void> {
       PCP_TAX_ID: m.PCP_TAX_ID,
       PCP_VISIT_DATE: m.PCP_VISIT_DATE,
       PCP_VISIT_FLAG: m.PCP_VISIT_FLAG,
+      PCP_VISIT_PRE_DATE: m.PCP_VISIT_PRE_DATE,
+      PCP_VISIT_PRE_FLAG: m.PCP_VISIT_PRE_FLAG,
       PRIORITY_FLAG: m.PRIORITY_FLAG,
       upcoming_task_date: m.upcoming_task_date || 'N/A',
       Call_count: m.Call_count,

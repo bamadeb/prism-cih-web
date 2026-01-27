@@ -33,11 +33,12 @@ import * as Papa from 'papaparse';
 
 
  const expectedHeaders = [
-      'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
-      'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
-      'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
+      'MEASURE_KEY','SUBMEASURE_KEY','MEMBER_NAME', 'AGE','BIRTH_DATE', 'PHONE_NUMBER', 'ADDRESSLINE1',
+      'ADDRESSLINE2','CITY', 'STATECODE','ZIPCODE', 'PCP_ID','PCP_NPI','PCP_TIN', 'PCP_Name', 'PCP_GROUP',
+      'CLSSDT', 'DENOM','DISCHARGE_CC_DESC_1', 'DISCHARGE_CC_DESC_2', 'DISCHARGE_CC_DESC_3', 'DISCH_ORDER',
+      'INDEX_ADMIT_DT', 'INDEX_DISCH_DT','INDEX_STAY', 'MEMBERKEY','NUMER','READMISSION', 'READMT_ADMIT_DT','READMT_DISCH_DT'
     ]; 
- const TABLE = 'MEM_CIH_QUALITY_TEMP';
+ const TABLE = 'MEM_CIH_PCR_TEMP';
 
 @Component({
   selector: 'app-pcr-file',
@@ -63,17 +64,8 @@ export class PcrFile {
         /* ----------- TABLE --------------------------------- */
         dataSource = new MatTableDataSource<any>([]);
         displayedColumns: string[] = [
-          'Subscriber_ID',
-          'Measure_Name',
-          'Submeasure',
-          'First_Name',
-          'Middle_Name',
-          'Last_Name',
-          'Medicare_ID',
-          'Medicaid_ID', 
-          'Date_of_Birth',
-          'Sex','Provider_ID','Provider_Name','Numerator_Gap','1'
-        ];  
+            'MEMBERKEY','MEASURE_KEY','SUBMEASURE_KEY','MEMBER_NAME','PCP_TIN', 'PCP_Name', 'DENOM', 'DISCH_ORDER',
+      'INDEX_ADMIT_DT', 'INDEX_DISCH_DT','INDEX_STAY','NUMER','READMISSION', 'READMT_ADMIT_DT','READMT_DISCH_DT','1'];  
       
         @ViewChild(MatPaginator) paginator!: MatPaginator;
         @ViewChild(MatSort) sort!: MatSort;
@@ -106,8 +98,8 @@ export class PcrFile {
         /* ============================ LIFECYCLE ============================ */
       
         async ngOnInit() { 
-          this.titleService.setTitle('PRISM :: PROCESS PCR DATA FILE');
-          this.headerService.setTitle('PROCESS PCR DATA FILE');
+          this.titleService.setTitle('PRISM :: PROCESS PCR FILE');
+          this.headerService.setTitle('PROCESS PCR FILE');
           const user = this.auth.getUser(); 
           if (!user) { 
             this.router.navigate(['/login']);
@@ -149,7 +141,7 @@ export class PcrFile {
         }
       
   /* ============================ UPLOAD ============================ */
-  async qualityFileSubmit(): Promise<void> {
+  async pcrFileSubmit(): Promise<void> {
   
     if (!this.processMembersFormGroup.valid || !this.selectedFile) {
       this.processMembersFormGroup.markAllAsTouched();
@@ -184,9 +176,10 @@ export class PcrFile {
           const parsedHeaders: string[] = result.meta.fields || [];
   
           const expectedHeaders = [
-            'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
-            'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
-            'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
+            'MEASURE_KEY','SUBMEASURE_KEY','MEMBER_NAME', 'AGE','BIRTH_DATE', 'PHONE_NUMBER', 'ADDRESSLINE1',
+            'ADDRESSLINE2','CITY', 'STATECODE','ZIPCODE', 'PCP_ID','PCP_NPI','PCP_TIN', 'PCP_Name', 'PCP_GROUP',
+            'CLSSDT', 'DENOM','DISCHARGE_CC_DESC_1', 'DISCHARGE_CC_DESC_2', 'DISCHARGE_CC_DESC_3', 'DISCH_ORDER',
+            'INDEX_ADMIT_DT', 'INDEX_DISCH_DT','INDEX_STAY', 'MEMBERKEY','NUMER','READMISSION', 'READMT_ADMIT_DT','READMT_DISCH_DT'
           ];         
   
           // Validate header
@@ -200,11 +193,7 @@ export class PcrFile {
           const insertDataArray: any[] = [];
   
           rows.forEach((row: any) => {
-            if (!row || Object.keys(row).length === 0) return;
-  
-            if (row.Date_of_Birth) {
-              row.Date_of_Birth = this.cleanDate(row.Date_of_Birth);
-            }
+            if (!row || Object.keys(row).length === 0) return; 
   
             row.INSERT_SESSION_ID = this.sessionId;
             insertDataArray.push(row);
@@ -238,60 +227,57 @@ export class PcrFile {
     }
   }
          
-      /* ============================ PROCESS FILE ============================ */
+    /* ============================ PROCESS FILE ============================ */
       
-      async processQualityGaps(): Promise<void> {
-          if (!this.sessionId) return;
-      
-          this.isProcessing = true;
-          try {
-            const res = await this.apiService.processQualityGapsSeccionID<any>({
-              session_id: this.sessionId
-            });
-            this.processLogList = res?.data?.loglist ?? [];
-            this.clearResults();
-          } finally {
-            this.isProcessing = false;
-          }
+    async processPCRFile(): Promise<void> {
+        if (!this.sessionId) return;
+    
+        this.isProcessing = true;
+        try {
+          const res = await this.apiService.processPCRdataSessionID<any>({
+            session_id: this.sessionId
+          });
+          this.processLogList = res?.data?.loglist ?? [];
+          this.clearResults();
+        } finally {
+          this.isProcessing = false;
         }
+      }
   
-        private clearResults(): void {
-          this.tempMemberList = [];
-          this.dataSource.data = [];
-          this.totalRecords = this.exist_count = this.error_count = 0;
-        }
-      
+      private clearResults(): void {
+        this.tempMemberList = [];
+        this.dataSource.data = [];
+        this.totalRecords = this.exist_count = this.error_count = 0;
+      }     
         
       
-        /* ============================ API ============================ */
+      /* ============================ API ============================ */
       
-        private async uploadInBatches(insertDataArray: any[]): Promise<void> {
-         const batches = this.chunkArray(insertDataArray, 1000);
-      
-          for (let i = 0; i < batches.length; i++) {
-            try {
-              await this.insertTemptable(batches[i]);
-              console.log(`✅ Batch ${i + 1}/${batches.length} completed.`);
-            } catch (err) {
-              console.error(`❌ Batch ${i + 1} failed`, err);
-              throw err;
-            }
+      private async uploadInBatches(insertDataArray: any[]): Promise<void> {
+        const batches = this.chunkArray(insertDataArray, 1000);
+    
+        for (let i = 0; i < batches.length; i++) {
+          try {
+            await this.insertTemptable(batches[i]);
+            console.log(`✅ Batch ${i + 1}/${batches.length} completed.`);
+          } catch (err) {
+            console.error(`❌ Batch ${i + 1} failed`, err);
+            throw err;
           }
         }
+      }
       
-        private async insertTemptable(insertDataArray: any[]): Promise<void> {
-      
+      private async insertTemptable(insertDataArray: any[]): Promise<void> {      
           const payload = {
             table_name: TABLE,
             insertDataArray: insertDataArray   // ✅ no extra []
-          };
-      
+          };      
           console.log(payload);
           await this.apiService.insert<any, MemberFileRequest>(payload);
       }
       
       private async loadTempMembers(): Promise<void> {
-        const res = await this.apiService.getTempQualityGapsBySeccionID<any>({
+        const res = await this.apiService.getTempCihPcrBySessionID<any>({
           session_id: this.sessionId
         });
     
@@ -302,72 +288,22 @@ export class PcrFile {
         this.dataSource.data = this.tempMemberList;
       
         this.totalRecords = this.tempMemberList.length;
-        this.exist_count = this.tempMemberList.filter(m => m.quality_gaps_exist).length;
+        this.exist_count = this.tempMemberList.filter(m => m.pcr_exist).length;
         this.error_count = this.tempMemberList.filter(m => !m.member_exist).length;
-      }
+      } 
        
-         
-      
-      
-        private parseAndValidateHeaders(
-          headerRow: string,
-          expectedHeaders: string[]
-        ): string[] {
-          const headers = headerRow
-            .split(',')
-            .map(h => h.trim().replace(/\r/g, ''));
-      
-          if (JSON.stringify(headers) !== JSON.stringify(expectedHeaders)) {
-            throw new Error('HEADER_MISMATCH');
-          }
-      
-          return headers;
-      }
-      
-       
-         /* ============================ UTILS ============================ */
-      
+  /* ============================ UTILS ============================ */      
         
-        private chunkArray<T>(arr: T[], size: number): T[][] {
-          const chunks: T[][] = [];
-          for (let i = 0; i < arr.length; i += size) {
-            chunks.push(arr.slice(i, i + size));
-          }
-          return chunks;
-        }
-      
-        private cleanDate(value: any): string | null {
-          if (!value || value.toString().trim() === '' || value.toString().toUpperCase() === 'NULL') {
-            return null;
-          }
-      
-          const val = value.toString().trim();
-          // Already ISO format (YYYY-MM-DD)
-          if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val;
-      
-          // Split on / or - and trim each part
-          const parts = val.split(/[\/\-]/).map((p: string) => p.trim());
-          if (parts.length === 3) {
-            let [p1, p2, p3] = parts;
-      
-            // Handle 2-digit year
-            if (p3.length === 2) p3 = '20' + p3;
-      
-            // Determine if DD/MM/YYYY or MM/DD/YYYY
-            if (parseInt(p1, 10) > 12) {
-              // DD/MM/YYYY
-              return `${p3}-${p2.padStart(2, '0')}-${p1.padStart(2, '0')}`;
-            } else {
-              // MM/DD/YYYY
-              return `${p3}-${p1.padStart(2, '0')}-${p2.padStart(2, '0')}`;
-            }
-          }
-          return null;
-        }  
-      
-        filter(event: Event): void {
-          const value = (event.target as HTMLInputElement).value ?? '';
-          this.dataSource.filter = value.trim().toLowerCase();
-        }  
+    private chunkArray<T>(arr: T[], size: number): T[][] {
+      const chunks: T[][] = [];
+      for (let i = 0; i < arr.length; i += size) {
+        chunks.push(arr.slice(i, i + size));
+      }
+      return chunks;
+    } 
+    filter(event: Event): void {
+      const value = (event.target as HTMLInputElement).value ?? '';
+      this.dataSource.filter = value.trim().toLowerCase();
+    }  
 
 }

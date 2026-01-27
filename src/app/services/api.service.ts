@@ -426,4 +426,40 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   } 
 
+   async getTempCihPcrBySessionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetcihpcr',
+      request   
+    );
+  }
+
+  async processPCRdataSessionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismProcessPCRdataSessionId',
+      request   
+    );
+  }
+
+  async getProviderList<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetProviderListByVendorId',
+      request   
+    );
+  } 
+
+  async getAppointmentList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetappointmentList',
+      request   
+    );
+  }
+
 }
