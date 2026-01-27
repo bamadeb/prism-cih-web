@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
-import { cognito } from '../../assets/environment.json';
+import { environment } from '../../environments/environment';
 import * as CryptoJS from 'crypto-js';
 import {
   CognitoIdentityProviderClient,
@@ -90,12 +90,12 @@ export class AuthService {
 
   // Congito 
   private client = new CognitoIdentityProviderClient({
-    region: cognito.region
+    region: environment.cognito.region
   });  
 
 private calculateSecretHash(username: string): string {
-    const message = username + cognito.clientId;
-    const secretKey = cognito.clientSecret;
+    const message = username + environment.cognito.clientId;
+    const secretKey = environment.cognito.clientSecret;
     const hash = CryptoJS.HmacSHA256(message, secretKey);
     return CryptoJS.enc.Base64.stringify(hash);
   }
@@ -108,7 +108,7 @@ private calculateSecretHash(username: string): string {
 
       const command = new InitiateAuthCommand({
         AuthFlow: "USER_PASSWORD_AUTH",
-        ClientId: cognito.clientId,
+        ClientId: environment.cognito.clientId,
         AuthParameters: {
           USERNAME: username,
           PASSWORD: password,
@@ -139,7 +139,7 @@ private calculateSecretHash(username: string): string {
     const secretHash = this.calculateSecretHash(username);
 
     const command = new RespondToAuthChallengeCommand({
-      ClientId: cognito.clientId,
+      ClientId: environment.cognito.clientId,
       ChallengeName: "SMS_MFA",
       Session: session,
       ChallengeResponses: {
@@ -172,7 +172,7 @@ private calculateSecretHash(username: string): string {
 
     const command = new InitiateAuthCommand({
       AuthFlow: "REFRESH_TOKEN_AUTH",
-      ClientId: cognito.clientId,
+      ClientId: environment.cognito.clientId,
       AuthParameters: {
         REFRESH_TOKEN: refreshToken,
         SECRET_HASH: secretHash
