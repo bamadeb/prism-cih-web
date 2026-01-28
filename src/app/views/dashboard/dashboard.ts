@@ -58,6 +58,7 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './dashboard.css'
 })
 export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
+  
   providerTinNameMapping: Record<string, string> = {
     '200807794': 'Mercado Medical Practice',
     '237082074': 'GPHA',

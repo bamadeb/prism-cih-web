@@ -140,7 +140,7 @@
 
                     <ng-container matColumnDef="Date_of_Birth">
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>DATE OF BIRTH</th>
-                        <td mat-cell *matCellDef="let row">{{ row.Date_of_Birth }}</td>
+                        <td mat-cell *matCellDef="let row">{{ row.Date_of_Birth | date:'MM/dd/yyyy' }}</td>
                     </ng-container>
 
                     <ng-container matColumnDef="Sex">

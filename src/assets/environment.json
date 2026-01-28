@@ -2,8 +2,8 @@
     "storageEncryption": false,
     "version": "2.0.2",
     "build": "632",
-    "endpointUrl":"https://yeuovejy1b.execute-api.us-east-2.amazonaws.com/prod/",
-    "envType": "prod"
+    "endpointUrl":"https://e9vakopr4c.execute-api.us-east-1.amazonaws.com/dev/",
+    "envType": "dev"
     
 }
 

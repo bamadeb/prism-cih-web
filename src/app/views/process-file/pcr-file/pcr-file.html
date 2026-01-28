@@ -43,7 +43,7 @@
                 <span>Total pcr data: <b>{{ totalRecords }}</b></span>
 
                 <span *ngIf="error_count > 0">
-                    Errors: <b>{{ error_count }}</b>
+                    Member Not Exist: <b>{{ error_count }}</b>
                 </span>
 
                 <span *ngIf="exist_count > 0">
@@ -176,13 +176,13 @@
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>STATUS</th>
 
                         <td mat-cell *matCellDef="let row" [ngStyle]="{
-                  'background-color': row.pcr_exist ? 'yellow' :  (!row.member_exist) ? 'red' : 'transparent' }">
+                  'background-color': row.pcr_exist ? 'yellow' :   (!row.member_exist) ? 'red' : 'transparent' }">
                             <ng-container *ngIf="row.pcr_exist">
-                                Find duplicate record
-                            </ng-container>
+                               1. Find duplicate record
+                            </ng-container><br>
 
                             <ng-container *ngIf="!row.member_exist">
-                                Member not exist
+                               2. Member not exist
                             </ng-container>
 
                         </td>
