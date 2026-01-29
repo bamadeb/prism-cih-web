@@ -59,11 +59,11 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   
-  providerTinNameMapping: Record<string, string> = {
-    '200807794': 'Mercado Medical Practice',
-    '237082074': 'GPHA',
-    '273160687': 'Dr. Milbourne',
-  };
+  // providerTinNameMapping: Record<string, string> = {
+  //   '200807794': 'Mercado Medical Practice',
+  //   '237082074': 'GPHA',
+  //   '273160687': 'Dr. Milbourne',
+  // };
 
   displayedColumns: string[] = ['2', 'MEM_INFO', 'PHONE', 'PCP_TAX_ID', 'PCP_VISIT_FLAG', 'PRIORITY_FLAG', 'upcoming_task_date', 'Call_count', 'risk_gap_count', 'risk_comp_count', 'risk_perf', 'quality_count', 'quality_comp_count', 'quality_perf', '1'];
   displayedColumnsTransfer: string[] = [
@@ -112,6 +112,8 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   NoLongerPatientList: any = {};
   navigatorList: any[] = [];
   performanceArray: Record<string, ProviderPerformance>[] = [];
+  providerTinNameMapping: Record<string, string> = {};
+  vendorList: any[] = [];
 
   entry: any = {}; 
   alt_phone: any[] = []; 
@@ -142,7 +144,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.titleService.setTitle('PRISM :: DASHBOARD');
     this.headerService.setTitle('Dashboard');
-    
+    this.loadVendors();
     this.loadTableData();
   }
 
@@ -169,6 +171,19 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     const numSelected = this.selection.selected.length;
     const numRows = this.dataSource.data.length;
     return numSelected === numRows;
+  }
+
+  async loadVendors() {
+    const result = await this.apiService.addActionMaster<any>('');
+    this.vendorList = result.data.vendorList || [];
+
+    this.providerTinNameMapping = this.vendorList.reduce(
+      (map: Record<string, string>, v: any) => {
+        map[String(v.VENDOR_NUM)] = v.LAST_NAME;
+        return map;
+      },
+      {}
+    );
   }
 
   /** Selects all rows if not all selected; otherwise clear selection */
