@@ -462,4 +462,13 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }
 
+   async getVendorListByplan<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismVendorListByplan',
+      request   
+    );
+  }
+
 }

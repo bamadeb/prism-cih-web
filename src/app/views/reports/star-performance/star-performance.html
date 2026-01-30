@@ -16,8 +16,8 @@
                 <mat-form-field appearance="outline">
                     <mat-label>PLAN</mat-label>
                     <mat-select formControlName="plan">
-                        @for (p of plans; track p.id) {
-                        <mat-option [value]="p.id" class="txupper">
+                        @for (p of plans; track p.name) {
+                        <mat-option [value]="p.name" class="txupper">
                             {{ p.name }}
                         </mat-option>
                         }
@@ -28,9 +28,7 @@
                     <mat-label>TINS</mat-label>
                     <mat-select formControlName="tins" multiple>
                         @for (tin of availableTins; track tin) {
-                        <mat-option [value]="tin" class="txupper">
-                            {{ getProviderGroupByTin(tin) }} ({{ tin }})
-                        </mat-option>
+                        <mat-option [value]="tin.VENDOR_NUM" class="txupper"> {{tin.LAST_NAME}} ({{tin.VENDOR_NUM}})</mat-option>
                         }
                     </mat-select>
                 </mat-form-field>

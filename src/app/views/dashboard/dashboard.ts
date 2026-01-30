@@ -716,11 +716,11 @@ onNavigatorChange(navigatorId: number): void {
     const totalArray: any = this.initializeTotals();
 
     // 🔹 Provider TIN → Name mapping
-    const providerTinNameMapping: Record<string, string> = {
-      '200807794': 'Mercado Medical Practice',
-      '237082074': 'GPHA',
-      '273160687': 'Dr. Milbourne',
-    };
+    // const providerTinNameMapping: Record<string, string> = {
+    //   '200807794': 'Mercado Medical Practice',
+    //   '237082074': 'GPHA',
+    //   '273160687': 'Dr. Milbourne',
+    // };
 
     for (const item of performanceList) {
       const pcpId = String(item['PCP_TAX_ID']);
@@ -796,7 +796,7 @@ onNavigatorChange(navigatorId: number): void {
       values.other_pcp_visit_color = this.getColor(values.other_pcp_visit_percentage);
 
       // ---------- PROVIDER NAME ----------
-      values.provider_name = providerTinNameMapping[pcpId] || '';
+      values.provider_name = this.providerTinNameMapping[pcpId] || '';
 
       performanceArray.push({ [pcpId]: values });
     }
