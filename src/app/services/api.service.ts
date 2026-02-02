@@ -126,11 +126,29 @@ export class ConfigService {
   );
 }
 
+async insertUsers<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
+  return commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismCreateUser',
+    request
+  );
+}
+
 async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
   return commonPostApi<TResponse>(
     this.httpClient,
     this.environmentService,
     'prismMultiplefieldupdate',
+    request
+  );
+}
+
+async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
+  return commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismUpdateUser',
     request
   );
 }
@@ -453,7 +471,7 @@ async update<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   } 
 
-  async getAppointmentList<TResponse>(request: MedicaidIdRequest): Promise<TResponse> {
+  async getAppointmentList<TResponse>(request: any): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,

@@ -671,10 +671,9 @@
             <mat-form-field appearance="outline" class="mr">
             <mat-label>APPOINTMENT TYPE</mat-label>
             <mat-select formControlName="appointment_type" class="txupper">
-              <mat-option class="txupper" value="Consultation">Consultation</mat-option>
-              <mat-option class="txupper" value="Follow-up">Follow-up</mat-option>
-              <mat-option class="txupper" value="Procedure">Procedure</mat-option>
-              <mat-option class="txupper" value="Physical">Physical</mat-option>
+              <mat-option class="txupper" *ngFor="let appType of appointTypeList"  [value]="appType.id">
+                {{ appType.type }}
+              </mat-option> 
             </mat-select>
           </mat-form-field>
            <div class="mr">
@@ -696,7 +695,8 @@
               <thead>
                 <tr>
                   <th>APPOINTMENT DATE</th>
-                  <th>TIN</th>
+                  <th>TYPE</th>
+                  <th>VENDOR</th>
                   <th>PROVIDER ID</th>
                   <th>STATUS</th>
                   <th>PLACE</th>
@@ -709,6 +709,7 @@
               
                 <tr>
                   <td>{{ app.action_date | date:'MM/dd/yyyy' }} {{ app.action_time}}</td>
+                  <td>{{ app.type }}</td>
                   <td>{{ app.vendor_id }}</td>
                   <td>{{ app.provider_id }}</td>
                   <td>{{ app.status }}</td>

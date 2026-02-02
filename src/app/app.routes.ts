@@ -16,6 +16,7 @@ import { QualitygapsFile } from './views/process-file/qualitygaps-file/qualityga
 import { SystemLog } from './views/reports/system-log/system-log';
 import { FileLogReport } from './views/reports/file-log-report/file-log-report';
 import { PcrFile } from './views/process-file/pcr-file/pcr-file';
+import { AppointmentList } from './views/reports/appointment-list/appointment-list/appointment-list';
 
 export const routes: Routes = [
   {
@@ -76,6 +77,12 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'risk-profile', component: RiskProfile },
+    ]
+  },{
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'appointment-list', component: AppointmentList },
     ]
   },
   {

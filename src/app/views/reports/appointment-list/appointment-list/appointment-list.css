@@ -1,0 +1,86 @@
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;        /* ✅ allow horizontal scroll */
+}
+
+table {
+  width: 100%;
+  min-width: 1600px;       /* ✅ prevents first column collapse */
+  border-collapse: collapse;
+}
+
+.mat-header-cell,
+.mat-cell {
+  white-space: nowrap;     /* ✅ prevents text wrapping */
+}
+
+
+.centered-table {
+  width: auto;               /* prevents full-width stretch */
+  margin: 0 auto;
+}
+.row-border-only {
+  border-collapse: collapse;
+  border: 1px solid #000;   /* outer table border */
+}
+
+/* Remove all default cell borders */
+.row-border-only td,
+.row-border-only th {
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none;
+  border-bottom: none;
+}
+
+/* Add row borders only */
+.row-border-only tr {
+  border-bottom: 1px solid #000;
+}
+
+/* Optional: remove last row bottom double line */
+.row-border-only tr:last-child {
+  border-bottom: none;
+}
+.top-margin {
+  margin-top: 50px;   /* adjust as needed */
+}
+.mat-card-content {
+  text-align: center;
+}
+.filter-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;   /* ⬅ space between mat-form-fields */
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between; /* ✅ important */
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.mat-column-medicaid_id {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+  min-width: 140px;
+} 
+
+.table-container {
+  position: relative;
+  min-height: 300px;
+}
+
+.table-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+

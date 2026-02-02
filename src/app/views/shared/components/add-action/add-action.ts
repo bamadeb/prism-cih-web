@@ -85,6 +85,7 @@ export class AddAction {
   starperformanceList: any[] = [];
   measureList: any[] = [];
   providerList: any[] = [];
+  appointTypeList: any[] = [];
   vendorLocationList: any[] = [];
   actionresult_followup_list: any[] = [];
   memberTaskList: any[] = [];
@@ -181,11 +182,11 @@ export class AddAction {
     this.appointmentFormGroup = this.fb.group({
       vendor_id: [null, Validators.required],
       provider_id: [{ value: null, disabled: true }, Validators.required],
-      appointment_date: [null, Validators.required],
+      appointment_date: [new Date(), Validators.required],
       appointment_time: ['', Validators.required],
-      action_status: [null, Validators.required],
+      action_status: ['Scheduled', Validators.required],
       place_of_appointment: [{ value: null, disabled: true }, Validators.required],
-      appointment_type: [null, Validators.required],
+      appointment_type: [1, Validators.required],
       appointment_note: ['']
     });
 
@@ -236,6 +237,7 @@ export class AddAction {
     this.measureList = result.data.measureList || [];
     this.pcpType = result.data.pcpType || [];
     this.vendorList = result.data.vendorList || [];
+    this.appointTypeList = result.data.appointTypeList || [];
     this.appointmentHistory(); 
     this.setScheduledActionStatus('17');
     // pcp visit history

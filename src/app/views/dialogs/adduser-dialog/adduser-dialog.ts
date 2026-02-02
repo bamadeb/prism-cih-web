@@ -73,22 +73,28 @@ export class AdduserDialog implements OnInit {
 
   // 🔹 EDIT MODE SETUP
   private enableEditMode(user: any): void {
-    //console.log(user);
-    this.isEditMode = true;
-    this.currentUserId = user.ID;
+  this.isEditMode = true;
+  this.currentUserId = user.ID;
 
-    this.addUserFormGroup.patchValue({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      password: user.password,
-      role: user.roleId,
-      department: user.department_id,
-      status: Number(user.member_status)
-    });
+  // 🔥 Make password optional in edit mode
+  const passwordControl = this.addUserFormGroup.get('password');
+  passwordControl?.clearValidators(); // remove required & minlength
+  passwordControl?.setValidators([Validators.minLength(6)]); // optional but validate if typed
+  passwordControl?.updateValueAndValidity();
 
-    this.addUserFormGroup.get('email')?.disable();
-  }
+  this.addUserFormGroup.patchValue({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    password: '', // NEVER bind old password
+    role: user.roleId,
+    department: user.department_id,
+    status: Number(user.member_status)
+  });
+
+  this.addUserFormGroup.get('email')?.disable();
+}
+
 
   // 🔹 SUBMIT HANDLER
   async submitUser(): Promise<void> {
@@ -133,20 +139,17 @@ export class AdduserDialog implements OnInit {
 
   // 🔹 INSERT USER
   private async insertUser(formValue: any): Promise<void> {
-    const payload: UserRequest = {
-      table_name: 'MEM_USERS',
-      insertDataArray: [{
+    const payload = { 
         FistName: formValue.firstName.trim(),
         LastName: formValue.lastName.trim(),
         EmailID: formValue.email,
         Password: formValue.password,
         role_id: formValue.role,
         department_id: formValue.department,
-        member_status: Number(formValue.status)
-      }]
+        member_status: Number(formValue.status) 
     };
-
-    await this.apiService.insert<any, UserRequest>(payload);
+    //console.log(payload);
+    await this.apiService.insertUsers(payload);
   }
 
   // 🔹 UPDATE USER
@@ -155,21 +158,17 @@ export class AdduserDialog implements OnInit {
       throw { code: 'USER_ID_MISSING' };
     }
 
-    const payload: UpdateUserRequest = {
-      table_name: 'MEM_USERS',
-      id_field_name: 'ID',
-      id_field_value: this.currentUserId,
-      updateData: {
+    const payload = {      
+        ID: this.currentUserId,
         FistName: formValue.firstName.trim(),
         LastName: formValue.lastName.trim(),
         ...(formValue.password && { Password: formValue.password }),
         role_id: formValue.role,
         department_id: formValue.department,
-        member_status: Number(formValue.status)
-      }
+        member_status: Number(formValue.status)       
     };
-
-    await this.apiService.update<any, UpdateUserRequest>(payload);
+    //console.log(payload);
+    await this.apiService.updateUser(payload);
   }
 
   // 🔹 ERROR HANDLER
