@@ -41,6 +41,7 @@ export class AdduserDialog implements OnInit {
   isLoading = false;
   isEditMode = false;
   currentUserId: number | null = null;
+  cognitoUsername: string | null = null;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -75,7 +76,8 @@ export class AdduserDialog implements OnInit {
   private enableEditMode(user: any): void {
   this.isEditMode = true;
   this.currentUserId = user.ID;
-
+  this.cognitoUsername = user.cognito_username;
+//console.log("user:",user);
   // 🔥 Make password optional in edit mode
   const passwordControl = this.addUserFormGroup.get('password');
   passwordControl?.clearValidators(); // remove required & minlength
@@ -138,26 +140,52 @@ export class AdduserDialog implements OnInit {
   }
 
   // 🔹 INSERT USER
-  private async insertUser(formValue: any): Promise<void> {
-    const payload = { 
-        FistName: formValue.firstName.trim(),
-        LastName: formValue.lastName.trim(),
-        EmailID: formValue.email,
-        Password: formValue.password,
-        role_id: formValue.role,
-        department_id: formValue.department,
-        member_status: Number(formValue.status) 
+private async insertUser(formValue: any): Promise<void> {
+  try {
+    // 1️⃣ Create Cognito user
+    const cognitoPayload = {
+      email: formValue.email,
+      password: formValue.password
     };
-    //console.log(payload);
+
+    const cognitoUsername =
+      await this.apiService.createCognitoUser(cognitoPayload);
+
+    console.log('Cognito Username:', cognitoUsername);
+
+    // 2️⃣ Insert into DB
+    const payload = { 
+      FistName: formValue.firstName.trim(),
+      LastName: formValue.lastName.trim(),
+      EmailID: formValue.email,
+      Password: formValue.password,
+      role_id: formValue.role,
+      department_id: formValue.department,
+      member_status: Number(formValue.status),
+      cognito_username: cognitoUsername // ✅ STORED
+    };
+
     await this.apiService.insertUsers(payload);
+
+  } catch (error) {
+    console.error('User creation failed:', error);
+    throw error;
   }
+}
 
   // 🔹 UPDATE USER
   private async updateUser(formValue: any): Promise<void> {
     if (!this.currentUserId) {
       throw { code: 'USER_ID_MISSING' };
     }
+    // 🔐 1️⃣ Update Cognito ONLY if password changed
+    if (formValue.password) {
+      if (!this.cognitoUsername) {
+        throw { code: 'COGNITO_USERNAME_MISSING' };
+      }
 
+      await this.apiService.updateCognitoUser(this.cognitoUsername,{},formValue.password);
+    }  
     const payload = {      
         ID: this.currentUserId,
         FistName: formValue.firstName.trim(),

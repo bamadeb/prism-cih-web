@@ -107,6 +107,7 @@ export class Users implements OnInit, AfterViewInit {
         roleId: u.role_id,
         member_status: u.member_status,
         status: u.status,
+        cognito_username: u.cognito_username
       }));
 
       this.selection.clear();
