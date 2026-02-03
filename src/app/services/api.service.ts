@@ -488,5 +488,53 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   }
+  async createCognitoUser(request: any): Promise<string> {
+      const res: any = await commonPostApi(
+        this.httpClient,
+        this.environmentService,
+        'prismCreateCognitoUser',
+        request
+      );
+
+      const parsed =
+        typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+
+      const cognitoUsername = parsed?.user?.cognitoUsername;
+
+      if (!cognitoUsername) {
+        throw new Error('Cognito username not returned');
+      }
+
+      return cognitoUsername;
+  }
+async updateCognitoUser(
+    username: string,
+    attributes: any,
+    newPassword?: string
+  ): Promise<void> {
+
+    const cognitoPayload: any = {
+      username,
+      attributes
+    };
+
+    // 🔐 Only include password if provided
+    if (newPassword) {
+      cognitoPayload.newPassword = newPassword;
+    }
+
+    const res: any = await commonPostApi(
+      this.httpClient,
+      this.environmentService,
+      'prismUpdateCognitoUser',
+      cognitoPayload
+    );
+
+    // Optional: validate backend response if needed
+    if (res?.success === false) {
+      throw new Error(res?.message || 'Failed to update Cognito user');
+    }
+  }
+
 
 }
