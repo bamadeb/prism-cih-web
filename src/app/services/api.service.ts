@@ -180,6 +180,15 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }
 
+  async userRequestList<TResponse>(): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismUserRequestList',
+      {}   
+    );
+  }
+
   async checkuserexist<TResponse>(request: UsernameRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,

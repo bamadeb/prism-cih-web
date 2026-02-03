@@ -17,6 +17,7 @@ import { SystemLog } from './views/reports/system-log/system-log';
 import { FileLogReport } from './views/reports/file-log-report/file-log-report';
 import { PcrFile } from './views/process-file/pcr-file/pcr-file';
 import { AppointmentList } from './views/reports/appointment-list/appointment-list/appointment-list';
+import { UserCreationRequest } from './views/user-creation-request/user-creation-request/user-creation-request';
 
 export const routes: Routes = [
   {
@@ -46,6 +47,13 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'plans', component: Plans },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'usercreation-request', component: UserCreationRequest },
     ]
   },
   {

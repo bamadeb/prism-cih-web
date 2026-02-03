@@ -122,13 +122,14 @@ export class QualitygapsFile {
   }
 
   onFileSelect(event: any): void {
-    const file = event.target.files[0];
+    const file = event.target.files[0];    
     if (file && file.type === 'text/csv') {
       this.selectedFile = file;
       this.processMembersFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
       this.processMembersFormGroup.get('file')?.reset();
+      alert('Only .csv files are allowed.');
     }
   }
 

@@ -129,6 +129,7 @@ export class RiskgapsFile {
     } else {
       this.selectedFile = null;
       this.processMembersFormGroup.get('file')?.reset();
+      alert('Only .csv files are allowed.');
     }
   }
 
@@ -154,7 +155,7 @@ export class RiskgapsFile {
 
     const file = this.selectedFile;
     const ext = file.name.split('.').pop()?.toLowerCase();
-
+    //console.log(ext);
     if (ext !== 'csv') {
       alert('Only .csv files are allowed.');
       this.resetFile();

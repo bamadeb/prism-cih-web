@@ -75,14 +75,15 @@ export class FileattachDialog implements OnInit {
   }
 
   onFileSelected(event: Event): void {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
 
-  this.setFileRequired(true); 
-  this.selectedFile = file;
-  this.isStatusOnlyUpdate = false; // 🔁 now file + status
-  this.uploadForm.patchValue({ file });
-}
+    this.setFileRequired(true); 
+    this.selectedFile = file;
+    this.isStatusOnlyUpdate = false; // 🔁 now file + status
+    this.uploadForm.patchValue({ file });
+    //console.log(this.data.type);
+  }
 
 
  upload(): void {
@@ -129,8 +130,6 @@ private async updateStatusOnly(status: number): Promise<void> {
   }
 }
 
-
-
   // ===============================
   // S3 UPLOAD
   // ===============================
@@ -139,11 +138,13 @@ private async updateStatusOnly(status: number): Promise<void> {
 
     this.isLoading = true;
     const file = this.selectedFile;
+    const uploadType = this.data.type;  
 
     const request: fileAttachRequest = {
       fileName: file.name,
       fileType: file.type,
-      plan_id: 'plan-'+this.data.entity.id,
+      directory: uploadType,
+      id: this.data.entity.id,
       env: this.envService.envType(),
       bucket: this.envService.s3bucket()
     };
@@ -186,12 +187,12 @@ private async updateStatusOnly(status: number): Promise<void> {
   // ===============================
   // DB INSERT
   // ===============================
-  private async insertFiletoDB(fileStatus: number, fileUrl: string): Promise<void> {
+  private async insertFiletoDB(fileStatus: number, fileUrl: string): Promise<void> { 
     const user = this.userData.getUser();
     const payload: FileRequest = {
       table_name: 'MEM_ATTACHMENT',
       insertDataArray: [{
-        type: 'plan',
+        type: this.data.type,
         type_id: this.data.entity.id,
         attachment: fileUrl,
         title: 'Add Attachment',
@@ -244,7 +245,7 @@ private async updateFileUrlToDB(
       status: row.status, 
     });
 
-     this.selectedFile = null;
+    this.selectedFile = null;
   }
 
   private setFileRequired(required: boolean): void {
