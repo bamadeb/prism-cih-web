@@ -75,17 +75,17 @@
     </mat-card>
 
     <!-- TABLE CARD -->
-    <mat-card>
+    <mat-card style="margin-top: 10px;">
         <mat-card-content>
 
             <!-- TOOLBAR -->
-            <div class="table-toolbar" *ngIf="tempMemberList && tempMemberList.length > 0">
+            <div class="table-toolbar">
                 <mat-form-field appearance="outline">
                     <mat-label>Search</mat-label>
                     <input matInput (keyup)="filter($event)" placeholder="Search records">
                 </mat-form-field>
 
-                <mat-paginator #mainPaginator [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]">
+                <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]">
                 </mat-paginator>
             </div>
 
@@ -96,8 +96,7 @@
 
             <!-- TABLE -->
             <div class="table-wrapper" *ngIf="!isLoading">
-                <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1"
-                    *ngIf="tempMemberList && tempMemberList.length > 0">
+                <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1">
                     <ng-container matColumnDef="MEMBERKEY" sticky>
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>MEMBER KEY </th>
                         <td mat-cell *matCellDef="let row">{{ row.MEMBERKEY }}</td>

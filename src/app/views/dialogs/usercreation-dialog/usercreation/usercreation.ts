@@ -70,7 +70,7 @@ export class Usercreation {
     email: ['', [Validators.required, Validators.email]],
     phone: ['', Validators.required],
     role_id: [9, Validators.required],
-    request_date: ['', Validators.required],
+    request_date: [new Date(), Validators.required],
     status: ['0', Validators.required]
   });
 

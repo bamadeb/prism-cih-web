@@ -2,8 +2,8 @@
   {{ data.title }}
 </h2>
 
-<mat-dialog-content  >
-  <mat-card>
+<mat-dialog-content  style="overflow: hidden !important;">
+  <mat-card >
     <mat-card-content >
 
       <form [formGroup]="userCreationFormGroup" (ngSubmit)="submitRequest()" >
@@ -86,7 +86,7 @@
             <mat-option value="0">NEW</mat-option>
             <mat-option value="1">IN-PROCESS</mat-option>
             <mat-option value="2">COMPLETED</mat-option>
-            <mat-option value="3">CANCEL</mat-option>
+            <mat-option value="3">CANCELED</mat-option>
         </mat-select>
         <mat-error *ngIf="userCreationFormGroup.get('status')?.touched &&  userCreationFormGroup.get('status')?.invalid">
             Status required

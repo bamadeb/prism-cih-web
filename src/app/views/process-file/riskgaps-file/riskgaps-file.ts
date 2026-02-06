@@ -67,7 +67,7 @@ export class RiskgapsFile {
     '1'
   ];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('mainPaginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -274,8 +274,8 @@ export class RiskgapsFile {
       session_id: this.sessionId
     });
 
-    console.log('sessionId:' + this.sessionId);
-    console.log(res);
+    // console.log('sessionId:' + this.sessionId);
+    // console.log(res);
 
     this.tempMemberList = res?.data ?? [];
     this.dataSource.data = this.tempMemberList;
@@ -283,6 +283,16 @@ export class RiskgapsFile {
     this.totalRecords = this.tempMemberList.length;
     this.exist_count = this.tempMemberList.filter(m => m.exist_gap).length;
     this.error_count = this.tempMemberList.filter(m => !m.member_exist).length;
+
+    // 🔥 FIX pagination
+  if (this.paginator) {
+    this.dataSource.paginator = this.paginator;
+  }
+  if (this.sort) {
+    this.dataSource.sort = this.sort;
+  }
+  
+  this.cdr.markForCheck();   // 👈 CRITICAL
   } 
 
   /* ============================ UTILS ============================ */

@@ -132,6 +132,13 @@ export class AddAction {
     'READMT_ADMIT_DT',
     'READMT_DISCH_DT'
   ];
+
+ riskTabarray = [
+  { label: '--', value: '' },
+  { label: '2025', value: '2025' },
+  { label: '2026', value: '2026' }
+];
+
   planTinMap: Record<string, string[]> = {
     AHC: ['237082074', '273160687', '200807794'],   // CHI → 3 TINs
     'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
@@ -141,12 +148,16 @@ export class AddAction {
   //userId: string | null = null;
   userId: string | null = null;
   showContent = false;
+  
   role_id: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
   member_dob: string | null = null;
   readonly dialog = inject(MatDialog);
   addActionChangeFlag = 0;
+  currentYear: number = new Date().getFullYear();
+  previousYear: number = this.currentYear - 1;
+
   constructor(
     private apiService: ConfigService,
     private cdr: ChangeDetectorRef,
@@ -199,7 +210,7 @@ export class AddAction {
 
     this.measureForm = this.fb.group({
       MEASURE: ['', Validators.required],
-      MEASURE_YEAR: ['', Validators.required],
+      MEASURE_DATE: ['', Validators.required],
       NUM_COUNT: ['', Validators.required],
       PCP_TAX_ID: ['', Validators.required]
     });
@@ -209,7 +220,7 @@ export class AddAction {
     this.member_dob = data?.member_dob;
     this.measureForm.patchValue({
       PCP_TAX_ID: data.PCP_TAX_ID,
-      MEASURE_YEAR: 2026,
+      MEASURE_DATE: new Date(),
       NUM_COUNT:1
     });
     if (this.medicaid_id) {
@@ -218,14 +229,16 @@ export class AddAction {
       });
       this.getMemberTaskList(this.medicaid_id);
       this.getMemberGapsList(this.medicaid_id);
-    }
+    } 
+    
     //alert(this.medicaid_id);
   }
 
 
   async ngOnInit(): Promise<void> {
     const user = this.userData.getUser();
-    this.userId = user.ID;
+    this.userId = user.ID; 
+      //console.log(this.riskTabarray);
     //this.role_id = user.role_id;
     const payload = { medicaid_id: this.medicaid_id };
     const result = await this.apiService.addActionMaster<any>(payload);
@@ -281,6 +294,8 @@ export class AddAction {
     this.actionresult_followup_list = result.data;
   }
 
+  
+
   async onVendorChange(vendorId: string) {
   if (!vendorId) return;
 
@@ -315,6 +330,10 @@ export class AddAction {
   } catch (error) {
     console.error('Vendor change failed', error);
   }
+}
+
+trackByValue(i: number, y: any) {
+  return y.value + i; // guaranteed unique
 }
 
 async addAppointment() {
@@ -444,7 +463,7 @@ applyFilter(event: Event) {
         medicaid_id: this.medicaid_id
       });
       this.appointmentList = result.data ?? []; 
-      console.log(this.appointmentList);
+      //console.log(this.appointmentList);
     } catch (error) {
       console.error(error);
     } finally {
@@ -460,9 +479,11 @@ applyFilter(event: Event) {
     return this.fb.group({
       PROCESS_STATUS: [false],
       DIAG_DESC: [gap.DIAG_DESC],
+      PLAN_YEAR: [this.extractYear(gap.PLAN_YEAR)],
+      RISKGAP_ID: [gap.ID],
       DIAG_CODE: [gap.DIAG_CODE],
       risk_gap_id: [gap.risk_gap_id],
-
+      PLANYEAR: [this.extractYear(gap.PLAN_YEAR)],
       Observation_Date: [gap.Observation_Date],
       Observation_Code: [gap.Observation_Code],
       CPT_Code_Modifier: [gap.CPT_Code_Modifier],
@@ -494,7 +515,7 @@ applyFilter(event: Event) {
     //console.log('add_update_action_submit');
     const formValues = this.addActionFormGroup.getRawValue();
     const action_id = formValues.update_action_id;
-    //console.log(formValues);
+    //console.log(formValues.value);
     this.isProcessing = true; // 🔹 show loader
     this.addActionChangeFlag = 1;
 
@@ -597,13 +618,22 @@ applyFilter(event: Event) {
     const qualitySubMeasures: string[] = [];
     const riskObsInsertArray: any[] = [];
     const riskObsUpdateArray: any[] = [];
+    const UpdateArray: any[] = [];
 
     /* ----------------------------------
        BUILD RISK GAP DATA
     -----------------------------------*/
+    
     if (formValues.riskGapsList?.length) {
       formValues.riskGapsList.forEach((riskGap: any) => {
 
+         UpdateArray.push({ 
+            medicaid_id: medicaid_id,
+            PLANYEAR: riskGap.PLANYEAR,
+            PLAN_YEAR: riskGap.PLAN_YEAR,
+            DIAG_CODE: riskGap.DIAG_CODE,
+          });
+       
         const processStatus = riskGap.PROCESS_STATUS;
         if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
           diagCodes.push(riskGap.DIAG_CODE);
@@ -790,6 +820,31 @@ applyFilter(event: Event) {
           insertDataArray: riskObsInsertArray
         });
       }
+      console.log("riskGap", formValues.riskGapsList);
+
+       /* ----------------------------------
+         STEP 4: UPDATE PLAN YEAR
+      -----------------------------------*/
+      
+       if (UpdateArray.length) { 
+          UpdateArray.forEach((newArray: any) => {
+            if(newArray.PLANYEAR != newArray.PLAN_YEAR){
+              console.log('UpdateArray:',newArray);
+              this.apiService.updatePlanyearForRiskgap<any>(newArray);
+            }
+          })
+        }
+      
+
+      // if (formValues.riskGapsList.length) { 
+      //   const apiUpdate = {
+      //     table_name: "MEM_RISK_GAP",
+      //     id_field_name: "ID",
+      //     updates: UpdateArray
+      //   };
+      //   await this.apiService.multipleRowAndFieldUpdate<any>(apiUpdate);
+
+      // }
 
 
     } catch (error) {
@@ -809,6 +864,10 @@ applyFilter(event: Event) {
   toggleRiskGaps() {
 
   }
+
+  trackByIndex(index: number) {
+  return index;
+}
   async getMemberTaskList(medicaid_id: string) {
 
     //alert(medicaid_id);
@@ -823,8 +882,8 @@ applyFilter(event: Event) {
   async getMemberGapsList(medicaid_id: string) {
     const payload = { medicaid_id: medicaid_id };
 
-    const request: MedicaidIdRequest = {
-      medicaid_id: medicaid_id
+    const request = {
+      medicaid_id: medicaid_id 
     };
     const result = await this.apiService.getMemberGapsList<any>(request);
     //this.riskGapsList = result.data.prismGapList || [];
@@ -839,12 +898,15 @@ applyFilter(event: Event) {
       Observation_Date: this.formatDateToMDY(qgap.Observation_Date)
     }));
     //this.riskGapsList.clear();
-    this.setRiskGapsData(this.memberGapList);
-    this.setQualityGapsData(this.memberQualityList);
+    await this.setRiskGapsData(this.memberGapList);
+    await this.setQualityGapsData(this.memberQualityList);
+    this.cdr.detectChanges();
+    //console.log(this.riskGapsList);
 
   }
-  setRiskGapsData(riskGapsdata: any) {
-    this.riskGapsList.clear();
+  async setRiskGapsData(riskGapsdata: any) {
+     //console.log(riskGapsdata);
+    this.riskGapsList.clear(); 
 
     if (riskGapsdata && Array.isArray(riskGapsdata)) {
       riskGapsdata.forEach((t: any) => {
@@ -852,7 +914,7 @@ applyFilter(event: Event) {
         const fg = this.fb.group({
           DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
           DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
-
+          PLAN_YEAR: [this.extractYear(t.PLAN_YEAR)],
           PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
           risk_gap_id: [t.id],
@@ -866,7 +928,8 @@ applyFilter(event: Event) {
               ? new Date(t.Observation_Date)
               : ''
           ],
-
+          RISKGAP_ID: [t.ID],
+          PLANYEAR: [this.extractYear(t.PLAN_YEAR)],
           Observation_Year: [this.sanitize(t.Observation_Year)],
           Observation_Code: [this.sanitize(t.Observation_Code)],
           CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
@@ -888,15 +951,31 @@ applyFilter(event: Event) {
           fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
         });
 
-        this.riskGapsList.push(fg);
-      });
+        this.riskGapsList.push(fg); 
+       
+      });        
     }
   }
+
+ extractYear(value: any): string {
+  //console.log(value);
+  if (!value || value === '1900-01-01T00:00:00.000Z') {
+    return ''; // treat as blank
+  }
+
+  const d = new Date(value);
+  if (isNaN(d.getTime())) {
+    return ''; // invalid date safety
+  }
+
+  return d.getFullYear().toString();
+}
+
 
   sanitize(value: any) {
     return value === null || value === undefined || value === 'null' ? '' : value;
   }
-  setQualityGapsData(qualityGapsdata: any) {
+  async setQualityGapsData(qualityGapsdata: any) {
     // Clear existing list
     this.qualityGapsList.clear();
 
@@ -960,28 +1039,30 @@ applyFilter(event: Event) {
   }
 
   async addMeasure() {
+
     if (this.measureForm.invalid) {
       this.measureForm.markAllAsTouched();
-    }     
-
-    // 🚫 DUPLICATE CHECK 
-    //alert(this.isDuplicateMeasure());
-    if (this.isDuplicateMeasure()) {
-       this.measureForm.get('MEASURE')?.setErrors({ duplicateMeasure: true });
-       this.measureForm.markAllAsTouched();
-      //alert('This measure already exists for this member and TIN.');
       return;
     }
 
     this.isLoading = true;
-
     try {
+      // 🚫 DUPLICATE CHECK FIRST
+      const isDuplicate = await this.isDuplicateMeasure();    
+
+      if (isDuplicate) {
+        this.measureForm.get('MEASURE')?.setErrors({ duplicateMeasure: true });
+        this.measureForm.markAllAsTouched();
+        return;  
+      }
+
+      // ✅ ONLY INSERT IF NOT DUPLICATE
       const payload = this.buildAddressPayload(); 
       await this.apiService.insert(payload);
 
       await this.logSuccess();
 
-      // ✅ ADD ROW TO TABLE (OPTIMISTIC UPDATE)
+      // ✅ ADD ROW TO TABLE
       this.addStarPerformanceRow();
 
       // ✅ RESET FORM
@@ -993,7 +1074,10 @@ applyFilter(event: Event) {
     } finally {
       this.isLoading = false;
     }
-  }
+}
+
+
+ 
 
   private addStarPerformanceRow() {
     const f = this.measureForm.value;
@@ -1010,7 +1094,16 @@ applyFilter(event: Event) {
     ];
   }
 
-  private isDuplicateMeasure(): boolean {
+  trackByMedicaidId(index: number, star: any): any {
+    return star.medicaid_id;
+  }
+
+  trackByMedicaidIdapp(index: number, app: any): any {
+    return app.medicaid_id;
+  }
+
+
+  async isDuplicateMeasure(): Promise<boolean> {
     const f = this.measureForm.value;  
 
   //   this.starperformanceList.forEach(row => {
@@ -1036,12 +1129,15 @@ applyFilter(event: Event) {
   private buildAddressPayload() {
     const user = this.userData.getUser();
     const f = this.measureForm.value;
+    const MEASURE_YEAR = new Date(f.MEASURE_DATE).getFullYear();
+    
     return {
       table_name: 'MEM_STAR_PERFORMANCE_PRISM_DATA',
       insertDataArray: [{
         MEDICAID_ID: this.medicaid_id,
         MEASURE: f.MEASURE,
-        MEASURE_YEAR: f.MEASURE_YEAR,
+        MEASURE_DATE: f.MEASURE_DATE,
+        MEASURE_YEAR: MEASURE_YEAR,
         NUM_COUNT: f.NUM_COUNT,
         PCP_TAX_ID: f.PCP_TAX_ID,
         ADDED_BY: user.ID

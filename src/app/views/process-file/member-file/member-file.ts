@@ -75,7 +75,7 @@ export class MemberFile {
     'STATUS'
   ];  
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('mainPaginator') paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -259,6 +259,16 @@ private async loadTempMembers(): Promise<void> {
   this.totalRecords = this.tempMemberList.length;
   this.exist_count = this.tempMemberList.filter(m => m.exist_member).length;
   this.error_count = this.tempMemberList.filter(m => !m.SUBSCRIBER_ID).length;
+
+  // 🔥 FIX pagination
+  if (this.paginator) {
+    this.dataSource.paginator = this.paginator;
+  }
+  if (this.sort) {
+    this.dataSource.sort = this.sort;
+  }
+  
+  this.cdr.markForCheck();   // 👈 CRITICAL
 }
  
   /* ============================ CSV HELPERS ============================ */

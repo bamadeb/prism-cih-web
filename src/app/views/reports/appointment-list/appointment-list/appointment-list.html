@@ -29,7 +29,7 @@
       </mat-form-field> 
           <button mat-raised-button color="primary" [disabled]="appListFormGroup.invalid" (click)="applyFilter()">
           @if (!isLoading) {
-                Search
+                SEARCH
               } @else {
                 <mat-progress-spinner
                   diameter="20"
@@ -37,9 +37,7 @@
                 </mat-progress-spinner>
               }
         </button>
-          <button mat-raised-button color="primary" type="button"  (click)="downloadCsv()">
-              Download
-          </button>          
+        <mat-icon (click)="downloadCsv()" style="cursor: pointer;" title="Download csv">download</mat-icon>                  
 
       </form>
 

@@ -497,6 +497,16 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   }
+
+  async updatePlanyearForRiskgap<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismUpdatePlanyearForRiskgap',
+      request   
+    );
+  }
+
   async createCognitoUser(request: any): Promise<string> {
       const res: any = await commonPostApi(
         this.httpClient,

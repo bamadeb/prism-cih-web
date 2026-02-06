@@ -18,7 +18,7 @@
             </div>
             <!-- Data Table -->
             <div class="mat-elevation-z8">
-              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" >                 
+              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper" >                 
                   
                 <ng-container matColumnDef="plan_name">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>PLAN NAME</th>
@@ -46,12 +46,14 @@
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
               </table>
-
+            </div>
+            <div class="no-record" *ngIf="!isLoading && dataSource?.data?.length === 0">
+              No records found
             </div>
           </mat-card-content>
         </mat-card> 
 </div>
 
 <div class="loader-backdrop" *ngIf="isLoading">
-  <mat-spinner diameter="60"></mat-spinner>
+  <mat-spinner diameter="50"></mat-spinner>
 </div>

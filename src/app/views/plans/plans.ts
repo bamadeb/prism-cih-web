@@ -134,19 +134,22 @@ export class Plans implements OnInit, AfterViewInit {
 
   private openPlanDialog(plan?: any): void {
     this.isLoading = true;
+
     const dialogRef = plan
       ? this.plansDialogService.editPlansDialog(plan)
       : this.plansDialogService.addPlansDialog();
 
-    dialogRef.afterClosed().subscribe(result => {
-      this.isLoading = false;
+    // ⬇ Hide loader as soon as dialog opens
+    this.isLoading = false;
 
+    dialogRef.afterClosed().subscribe(result => {
       if (result?.refresh) {
         console.info('🔄 Reloading plans');
         this.loadTableData();
       }
     });
-  } 
+}
+
 
   /* ---------------- FILTER ---------------- */
   applyFilter(event: Event): void {
