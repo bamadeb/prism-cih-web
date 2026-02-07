@@ -46,8 +46,8 @@
         <mat-form-field appearance="outline" style="width: 49%;">
         <mat-label>STATUS</mat-label>
         <mat-select formControlName="status">
-            <mat-option [value]="0">Active</mat-option>
-            <mat-option [value]="1">In-active</mat-option>
+            <mat-option [value]="0">ACTIVE</mat-option>
+            <mat-option [value]="1">IN-ACTIVE</mat-option>
         </mat-select>
         <mat-error *ngIf="plansFormGroup.get('status')?.touched &&  plansFormGroup.get('status')?.invalid">
             Plan status required

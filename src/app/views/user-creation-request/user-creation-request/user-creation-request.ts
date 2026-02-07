@@ -13,14 +13,15 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Title } from '@angular/platform-browser';
-import { ConfigService } from '../../services/api.service';
-import { HeaderService } from '../../services/header.service';
-import { PlansDialogService } from '../../services/plans-dialog.service';
-import { FileAttachService } from '../../services/fileattach.service';
+import { ConfigService } from '../../../services/api.service';
+import { HeaderService } from '../../../services/header.service';
+//import { PlansDialogService } from '../../../services/plans-dialog.service';
+import { FileAttachService } from '../../../services/fileattach.service';
+import { UserCreationRequestDialogService } from '../../../services/user-creation-service';
 
 @Component({
-  selector: 'app-plans',
-   standalone: true,
+  selector: 'app-user-creation-request',
+  standalone: true,
   imports: [
     CommonModule,
     MatCardModule,
@@ -35,17 +36,28 @@ import { FileAttachService } from '../../services/fileattach.service';
     MatTooltipModule,
     MatProgressSpinner
   ],
-  templateUrl: './plans.html',
-  styleUrl: './plans.css',
+  templateUrl: './user-creation-request.html',
+  styleUrl: './user-creation-request.css',
 })
-export class Plans implements OnInit, AfterViewInit {
+export class UserCreationRequest  implements OnInit, AfterViewInit {
   displayedColumns: string[] = [
-    'plan_name',
-    'start_date',
-    'end_date',
-    'status',
-    '1'
+    'FIRST_NAME',
+    'LAST_NAME',
+    'ROLE',
+    'PHONE',
+    'EMAIL',
+    'DATE_OF_REQUEST',    
+    'FistName',
+    'STATUS',
+    'ADDED_DATE','1'
   ];
+
+  statusMap: { [key: number]: string } = {
+    0: 'NEW',
+    1: 'IN-PROCESS',
+    2: 'COMPLETED',
+    3: 'CANCEL'
+  };
 
   dataSource = new MatTableDataSource<any>([]);
   selection = new SelectionModel<any>(true, []); 
@@ -56,7 +68,8 @@ export class Plans implements OnInit, AfterViewInit {
 
   constructor(
     private apiService: ConfigService,
-    private plansDialogService: PlansDialogService,
+    //private plansDialogService: PlansDialogService,
+    private UserCreationDialogService: UserCreationRequestDialogService,    
     private fileAttachService: FileAttachService,
     private titleService: Title,
     private headerService: HeaderService
@@ -65,8 +78,8 @@ export class Plans implements OnInit, AfterViewInit {
   /* ---------------- LIFE CYCLE ---------------- */
 
   ngOnInit(): void {
-    this.titleService.setTitle('PRISM :: MANAGE PLANS');
-    this.headerService.setTitle('MANAGE PLANS');
+    this.titleService.setTitle('PRISM :: USER CREATION REQUESTS');
+    this.headerService.setTitle('USER CREATION REQUESTS');
     this.loadTableData();
   }
 
@@ -84,18 +97,17 @@ export class Plans implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     try {
-      const res = await this.apiService.plans<any>();
-      const plans = res?.data?.plans ?? []; 
-      //this.attachments = res?.data?.attachments ?? []; 
-      //console.log(res.data);
-      this.dataSource.data = plans.map((u: any) => ({ 
-        id: u.id,
-        plan_name: u.plan_name ?? '',
-        start_date: u.start_date ?? '',
-        end_date: u.end_date ?? '', 
-        status: u.status,
-        planstatus: u.status === 1 ? 'In-active' : 'Active',
-      }));
+      const res = await this.apiService.userRequestList<any>();
+      this.dataSource.data = res?.data?.plans ?? [];  
+      console.log(this.dataSource.data);
+      // this.dataSource.data = plans.map((u: any) => ({ 
+      //   ID: u.ID,
+      //   FIRST_NAME: u.FIRST_NAME ?? '',
+      //   start_date: u.start_date ?? '',
+      //   end_date: u.end_date ?? '', 
+      //   status: u.status,
+      //   planstatus: u.status === 1 ? 'In-active' : 'Active',
+      // }));
 
       this.selection.clear();
 
@@ -108,7 +120,7 @@ export class Plans implements OnInit, AfterViewInit {
 
   /* ---------------- DIALOGS ---------------- */
 
-  addPlan(): void {
+  add(): void {
     this.openPlanDialog();
   }  
 
@@ -117,39 +129,42 @@ export class Plans implements OnInit, AfterViewInit {
   }
 
   attach(entity: any, type: string): void {
-    this.isLoading = true;
-    this.fileAttachService
-      .openAttachDialog({ entity, type })
-      .then(dialogRef =>
-        dialogRef.afterClosed().subscribe(result => {
-          this.isLoading = false;
+  this.isLoading = true;
 
-          if (result?.uploaded) {
-            console.info('📎 File attached successfully');
-          }
-        })
-      )
-      .catch(() => (this.isLoading = false));
-  }
+  this.fileAttachService
+    .openAttachDialog({ entity, type })
+    .then(dialogRef => {
+
+      // ✅ HIDE LOADER as soon as dialog is opened
+      this.isLoading = false;
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result?.uploaded) {
+          console.info('📎 File attached successfully');
+        }
+      });
+
+    })
+    .catch(() => (this.isLoading = false));
+}
+
 
   private openPlanDialog(plan?: any): void {
-    this.isLoading = true;
-
+    //this.isLoading = true;
     const dialogRef = plan
-      ? this.plansDialogService.editPlansDialog(plan)
-      : this.plansDialogService.addPlansDialog();
-
-    // ⬇ Hide loader as soon as dialog opens
-    this.isLoading = false;
+      ? this.UserCreationDialogService.editPlansDialog(plan)
+      : this.UserCreationDialogService.addPlansDialog();
 
     dialogRef.afterClosed().subscribe(result => {
+      this.isLoading = false;
+
       if (result?.refresh) {
         console.info('🔄 Reloading plans');
         this.loadTableData();
+        
       }
     });
-}
-
+  } 
 
   /* ---------------- FILTER ---------------- */
   applyFilter(event: Event): void {

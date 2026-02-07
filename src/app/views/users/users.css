@@ -12,3 +12,10 @@
   background: rgba(255, 255, 255, 0.6);
   z-index: 9999;
 }
+
+.no-record {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+  font-size: 14px;
+}

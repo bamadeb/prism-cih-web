@@ -55,10 +55,13 @@
               </table>
 
             </div>
+             <div class="no-record" *ngIf="!isLoading && dataSource?.data?.length === 0">
+              No records found
+            </div>
           </mat-card-content>
         </mat-card> 
 </div>
 
 <div class="loader-backdrop" *ngIf="isLoading">
-  <mat-spinner diameter="60"></mat-spinner>
+  <mat-spinner diameter="50"></mat-spinner>
 </div>

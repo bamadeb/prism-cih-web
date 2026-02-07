@@ -1,5 +1,5 @@
-<h4 mat-dialog-title class="txupper dialog-title">
-  Attach File For - {{ data.entity.plan_name }}
+<h4 mat-dialog-title class="txupper dialog-title">Attach File
+  <!-- Attach File For - {{ data.entity.plan_name }} -->
 
 </h4>
 
@@ -43,8 +43,8 @@
     </div>
 
   </form>
-  <div class="loader-backdrop" *ngIf="isLoading">
-    <mat-spinner diameter="60"></mat-spinner>
+  <div class="loader-overlay" *ngIf="isLoading">
+    <mat-spinner diameter="50"></mat-spinner>
   </div>
 
   <!-- ACTIONS -->
@@ -64,10 +64,10 @@
   </mat-dialog-actions>
 
   <!-- ATTACHED FILES -->
-  <mat-card class="attachments-card">
+  <mat-card class="attachments-card" style="overflow-y: scroll; height: 300px !important; ">
     <mat-card-title style="font-size: 16px;">ATTACHED FILES</mat-card-title>
 
-    <table class="attachments-table ">
+    <table class="attachments-table " >
       <thead>
         <tr>
           <th class="left">FILE</th>

@@ -50,7 +50,7 @@
                     </mat-select>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="outline" class="mr">
                 <mat-label>START DATE</mat-label>
                 <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
                 <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
@@ -60,7 +60,7 @@
                 </mat-error>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="outline" class="mr">
                 <mat-label>END DATE</mat-label>
                 <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
                 <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>

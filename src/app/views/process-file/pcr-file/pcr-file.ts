@@ -67,7 +67,7 @@ export class PcrFile {
             'MEMBERKEY','MEASURE_KEY','SUBMEASURE_KEY','MEMBER_NAME','PCP_TIN', 'PCP_Name', 'DENOM', 'DISCH_ORDER',
       'INDEX_ADMIT_DT', 'INDEX_DISCH_DT','INDEX_STAY','NUMER','READMISSION', 'READMT_ADMIT_DT','READMT_DISCH_DT','1'];  
       
-        @ViewChild(MatPaginator) paginator!: MatPaginator;
+        @ViewChild('mainPaginator') paginator!: MatPaginator;
         @ViewChild(MatSort) sort!: MatSort;
         @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
       
@@ -281,8 +281,8 @@ export class PcrFile {
           session_id: this.sessionId
         });
     
-        console.log('sessionId:'+this.sessionId);
-        console.log(res);
+        // console.log('sessionId:'+this.sessionId);
+        // console.log(res);
       
         this.tempMemberList = res?.data ?? [];
         this.dataSource.data = this.tempMemberList;
@@ -290,6 +290,16 @@ export class PcrFile {
         this.totalRecords = this.tempMemberList.length;
         this.exist_count = this.tempMemberList.filter(m => m.pcr_exist).length;
         this.error_count = this.tempMemberList.filter(m => !m.member_exist).length;
+
+        // 🔥 FIX pagination
+        if (this.paginator) {
+          this.dataSource.paginator = this.paginator;
+        }
+        if (this.sort) {
+          this.dataSource.sort = this.sort;
+        }
+        
+        this.cdr.markForCheck();   // 👈 CRITICAL
       } 
        
   /* ============================ UTILS ============================ */      

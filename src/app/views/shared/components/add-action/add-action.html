@@ -252,166 +252,176 @@
               <h4 class="mb-2 text-uppercase fw-bold" style="cursor:pointer" (click)="toggleRiskGaps()">
                 <b>Risk Gaps </b>
               </h4>
-              <div formArrayName="riskGapsList">
-                <mat-accordion multi>
+              <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+                <mat-tab *ngFor="let year of riskTabarray; trackBy: trackByIndex" label="{{year.label}}">
+                  <div formArrayName="riskGapsList">
+                    <mat-accordion multi>
 
-                  <ng-container *ngFor="let gap of riskGapsList.controls; let i = index" [formGroupName]="i">
-
-                    <mat-expansion-panel class="mb-2">
-
-                      <!-- HEADER -->
-                      <mat-expansion-panel-header>
-
-
-                        <mat-panel-title class="text-uppercase panel-title-10">
-                          <!-- <mat-checkbox formControlName="PROCESS_STATUS" (click)="$event.stopPropagation()"
-                            (keydown)="$event.stopPropagation()" class="me-2">
-                          </mat-checkbox> -->
-                          <mat-checkbox formControlName="PROCESS_STATUS" class="me-2">
-                          </mat-checkbox>
-                        </mat-panel-title>
-
-                        <mat-panel-description class="panel-desc-90 text-uppercase">
-                          {{ gap.get('DIAG_DESC')?.value }}
-                        </mat-panel-description>
-                      </mat-expansion-panel-header>
-
-                      <!-- BODY -->
-                      <div class="row mt-3">
-
-                        <!-- Observation Date -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Date</mat-label>
-
-                            <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
-                              placeholder="MM/DD/YYYY" readonly />
-
-                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                            <mat-datepicker #picker></mat-datepicker>
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Observation Code -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Code</mat-label>
-                            <input matInput formControlName="Observation_Code">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- CPT Code Modifier -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>CPT Code Modifier</mat-label>
-                            <input matInput formControlName="CPT_Code_Modifier">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Observation Code Set -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Code Set</mat-label>
-                            <input matInput formControlName="Observation_Code_Set">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Observation Result -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Result</mat-label>
-                            <mat-select formControlName="Observation_Result">
-                              <mat-option value="">-- Observation Result --</mat-option>
-                              <mat-option value="Rejected">Rejected</mat-option>
-                              <mat-option value="Addressed">Addressed</mat-option>
-                              <mat-option value="Trumped">Trumped</mat-option>
-                            </mat-select>
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider NPI -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Service Provider NPI</mat-label>
-                            <input matInput formControlName="Service_Provider_NPI">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider Taxonomy -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Taxonomy Code</mat-label>
-                            <input matInput formControlName="Service_Provider_Taxonomy_Code">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider Name -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Service Provider Name</mat-label>
-                            <input matInput formControlName="Service_Provider_Name">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider Type -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Service Provider Type</mat-label>
-                            <input matInput formControlName="Service_Provider_Type">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Rx Provider Flag -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Rx Provider Flag</mat-label>
-                            <input matInput formControlName="Service_Provider_RxProviderFlag">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Provider Group NPI -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Group NPI</mat-label>
-                            <input matInput formControlName="Provider_Group_NPI">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Provider Group Taxonomy -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Group Taxonomy</mat-label>
-                            <input matInput formControlName="Provider_Group_Taxonomy_Code">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Provider Group Name -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Group Name</mat-label>
-                            <input matInput formControlName="Provider_Group_Name">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Note -->
-                        <div class="col-lg-9 col-md-12 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Note</mat-label>
-                            <textarea matInput rows="2" formControlName="note"></textarea>
-                          </mat-form-field>
-                        </div>
-
-                      </div>
-
-                    </mat-expansion-panel>
-
-                  </ng-container>
-
-                </mat-accordion>
-              </div>
+                      <ng-container *ngFor="let gap of riskGapsList.controls; let i = index" [formGroupName]="i">
+                        <!-- <DIV>{{year.label }} == {{gap.get('PLAN_YEAR')?.value}}</DIV> -->
+                        <mat-expansion-panel class="mb-2"  *ngIf="year.value == (gap.get('PLAN_YEAR')?.value || '')">
+                            <input type="hidden" formControlName="RISKGAP_ID">
+                          <!-- HEADER -->
+                          <mat-expansion-panel-header>
 
 
+                            <mat-panel-title class="text-uppercase panel-title-10">
+                              
+                              <mat-checkbox formControlName="PROCESS_STATUS" class="me-2">
+                              </mat-checkbox>
+                            </mat-panel-title>
 
+                            <mat-panel-description class="panel-desc-90 text-uppercase">
+                              {{ gap.get('DIAG_DESC')?.value }}
+                            </mat-panel-description>
+                          </mat-expansion-panel-header>
+
+                          <!-- BODY -->
+                          <div class="row mt-3">
+                            <!-- PLAN YEAR -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>PLAN YEAR</mat-label>
+                                <mat-select formControlName="PLANYEAR">
+                                 <mat-option *ngFor="let y of riskTabarray; trackBy: trackByValue" [value]="y.value">
+                                  {{ y.label }}
+                                  </mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Observation Date -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Observation Date</mat-label>
+
+                                <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
+                                  placeholder="MM/DD/YYYY" readonly />
+
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Observation Code -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Observation Code</mat-label>
+                                <input matInput formControlName="Observation_Code">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- CPT Code Modifier -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>CPT Code Modifier</mat-label>
+                                <input matInput formControlName="CPT_Code_Modifier">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Observation Code Set -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Observation Code Set</mat-label>
+                                <input matInput formControlName="Observation_Code_Set">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Observation Result -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Observation Result</mat-label>
+                                <mat-select formControlName="Observation_Result">
+                                  <mat-option value="">-- Observation Result --</mat-option>
+                                  <mat-option value="Rejected">Rejected</mat-option>
+                                  <mat-option value="Addressed">Addressed</mat-option>
+                                  <mat-option value="Trumped">Trumped</mat-option>
+                                </mat-select>
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Service Provider NPI -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Service Provider NPI</mat-label>
+                                <input matInput formControlName="Service_Provider_NPI">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Service Provider Taxonomy -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Provider Taxonomy Code</mat-label>
+                                <input matInput formControlName="Service_Provider_Taxonomy_Code">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Service Provider Name -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Service Provider Name</mat-label>
+                                <input matInput formControlName="Service_Provider_Name">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Service Provider Type -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Service Provider Type</mat-label>
+                                <input matInput formControlName="Service_Provider_Type">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Rx Provider Flag -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Rx Provider Flag</mat-label>
+                                <input matInput formControlName="Service_Provider_RxProviderFlag">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Provider Group NPI -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Provider Group NPI</mat-label>
+                                <input matInput formControlName="Provider_Group_NPI">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Provider Group Taxonomy -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Provider Group Taxonomy</mat-label>
+                                <input matInput formControlName="Provider_Group_Taxonomy_Code">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Provider Group Name -->
+                            <div class="col-lg-3 col-md-6 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Provider Group Name</mat-label>
+                                <input matInput formControlName="Provider_Group_Name">
+                              </mat-form-field>
+                            </div>
+
+                            <!-- Note -->
+                            <div class="col-lg-9 col-md-12 mb-2">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Note</mat-label>
+                                <textarea matInput rows="2" formControlName="note"></textarea>
+                              </mat-form-field>
+                            </div>
+
+                          </div>
+
+                        </mat-expansion-panel>
+
+                      </ng-container>
+
+                    </mat-accordion>
+                  </div>
+                </mat-tab>                 
+              </mat-tab-group>
 
             </div>
             <!-- LEFT COLUMN -->
@@ -613,40 +623,39 @@
 
     <mat-tab label="APPOINTMENT">
       <div>
-        <form  [formGroup]="appointmentFormGroup" (ngSubmit)="addAppointment()">
-           <!-- SUCCESS MESSAGE -->
-        @if (appSuccessMessage()) {
-        <div class="pcp-success-msg">
-          <mat-icon class="pcp-success-icon">check_circle</mat-icon>
-          {{ appSuccessMessage() }}
-        </div><br>
-        }
+        <form [formGroup]="appointmentFormGroup" (ngSubmit)="addAppointment()">
+          <!-- SUCCESS MESSAGE -->
+          @if (appSuccessMessage()) {
+          <div class="pcp-success-msg">
+            <mat-icon class="pcp-success-icon">check_circle</mat-icon>
+            {{ appSuccessMessage() }}
+          </div><br>
+          }
           <mat-form-field appearance="outline" class="mr" style="margin-top:15px;width: 20%;">
-              <mat-label>VENDOR</mat-label>
-              <mat-select formControlName="vendor_id" class="txupper" (selectionChange)="onVendorChange($event.value)">
-                <mat-option class="txupper" *ngFor="let vendor of vendorList" [value]="vendor.VENDOR_NUM">
-                  {{ vendor.ABBR }} ({{ vendor.VENDOR_NUM }})</mat-option>
-              </mat-select>
-            </mat-form-field>
+            <mat-label>VENDOR</mat-label>
+            <mat-select formControlName="vendor_id" class="txupper" (selectionChange)="onVendorChange($event.value)">
+              <mat-option class="txupper" *ngFor="let vendor of vendorList" [value]="vendor.VENDOR_NUM">
+                {{ vendor.ABBR }} ({{ vendor.VENDOR_NUM }})</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" class="mr">
+          <mat-form-field appearance="outline" class="mr">
             <mat-label>PROVIDER</mat-label>
             <mat-select formControlName="provider_id" class="txupper">
-              <mat-option *ngFor="let provider of providerList"
-                          [value]="provider.provider_id">
+              <mat-option *ngFor="let provider of providerList" [value]="provider.provider_id">
                 {{ provider.provider_first_name }} {{ provider.provider_last_name }}
               </mat-option>
             </mat-select>
           </mat-form-field>
 
-          
-          <mat-form-field appearance="outline" class="mr"> 
-          <mat-label>APPOINTMENT DATE</mat-label>
+
+          <mat-form-field appearance="outline" class="mr">
+            <mat-label>APPOINTMENT DATE</mat-label>
             <input matInput [matDatepicker]="picker1" formControlName="appointment_date" placeholder="APPOINTMENT DATE"
               readonly />
             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
-          </mat-form-field>   
+          </mat-form-field>
 
           <mat-form-field appearance="outline" class="mr">
             <mat-label> STATUS</mat-label>
@@ -658,70 +667,64 @@
             </mat-select>
           </mat-form-field>
 
-           <mat-form-field appearance="outline" style="width: 15%;" class="mr">
+          <mat-form-field appearance="outline" style="width: 15%;" class="mr">
             <mat-label>PLACE</mat-label>
             <mat-select formControlName="place_of_appointment" class="txupper">
-              <mat-option class="txupper" *ngFor="let vendorL of vendorLocationList"
-                          [value]="vendorL.BILLING_ADDR_1">
+              <mat-option class="txupper" *ngFor="let vendorL of vendorLocationList" [value]="vendorL.BILLING_ADDR_1">
                 {{ vendorL.BILLING_ADDR_1 }}
               </mat-option>
             </mat-select>
           </mat-form-field>
 
-            <mat-form-field appearance="outline" class="mr">
+          <mat-form-field appearance="outline" class="mr">
             <mat-label>APPOINTMENT TYPE</mat-label>
             <mat-select formControlName="appointment_type" class="txupper">
-              <mat-option class="txupper" *ngFor="let appType of appointTypeList"  [value]="appType.id">
+              <mat-option class="txupper" *ngFor="let appType of appointTypeList" [value]="appType.id">
                 {{ appType.type }}
-              </mat-option> 
+              </mat-option>
             </mat-select>
           </mat-form-field>
-           <div class="mr">
-          <mat-label>TIME</mat-label>
-          <input  type="time" formControlName="appointment_time">
+          <div class="mr">
+            <mat-label>TIME</mat-label>
+            <input type="time" formControlName="appointment_time">
           </div>
 
 
-           <mat-form-field appearance="fill" class="w-100 textarea-no-ripple ">
+          <mat-form-field appearance="fill" class="w-100 textarea-no-ripple ">
             <mat-label>TYPE YOUR TEXT...</mat-label>
             <textarea matInput formControlName="appointment_note" rows="2"></textarea>
-          </mat-form-field> 
-            <button mat-raised-button  color="primary" type="submit" [disabled]="appointmentFormGroup.invalid" 
+          </mat-form-field>
+          <button mat-raised-button color="primary" type="submit" [disabled]="appointmentFormGroup.invalid"
             style="margin-bottom: 10px;margin-top: 10px;">CREATE A APPOINTMENT</button>
-           
+
         </form>
       </div>
-              <table class="comparison-table">
-              <thead>
-                <tr>
-                  <th>APPOINTMENT DATE</th>
-                  <th>TYPE</th>
-                  <th>VENDOR</th>
-                  <th>PROVIDER ID</th>
-                  <th>STATUS</th>
-                  <th>PLACE</th>
-                  <th>NOTE</th>
-                  <th>ADDED BY</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (app of appointmentList; track app.medicaid_id) {
-              
-                <tr>
-                  <td>{{ app.action_date | date:'MM/dd/yyyy' }} {{ app.action_time}}</td>
-                  <td>{{ app.type }}</td>
-                  <td>{{ app.vendor_id }}</td>
-                  <td>{{ app.provider_id }}</td>
-                  <td>{{ app.status }}</td>
-                  <td>{{ app.place_of_appointment}}</td>
-                  <td>{{ app.note}}</td>
-                  <td>{{ app.FistName}}</td>
-                  
-                </tr>
-                
-                }
-              </tbody>
-            </table>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>APPOINTMENT DATE</th>
+            <th>TYPE</th>
+            <th>VENDOR</th>
+            <th>PROVIDER ID</th>
+            <th>STATUS</th>
+            <th>PLACE</th>
+            <th>NOTE</th>
+            <th>ADDED BY</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of appointmentList; trackBy: trackByMedicaidIdapp">
+            <td>{{ app.action_date | date:'MM/dd/yyyy' }} {{ app.action_time }}</td>
+            <td>{{ app.type }}</td>
+            <td>{{ app.vendor_id }}</td>
+            <td>{{ app.provider_id }}</td>
+            <td>{{ app.status }}</td>
+            <td>{{ app.place_of_appointment }}</td>
+            <td>{{ app.note }}</td>
+            <td>{{ app.FistName }}</td>
+          </tr>
+        </tbody>
+      </table>
     </mat-tab>
     <mat-tab label="STAR PERFORMANCE">
       <div>
@@ -741,17 +744,16 @@
                 </tr>
               </thead>
               <tbody>
-                @for (star of starperformanceList; track star.medicaid_id) {
-                @if (star.TYPE === 'FILE') {
-                <tr>
-                  <td>{{ star.MEASURE_CODE }}</td>
-                  <td>{{ star.SUB_MEASURE }}</td>
-                  <td>{{ star.PCP_TAX_ID }}</td>
-                  <td>{{ star.NUMERATOR_GAP === 1 ? 'COMPLIANT' : 'NON-COMPLIANT' }}</td>
-                  <td>{{ star.ADDED_DATE | date:'MM/dd/yyyy' }}</td>
+                 
+                <tr *ngFor="let star of starperformanceList; trackBy: trackByMedicaidId">
+                  <ng-container *ngIf="star.TYPE === 'FILE'">
+                    <td>{{ star.MEASURE_CODE }}</td>
+                    <td>{{ star.SUB_MEASURE }}</td>
+                    <td>{{ star.PCP_TAX_ID }}</td>
+                    <td>{{ star.NUMERATOR_GAP === 1 ? 'COMPLIANT' : 'NON-COMPLIANT' }}</td>
+                    <td>{{ star.ADDED_DATE | date:'MM/dd/yyyy' }}</td>
+                  </ng-container>
                 </tr>
-                }
-                }
               </tbody>
             </table>
           </mat-card>
@@ -776,18 +778,27 @@
                 </mat-error>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" class="mr">
+              <!-- <mat-form-field appearance="outline" class="mr">
                 <mat-label>MEASURE YEAR</mat-label>
                 <mat-select formControlName="MEASURE_YEAR" class="txupper">
                   <mat-option [value]="2026">2026</mat-option>
                   <mat-option [value]="2025">2025</mat-option>
                   <mat-option [value]="2024">2024</mat-option>
                 </mat-select>
-                <!-- <input matInput formControlName="MEASURE_YEAR"> -->
+                
                 <mat-error *ngIf="measureForm.get('MEASURE_YEAR')?.invalid">
                   Measure year is required
                 </mat-error>
+              </mat-form-field> -->
+
+              <mat-form-field appearance="outline" class="mr" style="width:32%;">
+                <mat-label>MEASURE DATE</mat-label>
+                <input matInput [matDatepicker]="pcpPicker" formControlName="MEASURE_DATE" readonly>
+                <mat-datepicker-toggle matSuffix [for]="pcpPicker"></mat-datepicker-toggle>
+                <mat-datepicker #pcpPicker></mat-datepicker>
               </mat-form-field>
+
+
               <mat-form-field appearance="outline" class="mr" style="width: 33%;">
                 <mat-label>TIN</mat-label>
                 <mat-select formControlName="PCP_TAX_ID" class="txupper">
@@ -838,16 +849,15 @@
                 </tr>
               </thead>
               <tbody>
-                @for (star of starperformanceList; track star.medicaid_id) {
-                @if (star.TYPE === 'PRISM') {
-                <tr>
-                  <td>{{ star.SUB_MEASURE }}</td>
-                  <td>{{ star.PCP_TAX_ID }}</td>
-                  <td>{{ star.NUMERATOR_GAP == '1' ? 'COMPLIANT' : 'NON-COMPLIANT' }}</td>
-                  <td>{{ star.ADDED_DATE | date:'MM/dd/yyyy' }}</td>
-                </tr>
-                }
-                }
+                <tr *ngFor="let star of starperformanceList; trackBy: trackByMedicaidId">
+                  <ng-container *ngIf="star.TYPE === 'PRISM'">
+                     
+                    <td>{{ star.SUB_MEASURE }}</td>
+                    <td>{{ star.PCP_TAX_ID }}</td>
+                    <td>{{ star.NUMERATOR_GAP === 1 ? 'COMPLIANT' : 'NON-COMPLIANT' }}</td>
+                    <td>{{ star.ADDED_DATE | date:'MM/dd/yyyy' }}</td>
+                  </ng-container>
+                </tr> 
               </tbody>
             </table>
           </mat-card>
@@ -870,8 +880,8 @@
         }
 
         <!-- ADD FORM -->
-        <form [formGroup]="pcpVisitFormGroup"> 
-          <div class="pcp-visit-row">         
+        <form [formGroup]="pcpVisitFormGroup">
+          <div class="pcp-visit-row">
 
             <!-- VISIT DATE -->
             <mat-form-field appearance="outline" class="mr">
@@ -885,9 +895,9 @@
             <mat-form-field appearance="outline">
               <mat-label>PCP TYPE</mat-label>
               <mat-select formControlName="visit_type">
-                  <mat-option *ngFor="let type of pcpType" [value]="type.ID">
-                    {{ type.PCP_TYPE }}
-                  </mat-option>
+                <mat-option *ngFor="let type of pcpType" [value]="type.ID">
+                  {{ type.PCP_TYPE }}
+                </mat-option>
               </mat-select>
             </mat-form-field>
 
@@ -898,7 +908,7 @@
             </mat-form-field>
 
             <!-- SAVE BUTTON -->
-            <button  mat-raised-button color="primary" type="button" (click)="savePcpVisit()"
+            <button mat-raised-button color="primary" type="button" (click)="savePcpVisit()"
               [disabled]="isSavingPcpVisit() || pcpVisitFormGroup.invalid">
 
               @if (isSavingPcpVisit()) {
@@ -907,7 +917,7 @@
               SAVE
               }
 
-            </button>          
+            </button>
           </div>
         </form>
 
@@ -922,49 +932,50 @@
           }
 
           @if (!isLoadingPcpHistory() && pcpVisitDataSource.data.length) {
-            <div style="display: flex;">
+          <div style="display: flex;">
 
-              <!-- <mat-paginator #mainPaginator [pageSize]="10"
+            <!-- <mat-paginator #mainPaginator [pageSize]="10"
             [pageSizeOptions]="[10, 25, 50, 100]"></mat-paginator> -->
-          <mat-form-field appearance="outline" class="search-box">
-            <mat-label>Search</mat-label>
-            <input matInput (keyup)="applyFilter($event)" placeholder="Search">
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="search-box">
+              <mat-label>Search</mat-label>
+              <input matInput (keyup)="applyFilter($event)" placeholder="Search">
+            </mat-form-field>
 
-            </div>
-            
-           <table mat-table [dataSource]="pcpVisitDataSource" matSort #mainSort="matSort"  class="pcp-history-table txupper" > 
+          </div>
 
-            <ng-container matColumnDef="visit_date"> 
-              <th mat-header-cell *matHeaderCellDef >VISIT DATE</th>
+          <table mat-table [dataSource]="pcpVisitDataSource" matSort #mainSort="matSort"
+            class="pcp-history-table txupper">
+
+            <ng-container matColumnDef="visit_date">
+              <th mat-header-cell *matHeaderCellDef>VISIT DATE</th>
               <td mat-cell *matCellDef="let row">
                 {{ row.VISIT_DATE | date:'MM/dd/yyyy' }}
               </td>
             </ng-container>
 
-             <ng-container matColumnDef="visit_type">
-              <th mat-header-cell *matHeaderCellDef >PCP TYPE</th>
+            <ng-container matColumnDef="visit_type">
+              <th mat-header-cell *matHeaderCellDef>PCP TYPE</th>
               <td mat-cell *matCellDef="let row">
                 {{ row.PCP_TYPE }}
               </td>
             </ng-container>
 
             <ng-container matColumnDef="message">
-              <th mat-header-cell *matHeaderCellDef >NOTE</th>
+              <th mat-header-cell *matHeaderCellDef>NOTE</th>
               <td mat-cell *matCellDef="let row">
                 {{ row.MESSAGE }}
               </td>
             </ng-container>
 
             <ng-container matColumnDef="added_user_name">
-              <th mat-header-cell *matHeaderCellDef >ADDED BY</th>
+              <th mat-header-cell *matHeaderCellDef>ADDED BY</th>
               <td mat-cell *matCellDef="let row">
                 {{ row.added_user_name }}
               </td>
             </ng-container>
 
             <ng-container matColumnDef="added_date">
-              <th mat-header-cell *matHeaderCellDef >ADDED DATE</th>
+              <th mat-header-cell *matHeaderCellDef>ADDED DATE</th>
               <td mat-cell *matCellDef="let row">
                 {{ row.ADDED_DATE | date:'MM/dd/yyyy' }}
               </td>
@@ -991,5 +1002,3 @@
 <mat-dialog-actions>
   <button matButton mat-dialog-close>CLOSE</button>
 </mat-dialog-actions>
-
- 

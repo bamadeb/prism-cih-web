@@ -18,6 +18,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatIcon } from "@angular/material/icon";
 
 
 
@@ -25,12 +26,12 @@ import { SelectionModel } from '@angular/cdk/collections';
   selector: 'app-risks-gap-report',
  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule, MatDatepickerModule,ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
+  imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule, MatDatepickerModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
-    MatSortModule,    
-    MatButtonModule],
+    MatSortModule,
+    MatButtonModule, MatIcon],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],templateUrl: './risks-gap-report.html',
@@ -240,7 +241,6 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     alert('Failed to download CSV.');
   }
 }
-
 
   filter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';

@@ -22,6 +22,7 @@ export class FileAttachService {
 
     try {
       const req = { type: data.type, type_id: data.entity.id };
+      //console.log(req);
       const res = await this.apiService.attachments<any>(req);
       attachments = res?.data ?? [];
     } catch (err) {
@@ -31,7 +32,7 @@ export class FileAttachService {
     return this.dialog.open(FileattachDialog, {
       width: '900px',
       maxWidth: '95vw',
-      minHeight: '500px',
+      minHeight: '580px',
       disableClose: true,
       autoFocus: false,
       data: { ...data, attachments }

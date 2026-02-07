@@ -24,8 +24,9 @@ export interface UpdatePlanRequest {
 
 export interface fileAttachRequest {
   fileName: string;
-  fileType: string; 
-  plan_id: string;  
+  fileType: string;
+  directory: string;   
+  id: string;  
   env: string;  
   bucket: string;  
 }

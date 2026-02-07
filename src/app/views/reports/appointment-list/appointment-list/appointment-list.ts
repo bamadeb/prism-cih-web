@@ -17,6 +17,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatIcon } from "@angular/material/icon";
 interface AppointmentResponse {
   data: any[];
 }
@@ -29,7 +30,7 @@ interface AppointmentResponse {
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatButtonModule],
+    MatButtonModule, MatIcon],
   providers: [provideNativeDateAdapter()],
   templateUrl: './appointment-list.html',
   styleUrl: './appointment-list.css',
