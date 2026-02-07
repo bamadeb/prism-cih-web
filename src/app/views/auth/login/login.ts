@@ -17,6 +17,8 @@ import { UserDataService } from '../../../services/user-data-service';
 import { AuthService } from '../../../services/auth.service';
 
 import { LogRequest } from '../../../models/requests/dashboardRequest';
+import { MatDialog } from '@angular/material/dialog';
+import { PasswordWarningDialog } from '../../dialogs/password-warning-dialog/password-warning-dialog';
 
 @Component({
   selector: 'app-login',
@@ -27,7 +29,7 @@ import { LogRequest } from '../../../models/requests/dashboardRequest';
     MatButtonModule,
     MatCardModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
 ],
   templateUrl: './login.html',
   styleUrl: './login.css',
@@ -46,7 +48,8 @@ export class Login {
     private titleService: Title,
     private idleService: IdleTimeoutService,
     private auth: AuthService,
-    private apiService: ConfigService) {}
+    private apiService: ConfigService,
+    private dialog: MatDialog) {}
 
   bgImages = [
       'assets/images/1.jpg',
@@ -59,6 +62,10 @@ export class Login {
 
     ngOnInit() {
        this.titleService.setTitle('PRISM :: LOGIN');
+       //const navigation = this.router.getCurrentNavigation();
+        //this.errorMessage = navigation?.extras?.state?.['message'] || '';
+        this.errorMessage = window.history.state?.message || '';
+        //console.log(this.errorMessage);
       setInterval(() => {
         this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
       }, 4000); // 4 seconds
@@ -77,14 +84,30 @@ export class Login {
       //console.log('✅ Login success:', result);
       if(result.data.length>0){
         const user = result.data[0]; 
-        this.userData.setUser(user); 
+        this.userData.setUser(user);        
+        // 🔒 Password expired (STRICT)
+        if (user.is_password_expired === 1) {
+          this.isLoading = false;
+          this.openPasswordWarningDialog(user, true);
+          return;
+        }
+
+        // ⚠️ Password expiry warning (SOFT)
+        if (user.password_expiry_warning === 1) {
+          this.isLoading = false;
+          this.openPasswordWarningDialog(user, false);
+          return;
+        }
+
+        // this.userData.setUser(user); 
  
-        const roleId = user.role_id; 
-        this.userId = user.ID; 
-        this.idleService.startWatching();
-        this.addloginHistory();
-        this.router.navigate(['/dashboard']);  
-  
+        // const roleId = user.role_id; 
+        // this.userId = user.ID; 
+        // this.idleService.startWatching();
+        // this.addloginHistory();
+        // this.router.navigate(['/dashboard']);  
+        // ✅ Normal login
+        this.completeLogin(user);  
       }
       else{
         this.errorMessage = 'Invalid login credentials';
@@ -97,6 +120,46 @@ export class Login {
   }
   clearError() { 
     this.errorMessage = '';
+  }
+    private openPasswordWarningDialog(
+      user: any,
+      isExpired: boolean
+    ): void {
+
+      const dialogRef = this.dialog.open(PasswordWarningDialog, {
+        width: '500px',
+        disableClose: true,
+        data: {
+          message: user.password_message,
+          is_password_expired: isExpired
+        }
+      });
+
+      dialogRef.afterClosed().subscribe((action: 'change' | 'skip') => {
+        console.log("action : ",action);
+        // 🔒 Expired → must reset
+        if (isExpired) {
+          if (action === 'change') {
+            this.router.navigate(['/change-password']);
+          }
+          return; // ⛔ never allow login
+        }
+
+        // ⚠️ Warning → optional
+        if (action === 'change') {
+          this.router.navigate(['/change-password']);
+        } else {
+          this.completeLogin(user);
+        }
+      });
+    }
+
+  private completeLogin(user: any): void {
+    this.userData.setUser(user);
+    this.userId = user.ID;
+    this.idleService.startWatching();
+    this.addloginHistory();
+    this.router.navigate(['/dashboard']);
   }
 
   addloginHistory(){

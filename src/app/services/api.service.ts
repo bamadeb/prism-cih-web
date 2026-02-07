@@ -11,7 +11,7 @@ import { RiskGapApiResponse, RiskGapReport, RiskGapsRequest } from '../models/re
 import { UsernameRequest, UserRequest } from '../models/requests/userRequest';
 import { attachmentRequest, attchFileremoveRequest, fileAttachRequest } from '../models/requests/planRequest';
 import { actionLogRequest } from '../models/requests/actionLogRequest';
-  
+import {PasswordUpdateRequest}  from '../models/requests/passwordUpdateRequest'
  
 @Injectable({
   providedIn: 'root'
@@ -36,6 +36,14 @@ export class ConfigService {
     );
   }
 
+  async prismUserPasswordUpdate<TResponse>(request: PasswordUpdateRequest): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismUserPasswordUpdate',
+      request   
+    );
+  } 
   async dashboard<TResponse>(request: DashboardRequest): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,

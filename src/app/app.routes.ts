@@ -17,7 +17,11 @@ import { SystemLog } from './views/reports/system-log/system-log';
 import { FileLogReport } from './views/reports/file-log-report/file-log-report';
 import { PcrFile } from './views/process-file/pcr-file/pcr-file';
 import { AppointmentList } from './views/reports/appointment-list/appointment-list/appointment-list';
+
+import { ChangePassword } from './views/change-password/change-password';
+
 import { UserCreationRequest } from './views/user-creation-request/user-creation-request/user-creation-request';
+
 
 export const routes: Routes = [
   {
@@ -26,6 +30,13 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'login', pathMatch: 'full' },
       { path: 'login', component: Login },
+    ]
+  },
+  {
+    path: '',
+    component: AuthLayout,
+    children: [
+      { path: 'change-password', component: ChangePassword },
     ]
   },
   {
