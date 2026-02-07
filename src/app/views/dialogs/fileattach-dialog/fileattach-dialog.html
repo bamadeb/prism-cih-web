@@ -47,16 +47,19 @@
   <!-- ACTIONS -->
   <mat-dialog-actions align="end">
     <button mat-button (click)="close()">CANCEL</button>
-    <button mat-raised-button [color]="isStatusOnlyUpdate ? 'accent' : 'primary'"
-      [disabled]="uploadForm.invalid || isLoading" (click)="upload()">
+    <button mat-raised-button
+        type="button"
+        [color]="isStatusOnlyUpdate ? 'accent' : 'primary'"
+        [disabled]="isLoading || (!selectedFile && !isStatusOnlyUpdate)"
+        (click)="upload()">
 
-      <mat-icon *ngIf="!isLoading">
-        {{ isStatusOnlyUpdate ? 'sync' : 'cloud_upload' }}
-      </mat-icon>
+        <mat-icon *ngIf="!isLoading">
+          {{ isStatusOnlyUpdate ? 'sync' : 'cloud_upload' }}
+        </mat-icon>
 
-      {{ isStatusOnlyUpdate ? 'UPDATE STATUS' : 'UPLOAD FILE' }}
+        {{ isStatusOnlyUpdate ? 'UPDATE STATUS' : 'UPLOAD FILE' }}
 
-    </button>
+      </button>
 
   </mat-dialog-actions>
 

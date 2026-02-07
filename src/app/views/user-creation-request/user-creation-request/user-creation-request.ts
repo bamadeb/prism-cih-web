@@ -99,7 +99,7 @@ export class UserCreationRequest  implements OnInit, AfterViewInit {
     try {
       const res = await this.apiService.userRequestList<any>();
       this.dataSource.data = res?.data?.plans ?? [];  
-      console.log(this.dataSource.data);
+      //console.log(this.dataSource.data);
       // this.dataSource.data = plans.map((u: any) => ({ 
       //   ID: u.ID,
       //   FIRST_NAME: u.FIRST_NAME ?? '',
@@ -130,6 +130,7 @@ export class UserCreationRequest  implements OnInit, AfterViewInit {
 
   attach(entity: any, type: string): void {
   this.isLoading = true;
+  
 
   this.fileAttachService
     .openAttachDialog({ entity, type })

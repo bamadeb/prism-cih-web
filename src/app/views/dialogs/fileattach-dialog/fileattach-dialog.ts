@@ -65,13 +65,17 @@ export class FileattachDialog implements OnInit {
     private envService: AppEnvService,
     private userData: UserDataService,
     private dialogRef: MatDialogRef<FileattachDialog>
-  ) {}
+  ) {
+    
+  }
 
   ngOnInit(): void {
+    
     this.uploadForm = this.fb.group({
       file: [null, Validators.required],
       status: [0, Validators.required]
     });
+    
   }
 
   onFileSelected(event: Event): void {
@@ -87,6 +91,7 @@ export class FileattachDialog implements OnInit {
 
 
  upload(): void {
+   if (this.isLoading) return;
   const { status } = this.uploadForm.getRawValue();
 
   // 🔹 STATUS ONLY UPDATE
@@ -120,7 +125,7 @@ private async updateStatusOnly(status: number): Promise<void> {
     const item = this.data.attachments.find(a => a.id === this.currentId);
     if (item) item.status = status;
 
-    this.dialogRef.close({ updated: true });
+    //this.dialogRef.close({ updated: true });
 
   } catch (err) {
     console.error('❌ Status update failed', err);
@@ -161,7 +166,10 @@ private async updateStatusOnly(status: number): Promise<void> {
         await this.updateFileUrlToDB(fileStatus, parsed.fileUrl);
       }
 
-      this.dialogRef.close({ uploaded: true });
+      // 🔁 refresh list from DB
+        await this.loadAttachments();
+
+     // this.dialogRef.close({ uploaded: true });
 
     } catch (error) {
       console.error('❌ File upload failed:', error);
@@ -171,6 +179,21 @@ private async updateStatusOnly(status: number): Promise<void> {
       this.uploadForm.reset({ status: 0 });
     }
   }
+
+  private async loadAttachments(): Promise<void> {
+  try {
+    console.log(this.data.type+'===='+this.data.entity.id);
+    const res = await this.apiService.attachments<any>({
+      type: this.data.type,
+      type_id: this.data.entity.id
+    });
+
+    this.data.attachments = res.data;
+    console.log(this.data.attachments);
+  } catch (err) {
+    console.error('❌ Failed to load attachments', err);
+  }
+}
 
   private async uploadToS3(uploadUrl: string, file: File): Promise<void> {
     const response = await fetch(uploadUrl, {
