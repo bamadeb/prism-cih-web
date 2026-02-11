@@ -217,7 +217,7 @@ export class QualitygapsFile {
           this.isUpload = false;
         },
 
-        error: (err) => {
+        error: (err: any) => {
           console.error("CSV Parse Error:", err);
           alert("Unable to read CSV file.");
           this.isUpload = false;
