@@ -735,6 +735,22 @@ applyFilter(event: Event) {
           Source: 'CIH',
           note: qualityGap.note
         };
+          const qualityobservationFields = [
+            qualityGap.Observation_Date,
+            qualityGap.Observation_Code,
+            qualityGap.CPT_Code_Modifier,
+            qualityGap.Observation_Code_Set,
+            qualityGap.Observation_Result,
+            qualityGap.Service_Provider_NPI,
+            qualityGap.Service_Provider_Taxonomy_Code,
+            qualityGap.Service_Provider_Name,
+            qualityGap.Service_Provider_Type,
+            qualityGap.Service_Provider_RxProviderFlag,
+            qualityGap.Provider_Group_NPI,
+            qualityGap.Provider_Group_Taxonomy_Code,
+            qualityGap.Provider_Group_Name,
+            qualityGap.note
+          ];
 
         if (qualityGap.quality_gap_id) {
           riskObsUpdateArray.push({
@@ -743,7 +759,10 @@ applyFilter(event: Event) {
             updated_date: new Date()
           });
         } else {
-          const hasValue = Object.values(commonData).some(v => v);
+ //         const hasValue = Object.values(commonData).some(v => v);
+           // TRUE if ANY value is non-null, non-empty
+          const hasValue = qualityobservationFields.some(v => v !== null && v !== undefined && v !== "");
+
           if (hasValue) {
             riskObsInsertArray.push({
               ...commonData,
@@ -898,6 +917,8 @@ applyFilter(event: Event) {
       Observation_Date: this.formatDateToMDY(qgap.Observation_Date)
     }));
     //this.riskGapsList.clear();
+    //console.log('memberGapList:',this.memberGapList);
+    //console.log(this.memberQualityList);
     await this.setRiskGapsData(this.memberGapList);
     await this.setQualityGapsData(this.memberQualityList);
     this.cdr.detectChanges();
@@ -997,7 +1018,7 @@ applyFilter(event: Event) {
             t.Observation_Date &&
               t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
               t.Observation_Date !== '01/01/1900'
-              ? t.Observation_Date
+              ? new Date(t.Observation_Date)
               : ''
           ],
 
@@ -1025,6 +1046,7 @@ applyFilter(event: Event) {
         this.qualityGapsList.push(fg);
       });
     }
+    //console.log("qualityGapsList after set :",this.qualityGapsList)
   }
 
   toggleContent() {
