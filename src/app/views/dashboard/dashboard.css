@@ -240,12 +240,28 @@ mat-form-field {
 }
 
 
+.mat-icon 
+{font-size: 20px;}
 
 
 
 
+.alignment
+{display: flex; align-items: center; cursor: pointer;
+}
+.icon-cell {
+  display: flex;
+  justify-content: center;   /* horizontal center */
+  align-items: center;       /* vertical center */
+  gap: 8px;                  /* space between icons */
+  
+}
 
+.mat-mdc-card-content {
+    display: block;
+    padding: 0 16px 16px 16px;
+}
 
-
-
-
+.mat-mdc-menu-content {
+   padding:0px;
+}

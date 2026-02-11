@@ -211,6 +211,22 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     this.dataSource.paginator = this.mainPaginator;
     this.dataSource.sort = this.mainSort;
 
+     this.dataSource.filterPredicate = (data: any, filter: string) => {
+      const practiceName =  this.providerTinNameMapping[data.PCP_TAX_ID]?.toLowerCase() || '';
+      const searchText = filter.trim().toLowerCase();
+
+      return (
+        data.MEM_NO?.toLowerCase().includes(searchText) ||
+        data.FIRST_NAME?.toLowerCase().includes(searchText) ||
+        data.LAST_NAME?.toLowerCase().includes(searchText) ||
+        data.BIRTH?.toLowerCase().includes(searchText) ||
+        data.OTHER_PHONE?.toLowerCase().includes(searchText) ||
+        data.OTHER_ADDR1?.toLowerCase().includes(searchText) ||
+        data.upcoming_task_date?.toLowerCase().includes(searchText) || 
+        practiceName.includes(searchText)   // ✅ PRACTICE NAME FILTER
+      );
+    };
+
     // TRANSFER TABLE
     this.transferdataSource.paginator = this.transferPaginator;
     this.transferdataSource.sort = this.transferSort;

@@ -17,11 +17,12 @@
         >
 
           <!-- ADDRESS -->
-          <mat-form-field appearance="outline" class="w-100">
+          <mat-form-field appearance="outline" style="width: 100%;">
             <input
               matInput
               formControlName="alt_address"
               placeholder="ALTERNATE ADDRESS"
+            
             />
             <mat-error *ngIf="addAltaddressFormGroup.get('alt_address')?.touched">
               Alt address required
@@ -79,9 +80,9 @@
           </mat-form-field>
 
           <!-- BUTTON -->
-          <div class="text-end">
-            <div class="left"><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
-            <div class="right"><button mat-raised-button color="primary" (click)="close()">Close</button></div>
+          <div class="bot_12">
+            <div><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
+            <div><button mat-raised-button color="primary" (click)="close()">Close</button></div>
           </div>
 
         </form>
