@@ -17,3 +17,13 @@
 .right-table {
   width: 65%;
 }
+
+.mat-mdc-form-field-hint-wrapper, .mat-mdc-form-field-error-wrapper 
+{
+  top: -20px;
+  padding: 0px!important;}
+.bot_12{
+    display: flex;
+    justify-content: space-between;
+}
+ 
