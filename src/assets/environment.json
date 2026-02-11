@@ -4,7 +4,7 @@
     "build": "632",
     "endpointUrl":"https://e9vakopr4c.execute-api.us-east-1.amazonaws.com/dev/",
     "envType": "dev"   
-    
+     
 }
 
 
