@@ -222,7 +222,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
         data.BIRTH?.toLowerCase().includes(searchText) ||
         data.OTHER_PHONE?.toLowerCase().includes(searchText) ||
         data.OTHER_ADDR1?.toLowerCase().includes(searchText) ||
-        data.upcoming_task_date?.toLowerCase().includes(searchText) ||
+        data.upcoming_task_date?.toLowerCase().includes(searchText) || 
         practiceName.includes(searchText)   // ✅ PRACTICE NAME FILTER
       );
     };
