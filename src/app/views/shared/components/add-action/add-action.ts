@@ -101,6 +101,7 @@ export class AddAction {
     'added_user_name',
     'added_date'
   ]; 
+  //successMessage: string = '';
   pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]); 
   @ViewChild('mainPaginator') mainPaginator!: MatPaginator;
   @ViewChild('mainSort') mainSort!: MatSort;
@@ -108,6 +109,7 @@ export class AddAction {
   showPcpHistory = signal(false);
   isSavingPcpVisit = signal(false);
   pcpSuccessMessage = signal('');
+  successMessage = signal('');
   appSuccessMessage = signal('');
   isLoadingPcpHistory = signal(false);
   isLoadingappHistory = signal(false);
@@ -523,9 +525,9 @@ applyFilter(event: Event) {
       const insert_data = {
         medicaid_id: formValues.medicaid_id,
         action_type_source: formValues.action_type_source,
-        action_id: this.formatDateOnly(formValues.action_id),
+        action_id: formValues.action_id,
         panel_id: formValues.panel_id,
-        action_date: formValues.action_date,
+        action_date: this.formatDateOnly(formValues.action_date),
         action_status: formValues.action_status,
         add_by: this.userId || '', // if you store user info in authService/session
         action_note: formValues.action_note,
@@ -873,6 +875,8 @@ applyFilter(event: Event) {
 
     } finally {
       //alert('finally to save data');
+    this.successMessage .set('Saved successfully');
+    setTimeout(() => this.successMessage .set(''), 4000);      
       this.isProcessing = false;
       //alert(this.isProcessing);
     }
