@@ -803,7 +803,7 @@
                 <mat-label>TIN</mat-label>
                 <mat-select formControlName="PCP_TAX_ID" class="txupper">
                   @for (tin of availableTins; track tin) {
-                  <mat-option [value]="tin" class="txupper">{{ getProviderGroupByTin(tin) }} ({{tin}})</mat-option>
+                  <mat-option [value]="tin.VENDOR_NUM" class="txupper">{{ tin.LAST_NAME }} ({{tin.VENDOR_NUM}})</mat-option>
                   }
                 </mat-select>
                 <mat-error *ngIf="measureForm.get('PCP_TAX_ID')?.invalid">

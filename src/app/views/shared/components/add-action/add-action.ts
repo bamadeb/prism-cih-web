@@ -133,16 +133,19 @@ export class AddAction {
     'READMT_DISCH_DT'
   ];
 
+  currentYear: number = new Date().getFullYear();
+  previousYear: number = this.currentYear - 1;
+
  riskTabarray = [
   { label: '--', value: '' },
-  { label: '2025', value: '2025' },
-  { label: '2026', value: '2026' }
+  { label: this.previousYear, value: this.previousYear },
+  { label: this.currentYear, value: this.currentYear }
 ];
 
-  planTinMap: Record<string, string[]> = {
-    AHC: ['237082074', '273160687', '200807794'],   // CHI → 3 TINs
-    'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
-  };
+  // planTinMap: Record<string, string[]> = {
+  //   AHC: ['2370820741', '273160687', '200807794'],   // CHI → 3 TINs
+  //   'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
+  // };
   taskColumns: string[] = ['action_type', 'action_date', 'status', 'initial', 'action_note'];
   isProcessing: boolean = false;
   //userId: string | null = null;
@@ -155,8 +158,7 @@ export class AddAction {
   member_dob: string | null = null;
   readonly dialog = inject(MatDialog);
   addActionChangeFlag = 0;
-  currentYear: number = new Date().getFullYear();
-  previousYear: number = this.currentYear - 1;
+
 
   constructor(
     private apiService: ConfigService,
@@ -1027,10 +1029,13 @@ applyFilter(event: Event) {
     }
   }
 
-  toggleContent() {
-    this.availableTins = this.planTinMap['AHC'] || [];
-    //console.log(this.availableTins);
+  async toggleContent() {
     this.showContent = !this.showContent;
+    //this.availableTins = this.planTinMap['AHC'] || [];
+    const payload ={plan:'AHC'};
+    const result =  await this.apiService.getVendorListByplan<any>(payload); 
+    this.availableTins = result.data || [];
+    //console.log(this.availableTins);    
   }
 
   getProviderGroupByTin(tin: string): string {
