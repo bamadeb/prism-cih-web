@@ -1,11 +1,11 @@
 <h2 mat-dialog-title class="text-center">{{ data.title }}</h2>
 
-<mat-dialog-content class="text-center">
+<mat-dialog-content class="text-center" >
 
-  <div style="font-weight:bold; font-size:16px;">
+  <div style="font-weight:bold; font-size:16px;display: flex;justify-content:center;">
     {{ data.name }},
-    <span class="material-icons">phone</span> {{ data.phone | phoneFormat}},
-    <span class="material-icons">calendar_today</span> {{ data.birth }}
+    <span class="material-icons" style="font-size: 18px;margin-right:3px;">phone</span> {{ data.phone | phoneFormat}},
+    <span class="material-icons" style="font-size: 18px;margin-right:3px;">calendar_today</span> {{ data.birth }}
   </div>
 
   <p style="margin-top:15px; font-size:16px;">

@@ -1,3 +1,4 @@
+
 <h2 mat-dialog-title class="txupper" style="text-align:center">
   {{ data.title }}
 </h2>
@@ -9,7 +10,7 @@
       <form [formGroup]="plansFormGroup" (ngSubmit)="submitPlan()">
 
         <!-- FIRST NAME -->
-        <mat-form-field appearance="outline" class="mr" style="width: 49%;">
+        <mat-form-field appearance="outline" class="mr" style="width: 49.5%;">
           <mat-label>PLAN NAME</mat-label>
           <input matInput formControlName="plan_name">
 
@@ -21,7 +22,7 @@
         </mat-form-field>
 
         <!-- START DATE -->
-        <mat-form-field appearance="outline" style="width: 49%;">
+        <mat-form-field appearance="outline" style="width: 49.5%;">
           <mat-label>START DATE</mat-label>
           <input matInput [matDatepicker]="dp" formControlName="start_date">
           <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
@@ -32,7 +33,7 @@
         </mat-form-field>
         
         <!-- END DATE -->
-        <mat-form-field appearance="outline" class="mr" style="width: 49%;">
+        <mat-form-field appearance="outline" class="mr" style="width: 49.5%;">
           <mat-label>END DATE</mat-label>
           <input matInput [matDatepicker]="dp1" formControlName="end_date">
           <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
@@ -43,7 +44,7 @@
         </mat-form-field>
 
         <!-- STATUS -->
-        <mat-form-field appearance="outline" style="width: 49%;">
+        <mat-form-field appearance="outline" style="width: 49.5%;">
         <mat-label>STATUS</mat-label>
         <mat-select formControlName="status">
             <mat-option [value]="0">ACTIVE</mat-option>

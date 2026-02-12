@@ -26,7 +26,7 @@
       </mat-error>
 
       <!-- STATUS -->
-      <mat-form-field appearance="outline" class="status-field txupper">
+      <mat-form-field appearance="outline" class="status-field txupper" style="margin-top: 15px;">
         <mat-label>STATUS</mat-label>
         <mat-select formControlName="status">
           <mat-option [value]="0" class="txupper">Active</mat-option>
@@ -82,7 +82,7 @@
         <tr *ngFor="let r of data.attachments">
           <td>{{ r.attachment }}</td>
           <td class="txupper">{{ r.status === 0 ? 'Active' : 'In-active' }}</td>
-          <td class="actions">
+          <td class="actions"  style="padding:16px 0px;">
             <mat-icon class="icon edit" title="Update attachment" (click)="edit(r)">
               edit
             </mat-icon>

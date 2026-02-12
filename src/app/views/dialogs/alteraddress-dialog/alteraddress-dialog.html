@@ -24,37 +24,37 @@
               placeholder="ALTERNATE ADDRESS"
             
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_address')?.touched">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_address')?.touched"  class="error_message">
               Alt address required
             </mat-error>
           </mat-form-field>
 
           <!-- CITY -->
-          <mat-form-field appearance="outline" class="w-100">
+          <mat-form-field appearance="outline" style="width: 100%;">
             <input
               matInput
               formControlName="alt_city"
               placeholder="ALTERNATE CITY"
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_city')?.touched">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_city')?.touched" class="error_message">
               Alt city required
             </mat-error>
           </mat-form-field>
 
           <!-- STATE -->
-          <mat-form-field appearance="outline" class="w-100">
+          <mat-form-field appearance="outline" style="width: 100%;">
             <input
               matInput
               formControlName="alt_state"
               placeholder="ALTERNATE STATE"
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_state')?.touched">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_state')?.touched" class="error_message">
               Alt state required
             </mat-error>
           </mat-form-field>
 
           <!-- ZIP -->
-          <mat-form-field appearance="outline" class="w-100">
+          <mat-form-field appearance="outline" style="width: 100%;">
             <input
               matInput
               formControlName="alt_zip"
@@ -62,13 +62,13 @@
               maxlength="10"
               (input)="formatZip($event)"
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_zip')?.touched">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_zip')?.touched" class="error_message">
               Alt zip required
             </mat-error>
           </mat-form-field>
 
           <!-- DATE -->
-          <mat-form-field appearance="outline" style="width: 84%;">
+          <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Date</mat-label>
             <input
               matInput
