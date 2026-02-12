@@ -614,6 +614,12 @@
               </mat-progress-spinner>
 
             </button>
+             @if (successMessage()) {
+              <span class="pcp-success-msg">
+                <mat-icon class="pcp-success-icon">check_circle</mat-icon>
+                {{ successMessage() }}
+              </span>
+              }
           </div>
 
         </form>

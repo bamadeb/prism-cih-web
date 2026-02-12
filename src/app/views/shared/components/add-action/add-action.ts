@@ -101,6 +101,7 @@ export class AddAction {
     'added_user_name',
     'added_date'
   ]; 
+  //successMessage: string = '';
   pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]); 
   @ViewChild('mainPaginator') mainPaginator!: MatPaginator;
   @ViewChild('mainSort') mainSort!: MatSort;
@@ -108,6 +109,7 @@ export class AddAction {
   showPcpHistory = signal(false);
   isSavingPcpVisit = signal(false);
   pcpSuccessMessage = signal('');
+  successMessage = signal('');
   appSuccessMessage = signal('');
   isLoadingPcpHistory = signal(false);
   isLoadingappHistory = signal(false);
@@ -525,9 +527,9 @@ applyFilter(event: Event) {
       const insert_data = {
         medicaid_id: formValues.medicaid_id,
         action_type_source: formValues.action_type_source,
-        action_id: this.formatDateOnly(formValues.action_id),
+        action_id: formValues.action_id,
         panel_id: formValues.panel_id,
-        action_date: formValues.action_date,
+        action_date: this.formatDateOnly(formValues.action_date),
         action_status: formValues.action_status,
         add_by: this.userId || '', // if you store user info in authService/session
         action_note: formValues.action_note,
@@ -737,6 +739,22 @@ applyFilter(event: Event) {
           Source: 'CIH',
           note: qualityGap.note
         };
+          const qualityobservationFields = [
+            qualityGap.Observation_Date,
+            qualityGap.Observation_Code,
+            qualityGap.CPT_Code_Modifier,
+            qualityGap.Observation_Code_Set,
+            qualityGap.Observation_Result,
+            qualityGap.Service_Provider_NPI,
+            qualityGap.Service_Provider_Taxonomy_Code,
+            qualityGap.Service_Provider_Name,
+            qualityGap.Service_Provider_Type,
+            qualityGap.Service_Provider_RxProviderFlag,
+            qualityGap.Provider_Group_NPI,
+            qualityGap.Provider_Group_Taxonomy_Code,
+            qualityGap.Provider_Group_Name,
+            qualityGap.note
+          ];
 
         if (qualityGap.quality_gap_id) {
           riskObsUpdateArray.push({
@@ -745,7 +763,10 @@ applyFilter(event: Event) {
             updated_date: new Date()
           });
         } else {
-          const hasValue = Object.values(commonData).some(v => v);
+ //         const hasValue = Object.values(commonData).some(v => v);
+           // TRUE if ANY value is non-null, non-empty
+          const hasValue = qualityobservationFields.some(v => v !== null && v !== undefined && v !== "");
+
           if (hasValue) {
             riskObsInsertArray.push({
               ...commonData,
@@ -856,6 +877,8 @@ applyFilter(event: Event) {
 
     } finally {
       //alert('finally to save data');
+    this.successMessage .set('Saved successfully');
+    setTimeout(() => this.successMessage .set(''), 4000);      
       this.isProcessing = false;
       //alert(this.isProcessing);
     }
@@ -900,6 +923,8 @@ applyFilter(event: Event) {
       Observation_Date: this.formatDateToMDY(qgap.Observation_Date)
     }));
     //this.riskGapsList.clear();
+    //console.log('memberGapList:',this.memberGapList);
+    //console.log(this.memberQualityList);
     await this.setRiskGapsData(this.memberGapList);
     await this.setQualityGapsData(this.memberQualityList);
     this.cdr.detectChanges();
@@ -999,7 +1024,7 @@ applyFilter(event: Event) {
             t.Observation_Date &&
               t.Observation_Date !== '1900-01-01T00:00:00.000Z' &&
               t.Observation_Date !== '01/01/1900'
-              ? t.Observation_Date
+              ? new Date(t.Observation_Date)
               : ''
           ],
 
@@ -1027,6 +1052,7 @@ applyFilter(event: Event) {
         this.qualityGapsList.push(fg);
       });
     }
+    //console.log("qualityGapsList after set :",this.qualityGapsList)
   }
 
   async toggleContent() {
