@@ -25,3 +25,21 @@
 .mt-5{
   margin-top: 5px;
 }
+.password-hint {
+  font-size: 12px;
+  color: #666;
+}
+.action-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.error-message-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d32f2f;
+  font-size: 14px;
+  font-weight: 500;
+}
