@@ -940,7 +940,10 @@ applyFilter(event: Event) {
 
         const fg = this.fb.group({
           DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
-          DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
+          DIAG_DESC: [this.sanitize(t.DIAG_DESC)],          
+          RELEVANT_DATE: [t.RELEVANT_DATE],
+          HCC_CATEGORY: [t.HCC_CATEGORY],
+          HCC_MODEL: [t.HCC_MODEL],
           PLAN_YEAR: [this.extractYear(t.PLAN_YEAR)],
           PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
@@ -1062,6 +1065,10 @@ applyFilter(event: Event) {
     const result =  await this.apiService.getVendorListByplan<any>(payload); 
     this.availableTins = result.data || [];
     //console.log(this.availableTins);    
+  }
+
+  cancel() {
+    this.showContent = !this.showContent; 
   }
 
   getProviderGroupByTin(tin: string): string {

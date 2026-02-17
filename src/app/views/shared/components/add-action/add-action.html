@@ -271,8 +271,10 @@
                               </mat-checkbox>
                             </mat-panel-title>
 
-                            <mat-panel-description class="panel-desc-90 text-uppercase">
-                              {{ gap.get('DIAG_DESC')?.value }}
+                            <mat-panel-description class="panel-desc-100 text-uppercase">
+                              {{ gap.get('DIAG_DESC')?.value }} | {{ gap.get('DIAG_CODE')?.value }} 
+                              | {{ gap.get('HCC_CATEGORY')?.value }} | {{ gap.get('HCC_MODEL')?.value }} 
+                              | {{ gap.get('RELEVANT_DATE')?.value }} | {{ gap.get('PROCESS_STATUS')?.value === 1 ? 'COMPLETE' : 'OPEN' }}
                             </mat-panel-description>
                           </mat-expansion-panel-header>
 
@@ -448,8 +450,8 @@
                           </mat-checkbox>
                         </mat-panel-title>
 
-                        <mat-panel-description class="panel-desc-90 text-uppercase">
-                          {{ qgap.get('MEASURE_NAME')?.value }}
+                        <mat-panel-description class="panel-desc-100 text-uppercase">
+                          {{ qgap.get('MEASURE_NAME')?.value }} | {{ qgap.get('SUB_MEASURE')?.value }} | {{ qgap.get('PROCESS_STATUS')?.value === 1 ? 'COMPLETE' : 'OPEN' }}
                         </mat-panel-description>
                       </mat-expansion-panel-header>
 
@@ -834,8 +836,8 @@
                     <mat-progress-spinner diameter="20" mode="indeterminate">
                     </mat-progress-spinner>
                     }
-                  </button>
-                  <button mat-raised-button (click)="toggleContent()">CANCEL</button>
+                  </button>                   
+                  <a (click)="cancel()" style="cursor: pointer;text-decoration: underline;">CANCEL</a>
                 </div>
               </div>
             </form>
