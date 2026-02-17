@@ -4,7 +4,7 @@
 
       <form [formGroup]="appListFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
                          
-       <mat-form-field appearance="outline">
+       <mat-form-field appearance="outline" style="margin-top:10px;">
         <mat-label>START DATE</mat-label>
         <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
@@ -14,7 +14,7 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" style="margin-top:10px;">
         <mat-label>END DATE</mat-label>
         <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
@@ -37,7 +37,7 @@
                 </mat-progress-spinner>
               }
         </button>
-        <mat-icon (click)="downloadCsv()" style="cursor: pointer;" title="Download csv">download</mat-icon>                  
+        <mat-icon (click)="downloadCsv()" style="cursor: pointer;margin-top: 10px;" title="Download csv">download</mat-icon>                  
 
       </form>
 
