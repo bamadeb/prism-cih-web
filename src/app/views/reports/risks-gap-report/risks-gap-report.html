@@ -1,10 +1,10 @@
 <div class="pagecontent">
-  <mat-card style="margin-bottom: 5px;">
+  <mat-card style="margin-bottom: 15px;">
     <mat-card-content class="mat-card-content">
 
       <form [formGroup]="riskGapsFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
                          
-       <mat-form-field appearance="outline">
+       <mat-form-field appearance="outline" style="margin-top:18px;">
         <mat-label>START DATE</mat-label>
         <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
@@ -14,7 +14,7 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline"  style="margin-top:18px;">
         <mat-label>END DATE</mat-label>
         <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
@@ -37,7 +37,7 @@
                 </mat-progress-spinner>
               }
         </button>
-         <mat-icon (click)="downloadCsv()" style="cursor: pointer;" title="Download csv">download</mat-icon>   
+         <mat-icon (click)="downloadCsv()" style="cursor: pointer;" title="Download csv" style="margin-top:15px;">download</mat-icon>   
                    
 
       </form>

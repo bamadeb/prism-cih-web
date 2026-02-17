@@ -42,10 +42,19 @@ mat-nav-list a {
 mat-expansion-panel-header {
   padding-left: 16px;
 }
-.mt-5{
+.mt-50{
   margin-top: 5px;
 }
 
 .hidden {
   display: none;
+}
+.mdc-list {
+    
+    padding: 8px!important;
+}
+.nav-item .mat-list-item-content {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }

@@ -33,11 +33,11 @@
   </mat-card>
 
 
-  <div *ngIf="isOpen" class="box">
-    <table style="width: 100%;">
-      <tr>
-        <td>
-          <table class="static-table" style="width: 100%;">
+  <div *ngIf="isOpen" class="box" style="margin-top: 2px;">
+   <table class="table">
+    <tr>
+      <td>
+        <table class="static-table" style="width: 100%;">
             <thead>
               <tr>
                 <th>RISK</th>
@@ -87,7 +87,12 @@
                 <td>{{ ((overallSummary?.priority_risk_comp_count + overallSummary?.other_risk_comp_count)/(overallSummary?.priority_risk_count + overallSummary?.other_risk_count))*100 | number:'1.0-0' }}%</td>
               </tr>              
             </tbody>
-            <thead>
+            </table>
+      </td>
+
+      <td>
+        <table class="static-table" style="width: 100%;">
+                    <thead>
               <tr>
                 <th>QUALITY</th>
                 <th>GAPS</th>
@@ -137,9 +142,11 @@
               </tr>
             </tbody>
           </table>
-        </td>
-        <td>
-          <table class="static-table" style="width: 100%;margin-bottom: 165px !important;">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2">
+        <table class="static-table" style="width: 100%;">
             <thead>
               <tr>
                 <th>WORK OVERVIEW</th>
@@ -299,9 +306,9 @@
 
             </tbody>
           </table>
-        </td>
-      </tr>
-    </table>
+      </td>
+    </tr>
+   </table>
   </div>
 
   <mat-tab-group class="custom-tabs" mat-stretch-tabs>
@@ -310,7 +317,7 @@
         <mat-card>
           <mat-card-content>
             <!-- Search box -->
-            <div style="display:flex; justify-content:flex-end;">
+            <div style="display:flex; justify-content:flex-end;flex-wrap: wrap;">
               <!-- ACTION BAR -->
               <div class="action-bar">
                 <mat-form-field appearance="outline" class="action-select">

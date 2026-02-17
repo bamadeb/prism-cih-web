@@ -128,3 +128,17 @@ textarea.mat-mdc-input-element {
   color: #888;
   font-size: 14px;
 }
+.mat-mdc-form-field-icon-suffix {
+    align-self: center;
+    line-height: 0;
+    pointer-events: auto;
+    position: absolute!important;
+    z-index: 1;
+    top: 2px!important;
+    right: 0!important;
+}
+.mat-mdc-form-field-error {
+  margin-top:-18px!important;
+}
+.mat-mdc-form-field-hint-wrapper{top: -18px!important;}
+.pagecontent{min-height: 100vh;}

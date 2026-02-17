@@ -11,7 +11,7 @@
   </a>
 
   @if (userRole == 7 || userRole == 20) {
-    <mat-expansion-panel>
+    <mat-expansion-panel class="mt-50">
       <mat-expansion-panel-header>
         <mat-panel-title>MANAGE</mat-panel-title>
       </mat-expansion-panel-header>
@@ -24,7 +24,7 @@
   }
 
   @if (userRole == 7) {
-    <mat-expansion-panel class="mt-5">
+    <mat-expansion-panel class="mt-50">
       <mat-expansion-panel-header>
         <mat-panel-title>PROCESS FILE</mat-panel-title>
       </mat-expansion-panel-header>
@@ -37,7 +37,7 @@
     </mat-expansion-panel> 
   }
   @if (userRole == 7 || userRole == 20) {
-    <mat-expansion-panel class="mt-5">
+    <mat-expansion-panel class="mt-50">
       <mat-expansion-panel-header>
         <mat-panel-title>REPORTS</mat-panel-title>
       </mat-expansion-panel-header>

@@ -27,3 +27,9 @@
   padding:0px 0px!important;
 }
  
+.mat-mdc-form-field-icon-suffix{
+    position: absolute;
+    z-index: 1;
+    right:0px;
+   
+}
