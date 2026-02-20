@@ -72,21 +72,13 @@
         </mat-form-field>
 
         <!-- PASSWORD -->
-        <mat-form-field appearance="outline" class="mr common-field">
+        <!-- <mat-form-field appearance="outline" class="mr common-field">
           <mat-label>PASSWORD</mat-label>
 
           <input  matInput type="password" formControlName="password" autocomplete="new-password"
           >
 
-          <!-- <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="hidePassword = !hidePassword">
-            <mat-icon>
-              {{ hidePassword ? 'visibility_off' : 'visibility' }}
-            </mat-icon>
-          </button> -->
+         
 
           <mat-error *ngIf="
             addUserFormGroup.get('password')?.touched &&
@@ -99,8 +91,37 @@
             addUserFormGroup.get('password')?.hasError('minlength')">
             Minimum 6 characters required
           </mat-error>
-        </mat-form-field>
+        </mat-form-field> -->
+<mat-form-field appearance="outline" class="mr common-field">
+  <mat-label>PASSWORD</mat-label>
 
+  <input
+    matInput
+    type="password"
+    formControlName="password"
+    autocomplete="new-password"
+  >
+
+  <!-- ✅ Password policy hint -->
+  <mat-hint class="password-hint">
+    Password must be at least 8 characters long and include uppercase, lowercase, number, and special character (e.g., ! @ # $ % ^ & *).
+  </mat-hint>
+
+  <!-- Required error -->
+  <mat-error *ngIf="
+    addUserFormGroup.get('password')?.touched &&
+    addUserFormGroup.get('password')?.hasError('required')">
+    Password is required
+  </mat-error>
+
+  <!-- Length error -->
+  <mat-error *ngIf="
+    addUserFormGroup.get('password')?.touched &&
+    addUserFormGroup.get('password')?.hasError('minlength')">
+    Password must be at least 8 characters long
+  </mat-error>
+
+</mat-form-field>
         <!-- DEPARTMENT -->
         <mat-form-field appearance="outline" class="mr common-field mt-5" >
           <mat-label>DEPARTMENT</mat-label>
@@ -135,7 +156,11 @@
             [disabled]="addUserFormGroup.invalid || isLoading">
             {{ isEditMode ? 'UPDATE' : 'SUBMIT' }}
           </button>
-
+  <!-- ERROR MESSAGE (CENTER) -->
+  <div *ngIf="errorMessage" class="error-message-center">
+    <mat-icon color="warn">error</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
           <button
             mat-raised-button
             color="warn"

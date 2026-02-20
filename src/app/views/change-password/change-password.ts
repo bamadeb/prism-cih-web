@@ -47,11 +47,11 @@ export class ChangePassword {
     private titleService: Title,
     private apiService: ConfigService,
     private userData: UserDataService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.titleService.setTitle('PRISM :: CHANGE PASSWORD');
-    
+
     setInterval(() => {
       this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
     }, 4000);
@@ -80,35 +80,51 @@ export class ChangePassword {
     this.isLoading = true;
 
     try {
-        const cognito_username = user.cognito_username;
+      const cognito_username = user.cognito_username;
       if (!cognito_username) {
         throw { code: 'COGNITO_USERNAME_MISSING' };
       }
 
-      await this.apiService.updateCognitoUser(cognito_username,{},this.newPassword);
-        const apiparamUpdate = {
-          ID: user.ID,
-          Password: this.newPassword,
-          password_last_changed: new Date()
-        };
-        const updatequalitygapresult = await this.apiService.prismUserPasswordUpdate<any>(apiparamUpdate);
+      const response =await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
+      console.log('Conito res :',response);
+      if (!response || response.statusCode !== 200) {
+        throw new Error(response?.error || 'Password update failed');
+      }
+      const apiparamUpdate = {
+        ID: user.ID,
+        Password: this.newPassword,
+        password_last_changed: new Date()
+      };
+      const updatequalitygapresult = await this.apiService.prismUserPasswordUpdate<any>(apiparamUpdate);
 
-     // await this.apiService.updateUser(payload);
+      // await this.apiService.updateUser(payload);
 
       // 3️⃣ Clear user session and force re-login
       //this.errorMessage = "Password change successfuly.Please login.";
       this.userData.clearUser();
       //this.router.navigate(['/login']);
 
-    this.router.navigate(['/login'], {
-      state: {
-        message: 'Password changed successfully. Please login.'
-      }
-    });      
+      this.router.navigate(['/login'], {
+        state: {
+          message: 'Password changed successfully. Please login.'
+        }
+      });
 
-    } catch (error) {
-      console.error('Password update failed', error);
-      this.errorMessage = 'Failed to update password. Please try again.';
+    } catch (error: any) {
+      // console.error('Password update failed', error);
+       //this.errorMessage = 'Failed to update password. Please try again.';
+        console.error('Password update failed', error);
+
+  // Show Cognito error message
+        if (error?.error) {
+          this.errorMessage = error.error;
+        }
+        else if (error?.message) {
+          this.errorMessage = error.message;
+        }
+        else {
+          this.errorMessage = 'Password does not meet password policy requirements.';
+        }
     } finally {
       this.isLoading = false;
     }
