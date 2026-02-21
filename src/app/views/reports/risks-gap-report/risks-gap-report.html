@@ -3,6 +3,14 @@
     <mat-card-content class="mat-card-content">
 
       <form [formGroup]="riskGapsFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+
+         <mat-form-field appearance="outline" style="margin-top:18px;">
+              <mat-label>GAPS</mat-label>
+              <mat-select formControlName="gaps_type">
+                <mat-option value="risk" class="txupper"> RISK</mat-option>
+                <mat-option value="quality" class="txupper"> QUALITY </mat-option>  
+              </mat-select>
+          </mat-form-field>
                          
        <mat-form-field appearance="outline" style="margin-top:18px;">
         <mat-label>START DATE</mat-label>
@@ -48,8 +56,12 @@
   <mat-card>
     <mat-card-content>
       <div class="table-toolbar">
-      <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSize]="10" [pageSizeOptions]="[10, 25, 50, 100]">
+      <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]">
       </mat-paginator>
+      <button mat-raised-button color="warn"
+        [disabled]="!selection.hasValue()"
+        (click)="removeSelected()">  REMOVE</button>
+
       <mat-form-field appearance="outline" >
           <mat-label>Search</mat-label>
           <input matInput (keyup)="filter($event)" placeholder="Search records">
@@ -64,24 +76,51 @@
       <div class="project-header table-wrapper" [hidden]="isLoading">        
 
         <table   mat-table  [dataSource]="dataSource"  matSort  class="mat-elevation-z1 txupper" [hidden]="isLoading">
+
+          <ng-container matColumnDef="select" sticky>
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox
+                (change)="masterToggle()"
+                [checked]="isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+
+            <td mat-cell *matCellDef="let row">              
+              <mat-checkbox
+                (click)="$event.stopPropagation()"
+                (change)="selection.toggle(row)"
+                [checked]="selection.isSelected(row)"
+                [disabled]="row.added_by !== userId"
+                [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+          
           <ng-container matColumnDef="medicaid_id" sticky>
           <th mat-header-cell *matHeaderCellDef mat-sort-header> MEDICAID ID </th>
           <td mat-cell *matCellDef="let row">{{ row.medicaid_id }}</td>
         </ng-container> 
 
-         <ng-container matColumnDef="TYPE">
+         <!-- <ng-container matColumnDef="Type">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>TYPE</th>
-          <td mat-cell *matCellDef="let row">{{ row.TYPE }}</td>
+          <td mat-cell *matCellDef="let row">{{ row.Type }}</td>
+        </ng-container> -->
+
+         <ng-container matColumnDef="mode">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>TYPE</th>
+          <td mat-cell *matCellDef="let row">{{ row.mode }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="DIAG_CODE">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>DIAG CODE</th>
-          <td mat-cell *matCellDef="let row">{{ row.DIAG_CODE }}</td>
+        <ng-container matColumnDef="Gap_Code">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>CODE</th>
+          <td mat-cell *matCellDef="let row">{{ row.Gap_Code }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="DIAG_DESC">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>DIAG DESC</th>
-          <td mat-cell *matCellDef="let row">{{ row.DIAG_DESC }}</td>
+        <ng-container matColumnDef="MEASURE_DESC">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>CODE DESC</th>
+          <td mat-cell *matCellDef="let row">{{ row.MEASURE_DESC }}</td>
         </ng-container>
 
         <ng-container matColumnDef="ObservationDate">
@@ -175,4 +214,8 @@
     </mat-card-content>
   </mat-card> 
 
+</div>
+
+<div class="dialog-loader" *ngIf="isLoading">
+    <mat-spinner diameter="10"></mat-spinner>
 </div>

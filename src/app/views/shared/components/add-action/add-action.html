@@ -116,7 +116,7 @@
               <div class="mb-3">
                 <mat-form-field appearance="fill" class="w-100 textarea-no-ripple">
                   <mat-label>Type your text...</mat-label>
-                  <textarea matInput formControlName="next_action_note" rows="3"></textarea>
+                  <textarea matInput formControlName="next_action_note" rows="2"></textarea>
                 </mat-form-field>
               </div>
 
@@ -917,7 +917,7 @@
 
             <!-- SAVE BUTTON -->
             <button mat-raised-button color="primary" type="button" (click)="savePcpVisit()"
-              [disabled]="isSavingPcpVisit() || pcpVisitFormGroup.invalid">
+              [disabled]="isSavingPcpVisit() || pcpVisitFormGroup.invalid" style="margin-top:-10px;">
 
               @if (isSavingPcpVisit()) {
               <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>

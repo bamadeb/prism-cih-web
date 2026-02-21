@@ -19,6 +19,8 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatIcon } from "@angular/material/icon";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { UserDataService } from '../../../services/user-data-service';
 
 
 
@@ -31,7 +33,7 @@ import { MatIcon } from "@angular/material/icon";
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatButtonModule, MatIcon],
+    MatButtonModule, MatIcon, MatCheckbox],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],templateUrl: './risks-gap-report.html',
@@ -42,7 +44,7 @@ export class RisksGapReport {
 
   riskGapsFormGroup!: FormGroup;
   isLoading = false;
-
+  userId: string | null = null;
   riskGapsReportList: any[] = [];
 
   dataSource = new MatTableDataSource<any>([]);
@@ -51,10 +53,12 @@ export class RisksGapReport {
   @ViewChild('mainPaginator') paginator!: MatPaginator;
   @ViewChild('mainSort') sort!: MatSort;
   displayedColumns: string[] = [
+  'select',   
   'medicaid_id',
-  'TYPE',
-  'DIAG_CODE',
-  'DIAG_DESC',
+  // 'Type',
+  'mode',
+  'Gap_Code',
+  'MEASURE_DESC',
   'ObservationDate',
   'Observation_Year',
   'Observation_Code',
@@ -79,6 +83,7 @@ export class RisksGapReport {
     private fb: FormBuilder,
     private headerService: HeaderService ,
     private titleService: Title,
+    private userData: UserDataService,
     
   ) {
     const today = new Date();
@@ -86,6 +91,7 @@ export class RisksGapReport {
     const thirtyDaysBefore = new Date();
     thirtyDaysBefore.setDate(today.getDate() - 30);
     this.riskGapsFormGroup = this.fb.group({ 
+      gaps_type: ['risk'],
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required]
     },
@@ -94,8 +100,10 @@ export class RisksGapReport {
   }
 
   async ngOnInit() { 
-    this.titleService.setTitle('PRISM :: RISK GAPS');
-    this.headerService.setTitle('RISK GAPS');
+    this.titleService.setTitle('PRISM :: GAPS REPORT');
+    this.headerService.setTitle('GAPS REPORT');
+    const user = this.userData.getUser();
+    this.userId = user.ID; 
     // Load page 
     await this.applyFilter();
   }
@@ -127,15 +135,23 @@ export class RisksGapReport {
   this.isLoading = true;
 
   try {
-    const { start_date, end_date } = this.riskGapsFormGroup.value;
+    const { start_date, end_date,gaps_type } = this.riskGapsFormGroup.value;
 
-    const result = await this.apiService.getGapsObservationData({
-      start_date,
-      end_date
-    });
+    const formatDate = (d: string | Date) => {
+      const date = new Date(d);
+      return date.toISOString().split('T')[0]; // YYYY-MM-DD
+    };
+
+    const payload = {
+      start_date: formatDate(start_date),
+      end_date: formatDate(end_date),gaps_type
+    };
+
+    const result = await this.apiService.getGapsObservationData(payload);
 
     // ✅ TypeScript now knows that 'data' exists
     this.riskGapsReportList = result.data ?? [];
+    //console.log(this.riskGapsReportList);
     this.dataSource.data = this.riskGapsReportList;
 
   } catch (err) {
@@ -246,5 +262,80 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
   }
+
+  /** Selects all rows if not all selected; otherwise clear selection */
+  masterToggle() {
+    const selectableRows = this.dataSource.data.filter(
+      row => row.add_by === this.userId
+    );
+
+    if (this.selection.selected.length === selectableRows.length) {
+      this.selection.clear();
+    } else {
+      this.selection.clear();
+      selectableRows.forEach(row => this.selection.select(row));
+    }
+  }
+
+  getSelectedRows(): any[] {
+  return this.selection.selected;
+  }
+
+  
+
+  /** Checkbox label (accessibility) */
+  checkboxLabel(row?: any): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row`;
+  }
+
+  isAllSelected() {
+    const selectableRows = this.dataSource.data.filter(
+      row => row.add_by === this.userId
+    );
+    return this.selection.selected.length === selectableRows.length;
+  }
+
+
+ async removeSelected(): Promise<void> {
+  if (!this.selection.hasValue()) return;
+
+  const confirmed = confirm(
+    `Remove ${this.selection.selected.length} selected record(s)?`
+  );
+  if (!confirmed) return;
+
+  this.isLoading = true;
+  // collect payload
+  const payload = this.selection.selected.map(row => ({
+    id: row.id,
+    subscriber_number: row.SUBSCRIBER_NUMBER,
+    gap_code: row.Gap_Code,
+    Type: row.Type
+  }));
+  console.log(payload);
+  try {
+    await this.apiService.deleteGapObservations({ records: payload });
+
+    // remove from UI
+    const selected = new Set(this.selection.selected);
+    this.riskGapsReportList = this.riskGapsReportList.filter(
+      row => !selected.has(row)
+    );
+
+    this.dataSource.data = this.riskGapsReportList;
+    this.selection.clear();
+    this.isLoading = false;
+    //alert('Records removed successfully');
+  } catch (err) {
+    console.error('Delete failed', err);
+    alert('Failed to remove records');
+  }
+}
+
+
+
 }
 
