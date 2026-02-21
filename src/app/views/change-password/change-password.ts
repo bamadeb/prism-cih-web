@@ -106,7 +106,7 @@ export class ChangePassword {
 
       this.router.navigate(['/login'], {
         state: {
-          message: 'Password changed successfully. Please login.'
+          successMessage: 'Password changed successfully. Please login.'
         }
       });
 
