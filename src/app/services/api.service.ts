@@ -631,5 +631,14 @@ async createCognitoUser(request: any): Promise<string> {
     return res;
   }
 
+  async deleteGapObservations<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
+  return commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismdeleteGapObservations',
+    request
+  );
+}
+
 
 }

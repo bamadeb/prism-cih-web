@@ -699,6 +699,7 @@ applyFilter(event: Event) {
           if (hasAnyValue) {
             riskObsInsertArray.push({
               ...commonData,
+              added_by:this.userId,
               added_date: new Date()
             });
           }
@@ -770,6 +771,7 @@ applyFilter(event: Event) {
           if (hasValue) {
             riskObsInsertArray.push({
               ...commonData,
+              added_by:this.userId,
               added_date: new Date()
             });
           }

@@ -65,10 +65,10 @@ export class ChangePassword {
       return;
     }
 
-    if (this.newPassword.length < 6) {
-      this.errorMessage = 'Password must be at least 6 characters';
-      return;
-    }
+    // if (this.newPassword.length < 6) {
+    //   this.errorMessage = 'Password must be at least 6 characters';
+    //   return;
+    // }
 
     const user = this.userData.getUser();
     //console.log(user);
@@ -106,7 +106,7 @@ export class ChangePassword {
 
       this.router.navigate(['/login'], {
         state: {
-          message: 'Password changed successfully. Please login.'
+          successMessage: 'Password changed successfully. Please login.'
         }
       });
 

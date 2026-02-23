@@ -101,3 +101,14 @@
 .mat-error-box mat-icon {
   color: #d32f2f;
 }
+.mat-success-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2e7d32;
+  background-color: #e8f5e9;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
