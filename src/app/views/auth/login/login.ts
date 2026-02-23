@@ -41,7 +41,7 @@ export class Login {
   isLoading = false;
   errorMessage = '';
   errorMsg: any;
-
+  successMessage = '';
   constructor(private router: Router,
     private authService: Auth, 
     private userData: UserDataService,
@@ -65,6 +65,7 @@ export class Login {
        //const navigation = this.router.getCurrentNavigation();
         //this.errorMessage = navigation?.extras?.state?.['message'] || '';
         this.errorMessage = window.history.state?.message || '';
+        this.successMessage = window.history.state?.successMessage || '';
         //console.log(this.errorMessage);
       setInterval(() => {
         this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;

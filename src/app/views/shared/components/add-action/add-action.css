@@ -19,7 +19,10 @@
 .mat-radio-button {
   font-size: 14px;
 }
-
+textarea.mat-mdc-input-element {
+  resize: vertical;
+  overflow: auto !important;
+}
 /* Material form field full width */
 .mat-form-field.w-100 {
   width: 100%;

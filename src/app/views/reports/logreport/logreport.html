@@ -16,7 +16,7 @@
             </mat-card>              
             </div>
 
-            <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+            <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()" style="margin-top: 15px;">
                 <!-- NAVIGATORS -->
                 <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
                     <mat-label>ALL USERS</mat-label>
@@ -73,13 +73,13 @@
                 </mat-error>
                 </mat-form-field>
 
-                <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid">SEARCH</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid" style="margin-top:-10px;">SEARCH</button>
 
             </form>
         </mat-card-content>
     </mat-card>
 
-    <mat-card>
+    <mat-card style="margin-top:10px;">
         <mat-card-content>
 
         <!-- LOADER -->

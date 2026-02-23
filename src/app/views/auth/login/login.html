@@ -16,13 +16,23 @@
       <img src="assets/images/CIH-logo.png" width="250" />
       <!-- <div class="env-text">DEVELOPMENT ENVIRONMENT</div> -->
     </div>
-    @if (errorMessage) {
+    <!-- @if (errorMessage) {
       <div class="mat-error-box">
         <mat-icon>error</mat-icon>
         {{ errorMessage }}
       </div>
+    } -->
+    @if (errorMessage) {
+      <div class="mat-error-box">
+        <mat-icon color="warn">error</mat-icon>
+        {{ errorMessage }}
+      </div>
+    } @else if (successMessage) {
+      <div class="mat-success-box">
+        <mat-icon color="primary">check_circle</mat-icon>
+        {{ successMessage }}
+      </div>
     }
-
     <form (ngSubmit)="onSubmit()">
 
       <mat-form-field appearance="outline" class="full-width">
