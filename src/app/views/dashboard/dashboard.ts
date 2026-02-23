@@ -143,7 +143,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('PRISM :: DASHBOARD');
-    this.headerService.setTitle('Dashboard');
+    this.headerService.setTitle('DASHBOARD');
     this.loadVendors();
     this.loadTableData();
   }

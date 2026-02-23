@@ -1,0 +1,38 @@
+.access-denied-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+}
+
+.access-denied-card {
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.lock-icon {
+  font-size: 64px;
+  color: #f44336;
+  margin-bottom: 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #333;
+}
+
+p {
+  margin: 12px 0 24px;
+  color: #666;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}

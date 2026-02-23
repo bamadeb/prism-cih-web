@@ -84,6 +84,7 @@ export class Login {
       //console.log('✅ Login success:', result);
       if(result.data.length>0){
         const user = result.data[0]; 
+        user.pageAccess = result.pageAccess;
         this.userData.setUser(user);        
         // 🔒 Password expired (STRICT)
         if (user.is_password_expired === 1) {
