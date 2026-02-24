@@ -17,10 +17,10 @@ import { SystemLog } from './views/reports/system-log/system-log';
 import { FileLogReport } from './views/reports/file-log-report/file-log-report';
 import { PcrFile } from './views/process-file/pcr-file/pcr-file';
 import { AppointmentList } from './views/reports/appointment-list/appointment-list/appointment-list';
-
 import { ChangePassword } from './views/change-password/change-password';
-
 import { UserCreationRequest } from './views/user-creation-request/user-creation-request/user-creation-request';
+import { AccessDenied } from './views/access-denied/access-denied/access-denied';
+import { PageAccess } from './views/rolewise-page/page-access/page-access';
 
 
 export const routes: Routes = [
@@ -130,6 +130,20 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'process-pcr-file', component: PcrFile },
+    ]
+  },
+   {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'access-denied', component: AccessDenied },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'page-access', component: PageAccess },
     ]
   },
   {

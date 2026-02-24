@@ -179,6 +179,15 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }
 
+  async pageaccess<TResponse>(): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService, 
+      'prismGetPageAccessList',
+      {}   
+    );
+  }
+
   async plans<TResponse>(): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,

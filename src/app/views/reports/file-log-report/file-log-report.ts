@@ -49,7 +49,7 @@ export class FileLogReport implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.titleService.setTitle('PRISM :: FILE PROCESS LOG REPORT');
+    this.titleService.setTitle('PRISM :: FILE PROCESS REPORT');
     this.headerService.setTitle('FILE PROCESS REPORT');
 
     this.actionLogFormGroup = this.fb.group({

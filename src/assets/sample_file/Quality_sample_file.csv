@@ -1,0 +1,3 @@
+Subscriber_ID,Measure_Name,Submeasure,First_Name,Middle_Name,Last_Name,Medicare_ID,Medicaid_ID,Date_of_Birth,Sex,Provider_ID,Provider_TIN,Provider_Name,Numerator_Gap
+8000057500,Statin Therapy for Patients with Cardiovascular Disease-Statin Adherence,p_adh_mcr,Marie          , ,Mobley                             ,2KM7R93QM37 ,0020355764          ,4/30/1955,F,31018368,237082074,"JONES, DANIEL A.                                       ",1
+200433072,Care for Older Results - Functional Status,funcstatus,Denise         ,E,Webster                            ,5A36D09FV58 ,0027828300          ,03-08-1955,F,31018368,237082074,"JONES, DANIEL A.                                       ",0

@@ -144,7 +144,8 @@ export class RisksGapReport {
 
     const payload = {
       start_date: formatDate(start_date),
-      end_date: formatDate(end_date),gaps_type
+      end_date: formatDate(end_date),
+      gaps_type
     };
 
     const result = await this.apiService.getGapsObservationData(payload);
@@ -243,7 +244,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     const csv = [header.join('|'), ...rows].join('\n');
 
     const now = new Date();
-    const filename = `RISK_GAPS_CIH_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).CSV`;
+    const filename = `GAPS_CIH_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).CSV`;
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 
@@ -315,7 +316,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     gap_code: row.Gap_Code,
     Type: row.Type
   }));
-  console.log(payload);
+  //console.log(payload);
   try {
     await this.apiService.deleteGapObservations({ records: payload });
 
