@@ -508,15 +508,7 @@ applyFilter(event: Event) {
     });
   }
   async add_update_action_submit() {
-    // alert(this.addActionFormGroup.invalid);
-    // if (this.addActionFormGroup.invalid) {
-    //   this.addActionFormGroup.markAllAsTouched(); // show validation errors
-    //   return;
-    // }
-    // alert(2);
-    //const user = this.auth.getUser();
-    //const formValues = this.addActionFormGroup.value;
-    //console.log('add_update_action_submit');
+
     const formValues = this.addActionFormGroup.getRawValue();
     const action_id = formValues.update_action_id;
     //console.log(formValues.value);
@@ -628,157 +620,303 @@ applyFilter(event: Event) {
        BUILD RISK GAP DATA
     -----------------------------------*/
     
-    if (formValues.riskGapsList?.length) {
-      formValues.riskGapsList.forEach((riskGap: any) => {
+    // if (formValues.riskGapsList?.length) {
+    //   formValues.riskGapsList.forEach((riskGap: any) => {
 
-         UpdateArray.push({ 
-            medicaid_id: medicaid_id,
-            PLANYEAR: riskGap.PLANYEAR,
-            PLAN_YEAR: riskGap.PLAN_YEAR,
-            DIAG_CODE: riskGap.DIAG_CODE,
-          });
+    //      UpdateArray.push({ 
+    //         medicaid_id: medicaid_id,
+    //         PLANYEAR: riskGap.PLANYEAR,
+    //         PLAN_YEAR: riskGap.PLAN_YEAR,
+    //         DIAG_CODE: riskGap.DIAG_CODE,
+    //       });
        
-        const processStatus = riskGap.PROCESS_STATUS;
-        if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
-          diagCodes.push(riskGap.DIAG_CODE);
-        }
+    //     const processStatus = riskGap.PROCESS_STATUS;
+    //     if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
+    //       diagCodes.push(riskGap.DIAG_CODE);
+    //     }
 
 
-        const commonData = {
-          medicaid_id,
-          Type: riskGap.Type,
-          Gap_Code: riskGap.DIAG_CODE,
-          Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
-          Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
-          Observation_Code: riskGap.Observation_Code,
-          CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
-          Observation_Code_Set: riskGap.Observation_Code_Set,
-          Observation_Result: riskGap.Observation_Result,
-          Service_Provider_NPI: riskGap.Service_Provider_NPI,
-          Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
-          Service_Provider_Name: riskGap.Service_Provider_Name,
-          Service_Provider_Type: riskGap.Service_Provider_Type,
-          Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
-          Provider_Group_NPI: riskGap.Provider_Group_NPI,
-          Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
-          Provider_Group_Name: riskGap.Provider_Group_Name,
-          Source: 'CIH',
-          note: riskGap.note
-        };
-        //console.log("riskGap", riskGap);
-        if (riskGap.risk_gap_id) {
-          riskObsUpdateArray.push({
-            ...commonData,
-            id: riskGap.risk_gap_id,
-            updated_date: new Date()
-          });
-        } else {
+    //     const commonData = {
+    //       medicaid_id,
+    //       Type: riskGap.Type,
+    //       Gap_Code: riskGap.DIAG_CODE,
+    //       Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
+    //       Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
+    //       Observation_Code: riskGap.Observation_Code,
+    //       CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
+    //       Observation_Code_Set: riskGap.Observation_Code_Set,
+    //       Observation_Result: riskGap.Observation_Result,
+    //       Service_Provider_NPI: riskGap.Service_Provider_NPI,
+    //       Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
+    //       Service_Provider_Name: riskGap.Service_Provider_Name,
+    //       Service_Provider_Type: riskGap.Service_Provider_Type,
+    //       Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
+    //       Provider_Group_NPI: riskGap.Provider_Group_NPI,
+    //       Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
+    //       Provider_Group_Name: riskGap.Provider_Group_Name,
+    //       Source: 'CIH',
+    //       note: riskGap.note
+    //     };
+    //     console.log("dirty", riskGap.dirty);
+    //     if (riskGap.risk_gap_id) {
+    //       if(riskGap.dirty){
+    //         riskObsUpdateArray.push({
+    //           ...commonData,
+    //           id: riskGap.risk_gap_id,
+    //           updated_date: new Date()
+    //         });
+    //       }
+    //     } else {
+    //       const observationFields = [
+    //         riskGap.Observation_Date,
+    //         riskGap.Observation_Code,
+    //         riskGap.CPT_Code_Modifier,
+    //         riskGap.Observation_Code_Set,
+    //         riskGap.Observation_Result,
+    //         riskGap.Service_Provider_NPI,
+    //         riskGap.Service_Provider_Taxonomy_Code,
+    //         riskGap.Service_Provider_Name,
+    //         riskGap.Service_Provider_Type,
+    //         riskGap.Service_Provider_RxProviderFlag,
+    //         riskGap.Provider_Group_NPI,
+    //         riskGap.Provider_Group_Taxonomy_Code,
+    //         riskGap.Provider_Group_Name,
+    //         riskGap.note
+    //       ];
 
+    //       // TRUE if ANY value is non-null, non-empty
+    //       const hasAnyValue = observationFields.some(v => v !== null && v !== undefined && v !== "");
 
-          const observationFields = [
-            riskGap.Observation_Date,
-            riskGap.Observation_Code,
-            riskGap.CPT_Code_Modifier,
-            riskGap.Observation_Code_Set,
-            riskGap.Observation_Result,
-            riskGap.Service_Provider_NPI,
-            riskGap.Service_Provider_Taxonomy_Code,
-            riskGap.Service_Provider_Name,
-            riskGap.Service_Provider_Type,
-            riskGap.Service_Provider_RxProviderFlag,
-            riskGap.Provider_Group_NPI,
-            riskGap.Provider_Group_Taxonomy_Code,
-            riskGap.Provider_Group_Name,
-            riskGap.note
-          ];
+    //       //const hasValue = Object.values(commonData).some(v => v);
+    //       if (hasAnyValue) {
+    //         riskObsInsertArray.push({
+    //           ...commonData,
+    //           added_by:this.userId,
+    //           added_date: new Date()
+    //         });
+    //       }
+    //     }
 
-          // TRUE if ANY value is non-null, non-empty
-          const hasAnyValue = observationFields.some(v => v !== null && v !== undefined && v !== "");
+    //   });
+    // }
+(this.riskGapsList.controls as FormGroup[]).forEach((fg) => {
 
-          //const hasValue = Object.values(commonData).some(v => v);
-          if (hasAnyValue) {
-            riskObsInsertArray.push({
-              ...commonData,
-              added_by:this.userId,
-              added_date: new Date()
-            });
-          }
-        }
+  const riskGap = fg.getRawValue();
 
+  const processStatus = riskGap.PROCESS_STATUS;
+
+  if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
+    diagCodes.push(riskGap.DIAG_CODE);
+  }
+
+  const commonData = {
+    medicaid_id,
+    Type: riskGap.Type,
+    Gap_Code: riskGap.DIAG_CODE,
+    Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
+    Observation_Year: riskGap.Observation_Date
+      ? new Date(riskGap.Observation_Date).getFullYear()
+      : null,
+    Observation_Code: riskGap.Observation_Code,
+    CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
+    Observation_Code_Set: riskGap.Observation_Code_Set,
+    Observation_Result: riskGap.Observation_Result,
+    Service_Provider_NPI: riskGap.Service_Provider_NPI,
+    Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
+    Service_Provider_Name: riskGap.Service_Provider_Name,
+    Service_Provider_Type: riskGap.Service_Provider_Type,
+    Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
+    Provider_Group_NPI: riskGap.Provider_Group_NPI,
+    Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
+    Provider_Group_Name: riskGap.Provider_Group_Name,
+    Source: 'CIH',
+    note: riskGap.note
+  };
+
+  // ✅ UPDATE only if dirty
+  if (riskGap.risk_gap_id) {
+
+    if (fg.dirty) {
+
+      //console.log("Updating ID:", riskGap.risk_gap_id);
+
+      riskObsUpdateArray.push({
+        ...commonData,
+        id: riskGap.risk_gap_id,
+        updated_date: new Date()
       });
+
     }
 
+  }
+  else {
+
+    const hasAnyValue = Object.values(commonData).some(
+      v => v !== null && v !== undefined && v !== ''
+    );
+
+    if (hasAnyValue) {
+
+      //console.log("Inserting new record");
+
+      riskObsInsertArray.push({
+        ...commonData,
+        added_by: this.userId,
+        added_date: new Date()
+      });
+
+    }
+
+  }
+
+});
     /* ----------------------------------
        BUILD QUALITY GAP DATA
     -----------------------------------*/
-    if (formValues.qualityGapsList?.length) {
-      formValues.qualityGapsList.forEach((qualityGap: any) => {
+    // if (formValues.qualityGapsList?.length) {
+    //   formValues.qualityGapsList.forEach((qualityGap: any) => {
 
-        const processStatus = qualityGap.PROCESS_STATUS;
-        if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
-          qualitySubMeasures.push(qualityGap.SUB_MEASURE);
-        }
+    //     const processStatus = qualityGap.PROCESS_STATUS;
+    //     if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
+    //       qualitySubMeasures.push(qualityGap.SUB_MEASURE);
+    //     }
 
-        const commonData = {
-          medicaid_id,
-          Type: qualityGap.Type,
-          Gap_Code: qualityGap.SUB_MEASURE,
-          Observation_Date: qualityGap.Observation_Date,
-          Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
-          Observation_Code: qualityGap.Observation_Code,
-          CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
-          Observation_Code_Set: qualityGap.Observation_Code_Set,
-          Observation_Result: qualityGap.Observation_Result,
-          Service_Provider_NPI: qualityGap.Service_Provider_NPI,
-          Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
-          Service_Provider_Name: qualityGap.Service_Provider_Name,
-          Service_Provider_Type: qualityGap.Service_Provider_Type,
-          Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
-          Provider_Group_NPI: qualityGap.Provider_Group_NPI,
-          Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
-          Provider_Group_Name: qualityGap.Provider_Group_Name,
-          Source: 'CIH',
-          note: qualityGap.note
-        };
-          const qualityobservationFields = [
-            qualityGap.Observation_Date,
-            qualityGap.Observation_Code,
-            qualityGap.CPT_Code_Modifier,
-            qualityGap.Observation_Code_Set,
-            qualityGap.Observation_Result,
-            qualityGap.Service_Provider_NPI,
-            qualityGap.Service_Provider_Taxonomy_Code,
-            qualityGap.Service_Provider_Name,
-            qualityGap.Service_Provider_Type,
-            qualityGap.Service_Provider_RxProviderFlag,
-            qualityGap.Provider_Group_NPI,
-            qualityGap.Provider_Group_Taxonomy_Code,
-            qualityGap.Provider_Group_Name,
-            qualityGap.note
-          ];
+    //     const commonData = {
+    //       medicaid_id,
+    //       Type: qualityGap.Type,
+    //       Gap_Code: qualityGap.SUB_MEASURE,
+    //       Observation_Date: qualityGap.Observation_Date,
+    //       Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
+    //       Observation_Code: qualityGap.Observation_Code,
+    //       CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
+    //       Observation_Code_Set: qualityGap.Observation_Code_Set,
+    //       Observation_Result: qualityGap.Observation_Result,
+    //       Service_Provider_NPI: qualityGap.Service_Provider_NPI,
+    //       Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
+    //       Service_Provider_Name: qualityGap.Service_Provider_Name,
+    //       Service_Provider_Type: qualityGap.Service_Provider_Type,
+    //       Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
+    //       Provider_Group_NPI: qualityGap.Provider_Group_NPI,
+    //       Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
+    //       Provider_Group_Name: qualityGap.Provider_Group_Name,
+    //       Source: 'CIH',
+    //       note: qualityGap.note
+    //     };
+    //       const qualityobservationFields = [
+    //         qualityGap.Observation_Date,
+    //         qualityGap.Observation_Code,
+    //         qualityGap.CPT_Code_Modifier,
+    //         qualityGap.Observation_Code_Set,
+    //         qualityGap.Observation_Result,
+    //         qualityGap.Service_Provider_NPI,
+    //         qualityGap.Service_Provider_Taxonomy_Code,
+    //         qualityGap.Service_Provider_Name,
+    //         qualityGap.Service_Provider_Type,
+    //         qualityGap.Service_Provider_RxProviderFlag,
+    //         qualityGap.Provider_Group_NPI,
+    //         qualityGap.Provider_Group_Taxonomy_Code,
+    //         qualityGap.Provider_Group_Name,
+    //         qualityGap.note
+    //       ];
 
-        if (qualityGap.quality_gap_id) {
-          riskObsUpdateArray.push({
-            ...commonData,
-            id: qualityGap.quality_gap_id,
-            updated_date: new Date()
-          });
-        } else {
- //         const hasValue = Object.values(commonData).some(v => v);
-           // TRUE if ANY value is non-null, non-empty
-          const hasValue = qualityobservationFields.some(v => v !== null && v !== undefined && v !== "");
+    //     if (qualityGap.quality_gap_id) {
+    //       riskObsUpdateArray.push({
+    //         ...commonData,
+    //         id: qualityGap.quality_gap_id,
+    //         updated_date: new Date()
+    //       });
+    //     } else {
+    //       // const hasValue = Object.values(commonData).some(v => v);
+    //        // TRUE if ANY value is non-null, non-empty
+    //       const hasValue = qualityobservationFields.some(v => v !== null && v !== undefined && v !== "");
 
-          if (hasValue) {
-            riskObsInsertArray.push({
-              ...commonData,
-              added_by:this.userId,
-              added_date: new Date()
-            });
-          }
-        }
+    //       if (hasValue) {
+    //         riskObsInsertArray.push({
+    //           ...commonData,
+    //           added_by:this.userId,
+    //           added_date: new Date()
+    //         });
+    //       }
+    //     }
+    //   });
+    // }
+//this.qualityGapsList.controls.forEach((fg: FormGroup) => {
+(this.qualityGapsList.controls as FormGroup[]).forEach((fg) => {
+  const qualityGap = fg.getRawValue();
+
+  const processStatus = qualityGap.PROCESS_STATUS;
+  if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
+    qualitySubMeasures.push(qualityGap.SUB_MEASURE);
+  }
+
+  const commonData = {
+    medicaid_id,
+    Type: qualityGap.Type,
+    Gap_Code: qualityGap.SUB_MEASURE,
+    Observation_Date: qualityGap.Observation_Date,
+    Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
+    Observation_Code: qualityGap.Observation_Code,
+    CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
+    Observation_Code_Set: qualityGap.Observation_Code_Set,
+    Observation_Result: qualityGap.Observation_Result,
+    Service_Provider_NPI: qualityGap.Service_Provider_NPI,
+    Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
+    Service_Provider_Name: qualityGap.Service_Provider_Name,
+    Service_Provider_Type: qualityGap.Service_Provider_Type,
+    Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
+    Provider_Group_NPI: qualityGap.Provider_Group_NPI,
+    Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
+    Provider_Group_Name: qualityGap.Provider_Group_Name,
+    Source: 'CIH',
+    note: qualityGap.note
+  };
+
+  // ✅ UPDATE only if dirty
+  if (qualityGap.quality_gap_id) {
+
+    if (fg.dirty) {
+
+      riskObsUpdateArray.push({
+        ...commonData,
+        id: qualityGap.quality_gap_id,
+        updated_date: new Date()
       });
+
     }
 
+  }
+  else {
+
+    const hasValue = [
+      qualityGap.Observation_Date,
+      qualityGap.Observation_Code,
+      qualityGap.CPT_Code_Modifier,
+      qualityGap.Observation_Code_Set,
+      qualityGap.Observation_Result,
+      qualityGap.Service_Provider_NPI,
+      qualityGap.Service_Provider_Taxonomy_Code,
+      qualityGap.Service_Provider_Name,
+      qualityGap.Service_Provider_Type,
+      qualityGap.Service_Provider_RxProviderFlag,
+      qualityGap.Provider_Group_NPI,
+      qualityGap.Provider_Group_Taxonomy_Code,
+      qualityGap.Provider_Group_Name,
+      qualityGap.note
+    ].some(v => v !== null && v !== undefined && v !== "");
+
+    if (hasValue) {
+
+      riskObsInsertArray.push({
+        ...commonData,
+        added_by: this.userId,
+        added_date: new Date()
+      });
+
+    }
+
+  }
+
+});
     try {
       /* ----------------------------------
          STEP 1: UNSET MEMBER GAP STATUS
@@ -845,7 +983,7 @@ applyFilter(event: Event) {
           insertDataArray: riskObsInsertArray
         });
       }
-      console.log("riskGap", formValues.riskGapsList);
+      //console.log("riskGap", formValues.riskGapsList);
 
        /* ----------------------------------
          STEP 4: UPDATE PLAN YEAR
@@ -854,7 +992,7 @@ applyFilter(event: Event) {
        if (UpdateArray.length) { 
           UpdateArray.forEach((newArray: any) => {
             if(newArray.PLANYEAR != newArray.PLAN_YEAR){
-              console.log('UpdateArray:',newArray);
+              //console.log('UpdateArray:',newArray);
               this.apiService.updatePlanyearForRiskgap<any>(newArray);
             }
           })
@@ -982,7 +1120,8 @@ applyFilter(event: Event) {
         fg.get('Observation_Result')?.valueChanges.subscribe(value => {
           fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
         });
-
+        fg.markAsPristine();
+        fg.markAsUntouched();
         this.riskGapsList.push(fg); 
        
       });        
@@ -1053,7 +1192,8 @@ applyFilter(event: Event) {
         fg.get('Observation_Result')?.valueChanges.subscribe(value => {
           fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
         });
-
+        fg.markAsPristine();
+        fg.markAsUntouched();
         this.qualityGapsList.push(fg);
       });
     }
