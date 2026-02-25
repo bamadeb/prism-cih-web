@@ -17,9 +17,9 @@
         <!-- Right button -->
          <div>
            <mat-form-field appearance="outline" class="navigator-select txupper" *ngIf="loginRoleId === 7" style="margin-top: 10px;margin-left:10px;">
-          <mat-select placeholder="ALL NAVIGATOR" [value]="selectedNavigatorId"
+          <mat-select placeholder="ALL NAVIGATORS" [value]="selectedNavigatorId"
             (selectionChange)="onNavigatorChange($event.value)">
-            <mat-option [value]="0">ALL NAVIGATOR</mat-option>
+            <mat-option [value]="0">ALL NAVIGATORS</mat-option>
             <mat-option *ngFor="let n of navigatorList" [value]="n.ID" class="txupper">
               {{ n.FistName }} {{ n.LastName }}
             </mat-option>

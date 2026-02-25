@@ -6,8 +6,8 @@ import { ConfigService } from '../../../../services/api.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { ChangeDetectorRef, Inject, signal, ViewChild } from '@angular/core';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { ChangeDetectorRef, Inject, signal, ViewChild ,ElementRef } from '@angular/core'; 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -100,6 +100,8 @@ export class AddAction {
   pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   @ViewChild('mainPaginator') mainPaginator!: MatPaginator;
   @ViewChild('mainSort') mainSort!: MatSort;
+  @ViewChild('actionDateInput') actionDateInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('nextActionDateInput') nextActionDateInput!: ElementRef<HTMLInputElement>;
   showPcpVisitForm = signal(false);
   showPcpHistory = signal(false);
   isSavingPcpVisit = signal(false);
@@ -497,13 +499,43 @@ export class AddAction {
       note: [gap.note]
     });
   }
-  async add_update_action_submit() {
+
+  allowOnlyDateChars(event: KeyboardEvent) {
+    const allowedKeys = [
+      'Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'
+    ];
+
+    // allow navigation & control keys
+    if (allowedKeys.includes(event.key)) {
+      return;
+    }
+
+    // allow digits and '/'
+    const regex = /^[0-9/]$/;
+
+    if (!regex.test(event.key)) {
+      event.preventDefault(); // ❌ block other characters
+    }
+  }
+
+
+  async add_update_action_submit() { 
 
     const formValues = this.addActionFormGroup.getRawValue();
     const action_id = formValues.update_action_id;
     //console.log(formValues.value);
     this.isProcessing = true; // 🔹 show loader
-    this.addActionChangeFlag = 1;
+    this.addActionChangeFlag = 1; 
+    // 🔹 Validate action_date is a valid date
+    if (!formValues.action_date || isNaN(new Date(formValues.action_date).getTime())) {
+      alert('Please select a valid Action Date');
+      this.isProcessing = false;
+
+      setTimeout(() => {
+        this.actionDateInput.nativeElement.focus();
+      }, 0);
+      return;  
+    } 
 
     if (!action_id) {
       const insert_data = {

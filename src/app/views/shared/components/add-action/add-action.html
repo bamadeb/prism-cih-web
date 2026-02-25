@@ -44,10 +44,19 @@
                 <div class="action-row mb-3">
                   <mat-form-field appearance="outline" class="w-100 flex-item">
                     <mat-label>ACTION DATE</mat-label>
-                    <input matInput [matDatepicker]="picker" formControlName="action_date" placeholder="Select date"
-                      readonly />
+                    <input #actionDateInput matInput [matDatepicker]="picker" formControlName="action_date" (keydown)="allowOnlyDateChars($event)" maxlength="10" placeholder="MM/DD/YYYY"
+                      />
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
+
+                     <!-- 🔴 Error message -->
+                      <!-- <mat-error *ngIf="addActionFormGroup.get('action_date')?.hasError('required')">
+                        Action Date is required
+                      </mat-error>
+
+                      <mat-error *ngIf="addActionFormGroup.get('action_date')?.hasError('matDatepickerParse')">
+                        Invalid date format
+                      </mat-error> -->
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="w-100 flex-item">
@@ -105,10 +114,10 @@
               <div class="next-row mb-3">
                 <mat-form-field appearance="outline" class="flex-item w-100">
                   <mat-label>NEXT ACTION DATE</mat-label>
-                  <input matInput [matDatepicker]="nextPicker" formControlName="next_action_date"
-                    placeholder="NEXT ACTION DATE" readonly />
+                  <input #nextActionDateInput matInput [matDatepicker]="nextPicker" formControlName="next_action_date"
+                    placeholder="MM/DD/YYYY" (keydown)="allowOnlyDateChars($event)" maxlength="10" />
                   <mat-datepicker-toggle matSuffix [for]="nextPicker"></mat-datepicker-toggle>
-                  <mat-datepicker #nextPicker></mat-datepicker>
+                  <mat-datepicker #nextPicker></mat-datepicker>                  
                 </mat-form-field>
               </div>
 
@@ -298,7 +307,7 @@
                                 <mat-label>Observation Date</mat-label>
 
                                 <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
-                                  placeholder="MM/DD/YYYY" readonly />
+                                  placeholder="MM/DD/YYYY" (keydown)="allowOnlyDateChars($event)" maxlength="10"/>
 
                                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                                 <mat-datepicker #picker></mat-datepicker>
@@ -464,7 +473,7 @@
                             <mat-label>Observation Date</mat-label>
 
                             <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
-                              placeholder="MM/DD/YYYY" readonly />
+                              placeholder="MM/DD/YYYY" (keydown)="allowOnlyDateChars($event)" maxlength="10" />
 
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                             <mat-datepicker #picker></mat-datepicker>
