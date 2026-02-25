@@ -634,7 +634,12 @@ resetActionFields() {
       const riskGap = fg.getRawValue();
 
       const processStatus = riskGap.PROCESS_STATUS;
-
+         UpdateArray.push({ 
+            medicaid_id: medicaid_id,
+            PLANYEAR: riskGap.PLANYEAR,
+            PLAN_YEAR: riskGap.PLAN_YEAR,
+            DIAG_CODE: riskGap.DIAG_CODE,
+          });
       if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
         diagCodes.push(riskGap.DIAG_CODE);
       }
