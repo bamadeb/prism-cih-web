@@ -115,7 +115,10 @@ export class Login {
         this.errorMessage = 'Invalid login credentials';
       } 
     } catch (error) {
-      this.errorMessage = 'Invalid login credentials';
+      //console.log('error: ',error);
+      const err = error as Error;
+      //console.log('Error message:', err.message);           
+      this.errorMessage = err.message;
     } finally {
       this.isLoading = false;
     }
