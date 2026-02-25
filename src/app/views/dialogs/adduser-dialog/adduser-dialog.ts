@@ -154,7 +154,7 @@ export class AdduserDialog implements OnInit {
       const cognitoUsername =
         await this.apiService.createCognitoUser(cognitoPayload);
 
-      console.log('Cognito Username:', cognitoUsername);
+      //console.log('Cognito Username:', cognitoUsername);
 
       // 2️⃣ Insert into DB
       const payload = {

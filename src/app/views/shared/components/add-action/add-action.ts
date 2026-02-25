@@ -1,25 +1,20 @@
-//import { Component } from '@angular/core';
-// import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-// import {MatButtonModule} from '@angular/material/button';
+
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
-// import {MatGridListModule} from '@angular/material/grid-list';
 import { MatRadioModule } from '@angular/material/radio';
 import { ConfigService } from '../../../../services/api.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-// //import { MatRadioModule } from '@angular/material/radio';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-// import { MatNativeDateModule } from '@angular/material/core';
-import { ChangeDetectorRef, Inject, signal, ViewChild ,ElementRef } from '@angular/core';
+import { MatDatepickerModule } from '@angular/material/datepicker'; 
+import { ChangeDetectorRef, Inject, signal, ViewChild ,ElementRef } from '@angular/core'; 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { PROVIDER_TIN_MAP } from '../../../../constants/constant';  
+import { PROVIDER_TIN_MAP } from '../../../../constants/constant';
 import {
   MatDialog,
   MatDialogActions,
@@ -36,24 +31,24 @@ import { MatIconModule } from "@angular/material/icon";
 import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
 import { PhoneFormatPipe } from "../../../../pipes/phone-format.pipe";
 import { MatCard } from "@angular/material/card";
-import { MatPaginator,MatPaginatorModule  } from "@angular/material/paginator";
-import { MatTableDataSource } from '@angular/material/table'; 
+import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
+import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 
 
 @Component({
   selector: 'app-add-action',
-  imports: [  
+  imports: [
     MatButtonModule,
     MatDialogModule,
-    MatTabsModule, 
-    MatPaginatorModule ,
-    MatSortModule,     
-    MatRadioModule, 
+    MatTabsModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatRadioModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatDatepickerModule,     
+    MatDatepickerModule,
     MatTableModule,
     MatExpansionModule,
     MatCheckboxModule,
@@ -65,7 +60,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
     PhoneFormatPipe,
     MatCard,
     MatPaginator
-],
+  ],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],
@@ -93,16 +88,16 @@ export class AddAction {
   memberQualityList: any[] = [];
   isLoading = false;
   memberPCPVisitList: any[] = [];
-  pcpType: any[] = [];vendorList: any[] = [];
+  pcpType: any[] = []; vendorList: any[] = [];
   PCPVisitDisplayedColumns: string[] = [
     'visit_date',
     'visit_type',
     'message',
     'added_user_name',
     'added_date'
-  ]; 
+  ];
   //successMessage: string = '';
-  pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]); 
+  pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   @ViewChild('mainPaginator') mainPaginator!: MatPaginator;
   @ViewChild('mainSort') mainSort!: MatSort;
   @ViewChild('actionDateInput') actionDateInput!: ElementRef<HTMLInputElement>;
@@ -140,11 +135,11 @@ export class AddAction {
   currentYear: number = new Date().getFullYear();
   previousYear: number = this.currentYear - 1;
 
- riskTabarray = [
-  { label: '--', value: '' },
-  { label: this.previousYear, value: this.previousYear },
-  { label: this.currentYear, value: this.currentYear }
-];
+  riskTabarray = [
+    { label: '--', value: '' },
+    { label: this.previousYear, value: this.previousYear },
+    { label: this.currentYear, value: this.currentYear }
+  ];
 
   // planTinMap: Record<string, string[]> = {
   //   AHC: ['2370820741', '273160687', '200807794'],   // CHI → 3 TINs
@@ -155,7 +150,7 @@ export class AddAction {
   //userId: string | null = null;
   userId: string | null = null;
   showContent = false;
-  
+
   role_id: string | null = null;
   medicaid_id: string | null = null;
   member_name: string | null = null;
@@ -172,9 +167,7 @@ export class AddAction {
     private dialogRef: MatDialogRef<AddAction>,
     private fb: FormBuilder
   ) {
-    // this.form = this.fb.group({
-    //   riskGapsList: this.fb.array([])
-    // });
+
     this.addActionFormGroup = this.fb.group({
       // CURRENT ACTIVITY
       action_id: [18],
@@ -191,7 +184,7 @@ export class AddAction {
 
       //Member level
       medicaid_id: [''],
-      action_type_source: ['Member Action'], 
+      action_type_source: ['Member Action'],
       // RISK GAPS
       riskGapsList: this.fb.array([]),
       qualityGapsList: this.fb.array([])
@@ -212,7 +205,7 @@ export class AddAction {
       visit_type: [null, Validators.required],
       pcp_visit_message: ['']
     });
-    
+
 
     this.measureForm = this.fb.group({
       MEASURE: ['', Validators.required],
@@ -227,7 +220,7 @@ export class AddAction {
     this.measureForm.patchValue({
       PCP_TAX_ID: data.PCP_TAX_ID,
       MEASURE_DATE: new Date(),
-      NUM_COUNT:1
+      NUM_COUNT: 1
     });
     if (this.medicaid_id) {
       this.addActionFormGroup.patchValue({
@@ -235,20 +228,20 @@ export class AddAction {
       });
       this.getMemberTaskList(this.medicaid_id);
       this.getMemberGapsList(this.medicaid_id);
-    } 
-    
+    }
+
     //alert(this.medicaid_id);
   }
 
 
   async ngOnInit(): Promise<void> {
     const user = this.userData.getUser();
-    this.userId = user.ID; 
-      //console.log(this.riskTabarray);
+    this.userId = user.ID;
+    //console.log(this.riskTabarray);
     //this.role_id = user.role_id;
     const payload = { medicaid_id: this.medicaid_id };
     const result = await this.apiService.addActionMaster<any>(payload);
-    
+
     this.action_activity_category = result.data.actionActivityCategory || [];
     this.action_ativity_type = result.data.actionActivityType || [];
     this.navigatorList = result.data.navigatorList || [];
@@ -257,25 +250,22 @@ export class AddAction {
     this.pcpType = result.data.pcpType || [];
     this.vendorList = result.data.vendorList || [];
     this.appointTypeList = result.data.appointTypeList || [];
-    this.appointmentHistory(); 
+    this.appointmentHistory();
     this.setScheduledActionStatus('17');
     // pcp visit history
-    this.setPCPVisitHistory(); 
- 
+    this.setPCPVisitHistory();
+
     this.cdr.detectChanges();
     if (user.role_id === 9) {
       this.addActionFormGroup.get('panel_id')?.setValue(18);
     }
-    // this.form = this.fb.group({
-    //   riskGapsList: this.fb.array([])
-    // });qualityGapsList
 
     this.appointmentFormGroup
-  .get('appointment_time')
-  ?.valueChanges.subscribe(() => {
-    this.cdr.detectChanges();
-  });
- 
+      .get('appointment_time')
+      ?.valueChanges.subscribe(() => {
+        this.cdr.detectChanges();
+      });
+
 
   }
 
@@ -300,83 +290,83 @@ export class AddAction {
     this.actionresult_followup_list = result.data;
   }
 
-  
+
 
   async onVendorChange(vendorId: string) {
-  if (!vendorId) return;
+    if (!vendorId) return;
 
-  // 🔄 Reset dependent fields
-  this.providerList = [];
-  this.vendorLocationList = [];
+    // 🔄 Reset dependent fields
+    this.providerList = [];
+    this.vendorLocationList = [];
 
-  this.appointmentFormGroup.get('provider_id')?.reset();
-  this.appointmentFormGroup.get('place_of_appointment')?.reset();
+    this.appointmentFormGroup.get('provider_id')?.reset();
+    this.appointmentFormGroup.get('place_of_appointment')?.reset();
 
-  this.appointmentFormGroup.get('provider_id')?.disable();
-  this.appointmentFormGroup.get('place_of_appointment')?.disable();
-
-  try {
-    const result = await this.apiService.getProviderList<any>({
-      vendor_id: vendorId
-    });
-
-    this.providerList = result.data.providerList || [];
-    this.vendorLocationList = result.data.vendorLocationList || [];
-
-    // ✅ Enable once data arrives
-    if (this.providerList.length) {
-      this.appointmentFormGroup.get('provider_id')?.enable();
-    }
-    if (this.vendorLocationList.length) {
-      this.appointmentFormGroup.get('place_of_appointment')?.enable();
-    }
-
-    this.cdr.detectChanges(); // OnPush
-
-  } catch (error) {
-    console.error('Vendor change failed', error);
-  }
-}
-
-trackByValue(i: number, y: any) {
-  return y.value + i; // guaranteed unique
-}
-
-async addAppointment() {
-  if (this.appointmentFormGroup.invalid) {
-    this.appointmentFormGroup.markAllAsTouched();
-    return;
-  }
-
-  const formValue = this.appointmentFormGroup.getRawValue(); 
-
-  try {
-
-    await this.insertappiontment(formValue); 
-    await this.applogSuccess();
-    await this.appointmentHistory();
-
-    this.appSuccessMessage.set('Appointment added successfully');
-    this.appointmentFormGroup.reset();
-
-    // 🔒 Disable dependent fields again
     this.appointmentFormGroup.get('provider_id')?.disable();
     this.appointmentFormGroup.get('place_of_appointment')?.disable();
 
-    setTimeout(() => this.appSuccessMessage.set(''), 3000);
+    try {
+      const result = await this.apiService.getProviderList<any>({
+        vendor_id: vendorId
+      });
 
-  } catch (error) {
-    console.error('Error saving appointment:', error);
+      this.providerList = result.data.providerList || [];
+      this.vendorLocationList = result.data.vendorLocationList || [];
+
+      // ✅ Enable once data arrives
+      if (this.providerList.length) {
+        this.appointmentFormGroup.get('provider_id')?.enable();
+      }
+      if (this.vendorLocationList.length) {
+        this.appointmentFormGroup.get('place_of_appointment')?.enable();
+      }
+
+      this.cdr.detectChanges(); // OnPush
+
+    } catch (error) {
+      console.error('Vendor change failed', error);
+    }
   }
-}
 
-private async insertappiontment(form: any): Promise<void> {
+  trackByValue(i: number, y: any) {
+    return y.value + i; // guaranteed unique
+  }
+
+  async addAppointment() {
+    if (this.appointmentFormGroup.invalid) {
+      this.appointmentFormGroup.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.appointmentFormGroup.getRawValue();
+
+    try {
+
+      await this.insertappiontment(formValue);
+      await this.applogSuccess();
+      await this.appointmentHistory();
+
+      this.appSuccessMessage.set('Appointment added successfully');
+      this.appointmentFormGroup.reset();
+
+      // 🔒 Disable dependent fields again
+      this.appointmentFormGroup.get('provider_id')?.disable();
+      this.appointmentFormGroup.get('place_of_appointment')?.disable();
+
+      setTimeout(() => this.appSuccessMessage.set(''), 3000);
+
+    } catch (error) {
+      console.error('Error saving appointment:', error);
+    }
+  }
+
+  private async insertappiontment(form: any): Promise<void> {
     const payload = {
       table_name: 'MEM_SCHEDULE_APPOINTMENT_ACTION',
       insertDataArray: [{
         medicaid_id: this.medicaid_id,
         action_date: this.formatDateToYMD(form.appointment_date),
-        action_time:  form.appointment_time,
+        action_time: form.appointment_time,
         status: form.action_status,
         appiontment_type: form.appointment_type,
         vendor_id: form.vendor_id,
@@ -393,53 +383,53 @@ private async insertappiontment(form: any): Promise<void> {
 
 
   async savePcpVisit() {
-  if (this.pcpVisitFormGroup.invalid || this.isSavingPcpVisit()) {
-    return;
+    if (this.pcpVisitFormGroup.invalid || this.isSavingPcpVisit()) {
+      return;
+    }
+
+    this.isSavingPcpVisit.set(true);
+
+    const form = this.pcpVisitFormGroup.value;
+
+    const insert_data = {
+      MEDICAID_ID: this.medicaid_id,
+      VISIT_DATE: this.formatDateToYMD(form.pcp_visit_date),
+      MESSAGE: form.pcp_visit_message,
+      VISIT_TYPE: form.visit_type,
+      ADDED_BY: this.userId
+    };
+
+    try {
+      await this.apiService.multipleRowInsert({
+        table_name: 'MEM_MEMBER_PCP_VISIT',
+        insertDataArray: [insert_data]
+      });
+
+      await this.addTaskLog('ADD PCP VISIT', form.pcp_visit_message);
+
+      this.pcpSuccessMessage.set('PCP visit saved successfully');
+
+      this.pcpVisitFormGroup.reset();
+      await this.setPCPVisitHistory();
+
+      setTimeout(() => this.pcpSuccessMessage.set(''), 3000);
+
+    } catch (error) {
+      console.error('Error saving PCP visit:', error);
+    } finally {
+      this.isSavingPcpVisit.set(false);
+    }
   }
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.pcpVisitDataSource.filter = filterValue.trim().toLowerCase();
 
-  this.isSavingPcpVisit.set(true);
-
-  const form = this.pcpVisitFormGroup.value;
-
-  const insert_data = {
-    MEDICAID_ID: this.medicaid_id,
-    VISIT_DATE: this.formatDateToYMD(form.pcp_visit_date),
-    MESSAGE: form.pcp_visit_message,
-    VISIT_TYPE: form.visit_type,
-    ADDED_BY: this.userId
-  };
-
-  try {
-    await this.apiService.multipleRowInsert({
-      table_name: 'MEM_MEMBER_PCP_VISIT',
-      insertDataArray: [insert_data]
-    });
-
-    await this.addTaskLog('ADD PCP VISIT', form.pcp_visit_message);
-
-    this.pcpSuccessMessage.set('PCP visit saved successfully');
-
-    this.pcpVisitFormGroup.reset();
-    await this.setPCPVisitHistory();
-
-    setTimeout(() => this.pcpSuccessMessage.set(''), 3000);
-
-  } catch (error) {
-    console.error('Error saving PCP visit:', error);
-  } finally {
-    this.isSavingPcpVisit.set(false);
+    // 🔥 REQUIRED for paginator count update
+    if (this.pcpVisitDataSource.paginator) {
+      this.pcpVisitDataSource.paginator.firstPage();
+      this.cdr.detectChanges();
+    }
   }
-}
-applyFilter(event: Event) {
-  const filterValue = (event.target as HTMLInputElement).value;
-  this.pcpVisitDataSource.filter = filterValue.trim().toLowerCase();
-
-  // 🔥 REQUIRED for paginator count update
-  if (this.pcpVisitDataSource.paginator) {
-    this.pcpVisitDataSource.paginator.firstPage();
-    this.cdr.detectChanges();
-  }
-}
 
 
   async setPCPVisitHistory() {
@@ -458,9 +448,9 @@ applyFilter(event: Event) {
       this.isLoadingPcpHistory.set(false);
       this.cdr.detectChanges();
     }
-  } 
+  }
 
-   async appointmentHistory() {
+  async appointmentHistory() {
     if (!this.medicaid_id) return;
 
     this.isLoadingappHistory.set(true);
@@ -468,7 +458,7 @@ applyFilter(event: Event) {
       const result = await this.apiService.getAppointmentList<any>({
         medicaid_id: this.medicaid_id
       });
-      this.appointmentList = result.data ?? []; 
+      this.appointmentList = result.data ?? [];
       //console.log(this.appointmentList);
     } catch (error) {
       console.error(error);
@@ -476,10 +466,10 @@ applyFilter(event: Event) {
       this.isLoadingappHistory.set(false);
       this.cdr.detectChanges();
     }
-  } 
+  }
 
 
-  
+
 
   createRiskGapForm(gap: any): FormGroup {
     return this.fb.group({
@@ -598,6 +588,7 @@ applyFilter(event: Event) {
 
         this.getMemberTaskList(formValues.medicaid_id);
         this.getMemberGapsList(formValues.medicaid_id);
+        this.resetActionFields();
         this.isProcessing = false;
         //alert(44);
         this.cdr.detectChanges();
@@ -634,7 +625,24 @@ applyFilter(event: Event) {
     }
 
   }
- 
+resetActionFields() {
+  this.addActionFormGroup.patchValue({
+    action_result_id: '',
+    action_note: '',
+    next_panel_id: '',
+    next_action_note: '',
+    next_action_date: ''
+  });
+
+  // reset validation state
+  ['action_result_id', 'action_note', 'next_panel_id', 'next_action_note', 'next_action_date']
+    .forEach(field => {
+      const control = this.addActionFormGroup.get(field);
+      control?.markAsPristine();
+      control?.markAsUntouched();
+      control?.updateValueAndValidity();
+    });
+}
   private async updateQualityAndRiskData(
     formValues: any,
     action_id: number
@@ -651,304 +659,160 @@ applyFilter(event: Event) {
     /* ----------------------------------
        BUILD RISK GAP DATA
     -----------------------------------*/
-    
-    // if (formValues.riskGapsList?.length) {
-    //   formValues.riskGapsList.forEach((riskGap: any) => {
-
-    //      UpdateArray.push({ 
-    //         medicaid_id: medicaid_id,
-    //         PLANYEAR: riskGap.PLANYEAR,
-    //         PLAN_YEAR: riskGap.PLAN_YEAR,
-    //         DIAG_CODE: riskGap.DIAG_CODE,
-    //       });
-       
-    //     const processStatus = riskGap.PROCESS_STATUS;
-    //     if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
-    //       diagCodes.push(riskGap.DIAG_CODE);
-    //     }
 
 
-    //     const commonData = {
-    //       medicaid_id,
-    //       Type: riskGap.Type,
-    //       Gap_Code: riskGap.DIAG_CODE,
-    //       Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
-    //       Observation_Year: new Date(riskGap.Observation_Date).getFullYear(),
-    //       Observation_Code: riskGap.Observation_Code,
-    //       CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
-    //       Observation_Code_Set: riskGap.Observation_Code_Set,
-    //       Observation_Result: riskGap.Observation_Result,
-    //       Service_Provider_NPI: riskGap.Service_Provider_NPI,
-    //       Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
-    //       Service_Provider_Name: riskGap.Service_Provider_Name,
-    //       Service_Provider_Type: riskGap.Service_Provider_Type,
-    //       Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
-    //       Provider_Group_NPI: riskGap.Provider_Group_NPI,
-    //       Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
-    //       Provider_Group_Name: riskGap.Provider_Group_Name,
-    //       Source: 'CIH',
-    //       note: riskGap.note
-    //     };
-    //     console.log("dirty", riskGap.dirty);
-    //     if (riskGap.risk_gap_id) {
-    //       if(riskGap.dirty){
-    //         riskObsUpdateArray.push({
-    //           ...commonData,
-    //           id: riskGap.risk_gap_id,
-    //           updated_date: new Date()
-    //         });
-    //       }
-    //     } else {
-    //       const observationFields = [
-    //         riskGap.Observation_Date,
-    //         riskGap.Observation_Code,
-    //         riskGap.CPT_Code_Modifier,
-    //         riskGap.Observation_Code_Set,
-    //         riskGap.Observation_Result,
-    //         riskGap.Service_Provider_NPI,
-    //         riskGap.Service_Provider_Taxonomy_Code,
-    //         riskGap.Service_Provider_Name,
-    //         riskGap.Service_Provider_Type,
-    //         riskGap.Service_Provider_RxProviderFlag,
-    //         riskGap.Provider_Group_NPI,
-    //         riskGap.Provider_Group_Taxonomy_Code,
-    //         riskGap.Provider_Group_Name,
-    //         riskGap.note
-    //       ];
+    (this.riskGapsList.controls as FormGroup[]).forEach((fg) => {
 
-    //       // TRUE if ANY value is non-null, non-empty
-    //       const hasAnyValue = observationFields.some(v => v !== null && v !== undefined && v !== "");
+      const riskGap = fg.getRawValue();
 
-    //       //const hasValue = Object.values(commonData).some(v => v);
-    //       if (hasAnyValue) {
-    //         riskObsInsertArray.push({
-    //           ...commonData,
-    //           added_by:this.userId,
-    //           added_date: new Date()
-    //         });
-    //       }
-    //     }
+      const processStatus = riskGap.PROCESS_STATUS;
 
-    //   });
-    // }
-(this.riskGapsList.controls as FormGroup[]).forEach((fg) => {
+      if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
+        diagCodes.push(riskGap.DIAG_CODE);
+      }
 
-  const riskGap = fg.getRawValue();
+      const commonData = {
+        medicaid_id,
+        Type: riskGap.Type,
+        Gap_Code: riskGap.DIAG_CODE,
+        Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
+        Observation_Year: riskGap.Observation_Date
+          ? new Date(riskGap.Observation_Date).getFullYear()
+          : null,
+        Observation_Code: riskGap.Observation_Code,
+        CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
+        Observation_Code_Set: riskGap.Observation_Code_Set,
+        Observation_Result: riskGap.Observation_Result,
+        Service_Provider_NPI: riskGap.Service_Provider_NPI,
+        Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
+        Service_Provider_Name: riskGap.Service_Provider_Name,
+        Service_Provider_Type: riskGap.Service_Provider_Type,
+        Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
+        Provider_Group_NPI: riskGap.Provider_Group_NPI,
+        Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
+        Provider_Group_Name: riskGap.Provider_Group_Name,
+        Source: 'CIH',
+        note: riskGap.note
+      };
 
-  const processStatus = riskGap.PROCESS_STATUS;
+      // ✅ UPDATE only if dirty
+      if (riskGap.risk_gap_id) {
 
-  if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
-    diagCodes.push(riskGap.DIAG_CODE);
-  }
+        if (fg.dirty) {
 
-  const commonData = {
-    medicaid_id,
-    Type: riskGap.Type,
-    Gap_Code: riskGap.DIAG_CODE,
-    Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
-    Observation_Year: riskGap.Observation_Date
-      ? new Date(riskGap.Observation_Date).getFullYear()
-      : null,
-    Observation_Code: riskGap.Observation_Code,
-    CPT_Code_Modifier: riskGap.CPT_Code_Modifier,
-    Observation_Code_Set: riskGap.Observation_Code_Set,
-    Observation_Result: riskGap.Observation_Result,
-    Service_Provider_NPI: riskGap.Service_Provider_NPI,
-    Service_Provider_Taxonomy_Code: riskGap.Service_Provider_Taxonomy_Code,
-    Service_Provider_Name: riskGap.Service_Provider_Name,
-    Service_Provider_Type: riskGap.Service_Provider_Type,
-    Service_Provider_RxProviderFlag: riskGap.Service_Provider_RxProviderFlag,
-    Provider_Group_NPI: riskGap.Provider_Group_NPI,
-    Provider_Group_Taxonomy_Code: riskGap.Provider_Group_Taxonomy_Code,
-    Provider_Group_Name: riskGap.Provider_Group_Name,
-    Source: 'CIH',
-    note: riskGap.note
-  };
+          //console.log("Updating ID:", riskGap.risk_gap_id);
 
-  // ✅ UPDATE only if dirty
-  if (riskGap.risk_gap_id) {
+          riskObsUpdateArray.push({
+            ...commonData,
+            id: riskGap.risk_gap_id,
+            updated_date: new Date()
+          });
 
-    if (fg.dirty) {
+        }
 
-      //console.log("Updating ID:", riskGap.risk_gap_id);
+      }
+      else {
 
-      riskObsUpdateArray.push({
-        ...commonData,
-        id: riskGap.risk_gap_id,
-        updated_date: new Date()
-      });
+        const hasAnyValue = Object.values(commonData).some(
+          v => v !== null && v !== undefined && v !== ''
+        );
 
-    }
+        if (hasAnyValue) {
 
-  }
-  else {
+          //console.log("Inserting new record");
 
-    const hasAnyValue = Object.values(commonData).some(
-      v => v !== null && v !== undefined && v !== ''
-    );
+          riskObsInsertArray.push({
+            ...commonData,
+            added_by: this.userId,
+            added_date: new Date()
+          });
 
-    if (hasAnyValue) {
+        }
 
-      //console.log("Inserting new record");
+      }
 
-      riskObsInsertArray.push({
-        ...commonData,
-        added_by: this.userId,
-        added_date: new Date()
-      });
-
-    }
-
-  }
-
-});
+    });
     /* ----------------------------------
        BUILD QUALITY GAP DATA
     -----------------------------------*/
-    // if (formValues.qualityGapsList?.length) {
-    //   formValues.qualityGapsList.forEach((qualityGap: any) => {
 
-    //     const processStatus = qualityGap.PROCESS_STATUS;
-    //     if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
-    //       qualitySubMeasures.push(qualityGap.SUB_MEASURE);
-    //     }
+    //this.qualityGapsList.controls.forEach((fg: FormGroup) => {
+    (this.qualityGapsList.controls as FormGroup[]).forEach((fg) => {
+      const qualityGap = fg.getRawValue();
 
-    //     const commonData = {
-    //       medicaid_id,
-    //       Type: qualityGap.Type,
-    //       Gap_Code: qualityGap.SUB_MEASURE,
-    //       Observation_Date: qualityGap.Observation_Date,
-    //       Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
-    //       Observation_Code: qualityGap.Observation_Code,
-    //       CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
-    //       Observation_Code_Set: qualityGap.Observation_Code_Set,
-    //       Observation_Result: qualityGap.Observation_Result,
-    //       Service_Provider_NPI: qualityGap.Service_Provider_NPI,
-    //       Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
-    //       Service_Provider_Name: qualityGap.Service_Provider_Name,
-    //       Service_Provider_Type: qualityGap.Service_Provider_Type,
-    //       Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
-    //       Provider_Group_NPI: qualityGap.Provider_Group_NPI,
-    //       Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
-    //       Provider_Group_Name: qualityGap.Provider_Group_Name,
-    //       Source: 'CIH',
-    //       note: qualityGap.note
-    //     };
-    //       const qualityobservationFields = [
-    //         qualityGap.Observation_Date,
-    //         qualityGap.Observation_Code,
-    //         qualityGap.CPT_Code_Modifier,
-    //         qualityGap.Observation_Code_Set,
-    //         qualityGap.Observation_Result,
-    //         qualityGap.Service_Provider_NPI,
-    //         qualityGap.Service_Provider_Taxonomy_Code,
-    //         qualityGap.Service_Provider_Name,
-    //         qualityGap.Service_Provider_Type,
-    //         qualityGap.Service_Provider_RxProviderFlag,
-    //         qualityGap.Provider_Group_NPI,
-    //         qualityGap.Provider_Group_Taxonomy_Code,
-    //         qualityGap.Provider_Group_Name,
-    //         qualityGap.note
-    //       ];
+      const processStatus = qualityGap.PROCESS_STATUS;
+      if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
+        qualitySubMeasures.push(qualityGap.SUB_MEASURE);
+      }
 
-    //     if (qualityGap.quality_gap_id) {
-    //       riskObsUpdateArray.push({
-    //         ...commonData,
-    //         id: qualityGap.quality_gap_id,
-    //         updated_date: new Date()
-    //       });
-    //     } else {
-    //       // const hasValue = Object.values(commonData).some(v => v);
-    //        // TRUE if ANY value is non-null, non-empty
-    //       const hasValue = qualityobservationFields.some(v => v !== null && v !== undefined && v !== "");
+      const commonData = {
+        medicaid_id,
+        Type: qualityGap.Type,
+        Gap_Code: qualityGap.SUB_MEASURE,
+        Observation_Date: qualityGap.Observation_Date,
+        Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
+        Observation_Code: qualityGap.Observation_Code,
+        CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
+        Observation_Code_Set: qualityGap.Observation_Code_Set,
+        Observation_Result: qualityGap.Observation_Result,
+        Service_Provider_NPI: qualityGap.Service_Provider_NPI,
+        Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
+        Service_Provider_Name: qualityGap.Service_Provider_Name,
+        Service_Provider_Type: qualityGap.Service_Provider_Type,
+        Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
+        Provider_Group_NPI: qualityGap.Provider_Group_NPI,
+        Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
+        Provider_Group_Name: qualityGap.Provider_Group_Name,
+        Source: 'CIH',
+        note: qualityGap.note
+      };
 
-    //       if (hasValue) {
-    //         riskObsInsertArray.push({
-    //           ...commonData,
-    //           added_by:this.userId,
-    //           added_date: new Date()
-    //         });
-    //       }
-    //     }
-    //   });
-    // }
-//this.qualityGapsList.controls.forEach((fg: FormGroup) => {
-(this.qualityGapsList.controls as FormGroup[]).forEach((fg) => {
-  const qualityGap = fg.getRawValue();
+      // ✅ UPDATE only if dirty
+      if (qualityGap.quality_gap_id) {
 
-  const processStatus = qualityGap.PROCESS_STATUS;
-  if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
-    qualitySubMeasures.push(qualityGap.SUB_MEASURE);
-  }
+        if (fg.dirty) {
 
-  const commonData = {
-    medicaid_id,
-    Type: qualityGap.Type,
-    Gap_Code: qualityGap.SUB_MEASURE,
-    Observation_Date: qualityGap.Observation_Date,
-    Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
-    Observation_Code: qualityGap.Observation_Code,
-    CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
-    Observation_Code_Set: qualityGap.Observation_Code_Set,
-    Observation_Result: qualityGap.Observation_Result,
-    Service_Provider_NPI: qualityGap.Service_Provider_NPI,
-    Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
-    Service_Provider_Name: qualityGap.Service_Provider_Name,
-    Service_Provider_Type: qualityGap.Service_Provider_Type,
-    Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
-    Provider_Group_NPI: qualityGap.Provider_Group_NPI,
-    Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
-    Provider_Group_Name: qualityGap.Provider_Group_Name,
-    Source: 'CIH',
-    note: qualityGap.note
-  };
+          riskObsUpdateArray.push({
+            ...commonData,
+            id: qualityGap.quality_gap_id,
+            updated_date: new Date()
+          });
 
-  // ✅ UPDATE only if dirty
-  if (qualityGap.quality_gap_id) {
+        }
 
-    if (fg.dirty) {
+      }
+      else {
 
-      riskObsUpdateArray.push({
-        ...commonData,
-        id: qualityGap.quality_gap_id,
-        updated_date: new Date()
-      });
+        const hasValue = [
+          qualityGap.Observation_Date,
+          qualityGap.Observation_Code,
+          qualityGap.CPT_Code_Modifier,
+          qualityGap.Observation_Code_Set,
+          qualityGap.Observation_Result,
+          qualityGap.Service_Provider_NPI,
+          qualityGap.Service_Provider_Taxonomy_Code,
+          qualityGap.Service_Provider_Name,
+          qualityGap.Service_Provider_Type,
+          qualityGap.Service_Provider_RxProviderFlag,
+          qualityGap.Provider_Group_NPI,
+          qualityGap.Provider_Group_Taxonomy_Code,
+          qualityGap.Provider_Group_Name,
+          qualityGap.note
+        ].some(v => v !== null && v !== undefined && v !== "");
 
-    }
+        if (hasValue) {
 
-  }
-  else {
+          riskObsInsertArray.push({
+            ...commonData,
+            added_by: this.userId,
+            added_date: new Date()
+          });
 
-    const hasValue = [
-      qualityGap.Observation_Date,
-      qualityGap.Observation_Code,
-      qualityGap.CPT_Code_Modifier,
-      qualityGap.Observation_Code_Set,
-      qualityGap.Observation_Result,
-      qualityGap.Service_Provider_NPI,
-      qualityGap.Service_Provider_Taxonomy_Code,
-      qualityGap.Service_Provider_Name,
-      qualityGap.Service_Provider_Type,
-      qualityGap.Service_Provider_RxProviderFlag,
-      qualityGap.Provider_Group_NPI,
-      qualityGap.Provider_Group_Taxonomy_Code,
-      qualityGap.Provider_Group_Name,
-      qualityGap.note
-    ].some(v => v !== null && v !== undefined && v !== "");
+        }
 
-    if (hasValue) {
+      }
 
-      riskObsInsertArray.push({
-        ...commonData,
-        added_by: this.userId,
-        added_date: new Date()
-      });
-
-    }
-
-  }
-
-});
+    });
     try {
       /* ----------------------------------
          STEP 1: UNSET MEMBER GAP STATUS
@@ -975,11 +839,6 @@ applyFilter(event: Event) {
         action_id: action_id
       };
       const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
-      // await this.apiService.post('prismUpdategapStatus', {
-      //   medicaid_id,
-      //   diag_codes: diagCodes.length ? `'${diagCodes.join("','")}'` : '',
-      //   action_id
-      // }).toPromise();
 
       /* ----------------------------------
          STEP 3: UPDATE QUALITY STATUS
@@ -1017,29 +876,20 @@ applyFilter(event: Event) {
       }
       //console.log("riskGap", formValues.riskGapsList);
 
-       /* ----------------------------------
-         STEP 4: UPDATE PLAN YEAR
-      -----------------------------------*/
-      
-       if (UpdateArray.length) { 
-          UpdateArray.forEach((newArray: any) => {
-            if(newArray.PLANYEAR != newArray.PLAN_YEAR){
-              //console.log('UpdateArray:',newArray);
-              this.apiService.updatePlanyearForRiskgap<any>(newArray);
-            }
-          })
-        }
-      
+      /* ----------------------------------
+        STEP 4: UPDATE PLAN YEAR
+     -----------------------------------*/
 
-      // if (formValues.riskGapsList.length) { 
-      //   const apiUpdate = {
-      //     table_name: "MEM_RISK_GAP",
-      //     id_field_name: "ID",
-      //     updates: UpdateArray
-      //   };
-      //   await this.apiService.multipleRowAndFieldUpdate<any>(apiUpdate);
+      if (UpdateArray.length) {
+        UpdateArray.forEach((newArray: any) => {
+          if (newArray.PLANYEAR != newArray.PLAN_YEAR) {
+            //console.log('UpdateArray:',newArray);
+            this.apiService.updatePlanyearForRiskgap<any>(newArray);
+          }
+        })
+      }
 
-      // }
+
 
 
     } catch (error) {
@@ -1049,8 +899,8 @@ applyFilter(event: Event) {
 
     } finally {
       //alert('finally to save data');
-    this.successMessage .set('Saved successfully');
-    setTimeout(() => this.successMessage .set(''), 4000);      
+      this.successMessage.set('Saved successfully');
+      setTimeout(() => this.successMessage.set(''), 4000);
       this.isProcessing = false;
       //alert(this.isProcessing);
     }
@@ -1063,8 +913,8 @@ applyFilter(event: Event) {
   }
 
   trackByIndex(index: number) {
-  return index;
-}
+    return index;
+  }
   async getMemberTaskList(medicaid_id: string) {
 
     //alert(medicaid_id);
@@ -1080,7 +930,7 @@ applyFilter(event: Event) {
     const payload = { medicaid_id: medicaid_id };
 
     const request = {
-      medicaid_id: medicaid_id 
+      medicaid_id: medicaid_id
     };
     const result = await this.apiService.getMemberGapsList<any>(request);
     //this.riskGapsList = result.data.prismGapList || [];
@@ -1094,9 +944,7 @@ applyFilter(event: Event) {
       ...qgap,
       Observation_Date: this.formatDateToMDY(qgap.Observation_Date)
     }));
-    //this.riskGapsList.clear();
-    //console.log('memberGapList:',this.memberGapList);
-    //console.log(this.memberQualityList);
+
     await this.setRiskGapsData(this.memberGapList);
     await this.setQualityGapsData(this.memberQualityList);
     this.cdr.detectChanges();
@@ -1104,15 +952,15 @@ applyFilter(event: Event) {
 
   }
   async setRiskGapsData(riskGapsdata: any) {
-     //console.log(riskGapsdata);
-    this.riskGapsList.clear(); 
+    //console.log(riskGapsdata);
+    this.riskGapsList.clear();
 
     if (riskGapsdata && Array.isArray(riskGapsdata)) {
       riskGapsdata.forEach((t: any) => {
 
         const fg = this.fb.group({
           DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
-          DIAG_DESC: [this.sanitize(t.DIAG_DESC)],          
+          DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
           RELEVANT_DATE: [t.RELEVANT_DATE],
           HCC_CATEGORY: [t.HCC_CATEGORY],
           HCC_MODEL: [t.HCC_MODEL],
@@ -1154,25 +1002,25 @@ applyFilter(event: Event) {
         });
         fg.markAsPristine();
         fg.markAsUntouched();
-        this.riskGapsList.push(fg); 
-       
-      });        
+        this.riskGapsList.push(fg);
+
+      });
     }
   }
 
- extractYear(value: any): string {
-  //console.log(value);
-  if (!value || value === '1900-01-01T00:00:00.000Z') {
-    return ''; // treat as blank
-  }
+  extractYear(value: any): string {
+    //console.log(value);
+    if (!value || value === '1900-01-01T00:00:00.000Z') {
+      return ''; // treat as blank
+    }
 
-  const d = new Date(value);
-  if (isNaN(d.getTime())) {
-    return ''; // invalid date safety
-  }
+    const d = new Date(value);
+    if (isNaN(d.getTime())) {
+      return ''; // invalid date safety
+    }
 
-  return d.getFullYear().toString();
-}
+    return d.getFullYear().toString();
+  }
 
 
   sanitize(value: any) {
@@ -1235,14 +1083,14 @@ applyFilter(event: Event) {
   async toggleContent() {
     this.showContent = !this.showContent;
     //this.availableTins = this.planTinMap['AHC'] || [];
-    const payload ={plan:'AHC'};
-    const result =  await this.apiService.getVendorListByplan<any>(payload); 
+    const payload = { plan: 'AHC' };
+    const result = await this.apiService.getVendorListByplan<any>(payload);
     this.availableTins = result.data || [];
     //console.log(this.availableTins);    
   }
 
   cancel() {
-    this.showContent = !this.showContent; 
+    this.showContent = !this.showContent;
   }
 
   getProviderGroupByTin(tin: string): string {
@@ -1260,16 +1108,16 @@ applyFilter(event: Event) {
     this.isLoading = true;
     try {
       // 🚫 DUPLICATE CHECK FIRST
-      const isDuplicate = await this.isDuplicateMeasure();    
+      const isDuplicate = await this.isDuplicateMeasure();
 
       if (isDuplicate) {
         this.measureForm.get('MEASURE')?.setErrors({ duplicateMeasure: true });
         this.measureForm.markAllAsTouched();
-        return;  
+        return;
       }
 
       // ✅ ONLY INSERT IF NOT DUPLICATE
-      const payload = this.buildAddressPayload(); 
+      const payload = this.buildAddressPayload();
       await this.apiService.insert(payload);
 
       await this.logSuccess();
@@ -1286,10 +1134,10 @@ applyFilter(event: Event) {
     } finally {
       this.isLoading = false;
     }
-}
+  }
 
 
- 
+
 
   private addStarPerformanceRow() {
     const f = this.measureForm.value;
@@ -1316,18 +1164,8 @@ applyFilter(event: Event) {
 
 
   async isDuplicateMeasure(): Promise<boolean> {
-    const f = this.measureForm.value;  
+    const f = this.measureForm.value;
 
-  //   this.starperformanceList.forEach(row => {
-  //   console.log({
-  //     rowMedicaid: row.RECIP_NO,
-  //     rowMeasure: row.SUB_MEASURE,
-  //     rowTin: row.PCP_TAX_ID,
-  //     formMedicaid: this.medicaid_id,
-  //     formMeasure: f.MEASURE,
-  //     formTin: f.PCP_TAX_ID
-  //   });
-  // });
 
 
     return this.starperformanceList.some(row =>
@@ -1336,13 +1174,13 @@ applyFilter(event: Event) {
       row.PCP_TAX_ID == f.PCP_TAX_ID
     );
   }
- 
+
 
   private buildAddressPayload() {
     const user = this.userData.getUser();
     const f = this.measureForm.value;
     const MEASURE_YEAR = new Date(f.MEASURE_DATE).getFullYear();
-    
+
     return {
       table_name: 'MEM_STAR_PERFORMANCE_PRISM_DATA',
       insertDataArray: [{
