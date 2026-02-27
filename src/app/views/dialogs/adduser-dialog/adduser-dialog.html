@@ -104,7 +104,7 @@
 
   <!-- ✅ Password policy hint -->
   <mat-hint class="password-hint">
-    Password must be at least 8 characters long and include uppercase, lowercase, number, and special character (e.g., ! @ # $ % ^ & *).
+    Password must be at least 15 characters long and include uppercase, lowercase, number, and special character (e.g., ! @ # $ % ^ & *).
   </mat-hint>
 
   <!-- Required error -->
@@ -118,7 +118,7 @@
   <mat-error *ngIf="
     addUserFormGroup.get('password')?.touched &&
     addUserFormGroup.get('password')?.hasError('minlength')">
-    Password must be at least 8 characters long
+    Password must be at least 15 characters long
   </mat-error>
 
 </mat-form-field>

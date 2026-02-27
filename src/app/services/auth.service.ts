@@ -5,14 +5,16 @@ import * as CryptoJS from 'crypto-js';
 import {
   CognitoIdentityProviderClient,
   InitiateAuthCommand,
-  RespondToAuthChallengeCommand
+  RespondToAuthChallengeCommand,
+  AssociateSoftwareTokenCommand,
+  VerifySoftwareTokenCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 const USER_KEY = 'app_user';
 const INACTIVITY_LIMIT = 60 * 60 * 1000; // 10 minutes in milliseconds
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private inactivityTimer: any;
-  constructor(private router: Router, private ngZone: NgZone) {this.startInactivityWatcher();}  // ✅ keep only this, no `router: any`
+  constructor(private router: Router, private ngZone: NgZone) { this.startInactivityWatcher(); }  // ✅ keep only this, no `router: any`
 
   // ✅ Start tracking user activity
   private startInactivityWatcher(): void {
@@ -49,7 +51,7 @@ export class AuthService {
       + (user?.ROLE_NAME ? ` (${user.ROLE_NAME})` : '');
   }
 
-   // ✅ Get full name with role
+  // ✅ Get full name with role
   getName(): string {
     const user = this.getUser();
     return [user?.FistName, user?.LastName].filter(Boolean).join(' ');
@@ -91,9 +93,9 @@ export class AuthService {
   // Congito 
   private client = new CognitoIdentityProviderClient({
     region: environment.cognito.region
-  });  
+  });
 
-private calculateSecretHash(username: string): string {
+  private calculateSecretHash(username: string): string {
     const message = username + environment.cognito.clientId;
     const secretKey = environment.cognito.clientSecret;
     const hash = CryptoJS.HmacSHA256(message, secretKey);
@@ -104,36 +106,54 @@ private calculateSecretHash(username: string): string {
   // LOGIN
   // ------------------------
   async login(username: string, password: string) {
-      const secretHash = this.calculateSecretHash(username);
+    const secretHash = this.calculateSecretHash(username);
 
-      const command = new InitiateAuthCommand({
-        AuthFlow: "USER_PASSWORD_AUTH",
-        ClientId: environment.cognito.clientId,
-        AuthParameters: {
-          USERNAME: username,
-          PASSWORD: password,
-          SECRET_HASH: secretHash
-        }
-      });
-
-      const result: any = await this.client.send(command);
-      //console.log(result);
-      // ➤ Case 1: Auth success (no MFA)
-      if (result.AuthenticationResult) {
-        this.storeTokens(result.AuthenticationResult, username);
-        return { status: "SUCCESS", tokens: result.AuthenticationResult };
+    const command = new InitiateAuthCommand({
+      AuthFlow: "USER_PASSWORD_AUTH",
+      ClientId: environment.cognito.clientId,
+      AuthParameters: {
+        USERNAME: username,
+        PASSWORD: password,
+        SECRET_HASH: secretHash
       }
+    });
 
-      // ➤ Case 2: MFA Required (SMS sent)
-      if (result.ChallengeName === "SMS_MFA") {
-        return {
-          status: "MFA_REQUIRED",
-          session: result.Session,
-          challengeName: result.ChallengeName
-        };
-      }
+    const result: any = await this.client.send(command);
+    //console.log(result);
+    // ➤ Case 1: Auth success (no MFA)
+    if (result.AuthenticationResult) {
+      this.storeTokens(result.AuthenticationResult, username);
+      return { status: "SUCCESS", tokens: result.AuthenticationResult };
+    }
+    // ✅ CASE 2: FIRST TIME → NEED QR CODE
+    if (result.ChallengeName === "MFA_SETUP") {
 
-      throw new Error("Unknown authentication challenge.");
+      return {
+        status: "MFA_SETUP",
+        session: result.Session,
+        username: username
+      };
+    }
+    // ✅ CASE 3: NORMAL MFA LOGIN
+    if (result.ChallengeName === "SOFTWARE_TOKEN_MFA") {
+
+      return {
+        status: "SOFTWARE_TOKEN_MFA",
+        session: result.Session,
+        username: username
+      };
+    }
+
+    // ➤ Case 2: MFA Required (SMS sent)
+    if (result.ChallengeName === "SMS_MFA") {
+      return {
+        status: "MFA_REQUIRED",
+        session: result.Session,
+        challengeName: result.ChallengeName
+      };
+    }
+
+    throw new Error("Unknown authentication challenge.");
   }
   async confirmMfaCode(username: string, code: string, session: string) {
     const secretHash = this.calculateSecretHash(username);
@@ -242,5 +262,56 @@ private calculateSecretHash(username: string): string {
   }
   getIdToken() {
     return localStorage.getItem('id_token');
+  }
+  async associateSoftwareToken(session: string) {
+
+    const command = new AssociateSoftwareTokenCommand({
+      Session: session
+    });
+
+    const response: any = await this.client.send(command);
+
+    return response;
+  }
+  async confirmMfaSetup(username: string, session: string, otp: string) {
+    const secretHash = this.calculateSecretHash(username);
+    const command =
+      new RespondToAuthChallengeCommand({
+        ClientId: environment.cognito.clientId,
+        ChallengeName: "MFA_SETUP",
+        Session: session,
+        ChallengeResponses: {
+          USERNAME: username,
+          SOFTWARE_TOKEN_MFA_CODE: otp,
+          SECRET_HASH: secretHash
+        }
+      });
+    const result: any =
+      await this.client.send(command);
+    this.storeTokens(result.AuthenticationResult, username);
+    return result;
+  }
+  async verifyLoginOtp(username: string, session: string, otp: string) {
+      const secretHash = this.calculateSecretHash(username);
+      const command = new RespondToAuthChallengeCommand({
+          ClientId: environment.cognito.clientId,
+          ChallengeName: "SOFTWARE_TOKEN_MFA",
+          Session: session,
+          ChallengeResponses: {
+            USERNAME: username,
+            SOFTWARE_TOKEN_MFA_CODE: otp,
+            SECRET_HASH: secretHash
+          }
+        });
+      const result: any = await this.client.send(command);
+      this.storeTokens(result.AuthenticationResult, username);
+      return result;
+    }
+    async verifySoftwareToken(session: string, otp: string) {
+    const command = new VerifySoftwareTokenCommand({
+      Session: session,
+      UserCode: otp
+    });
+    return await this.client.send(command);
   }
 }
