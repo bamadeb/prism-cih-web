@@ -114,8 +114,10 @@ export class AppointmentList {
 
     this.isLoading = true;
 
-    try {
-      const { start_date, end_date } = this.appListFormGroup.value;
+    try { 
+      const formvalues= this.appListFormGroup.value;
+      const start_date= this.formatDateOnly(formvalues.start_date);
+      const end_date= this.formatDateOnly(formvalues.end_date);
 
       const result = await this.apiService.getAppointmentList<any>({
         start_date,
@@ -131,7 +133,15 @@ export class AppointmentList {
       this.cdr.markForCheck();
     }
   }
-
+ private formatDateOnly(date: Date | string | null | undefined): string {
+    if (!date) return '';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 
 
 

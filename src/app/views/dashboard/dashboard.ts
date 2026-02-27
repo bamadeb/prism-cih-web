@@ -324,19 +324,27 @@ showCallList(row: any) {
 confirmAction(row: any) {
   this.withLoader(async () => {
     const result = await this.noLongerPatientService.confirmbox(row);
+
     if (result?.refresh) {
+      const note = result.note;
       this.removeMemberFromTable(row.medicaid_id);
       // 2️⃣ add to no longer patient table
+      //console.log(row);
       
       this.nolongerpatientdataSource.data = [
       {
         medicaid_id: row.medicaid_id,
         FIRST_NAME: row.FIRST_NAME,
         LAST_NAME: row.LAST_NAME,
+        memberName: row.FIRST_NAME+' '+row.LAST_NAME,
+        BIRTH: row.BIRTH,     
+        address: row.OTHER_ADDR1,
+        phone: row.OTHER_PHONE,     
+        NO_LONGER_PATIENT_NOTE: note ,  
         NO_LONGER_PATIENT_DATE: this.formatMDY(new Date())
       },
       ...this.nolongerpatientdataSource.data
-    ];
+    ]; 
 
     // refresh table
     this.nolongerpatientdataSource._updateChangeSubscription();

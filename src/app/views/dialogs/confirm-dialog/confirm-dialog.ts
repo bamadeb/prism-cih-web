@@ -62,7 +62,8 @@ export class ConfirmDialog {
       // ✅ notify parent
       this.dialogRef.close({
         refresh: true,
-        medicaid_id: medicaidId
+        medicaid_id: medicaidId,
+        note: note
       });
 
     } catch (error) {

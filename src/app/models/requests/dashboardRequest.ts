@@ -134,6 +134,7 @@ export interface UpdateMemberRequest {
 export interface ConfirmDialogResult {
   refresh: boolean;
   medicaid_id?: number;
+   note?: string; 
 }
 
 export interface AltphoneRequest {
