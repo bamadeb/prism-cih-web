@@ -666,7 +666,12 @@ resetActionFields() {
       const riskGap = fg.getRawValue();
 
       const processStatus = riskGap.PROCESS_STATUS;
-
+         UpdateArray.push({ 
+            medicaid_id: medicaid_id,
+            PLANYEAR: riskGap.PLANYEAR,
+            PLAN_YEAR: riskGap.PLAN_YEAR,
+            DIAG_CODE: riskGap.DIAG_CODE,
+          });
       if ((processStatus === true || processStatus === '1') && riskGap.DIAG_CODE) {
         diagCodes.push(riskGap.DIAG_CODE);
       }
@@ -958,14 +963,15 @@ resetActionFields() {
 
     if (riskGapsdata && Array.isArray(riskGapsdata)) {
       riskGapsdata.forEach((t: any) => {
-
+//console.log('t.PLAN_YEAR:',this.extractYear(t.PLAN_YEAR));
         const fg = this.fb.group({
           DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
           DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
           RELEVANT_DATE: [t.RELEVANT_DATE],
-          HCC_CATEGORY: [t.HCC_CATEGORY],
+          HCC_CATEGORY: ["t.HCC_CATEGORY"],
           HCC_MODEL: [t.HCC_MODEL],
           PLAN_YEAR: [this.extractYear(t.PLAN_YEAR)],
+          //PLAN_YEAR: ['2026'],
           PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
           risk_gap_id: [t.id],
@@ -980,7 +986,8 @@ resetActionFields() {
               : ''
           ],
           RISKGAP_ID: [t.ID],
-          PLANYEAR: [this.extractYear(t.PLAN_YEAR)],
+          PLANYEAR: [Number(this.extractYear(t.PLAN_YEAR))],
+          //PLANYEAR: [2026],
           Observation_Year: [this.sanitize(t.Observation_Year)],
           Observation_Code: [this.sanitize(t.Observation_Code)],
           CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
@@ -996,7 +1003,7 @@ resetActionFields() {
           Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
           note: [this.sanitize(t.note)]
         });
-
+//console.log(fg);
         // 🔥 Auto-toggle checkbox based on Observation Result
         fg.get('Observation_Result')?.valueChanges.subscribe(value => {
           fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });

@@ -112,3 +112,14 @@
   margin-top: 10px;
   margin-bottom: 15px;
 }
+.otp-field {
+  width: 260px;
+}
+
+.otp-input {
+  text-align: center;
+  font-size: 28px;
+  letter-spacing: 12px;
+  font-weight: 600;
+  font-family: monospace;
+}
