@@ -25,7 +25,7 @@ import {
 import { UserIdRequest, MedicaidIdRequest } from '../../../../models/requests/commonRequest';
 import { UserDataService } from '../../../../services/user-data-service';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule,DatePipe  } from '@angular/common';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
 import { LogRequest } from '../../../../models/requests/addActionMasterRequest';
@@ -62,7 +62,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
     MatPaginator
   ],
   providers: [
-    provideNativeDateAdapter()   // <-- REQUIRED FIX
+    provideNativeDateAdapter() ,DatePipe  // <-- REQUIRED FIX
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './add-action.html',
@@ -165,7 +165,7 @@ export class AddAction {
     private userData: UserDataService,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<AddAction>,
-    private fb: FormBuilder
+    private fb: FormBuilder,private datePipe: DatePipe
   ) {
 
     this.addActionFormGroup = this.fb.group({
@@ -365,7 +365,7 @@ export class AddAction {
       table_name: 'MEM_SCHEDULE_APPOINTMENT_ACTION',
       insertDataArray: [{
         medicaid_id: this.medicaid_id,
-        action_date: this.formatDateToYMD(form.appointment_date),
+        action_date: this.datePipe.transform(form.appointment_date, 'yyyy-MM-dd'),
         action_time: form.appointment_time,
         status: form.action_status,
         appiontment_type: form.appointment_type,
@@ -393,7 +393,7 @@ export class AddAction {
 
     const insert_data = {
       MEDICAID_ID: this.medicaid_id,
-      VISIT_DATE: this.formatDateToYMD(form.pcp_visit_date),
+      VISIT_DATE: this.datePipe.transform(form.pcp_visit_date, 'yyyy-MM-dd'),
       MESSAGE: form.pcp_visit_message,
       VISIT_TYPE: form.visit_type,
       ADDED_BY: this.userId
@@ -543,7 +543,7 @@ export class AddAction {
         action_type_source: formValues.action_type_source,
         action_id: formValues.action_id,
         panel_id: formValues.panel_id,
-        action_date: this.formatDateOnly(formValues.action_date),
+        action_date: this.datePipe.transform(formValues.action_date, 'yyyy-MM-dd'),
         action_status: formValues.action_status,
         add_by: this.userId || '', // if you store user info in authService/session
         action_note: formValues.action_note,
@@ -572,7 +572,7 @@ export class AddAction {
               {
                 medicaid_id: formValues.medicaid_id,
                 action_id: next_panel_id,
-                action_date: this.formatDateOnly(formValues.next_action_date),
+                action_date: this.datePipe.transform(formValues.next_action_date, 'yyyy-MM-dd'),
                 action_note: formValues.next_action_note,
                 status: 'Open',
                 assign_to: this.userId,
@@ -607,7 +607,7 @@ export class AddAction {
         action_type_source: formValues.action_type_source,
         action_id: formValues.action_id,
         panel_id: formValues.panel_id,
-        action_date: formValues.action_date,
+        action_date: this.datePipe.transform(formValues.action_date, 'yyyy-MM-dd'),
         action_status: formValues.action_status,
         action_note: formValues.action_note,
         action_result_id: formValues.action_result_id,
@@ -619,11 +619,7 @@ export class AddAction {
         id_field_name: 'id',
         id_field_value: action_id,
       };
-
-
-
     }
-
   }
 resetActionFields() {
   this.addActionFormGroup.patchValue({
@@ -680,7 +676,7 @@ resetActionFields() {
         medicaid_id,
         Type: riskGap.Type,
         Gap_Code: riskGap.DIAG_CODE,
-        Observation_Date: this.formatDateOnly(riskGap.Observation_Date),
+        Observation_Date: this.datePipe.transform(riskGap.Observation_Date, 'yyyy-MM-dd'),
         Observation_Year: riskGap.Observation_Date
           ? new Date(riskGap.Observation_Date).getFullYear()
           : null,
@@ -744,6 +740,7 @@ resetActionFields() {
     //this.qualityGapsList.controls.forEach((fg: FormGroup) => {
     (this.qualityGapsList.controls as FormGroup[]).forEach((fg) => {
       const qualityGap = fg.getRawValue();
+      console.log(qualityGap);
 
       const processStatus = qualityGap.PROCESS_STATUS;
       if ((processStatus === true || processStatus === '1') && qualityGap.SUB_MEASURE) {
@@ -754,8 +751,8 @@ resetActionFields() {
         medicaid_id,
         Type: qualityGap.Type,
         Gap_Code: qualityGap.SUB_MEASURE,
-        //Observation_Date: qualityGap.Observation_Date,
-        Observation_Date: this.formatDateOnly(qualityGap.Observation_Date),
+        Observation_Date: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),
+        //Observation_Date: this.formatDateOnly(qualityGap.Observation_Date),
         Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
         Observation_Code: qualityGap.Observation_Code,
         CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
@@ -772,6 +769,8 @@ resetActionFields() {
         Source: 'CIH',
         note: qualityGap.note
       };
+
+      console.log('commonData:',commonData);
 
       // ✅ UPDATE only if dirty
       if (qualityGap.quality_gap_id) {
@@ -805,7 +804,7 @@ resetActionFields() {
           qualityGap.Provider_Group_Name,
           qualityGap.note
         ].some(v => v !== null && v !== undefined && v !== "");
-
+        console.log('hasValue:',hasValue);
         if (hasValue) {
 
           riskObsInsertArray.push({
@@ -857,7 +856,8 @@ resetActionFields() {
       };
       const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
 
-
+      console.log('riskObsInsertArray:',riskObsInsertArray);
+      console.log('riskObsUpdateArray:',riskObsUpdateArray);      
       /* ----------------------------------
          STEP 4: UPDATE OBSERVATIONS
       -----------------------------------*/
@@ -1194,7 +1194,7 @@ resetActionFields() {
       insertDataArray: [{
         MEDICAID_ID: this.medicaid_id,
         MEASURE: f.MEASURE,
-        MEASURE_DATE: f.MEASURE_DATE,
+        MEASURE_DATE: this.datePipe.transform(f.MEASURE_DATE, 'yyyy-MM-dd'),
         MEASURE_YEAR: MEASURE_YEAR,
         NUM_COUNT: f.NUM_COUNT,
         PCP_TAX_ID: f.PCP_TAX_ID,
