@@ -714,10 +714,25 @@ resetActionFields() {
       }
       else {
 
-        const hasAnyValue = Object.values(commonData).some(
-          v => v !== null && v !== undefined && v !== ''
-        );
-
+        // const hasAnyValue = Object.values(commonData).some(
+        //   v => v !== null && v !== undefined && v !== ''
+        // );
+        const hasAnyValue = [
+          riskGap.Observation_Date,
+          riskGap.Observation_Code,
+          riskGap.CPT_Code_Modifier,
+          riskGap.Observation_Code_Set,
+          riskGap.Observation_Result,
+          riskGap.Service_Provider_NPI,
+          riskGap.Service_Provider_Taxonomy_Code,
+          riskGap.Service_Provider_Name,
+          riskGap.Service_Provider_Type,
+          riskGap.Service_Provider_RxProviderFlag,
+          riskGap.Provider_Group_NPI,
+          riskGap.Provider_Group_Taxonomy_Code,
+          riskGap.Provider_Group_Name,
+          riskGap.note
+        ].some(v => v !== null && v !== undefined && v !== "");
         if (hasAnyValue) {
 
           //console.log("Inserting new record");
