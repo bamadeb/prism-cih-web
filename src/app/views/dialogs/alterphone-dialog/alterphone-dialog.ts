@@ -15,7 +15,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 @Component({
   selector: 'app-alterphone-dialog',
   imports: [
-    MatDialogContent, MatFormFieldModule, MatInputModule, MatDialogActions,
+    MatDialogContent, MatFormFieldModule, MatInputModule, 
     MatButtonModule, PhoneFormatPipe, CommonModule, MatCard, MatCardContent,
     ReactiveFormsModule, MatFormField, MatError,
     MatProgressSpinner

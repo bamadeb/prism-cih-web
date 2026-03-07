@@ -58,8 +58,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
     MatProgressSpinner,
     MatIconModule,
     PhoneFormatPipe,
-    MatCard,
-    MatPaginator
+    MatCard
   ],
   providers: [
     provideNativeDateAdapter() ,DatePipe  // <-- REQUIRED FIX
