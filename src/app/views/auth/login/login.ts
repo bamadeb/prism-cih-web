@@ -146,20 +146,20 @@ export class Login {
 async setupQrCode() {
   try {
 
-    console.log("setupQrCode session:", this.session);
+    //console.log("setupQrCode session:", this.session);
 
     const response =
       await this.auth.associateSoftwareToken(this.session);
 
-    console.log("associateSoftwareToken response:", response);
+    //console.log("associateSoftwareToken response:", response);
 
     this.session = response.Session;
 
     const secretCode = response.SecretCode;
 
-    this.qrCodeData =  `otpauth://totp/PrismDev:${encodeURIComponent(this.username)}?secret=${secretCode}&issuer=PrismDev`;
+    this.qrCodeData =  `otpauth://totp/Prism:${encodeURIComponent(this.username)}?secret=${secretCode}&issuer=Prism`;
 
-    console.log("QR Data:", this.qrCodeData);
+    //console.log("QR Data:", this.qrCodeData);
 
     this.showQrScreen = true;
     this.cdr.detectChanges();
