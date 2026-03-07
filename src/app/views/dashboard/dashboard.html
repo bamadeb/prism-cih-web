@@ -277,7 +277,7 @@
                   </div>
                 </td>
                 <td>
-                  {{ totalArray.priority_pcp_visit_count ?? 0 }}/{{ totalArray.total_priority_count }}
+                  {{ totalArray.total_priority_count_pcp ?? 0 }}/{{ totalArray.total_priority_count }}
                   (<span [style.color]="totalArray.priority_pcp_color" style="padding: 0;">{{
                     totalArray.priority_pcp_percentage |
                     number:'1.0-0' }}%</span>)
