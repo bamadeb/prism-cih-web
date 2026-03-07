@@ -153,7 +153,7 @@
                 <th *ngFor="let item of performanceArray">
                   <div *ngFor="let entry of (item | keyvalue)">
                     <span [title]="entry.value.provider_name" class="text-uppercase"> {{
-                      entry.value.provider_name?.slice(0, 5) }}.. </span>
+                      entry.value.provider_name.slice(0, 5) }}.. </span>
                   </div>
                 </th>
                 <th>TOTAL</th>

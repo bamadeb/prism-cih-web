@@ -4,7 +4,7 @@ import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-access-denied',
-  imports: [MatCard, MatIcon, MatCardContent],
+  imports: [MatCard, MatCardContent],
   templateUrl: './access-denied.html',
   styleUrl: './access-denied.css',
 })

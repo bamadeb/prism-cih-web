@@ -17,7 +17,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 @Component({
   selector: 'app-alteraddress-dialog',
    providers: [provideNativeDateAdapter()], // ✅ REQUIRED
-  imports: [MatDialogContent, MatDatepickerModule, MatNativeDateModule, MatFormFieldModule, MatInputModule, MatDialogActions, MatButtonModule, CommonModule, MatCard, MatCardContent, ReactiveFormsModule, MatFormField, MatError, MatProgressSpinner],
+  imports: [MatDialogContent, MatDatepickerModule, MatNativeDateModule, MatFormFieldModule, MatInputModule, MatButtonModule, CommonModule, MatCard, MatCardContent, ReactiveFormsModule, MatFormField, MatError, MatProgressSpinner],
   templateUrl: './alteraddress-dialog.html',
   styleUrl: './alteraddress-dialog.css',
 })
