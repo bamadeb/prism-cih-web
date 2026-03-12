@@ -49,7 +49,7 @@ export class QualitygapsFile {
 
 
   /* ---------- FORM & FILE ---------------------------- */
-  processMembersFormGroup!: FormGroup;
+  processQualityFormGroup!: FormGroup;
   selectedFile: File | null = null;
 
   /* ----------- TABLE --------------------------------- */
@@ -90,7 +90,7 @@ export class QualitygapsFile {
     private titleService: Title, private router: Router, private auth: UserDataService
 
   ) {
-    this.processMembersFormGroup = this.fb.group({
+    this.processQualityFormGroup = this.fb.group({
       file: [null, Validators.required]
     });
   }
@@ -125,10 +125,11 @@ export class QualitygapsFile {
     const file = event.target.files[0];    
     if (file && file.type === 'text/csv') {
       this.selectedFile = file;
-      this.processMembersFormGroup.patchValue({ file: file });
+      this.processQualityFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
-      this.processMembersFormGroup.get('file')?.reset();
+      this.processQualityFormGroup.get('file')?.reset();
+      this.isUpload = false;
       alert('Only .csv files are allowed.');
     }
   }
@@ -137,15 +138,15 @@ export class QualitygapsFile {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = ''; // ✅ allowed
     }
-    this.processMembersFormGroup.get('file')?.reset();
+    this.processQualityFormGroup.get('file')?.reset();
     this.selectedFile = null;
   }
 
   /* ============================ UPLOAD ============================ */
   async qualityFileSubmit(): Promise<void> {
 
-    if (!this.processMembersFormGroup.valid || !this.selectedFile) {
-      this.processMembersFormGroup.markAllAsTouched();
+    if (!this.processQualityFormGroup.valid || !this.selectedFile) {
+      this.processQualityFormGroup.markAllAsTouched();
       return;
     }
 
@@ -208,10 +209,10 @@ export class QualitygapsFile {
           await this.uploadInBatches(insertDataArray);
 
           // ------------------ Fetch temp members ------------------
-          await this.loadTempMembers();
+          await this.loadTempRecords();
 
           // Reset form + file
-          this.processMembersFormGroup.reset();
+          this.processQualityFormGroup.reset();
           this.selectedFile = null;
           this.resetFile();
           this.isUpload = false;
@@ -283,7 +284,7 @@ export class QualitygapsFile {
     await this.apiService.insert<any, MemberFileRequest>(payload);
   }
 
-  private async loadTempMembers(): Promise<void> {
+  private async loadTempRecords(): Promise<void> {
     const res = await this.apiService.getTempQualityGapsBySeccionID<any>({
       session_id: this.sessionId
     });

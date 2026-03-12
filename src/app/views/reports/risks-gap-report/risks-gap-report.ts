@@ -125,6 +125,15 @@ export class RisksGapReport {
     return typeof value === 'string' ? value.toLowerCase() : value;
   };
 }
+
+formatDateToYMD(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`; // m/d/Y format
+  }
   
  async applyFilter() {
   if (this.riskGapsFormGroup.invalid) {
@@ -143,8 +152,8 @@ export class RisksGapReport {
     };
 
     const payload = {
-      start_date: formatDate(start_date),
-      end_date: formatDate(end_date),
+      start_date: this.formatDateToYMD(start_date),
+      end_date: this.formatDateToYMD(end_date),
       gaps_type
     };
 
@@ -162,8 +171,6 @@ export class RisksGapReport {
     this.cdr.markForCheck();
   }
 }
-
-
 
 
 dateRangeValidator(control: AbstractControl): ValidationErrors | null {
@@ -335,8 +342,6 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     alert('Failed to remove records');
   }
 }
-
-
 
 }
 

@@ -21,6 +21,7 @@ import { ChangePassword } from './views/change-password/change-password';
 import { UserCreationRequest } from './views/user-creation-request/user-creation-request/user-creation-request';
 import { AccessDenied } from './views/access-denied/access-denied/access-denied';
 import { PageAccess } from './views/rolewise-page/page-access/page-access';
+import { OutreachActivity } from './views/reports/outreach-activity/outreach-activity/outreach-activity';
 
 
 export const routes: Routes = [
@@ -144,6 +145,13 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'page-access', component: PageAccess },
+    ]
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'outreach-activity', component: OutreachActivity },
     ]
   },
   {

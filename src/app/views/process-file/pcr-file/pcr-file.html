@@ -4,7 +4,7 @@
     <mat-card class="mb-1">
         <mat-card-content>
 
-            <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="pcrFileSubmit()"
+            <form [formGroup]="processPcrFormGroup" class="filter-row" (ngSubmit)="pcrFileSubmit()"
                 enctype="multipart/form-data">
 
                 <!-- <mat-label class="file-label">Select Member File</mat-label> -->
@@ -23,13 +23,13 @@
 
                 <input #fileInput type="file" hidden (change)="onFileSelect($event)" />
 
-                <mat-error *ngIf="processMembersFormGroup.get('file')?.touched &&
-                 processMembersFormGroup.get('file')?.invalid">
+                <mat-error *ngIf="processPcrFormGroup.get('file')?.touched &&
+                 processPcrFormGroup.get('file')?.invalid">
                     File is required
                 </mat-error>
 
                  <button mat-raised-button color="primary" type="submit"
-                    [disabled]="isUpload || !processMembersFormGroup.valid">
+                    [disabled]="isUpload || !processPcrFormGroup.valid">
                     @if (isUpload) {
                         <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
                     } @else {
