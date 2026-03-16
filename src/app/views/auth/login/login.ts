@@ -286,7 +286,10 @@ async setupQrCode() {
   }
 
   addloginHistory() {
-    const logpayload: LogRequest = {
+    const utcDate = new Date().toISOString();   
+    console.log("Login log UTC date:", utcDate);
+
+    const logpayload = {
       table_name: 'MEM_SYSTEM_LOG',
       insertDataArray: [{
         medicaid_id: 0,
@@ -294,6 +297,7 @@ async setupQrCode() {
         log_details: `Login By ${this.username}`,
         log_status: 'SUCCESS',
         log_by: this.userId,
+        //add_date: utcDate,
         action_type: `${this.username}`
       }]
     };

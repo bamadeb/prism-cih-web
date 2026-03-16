@@ -118,12 +118,14 @@ navigatorList: any[] = [];
   : Array.isArray(result?.data?.data)
     ? result.data.data
     : []; 
+
+    
      this.dataSource.data = rawData.map((u: any) => ({
         medicaid_id: u.medicaid_id ?? '',
         log_name: u.log_name ?? '',
         log_details: u.log_details ?? '',
         log_status: u.log_status ?? '',
-        add_date: u.add_date ?? ''
+        add_date: this.convertToLocal(u.add_date) ?? ''
       }));
 
     this.selection.clear();
@@ -132,6 +134,12 @@ navigatorList: any[] = [];
     this.cdr.markForCheck(); // ✅ OnPush safe
   }
 }
+
+
+convertToLocal(apiDate: any): string { 
+  return new Date(apiDate).toLocaleString();
+}
+ 
 
 async loadLogreport() {
   this.isLoading = true;
