@@ -20,7 +20,7 @@ export class BaseComponent {
     protected errorLogger: ErrorReportingService,
     public matDialog: MatDialog) { }
 
-    private eventSubject = new Subject<any>();
+    private readonly eventSubject = new Subject<any>();
 
     sendEvent(data: any) {
       this.eventSubject.next(data);
