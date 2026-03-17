@@ -195,8 +195,10 @@ async membersFileSubmit(): Promise<void> {
     this.resetFile();
 
   } catch (error) {
+    this.isUpload = false;
     console.error('Error reading or uploading CSV:', error);
     alert('Error processing member file. Please check your CSV format.');
+    
   } finally {
     this.isUpload = false;
     console.log('finally');

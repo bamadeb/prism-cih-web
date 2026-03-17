@@ -852,7 +852,7 @@ onNavigatorChange(navigatorId: number): void {
     this.performanceArray = performanceArray;
     this.totalArray = totalArray;
 
-    //console.log('✅ Provider performance summary:', this.performanceArray);
+    console.log('✅ Provider performance summary:', this.performanceArray);
     //console.log('✅ Totals:', this.totalArray);
   }
 

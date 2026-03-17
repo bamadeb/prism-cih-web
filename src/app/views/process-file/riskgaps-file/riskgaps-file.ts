@@ -49,7 +49,7 @@ export class RiskgapsFile {
 
 
   /* ---------- FORM & FILE ---------------------------- */
-  processMembersFormGroup!: FormGroup;
+  processRiskFormGroup!: FormGroup;
   selectedFile: File | null = null;
 
   /* ----------- TABLE --------------------------------- */
@@ -90,7 +90,7 @@ export class RiskgapsFile {
     private titleService: Title, private router: Router, private auth: UserDataService
 
   ) {
-    this.processMembersFormGroup = this.fb.group({
+    this.processRiskFormGroup = this.fb.group({
       file: [null, Validators.required]
     });
   }
@@ -125,10 +125,11 @@ export class RiskgapsFile {
     const file = event.target.files[0];
     if (file && file.type === 'text/csv') {
       this.selectedFile = file;
-      this.processMembersFormGroup.patchValue({ file: file });
+      this.processRiskFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
-      this.processMembersFormGroup.get('file')?.reset();
+      this.processRiskFormGroup.get('file')?.reset();
+      this.isUpload = false;
       alert('Only .csv files are allowed.');
     }
   }
@@ -137,15 +138,15 @@ export class RiskgapsFile {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = ''; // ✅ allowed
     }
-    this.processMembersFormGroup.get('file')?.reset();
+    this.processRiskFormGroup.get('file')?.reset();
     this.selectedFile = null;
   }
 
   /* ============================ UPLOAD ============================ */
   async riskGapsFileSubmit(): Promise<void> {
 
-    if (!this.processMembersFormGroup.valid || !this.selectedFile) {
-      this.processMembersFormGroup.markAllAsTouched();
+    if (!this.processRiskFormGroup.valid || !this.selectedFile) {
+      this.processRiskFormGroup.markAllAsTouched();
       return;
     }
 
@@ -204,10 +205,10 @@ export class RiskgapsFile {
           await this.uploadInBatches(insertDataArray);
 
           // ------------------ Fetch temp members ------------------
-          await this.loadTempMembers();
+          await this.loadTempRiskGaps();
 
           // Reset form + file
-          this.processMembersFormGroup.reset();
+          this.processRiskFormGroup.reset();
           this.selectedFile = null;
           this.resetFile();
           this.isUpload = false;
@@ -269,7 +270,7 @@ export class RiskgapsFile {
     await this.apiService.insert<any, MemberFileRequest>(payload);
   }
 
-  private async loadTempMembers(): Promise<void> {
+  private async loadTempRiskGaps(): Promise<void> {
     const res = await this.apiService.getTempRiskGapsBySeccionID<any>({
       session_id: this.sessionId
     });

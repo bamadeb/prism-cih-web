@@ -765,8 +765,7 @@ resetActionFields() {
         medicaid_id,
         Type: qualityGap.Type,
         Gap_Code: qualityGap.SUB_MEASURE,
-        Observation_Date: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),
-        //Observation_Date: this.formatDateOnly(qualityGap.Observation_Date),
+        Observation_Date: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),         
         Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
         Observation_Code: qualityGap.Observation_Code,
         CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
@@ -1255,24 +1254,34 @@ resetActionFields() {
     return this.apiService.insert(logpayload);
   }
 
-  private formatDateOnly(date: Date | string | null | undefined): string {
-    if (!date) return '';
+  formatYMD(date:Date) {
     const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${month}/${day}/${year}`;
   }
+
+  // formatDateToMDY(dateStr: string): string {
+  //   if (!dateStr) return '';
+
+  //   const formattedDate = dateStr.split('T')[0];
+  //   const date = new Date(formattedDate);
+  //   const month = String(date.getMonth() + 1).padStart(2, '0');
+  //   const day = String(date.getDate()).padStart(2, '0');
+  //   const year = date.getFullYear();
+  //   return `${month}/${day}/${year}`; // m/d/Y format
+  // }
 
   formatDateToMDY(dateStr: string): string {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`; // m/d/Y format
+
+    const datePart = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+    const [year, month, day] = datePart.split('-');
+    return `${month}/${day}/${year}`;
   }
+
+
   formatDateToYMD(dateStr: string): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);

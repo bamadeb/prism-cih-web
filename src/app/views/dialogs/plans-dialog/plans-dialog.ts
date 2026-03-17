@@ -125,21 +125,25 @@ export class PlansDialog {
       table_name: 'MEM_PLAN_MASTER',
       insertDataArray: [{
         plan_name: formValue.plan_name,
-        start_date: this.formatDateOnly(formValue.start_date),
-        end_date: this.formatDateOnly(formValue.end_date),
-        status: formValue.status
+        start_date: this.formatDateToYMD(formValue.start_date),
+        end_date: this.formatDateToYMD(formValue.end_date),
+        status: formValue.status 
       }]
     };
 
     await this.apiService.insert<any, PlanRequest>(payload);
   }
 
-  private formatDateOnly(date: Date): string {
-    const year = date.getFullYear();
+  formatDateToYMD(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`; // m/d/Y format
   }
+
+   
 
   // 🔹 UPDATE PLAN
   private async updatePlan(formValue: any): Promise<void> {
@@ -153,8 +157,8 @@ export class PlansDialog {
       id_field_value: this.currentPlanId,
       updateData: {
         plan_name: formValue.plan_name,
-        start_date: this.formatDateOnly(formValue.start_date),
-        end_date: this.formatDateOnly(formValue.end_date),
+        start_date: this.formatDateToYMD(formValue.start_date),
+        end_date: this.formatDateToYMD(formValue.end_date),
         status: Number(formValue.status)
       }
     };

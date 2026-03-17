@@ -1,0 +1,66 @@
+.table-loader {
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
+  min-height: 200px;         /* give space to center vertically */
+}
+.wd{
+  width: 20%;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between; /* ✅ important */
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+mat-card {
+  text-align: center;
+}
+
+mat-card h2 {
+  color: #1e88e5;
+  font-size: 28px;
+  margin: 0;
+}
+
+mat-card p {
+  margin: 4px 0 0;
+  color: #1e88e5;
+  font-weight: 500;
+}
+.fbold{
+  font-weight: bold;
+}
+
+.fnormal{
+  font-weight: normal;
+}
+
+.note-column {
+  width: 30%;
+  max-width: 30%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+.loader-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; 
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+

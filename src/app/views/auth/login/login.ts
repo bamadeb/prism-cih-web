@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component,OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from "@angular/material/card";
 import { FormsModule } from '@angular/forms';
@@ -41,7 +41,7 @@ import { ChangeDetectorRef } from '@angular/core';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit{
   username = '';
   password = '';
   userId: number = 0;
@@ -286,7 +286,10 @@ async setupQrCode() {
   }
 
   addloginHistory() {
-    const logpayload: LogRequest = {
+    const utcDate = new Date().toISOString();   
+    console.log("Login log UTC date:", utcDate);
+
+    const logpayload = {
       table_name: 'MEM_SYSTEM_LOG',
       insertDataArray: [{
         medicaid_id: 0,
@@ -294,6 +297,7 @@ async setupQrCode() {
         log_details: `Login By ${this.username}`,
         log_status: 'SUCCESS',
         log_by: this.userId,
+        //add_date: utcDate,
         action_type: `${this.username}`
       }]
     };

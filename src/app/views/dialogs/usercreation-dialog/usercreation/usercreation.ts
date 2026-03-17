@@ -148,12 +148,7 @@ async loadRoles() {
       await this.apiService.insert(payload);
     }
   
-    // private formatDateOnly(date: Date): string {
-    //   const year = date.getFullYear();
-    //   const month = String(date.getMonth() + 1).padStart(2, '0');
-    //   const day = String(date.getDate()).padStart(2, '0');
-    //   return `${year}-${month}-${day}`;
-    // }
+     
   
     // 🔹 UPDATE PLAN
     // private async updatePlan(formValue: any): Promise<void> {
@@ -161,20 +156,7 @@ async loadRoles() {
     //     throw { code: 'PLAN_ID_MISSING' };
     //   }
   
-    //   const payload: UpdatePlanRequest = {
-    //     table_name: 'MEM_PLAN_MASTER',
-    //     id_field_name: 'id',
-    //     id_field_value: this.currentPlanId,
-    //     updateData: {
-    //       plan_name: formValue.plan_name,
-    //       start_date: this.formatDateOnly(formValue.start_date),
-    //       end_date: this.formatDateOnly(formValue.end_date),
-    //       status: Number(formValue.status)
-    //     }
-    //   };
-  
-    //   await this.apiService.update<any, UpdatePlanRequest>(payload);
-    // }
+    
   
     // 🔹 ERROR HANDLER
     private handleError(error: any): void {
