@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { ConfigService } from '../../../services/api.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -26,7 +26,7 @@ import { MatIcon } from "@angular/material/icon";
   templateUrl: './star-performance.html',
   styleUrl: './star-performance.css'
 })
-export class StarPerformance {
+export class StarPerformance implements OnInit {
 
   starPerformanceFormGroup!: FormGroup;
   isLoading = false;

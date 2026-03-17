@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule,Validators, AbstractControl, ValidationErrors  } from '@angular/forms';
 import { ConfigService } from '../../../services/api.service';
 import { Title } from '@angular/platform-browser';
@@ -39,7 +39,7 @@ import { UserDataService } from '../../../services/user-data-service';
   ],templateUrl: './risks-gap-report.html',
   styleUrl: './risks-gap-report.css',
 })
-export class RisksGapReport {
+export class RisksGapReport implements AfterViewInit ,OnInit {
 
 
   riskGapsFormGroup!: FormGroup;

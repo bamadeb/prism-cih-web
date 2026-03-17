@@ -58,7 +58,7 @@ interface RiskSummaryRow {
   templateUrl: './risk-profile.html',
   styleUrl: './risk-profile.css',
 })
-export class RiskProfile {
+export class RiskProfile implements AfterViewInit, OnInit {
   displayedColumns: string[] = [ ]; 
   dynamicDateColumns: string[] = []; 
 

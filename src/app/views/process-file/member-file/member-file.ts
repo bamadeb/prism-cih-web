@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -53,7 +54,7 @@ import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
   templateUrl: './member-file.html',
   styleUrl: './member-file.css',
 })
-export class MemberFile {
+export class MemberFile implements OnInit{
 
   /* ---------- FORM & FILE ---------------------------- */
   processMembersFormGroup!: FormGroup;

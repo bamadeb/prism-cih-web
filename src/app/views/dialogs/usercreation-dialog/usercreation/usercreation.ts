@@ -35,7 +35,7 @@ import { UserDataService } from '../../../../services/user-data-service';
   templateUrl: './usercreation.html',
   styleUrl: './usercreation.css',
 })
-export class Usercreation {
+export class Usercreation implements OnInit{
 
   userCreationFormGroup!: FormGroup;
     hidePassword = true;

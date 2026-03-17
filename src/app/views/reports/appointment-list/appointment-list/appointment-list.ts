@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConfigService } from '../../../../services/api.service';
 import { Title } from '@angular/platform-browser';
@@ -37,7 +37,7 @@ interface AppointmentResponse {
 })
 
 
-export class AppointmentList {
+export class AppointmentList implements AfterViewInit,OnInit {
 
   appListFormGroup!: FormGroup;
   isLoading = false;

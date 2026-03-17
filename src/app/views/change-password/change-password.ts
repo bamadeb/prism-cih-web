@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component,OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from "@angular/material/card";
@@ -27,7 +27,7 @@ import { UserDataService } from '../../services/user-data-service';
   templateUrl: './change-password.html',
   styleUrl: './change-password.css',
 })
-export class ChangePassword {
+export class ChangePassword implements OnInit{
 
   newPassword = '';
   confirmPassword = '';

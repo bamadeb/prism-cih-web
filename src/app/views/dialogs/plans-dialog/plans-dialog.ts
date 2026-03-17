@@ -35,7 +35,7 @@ import { PlanRequest, UpdatePlanRequest } from '../../../models/requests/planReq
   templateUrl: './plans-dialog.html',
   styleUrl: './plans-dialog.css',
 })
-export class PlansDialog {
+export class PlansDialog implements OnInit{
 
   plansFormGroup!: FormGroup;
   hidePassword = true;

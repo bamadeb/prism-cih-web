@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -45,7 +47,7 @@ const TABLE = 'MEM_CIH_QUALITY_TEMP';
   templateUrl: './qualitygaps-file.html',
   styleUrl: './qualitygaps-file.css',
 })
-export class QualitygapsFile {
+export class QualitygapsFile implements AfterViewInit, OnInit {
 
 
   /* ---------- FORM & FILE ---------------------------- */

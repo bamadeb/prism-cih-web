@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -45,7 +47,7 @@ const TABLE = 'MEM_RISK_GAP_TEMP';
   templateUrl: './riskgaps-file.html',
   styleUrl: './riskgaps-file.css',
 })
-export class RiskgapsFile {
+export class RiskgapsFile implements AfterViewInit, OnInit {
 
 
   /* ---------- FORM & FILE ---------------------------- */

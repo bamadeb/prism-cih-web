@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component ,OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -20,7 +20,7 @@ import { Router } from '@angular/router';
 })
 
 
-export class Sidebar {
+export class Sidebar implements OnInit{
   userRole: any;
     constructor(     
     private userData: UserDataService,private router: Router 

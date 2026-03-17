@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -54,7 +55,7 @@ import * as Papa from 'papaparse';
   templateUrl: './pcr-file.html',
   styleUrl: './pcr-file.css',
 })
-export class PcrFile {
+export class PcrFile implements OnInit{
 
   
         /* ---------- FORM & FILE ---------------------------- */

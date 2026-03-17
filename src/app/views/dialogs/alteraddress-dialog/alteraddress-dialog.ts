@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject,OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfigService } from '../../../services/api.service'; 
@@ -21,7 +21,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
   templateUrl: './alteraddress-dialog.html',
   styleUrl: './alteraddress-dialog.css',
 })
-export class AlteraddressDialog {
+export class AlteraddressDialog implements OnInit{
   addAltaddressFormGroup!: FormGroup;
   isLoading = false;
 

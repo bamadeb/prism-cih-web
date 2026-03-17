@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogTitle, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -21,7 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './riskgaps-dialog.html',
   styleUrl: './riskgaps-dialog.css',
 })
-export class RiskgapsDialog {
+export class RiskgapsDialog implements AfterViewInit{
   displayedColumns = [
     'sl',
     'RELEVANT_DATE',
