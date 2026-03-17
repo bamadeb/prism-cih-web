@@ -22,8 +22,8 @@ export class ConfigService {
   }
 
   constructor(
-    private httpClient: HttpClient,
-    private environmentService: AppEnvService,
+    private readonly httpClient: HttpClient,
+    private readonly environmentService: AppEnvService,
 
   ) { }
 
@@ -645,7 +645,7 @@ async createCognitoUser(request: any): Promise<string> {
     );
 
     // ✅ Handle Cognito error properly
-    if (!res || res.statusCode !== 200) {
+    if (res?.statusCode !== 200) {
 
       throw {
         code: 'INVALID_PASSWORD',

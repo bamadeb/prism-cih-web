@@ -7,8 +7,8 @@ import { Injectable } from '@angular/core';
 export class AlterPhoneDialogService {
 
   constructor(
-    private dialog: MatDialog,
-    private apiService: ConfigService
+    private readonly dialog: MatDialog,
+    private readonly apiService: ConfigService
   ) {}
 
   async showalterPhoneListDialog(row: any): Promise<MatDialogRef<AlterphoneDialog>> {
