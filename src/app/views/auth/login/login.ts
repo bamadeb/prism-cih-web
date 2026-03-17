@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component,OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from "@angular/material/card";
 import { FormsModule } from '@angular/forms';
@@ -41,7 +41,7 @@ import { ChangeDetectorRef } from '@angular/core';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit{
   username = '';
   password = '';
   userId: number = 0;

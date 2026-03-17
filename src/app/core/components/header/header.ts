@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input,OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router } from '@angular/router'; 
@@ -21,7 +21,7 @@ import { IdleTimeoutService } from '../../../services/idle-timeout';
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class Header {
+export class Header implements OnInit {
  @Input() drawer!: MatSidenav;
 
   pageTitle = 'Dashboard';
