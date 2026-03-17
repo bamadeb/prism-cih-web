@@ -206,7 +206,7 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
             insertDataArray.push(row);
           });
 
-          //console.log("Insert Data:", insertDataArray);
+
           // ------------------ Batch processing ------------------
           await this.uploadInBatches(insertDataArray);
 
@@ -282,7 +282,7 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
       insertDataArray: insertDataArray   // ✅ no extra []
     };
 
-    //console.log(payload);
+
     await this.apiService.insert<any, MemberFileRequest>(payload);
   }
 
@@ -291,8 +291,7 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
       session_id: this.sessionId
     });
 
-    // console.log('sessionId:' + this.sessionId);
-    // console.log(res);
+
 
     this.tempMemberList = res?.data ?? [];
     this.dataSource.data = this.tempMemberList;

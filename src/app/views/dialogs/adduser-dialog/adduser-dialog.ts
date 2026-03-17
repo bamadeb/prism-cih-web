@@ -80,7 +80,7 @@ export class AdduserDialog implements OnInit {
     this.isEditMode = true;
     this.currentUserId = user.ID;
     this.cognitoUsername = user.cognito_username;
-    //console.log("user:",user);
+
     // 🔥 Make password optional in edit mode
     const passwordControl = this.addUserFormGroup.get('password');
     passwordControl?.clearValidators(); // remove required & minlength
@@ -154,7 +154,7 @@ export class AdduserDialog implements OnInit {
       const cognitoUsername =
         await this.apiService.createCognitoUser(cognitoPayload);
 
-      //console.log('Cognito Username:', cognitoUsername);
+
 
       // 2️⃣ Insert into DB
       const payload = {
@@ -176,31 +176,8 @@ export class AdduserDialog implements OnInit {
     }
   }
 
-  // 🔹 UPDATE USER
-  // private async updateUser(formValue: any): Promise<void> {
-  //   if (!this.currentUserId) {
-  //     throw { code: 'USER_ID_MISSING' };
-  //   }
-  //   // 🔐 1️⃣ Update Cognito ONLY if password changed
-  //   if (formValue.password) {
-  //     if (!this.cognitoUsername) {
-  //       throw { code: 'COGNITO_USERNAME_MISSING' };
-  //     }
 
-  //     await this.apiService.updateCognitoUser(this.cognitoUsername, {}, formValue.password);
-  //   }
-  //   const payload = {
-  //     ID: this.currentUserId,
-  //     FistName: formValue.firstName.trim(),
-  //     LastName: formValue.lastName.trim(),
-  //     ...(formValue.password && { Password: formValue.password }),
-  //     role_id: formValue.role,
-  //     department_id: formValue.department,
-  //     member_status: Number(formValue.status)
-  //   };
-  //   //console.log(payload);
-  //   await this.apiService.updateUser(payload);
-  // }
+
 private async updateUser(formValue: any): Promise<void> {
 
   if (!this.currentUserId) {
@@ -219,7 +196,6 @@ private async updateUser(formValue: any): Promise<void> {
         {},
         formValue.password
       );
-      //await this.apiService.updateCognitoUser(this.cognitoUsername, {}, formValue.password);
 
     }
 
@@ -251,27 +227,11 @@ private async updateUser(formValue: any): Promise<void> {
   }
 }
 
-  // // 🔹 ERROR HANDLER
-  // private handleError(error: any): void {
-  //   console.error('❌ User operation failed:', error);
 
-  //   switch (error?.code) {
-  //     case 'EMAIL_EXISTS':
-  //       this.addUserFormGroup.get('email')?.setErrors({ exists: true });
-  //       break;
-
-  //     case 'USER_ID_MISSING':
-  //       alert('User ID missing. Please refresh and try again.');
-  //       break;
-
-  //     default:
-  //       alert('Something went wrong. Please try again.');
-  //   }
-  // }
 // 🔹 ERROR HANDLER
  private handleError(error: any): void {
 
-  //console.error('❌ User operation failed:', error);
+
 
   if (error?.code === 'EMAIL_EXISTS') {
     this.addUserFormGroup.get('email')?.setErrors({ exists: true });

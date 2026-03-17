@@ -68,7 +68,7 @@ export class AddpageAccess implements OnInit {
   private enableEditMode(list: any): void {
     this.isEditMode = true;
     this.currentUserId = list.id;
-    //console.log("user:",user); 
+
     this.addUserFormGroup.patchValue({     
       role_id: list.role_id,
       page_id: list.page_id,

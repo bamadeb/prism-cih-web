@@ -9,7 +9,7 @@ import { IdleTimeoutService } from './services/idle-timeout';
 })
 export class App implements OnInit {
   protected readonly title = signal('prism-cih-web');
-  constructor(private idleService: IdleTimeoutService) {}
+  constructor(private readonly idleService: IdleTimeoutService) {}
 
   ngOnInit(): void {
 

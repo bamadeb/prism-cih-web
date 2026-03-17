@@ -13,8 +13,6 @@ import { SystemLogService } from '../../../services/system-log';
 import { Observable } from 'rxjs/internal/Observable';
 import { USER_KEY } from '../../../constants/constant';
 import { IdleTimeoutService } from '../../../services/idle-timeout';
-
-
 @Component({
   selector: 'app-header',
   imports: [MatToolbarModule, MatButtonModule, MatIcon, MatMenu, MatDivider,CommonModule,MatMenuModule, MatIconModule],
@@ -23,31 +21,23 @@ import { IdleTimeoutService } from '../../../services/idle-timeout';
 })
 export class Header implements OnInit {
  @Input() drawer!: MatSidenav;
-
   pageTitle = 'Dashboard';
-  //pageTitle$!: Observable<string>;
   userName: string | undefined;
   userId!: number;
   userEmail!: string;
   title$!: Observable<string>;
-  constructor(private router: Router,private userData: UserDataService,private headerService: HeaderService,private idleService: IdleTimeoutService, private systemLogService:SystemLogService ) {}
-
+  constructor(private readonly router: Router,private readonly userData: UserDataService,private readonly headerService: HeaderService,private readonly idleService: IdleTimeoutService, private readonly systemLogService:SystemLogService ) {}
    ngOnInit(): void {
-    const abc = this.headerService.title$;
-    //console.log(abc);
-     this.title$ = this.headerService.title$;
-      const user = this.userData.getUser(); 
-    if (!user) {
-      //alert('User not logged in!');
+    this.title$ = this.headerService.title$;
+    const user = this.userData.getUser(); 
+    if (!user) {      
       this.router.navigate(['/login']);
       return;
     }
-      this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
-      this.userId = user.ID;
-      this.userEmail = user.EmailID;
-      //console.log(user);
+    this.userName = user.FistName+' '+user.LastName+' ('+user.ROLE_NAME+')';
+    this.userId = user.ID;
+    this.userEmail = user.EmailID;     
   }  
-
   logout() {
     this.systemLogService.addSystemLog({
       log_name: 'LOGOUT',
@@ -58,7 +48,6 @@ export class Header implements OnInit {
     }).catch(() => {});
     localStorage.removeItem(USER_KEY);
     this.idleService.stopWatching();
-    //console.log('logout');
     this.router.navigate(['/login']);
     return;
   }

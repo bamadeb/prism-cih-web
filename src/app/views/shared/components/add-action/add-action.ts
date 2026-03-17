@@ -1,4 +1,3 @@
-
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatRadioModule } from '@angular/material/radio';
@@ -34,8 +33,6 @@ import { MatCard } from "@angular/material/card";
 import { MatPaginator, MatPaginatorModule } from "@angular/material/paginator";
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-
-
 @Component({
   selector: 'app-add-action',
   imports: [
@@ -95,7 +92,7 @@ export class AddAction implements OnInit , AfterViewInit {
     'added_user_name',
     'added_date'
   ];
-  //successMessage: string = '';
+  
   pcpVisitDataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   @ViewChild('mainPaginator') mainPaginator!: MatPaginator;
   @ViewChild('mainSort') mainSort!: MatSort;
@@ -109,12 +106,7 @@ export class AddAction implements OnInit , AfterViewInit {
   appSuccessMessage = signal('');
   isLoadingPcpHistory = signal(false);
   isLoadingappHistory = signal(false);
-  // Sample history data
-  // pcpVisitHistory: any[] = [
-  //   { visit_date: new Date('2025-12-01'), message: 'Routine checkup' },
-  //   { visit_date: new Date('2026-01-01'), message: 'Follow-up visit' },
-  // ];
-  //await
+ 
   cihpcrList: any[] = [];
   availableTins: any[] = [];
   pcrColumns: string[] = [
@@ -140,13 +132,10 @@ export class AddAction implements OnInit , AfterViewInit {
     { label: this.currentYear, value: this.currentYear }
   ];
 
-  // planTinMap: Record<string, string[]> = {
-  //   AHC: ['2370820741', '273160687', '200807794'],   // CHI → 3 TINs
-  //   'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
-  // };
+
   taskColumns: string[] = ['action_type', 'action_date', 'status', 'initial', 'action_note'];
   isProcessing: boolean = false;
-  //userId: string | null = null;
+  
   userId: string | null = null;
   showContent = false;
 
@@ -212,7 +201,7 @@ export class AddAction implements OnInit , AfterViewInit {
       NUM_COUNT: ['', Validators.required],
       PCP_TAX_ID: ['', Validators.required]
     });
-    //console.log(data);
+    
     this.medicaid_id = data?.medicaid_id;
     this.member_name = data?.member_name;
     this.member_dob = data?.member_dob;
@@ -228,15 +217,14 @@ export class AddAction implements OnInit , AfterViewInit {
       
     }
 
-    //alert(this.medicaid_id);
+
   }
 
 
   async ngOnInit(): Promise<void> {
     const user = this.userData.getUser();
     this.userId = user.ID;
-    //console.log(this.riskTabarray);
-    //this.role_id = user.role_id;
+
     if (this.medicaid_id) {
       await this.getMemberTaskList(this.medicaid_id);
       await this.getMemberGapsList(this.medicaid_id);
@@ -283,12 +271,11 @@ export class AddAction implements OnInit , AfterViewInit {
   }
   async setScheduledActionStatus(id: string) {
     const user = this.userData.getUser();
-    //console.log('Dashboard:', user);
-    // if(user.role_id == 7){
+
     const role_id = user.role_id;
     const payload = { scheduled_type: id, role_id: role_id };
     const result = await this.apiService.getActionresultfollowup<any>(payload);
-    //console.log(payload);
+
     this.actionresult_followup_list = result.data;
   }
 
@@ -461,7 +448,7 @@ export class AddAction implements OnInit , AfterViewInit {
         medicaid_id: this.medicaid_id
       });
       this.appointmentList = result.data ?? [];
-      //console.log(this.appointmentList);
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -525,7 +512,7 @@ export class AddAction implements OnInit , AfterViewInit {
 
     const formValues = this.addActionFormGroup.getRawValue();
     const action_id = formValues.update_action_id;
-    //console.log(formValues.value);
+
     this.isProcessing = true; // 🔹 show loader
     this.addActionChangeFlag = 1; 
     // 🔹 Validate action_date is a valid date
@@ -585,16 +572,16 @@ export class AddAction implements OnInit , AfterViewInit {
 
           await this.apiService.multipleRowInsert<any>(taskPayload);
         }
-        //this.insertSystemLog(formValues);
+
         await this.updateQualityAndRiskData(formValues, action_id);
 
         this.getMemberTaskList(formValues.medicaid_id);
         this.getMemberGapsList(formValues.medicaid_id);
         this.resetActionFields();
         this.isProcessing = false;
-        //alert(44);
+
         this.cdr.detectChanges();
-        //console.log('insert call:', result)
+
       } catch (error) {
         console.log('error:' + error);
       } finally {
@@ -703,7 +690,7 @@ resetActionFields() {
 
         if (fg.dirty) {
 
-          //console.log("Updating ID:", riskGap.risk_gap_id);
+
 
           riskObsUpdateArray.push({
             ...commonData,
@@ -716,9 +703,7 @@ resetActionFields() {
       }
       else {
 
-        // const hasAnyValue = Object.values(commonData).some(
-        //   v => v !== null && v !== undefined && v !== ''
-        // );
+
         const hasAnyValue = [
           riskGap.Observation_Date,
           riskGap.Observation_Code,
@@ -737,7 +722,7 @@ resetActionFields() {
         ].some(v => v !== null && v !== undefined && v !== "");
         if (hasAnyValue) {
 
-          //console.log("Inserting new record");
+
 
           riskObsInsertArray.push({
             ...commonData,
@@ -754,7 +739,7 @@ resetActionFields() {
        BUILD QUALITY GAP DATA
     -----------------------------------*/
 
-    //this.qualityGapsList.controls.forEach((fg: FormGroup) => {
+
     (this.qualityGapsList.controls as FormGroup[]).forEach((fg) => {
       const qualityGap = fg.getRawValue();
       console.log(qualityGap);
@@ -843,17 +828,13 @@ resetActionFields() {
         action_id: action_id
       };
       const result = await this.apiService.unSetMemberGapsStatus<any>(paramsunsetq);
-      // await this.apiService.post('prismUnSetMemberGapsStatus', {
-      //   medicaid_id,
-      //   action_id
-      // }).toPromise();
+
 
       /* ----------------------------------
          STEP 2: UPDATE RISK STATUS
       -----------------------------------*/
       const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
-      //alert(diagVal);
-      //return;
+
       const paramsupdate = {
         medicaid_id: medicaid_id,
         diag_codes: diagVal,
@@ -872,8 +853,7 @@ resetActionFields() {
       };
       const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
 
-      console.log('riskObsInsertArray:',riskObsInsertArray);
-      console.log('riskObsUpdateArray:',riskObsUpdateArray);      
+     
       /* ----------------------------------
          STEP 4: UPDATE OBSERVATIONS
       -----------------------------------*/
@@ -896,7 +876,7 @@ resetActionFields() {
           insertDataArray: riskObsInsertArray
         });
       }
-      //console.log("riskGap", formValues.riskGapsList);
+
 
       /* ----------------------------------
         STEP 4: UPDATE PLAN YEAR
@@ -905,7 +885,7 @@ resetActionFields() {
       if (UpdateArray.length) {
         UpdateArray.forEach((newArray: any) => {
           if (newArray.PLANYEAR != newArray.PLAN_YEAR) {
-            //console.log('UpdateArray:',newArray);
+
             this.apiService.updatePlanyearForRiskgap<any>(newArray);
           }
         })
@@ -916,17 +896,16 @@ resetActionFields() {
 
     } catch (error) {
       console.error('❌ Error updating quality/risk data:', error);
-      //alert('Failed to save data');
-      //this.isLoading = false;
+
 
     } finally {
-      //alert('finally to save data');
+
       this.successMessage.set('Saved successfully');
       setTimeout(() => this.successMessage.set(''), 4000);
       this.isProcessing = false;
-      //alert(this.isProcessing);
+
     }
-    //this.isProcessing = false;
+
 
   }
 
@@ -937,14 +916,13 @@ resetActionFields() {
   }
   async getMemberTaskList(medicaid_id: string) {
 
-    //alert(medicaid_id);
-    //this.isLoading = true;
+
     const request: MedicaidIdRequest = {
       medicaid_id: medicaid_id
     };
     const result = await this.apiService.getMemberTaskList<any>(request);
     this.memberTaskList = result.data || [];
-    //console.log('Task result:', result);
+
   }
   async getMemberGapsList(medicaid_id: string) {
     const payload = { medicaid_id: medicaid_id };
@@ -953,8 +931,7 @@ resetActionFields() {
       medicaid_id: medicaid_id
     };
     const result = await this.apiService.getMemberGapsList<any>(request);
-    //this.riskGapsList = result.data.prismGapList || [];
-    //console.log('Gaps result:', result);
+
     this.cihpcrList = result.data.prismCihPcrList || [];
     this.memberGapList = (result.data.prismGapList || []).map((gap: { Observation_Date: string; }) => ({
       ...gap,
@@ -968,16 +945,16 @@ resetActionFields() {
     await this.setRiskGapsData(this.memberGapList);
     await this.setQualityGapsData(this.memberQualityList);
     this.cdr.detectChanges();
-    //console.log(this.riskGapsList);
+
 
   }
   async setRiskGapsData(riskGapsdata: any) {
-    //console.log(riskGapsdata);
+
     this.riskGapsList.clear();
 
     if (riskGapsdata && Array.isArray(riskGapsdata)) {
       riskGapsdata.forEach((t: any) => {
-//console.log('t.PLAN_YEAR:',this.extractYear(t.PLAN_YEAR));
+
         const fg = this.fb.group({
           DIAG_CODE: [this.sanitize(t.DIAG_CODE)],
           DIAG_DESC: [this.sanitize(t.DIAG_DESC)],
@@ -985,7 +962,7 @@ resetActionFields() {
           HCC_CATEGORY: ["t.HCC_CATEGORY"],
           HCC_MODEL: [t.HCC_MODEL],
           PLAN_YEAR: [this.extractYear(t.PLAN_YEAR)],
-          //PLAN_YEAR: ['2026'],
+
           PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
           risk_gap_id: [t.id],
@@ -1001,7 +978,7 @@ resetActionFields() {
           ],
           RISKGAP_ID: [t.ID],
           PLANYEAR: [Number(this.extractYear(t.PLAN_YEAR))],
-          //PLANYEAR: [2026],
+
           Observation_Year: [this.sanitize(t.Observation_Year)],
           Observation_Code: [this.sanitize(t.Observation_Code)],
           CPT_Code_Modifier: [this.sanitize(t.CPT_Code_Modifier)],
@@ -1017,7 +994,7 @@ resetActionFields() {
           Provider_Group_Name: [this.sanitize(t.Provider_Group_Name)],
           note: [this.sanitize(t.note)]
         });
-//console.log(fg);
+
         // 🔥 Auto-toggle checkbox based on Observation Result
         fg.get('Observation_Result')?.valueChanges.subscribe(value => {
           fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
@@ -1031,7 +1008,7 @@ resetActionFields() {
   }
 
   extractYear(value: any): string {
-    //console.log(value);
+
     if (!value || value === '1900-01-01T00:00:00.000Z') {
       return ''; // treat as blank
     }
@@ -1099,16 +1076,16 @@ resetActionFields() {
         this.qualityGapsList.push(fg);
       });
     }
-    //console.log("qualityGapsList after set :",this.qualityGapsList)
+
   }
 
   async toggleContent() {
     this.showContent = !this.showContent;
-    //this.availableTins = this.planTinMap['AHC'] || [];
+
     const payload = { plan: 'AHC' };
     const result = await this.apiService.getVendorListByplan<any>(payload);
     this.availableTins = result.data || [];
-    //console.log(this.availableTins);    
+    
   }
 
   cancel() {
@@ -1263,16 +1240,7 @@ resetActionFields() {
     return `${month}/${day}/${year}`;
   }
 
-  // formatDateToMDY(dateStr: string): string {
-  //   if (!dateStr) return '';
 
-  //   const formattedDate = dateStr.split('T')[0];
-  //   const date = new Date(formattedDate);
-  //   const month = String(date.getMonth() + 1).padStart(2, '0');
-  //   const day = String(date.getDate()).padStart(2, '0');
-  //   const year = date.getFullYear();
-  //   return `${month}/${day}/${year}`; // m/d/Y format
-  // }
 
   formatDateToMDY(dateStr: string): string {
     if (!dateStr) return '';

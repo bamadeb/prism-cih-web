@@ -6,8 +6,8 @@ import { TransferDialogService } from './transfer-dialog.service';
 export class ActionHandlerService {
 
   constructor(
-    private transferService: TransferDialogService,
-    private assignPlanService: AssignPlanDialogService
+    private readonly transferService: TransferDialogService,
+    private readonly assignPlanService: AssignPlanDialogService
   ) {}
 
   handleAction(action: string, rows: any[],planList: any[],departmentList:any[]): Promise<any> {

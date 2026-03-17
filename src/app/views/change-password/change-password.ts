@@ -65,13 +65,8 @@ export class ChangePassword implements OnInit{
       return;
     }
 
-    // if (this.newPassword.length < 6) {
-    //   this.errorMessage = 'Password must be at least 6 characters';
-    //   return;
-    // }
 
     const user = this.userData.getUser();
-    //console.log(user);
     if (!user) {
       this.errorMessage = 'Session expired. Please login again.';
       return;
@@ -97,12 +92,9 @@ export class ChangePassword implements OnInit{
       };
       const updatequalitygapresult = await this.apiService.prismUserPasswordUpdate<any>(apiparamUpdate);
 
-      // await this.apiService.updateUser(payload);
 
       // 3️⃣ Clear user session and force re-login
-      //this.errorMessage = "Password change successfuly.Please login.";
       this.userData.clearUser();
-      //this.router.navigate(['/login']);
 
       this.router.navigate(['/login'], {
         state: {
@@ -111,8 +103,6 @@ export class ChangePassword implements OnInit{
       });
 
     } catch (error: any) {
-      // console.error('Password update failed', error);
-       //this.errorMessage = 'Failed to update password. Please try again.';
         console.error('Password update failed', error);
 
   // Show Cognito error message

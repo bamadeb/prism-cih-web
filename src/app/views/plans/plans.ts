@@ -86,8 +86,7 @@ export class Plans implements OnInit, AfterViewInit {
     try {
       const res = await this.apiService.plans<any>();
       const plans = res?.data?.plans ?? []; 
-      //this.attachments = res?.data?.attachments ?? []; 
-      //console.log(res.data);
+
       this.dataSource.data = plans.map((u: any) => ({ 
         id: u.id,
         plan_name: u.plan_name ?? '',
