@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -54,7 +55,7 @@ import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
   templateUrl: './member-file.html',
   styleUrl: './member-file.css',
 })
-export class MemberFile implements OnInit{
+export class MemberFile implements OnInit, AfterViewInit {
 
   /* ---------- FORM & FILE ---------------------------- */
   processMembersFormGroup!: FormGroup;

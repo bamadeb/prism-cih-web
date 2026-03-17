@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -55,7 +56,7 @@ import * as Papa from 'papaparse';
   templateUrl: './pcr-file.html',
   styleUrl: './pcr-file.css',
 })
-export class PcrFile implements OnInit{
+export class PcrFile implements OnInit, AfterViewInit {
 
   
         /* ---------- FORM & FILE ---------------------------- */

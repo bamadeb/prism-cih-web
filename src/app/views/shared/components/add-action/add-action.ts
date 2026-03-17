@@ -7,7 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker'; 
-import { ChangeDetectorRef, Inject, signal, ViewChild ,ElementRef } from '@angular/core'; 
+import { ChangeDetectorRef, Inject, signal, ViewChild ,ElementRef, OnInit, AfterViewInit } from '@angular/core'; 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
@@ -67,7 +67,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
   templateUrl: './add-action.html',
   styleUrl: './add-action.css',
 })
-export class AddAction {
+export class AddAction implements OnInit , AfterViewInit {
   addActionFormGroup!: FormGroup;
   pcpVisitFormGroup!: FormGroup;
   measureForm!: FormGroup;

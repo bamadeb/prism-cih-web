@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -45,7 +47,7 @@ const TABLE = 'MEM_STAR_PERFORMANCE_REPORT_DATA_TEMP';
   templateUrl: './star-performance-file.html',
   styleUrl: './star-performance-file.css',
 })
-export class StarPerformanceFile {
+export class StarPerformanceFile implements OnInit , AfterViewInit {
 
 
   /* ---------- FORM & FILE ---------------------------- */
