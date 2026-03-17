@@ -12,20 +12,7 @@ export const ROUTE_ACCOUNT_UNSUPPORTED_BROWSER = '/account/unsupported-browser';
 
 /*************END**************/
 
-/**********PATTERN CONSTANTS **************/
-export const EMAIL_PATTERN = '[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9\.]{1,253}$';
-export const OTP_PATTERN = '^[0-9]{1,6}$';
-export const YEAR_PATTERN = '^[0-9]{1,4}$';
-export const NPI_PATTERN = '^[0-9]{10}$';
-export const ONLY_NUMBERS_PATTERN = '^[0-9]*$';
-export const LETTER_PATTERN_SPACE_HYPHEN = '^[a-zA-Z\- ]*$';
-export const LETTER_WITH_SINGLE_QUOTE_PATTERN = '^[a-zA-Z\' ]*$';
-export const LETTER_NUMBERS_SINGLE_QUOTE_UNDERSCORE_SPACE_PATTERN = '^[a-zA-Z0-9\'_ ]*$';
-export const LETTER_NUMBERS_SINGLE_QUOTE_UNDERSCORE_PATTERN = '^[a-zA-Z0-9\'_]*$';
-export const ONLY_LETTER_PATTERN = '^[a-zA-Z]+$';
-export const ALPHA_NUM_PATTERN = '^[a-zA-Z0-9]*$';
-export const DATE_PATTERN = '((0?[1-9]|1[012])[- /.](0?[1-9]|[12][0-9]|3[01])[- /.](19|20)?[0-9]{2})*$';
-/*** END ******/
+
 
 /****** CUSTOM VALIDATION MESSAGE************/
 export const EMAIL_REQUIRED_MESSAGE = 'Email is required.';
