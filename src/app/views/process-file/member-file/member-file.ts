@@ -248,7 +248,6 @@ async processMembers(): Promise<void> {
       insertDataArray: insertDataArray   // ✅ no extra []
     };
 
-    //console.log(payload);
     await this.apiService.insert<any, MemberFileRequest>(payload);
 }
 

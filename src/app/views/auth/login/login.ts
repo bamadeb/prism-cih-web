@@ -55,7 +55,6 @@ export class Login implements OnInit{
 
   showQrScreen: boolean = false;
   showOtpScreen: boolean = false;
-  //private renderer!: Renderer2;
   constructor(private router: Router,
     private authService: Auth,
     private userData: UserDataService,
@@ -79,11 +78,8 @@ export class Login implements OnInit{
 
   ngOnInit() {
     this.titleService.setTitle('PRISM :: LOGIN');
-    //const navigation = this.router.getCurrentNavigation();
-    //this.errorMessage = navigation?.extras?.state?.['message'] || '';
     this.errorMessage = window.history.state?.message || '';
     this.successMessage = window.history.state?.successMessage || '';
-    //console.log(this.errorMessage);
     setInterval(() => {
       this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
     }, 4000); // 4 seconds
@@ -98,10 +94,6 @@ export class Login implements OnInit{
 
     try {
       const cognitoResult = await this.auth.login(this.username, this.password);
-
-
-
-      //console.log('✅ Login success:', result);
       if (cognitoResult.status === "SUCCESS") {
         await this.continueBackendLogin();
  
@@ -119,48 +111,22 @@ export class Login implements OnInit{
 
       }
     } catch (error) {
-      //console.log('error: ',error);
       const err = error as Error;
-      //console.log('Error message:', err);
       this.errorMessage = err.message;
     } finally {
       this.isLoading = false;
     }
   }
-  // async setupQrCode() {
-  //   try {
-  //     const response =
-  //       await this.auth.associateSoftwareToken(
-  //         this.session
-  //       );
-  //     this.session = response.Session;
-  //     const secretCode =
-  //       response.SecretCode;
-  //     this.qrCodeData = `otpauth://totp/Prism:${this.username}?secret=${secretCode}&issuer=Prism`;
-  //     this.showQrScreen = true;
-  //   }
-  //   catch (err) {
-  //     this.errorMessage = "Failed to setup MFA";
-  //   }
-  // }
+
 async setupQrCode() {
   try {
-
-    //console.log("setupQrCode session:", this.session);
-
     const response =
       await this.auth.associateSoftwareToken(this.session);
-
-    //console.log("associateSoftwareToken response:", response);
-
     this.session = response.Session;
 
     const secretCode = response.SecretCode;
 
     this.qrCodeData =  `otpauth://totp/Prism:${encodeURIComponent(this.username)}?secret=${secretCode}&issuer=Prism`;
-
-    //console.log("QR Data:", this.qrCodeData);
-
     this.showQrScreen = true;
     this.cdr.detectChanges();
   }
@@ -297,7 +263,6 @@ async setupQrCode() {
         log_details: `Login By ${this.username}`,
         log_status: 'SUCCESS',
         log_by: this.userId,
-        //add_date: utcDate,
         action_type: `${this.username}`
       }]
     };

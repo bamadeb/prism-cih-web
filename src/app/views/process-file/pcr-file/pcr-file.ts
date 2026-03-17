@@ -201,7 +201,7 @@ export class PcrFile implements OnInit, AfterViewInit {
             insertDataArray.push(row);
           });
   
-          //console.log("Insert Data:", insertDataArray);
+
           // ------------------ Batch processing ------------------
           await this.uploadInBatches(insertDataArray);  
   
@@ -283,8 +283,7 @@ export class PcrFile implements OnInit, AfterViewInit {
           session_id: this.sessionId
         });
     
-        // console.log('sessionId:'+this.sessionId);
-        // console.log(res);
+
       
         this.tempMemberList = res?.data ?? [];
         this.dataSource.data = this.tempMemberList;

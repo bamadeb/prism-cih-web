@@ -56,18 +56,7 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
   /* ----------- TABLE --------------------------------- */
   dataSource = new MatTableDataSource<any>([]);
-  // displayedColumns: string[] = [
-  //   'Subscriber_ID',
-  //   'Measure_Name',
-  //   'Submeasure',
-  //   'First_Name',
-  //   'Middle_Name',
-  //   'Last_Name',
-  //   'Medicare_ID',
-  //   'Medicaid_ID',
-  //   'Date_of_Birth',
-  //   'Sex', 'Provider_ID', 'Provider_Name', 'Numerator_Gap', '1'
-  // ];
+ 
   displayedColumns: string[] = [
   'Measure_Name',
   'Measure_Code',
@@ -189,12 +178,7 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
             'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
           ];
 
-          // Validate header
-          // if (JSON.stringify(parsedHeaders) !== JSON.stringify(expectedHeaders)) {
-          //   alert("File header mismatch.");
-          //   this.isUpload = false;
-          //   return;
-          // }
+
 
           // Build array for inserting
           const insertDataArray: any[] = [];
@@ -316,35 +300,11 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
       insertDataArray: insertDataArray   // ✅ no extra []
     };
 
-    //console.log(payload);
+
     await this.apiService.insert<any, MemberFileRequest>(payload);
   }
 
-  // private async loadTempStarPerformance(): Promise<void> {
-  //     const res = await this.apiService.getTempStarPerformanceBySeccionID<any>({
-  //       session_id: this.sessionId
-  //     });
-
-  //     // console.log('sessionId:' + this.sessionId);
-  //     console.log(res);
-
-  //     this.tempMemberList = res?.data ?? [];
-  //     this.dataSource.data = this.tempMemberList;
-
-  //     this.totalRecords = this.tempMemberList.length;
-  //     this.exist_count = this.tempMemberList.filter(m => m.quality_gaps_exist).length;
-  //     this.error_count = this.tempMemberList.filter(m => !m.member_exist).length;
-
-  //     // 🔥 FIX pagination
-  //   if (this.paginator) {
-  //     this.dataSource.paginator = this.paginator;
-  //   }
-  //   if (this.sort) {
-  //     this.dataSource.sort = this.sort;
-  //   }
-    
-  //   this.cdr.markForCheck();   // 👈 CRITICAL
-  // }
+  
 private async loadTempStarPerformance(): Promise<void> {
 
   const res = await this.apiService.getTempStarPerformanceBySeccionID<any>({
@@ -355,14 +315,7 @@ private async loadTempStarPerformance(): Promise<void> {
 
   const rawData = res?.data ?? [];
 
-  // const pivot = this.buildExcelView(rawData);
-
-  // this.displayedColumns = [
-  //   'Measure_Name',
-  //   'Measure_Code',
-  //   'Statistics',
-  //   ...pivot.dates
-  // ];
+  
 const pivot = this.buildExcelView(rawData);
 
 this.dynamicDates = pivot.dates;

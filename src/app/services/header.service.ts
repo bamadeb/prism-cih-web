@@ -24,7 +24,6 @@ export class HeaderService {
       this.router.navigate(['/access-denied']);
       return;
     }
-     //console.log('title: '+ title+'==='+user.role_id);
     const roleId = user.role_id;
 
     // ✅ check if page is allowed

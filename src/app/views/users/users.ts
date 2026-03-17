@@ -94,7 +94,7 @@ export class Users implements OnInit, AfterViewInit {
 
       this.roles = res?.data?.roles ?? [];
       this.departments = res?.data?.department ?? [];
-      //console.log(users);
+
       this.dataSource.data = users.map((u: any) => ({
         ID: u.ID,
         firstName: u.FistName ?? '',

@@ -853,8 +853,7 @@ resetActionFields() {
       };
       const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
 
-      console.log('riskObsInsertArray:',riskObsInsertArray);
-      console.log('riskObsUpdateArray:',riskObsUpdateArray);      
+     
       /* ----------------------------------
          STEP 4: UPDATE OBSERVATIONS
       -----------------------------------*/

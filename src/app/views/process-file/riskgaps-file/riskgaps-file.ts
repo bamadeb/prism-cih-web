@@ -158,7 +158,7 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
 
     const file = this.selectedFile;
     const ext = file.name.split('.').pop()?.toLowerCase();
-    //console.log(ext);
+
     if (ext !== 'csv') {
       alert('Only .csv files are allowed.');
       this.resetFile();
@@ -250,7 +250,7 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
   /* ============================ API ============================ */
 
   private async uploadInBatches(insertDataArray: any[]): Promise<void> {
-    //console.log('Total Record: '+insertDataArray.length);
+
     const batches = this.chunkArray(insertDataArray, 1000);
 
     for (let i = 0; i < batches.length; i++) {
@@ -277,8 +277,7 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
       session_id: this.sessionId
     });
 
-    // console.log('sessionId:' + this.sessionId);
-    // console.log(res);
+
 
     this.tempMemberList = res?.data ?? [];
     this.dataSource.data = this.tempMemberList;
