@@ -442,6 +442,14 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   } 
+   async getTempStarPerformanceBySeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetTempStarPerformanceBySeccionID',
+      request   
+    );
+  } 
 
   async getSystemlog<TResponse>(request: any): Promise<TResponse> {
     return await commonPostApi<TResponse>(
