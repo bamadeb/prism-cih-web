@@ -178,7 +178,7 @@ newRiskCategoryCount: Record<string, number> = {};
     ===================================================== */
     const dateSet = new Set<string>();
     rawData.forEach(r => r.to_date && dateSet.add(r.to_date));
-    this.dynamicDateColumns = Array.from(dateSet).sort();
+    this.dynamicDateColumns = Array.from(dateSet).sort((a, b) => a.localeCompare(b));
 
     /* =====================================================
        4️⃣ GROUP TABLE ROWS

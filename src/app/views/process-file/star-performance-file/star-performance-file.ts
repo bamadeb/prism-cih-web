@@ -456,7 +456,7 @@ this.displayedColumns = [
 
     return {
       rows: Object.values(result),
-      dates: Array.from(dates).sort()
+      dates: Array.from(dates).sort((a, b) => a.localeCompare(b))
     };
 
   }
