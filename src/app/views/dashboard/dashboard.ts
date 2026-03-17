@@ -243,7 +243,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 async loadTableData(): Promise<void> {
   await this.withLoader(async () => {
     const user = this.userData.getUser();      
-    if(user.role_id == 7){
+    if(user.role_id == 7 || user.role_id == 21){
       this.loginUserId =this.selectedNavigatorId ?? 0;
     }else{
        this.loginUserId=user.ID;
