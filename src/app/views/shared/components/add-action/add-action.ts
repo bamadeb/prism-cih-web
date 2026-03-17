@@ -225,8 +225,7 @@ export class AddAction {
       this.addActionFormGroup.patchValue({
         medicaid_id: this.medicaid_id
       });
-      this.getMemberTaskList(this.medicaid_id);
-      this.getMemberGapsList(this.medicaid_id);
+      
     }
 
     //alert(this.medicaid_id);
@@ -238,6 +237,10 @@ export class AddAction {
     this.userId = user.ID;
     //console.log(this.riskTabarray);
     //this.role_id = user.role_id;
+    if (this.medicaid_id) {
+      await this.getMemberTaskList(this.medicaid_id);
+      await this.getMemberGapsList(this.medicaid_id);
+    }    
     const payload = { medicaid_id: this.medicaid_id };
     const result = await this.apiService.addActionMaster<any>(payload);
 
@@ -927,9 +930,7 @@ resetActionFields() {
 
   }
 
-  toggleRiskGaps() {
-
-  }
+  
 
   trackByIndex(index: number) {
     return index;
