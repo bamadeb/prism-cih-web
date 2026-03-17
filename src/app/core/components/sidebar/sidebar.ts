@@ -23,11 +23,10 @@ import { Router } from '@angular/router';
 export class Sidebar implements OnInit{
   userRole: any;
     constructor(     
-    private userData: UserDataService,private router: Router 
+    private readonly userData: UserDataService,private router: Router 
   ) {
       const user = this.userData.getUser();
     if (!user) {
-      //alert('User not logged in!');
       this.router.navigate(['/login']);
       return;
     }    
@@ -36,7 +35,6 @@ export class Sidebar implements OnInit{
   ngOnInit(): void {
       const user = this.userData.getUser();
     if (!user) {
-      //alert('User not logged in!');
       this.router.navigate(['/login']);
       return;
     }else{

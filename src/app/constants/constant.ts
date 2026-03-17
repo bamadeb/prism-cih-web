@@ -4,7 +4,7 @@ export const HTTP_NOT_ALLOWED = 405;
 export const CHROME = 'chrome';
 
 /**********ROUTE CONSTANTS **************/
-export const ROUTE_ACCOUNT_FORGOT_PASSWORD = '/account/forgot-password';
+//export const ROUTE_ACCOUNT_FORGOT_PASSWORD = '/account/forgot-password';
 export const ROUTE_ACCOUNT_REGISTER = '/account/register';
 export const ROUTE_ACCOUNT_LOGIN = '/account/login';
 export const ROUTE_ACCOUNT_PROFILE = '/account/profile';
