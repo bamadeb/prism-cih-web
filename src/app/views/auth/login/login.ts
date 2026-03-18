@@ -23,7 +23,7 @@ import { QRCodeComponent   } from 'angularx-qrcode';
 
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
-//import { AngularxQrcodeModule } from 'angularx-qrcode';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -55,17 +55,17 @@ export class Login implements OnInit{
 
   showQrScreen: boolean = false;
   showOtpScreen: boolean = false;
-  constructor(private router: Router,
-    private authService: Auth,
-    private userData: UserDataService,
-    private titleService: Title,
-    private idleService: IdleTimeoutService,
-    private auth: AuthService,
-    private cdr: ChangeDetectorRef,
+  constructor(private readonly router: Router,
+    private readonly authService: Auth,
+    private readonly userData: UserDataService,
+    private readonly titleService: Title,
+    private readonly idleService: IdleTimeoutService,
+    private readonly auth: AuthService,
+    private readonly cdr: ChangeDetectorRef,
     
    
-    private apiService: ConfigService,
-    private dialog: MatDialog) { }
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog) { }
 
   bgImages = [
     'assets/images/1.jpg',
@@ -87,11 +87,7 @@ export class Login implements OnInit{
   async onSubmit() {
     this.isLoading = true;
     this.clearError();
-    const request: LoginRequest = {
-      username: this.username,
-      password: this.password
-    };
-
+ 
     try {
       const cognitoResult = await this.auth.login(this.username, this.password);
       if (cognitoResult.status === "SUCCESS") {
