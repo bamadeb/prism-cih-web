@@ -54,10 +54,10 @@ export class TransferDialog implements OnInit {
   userList: any[] = [];
 
   constructor(
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService,
-    private dialogRef: MatDialogRef<TransferDialog>,
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService,
+    private readonly dialogRef: MatDialogRef<TransferDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 

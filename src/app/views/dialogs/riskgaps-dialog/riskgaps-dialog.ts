@@ -38,7 +38,7 @@ export class RiskgapsDialog implements AfterViewInit{
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<RiskgapsDialog>
+    private readonly dialogRef: MatDialogRef<RiskgapsDialog>
   ) {
     this.dataSource = new MatTableDataSource(data?.riskgapList || []);
   }
@@ -52,7 +52,7 @@ export class RiskgapsDialog implements AfterViewInit{
   formatDate(date: any): string {
     if (!date) return '';
     const d = new Date(date);
-    return isNaN(d.getTime())
+    return Number.isNaN(d.getTime())
       ? ''
       : d.toLocaleDateString('en-US');
   }

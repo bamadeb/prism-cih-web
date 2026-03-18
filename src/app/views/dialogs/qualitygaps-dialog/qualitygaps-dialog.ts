@@ -37,7 +37,7 @@ export class QualitygapsDialog implements AfterViewInit{
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<QualitygapsDialog>
+    private readonly dialogRef: MatDialogRef<QualitygapsDialog>
   ) {
     this.dataSource = new MatTableDataSource(data?.qualitygapList || []);
   }
@@ -51,7 +51,7 @@ export class QualitygapsDialog implements AfterViewInit{
   formatDate(date: any): string {
     if (!date) return '';
     const d = new Date(date);
-    return isNaN(d.getTime())
+    return Number.isNaN(d.getTime())
       ? ''
       : d.toLocaleDateString('en-US');
   }

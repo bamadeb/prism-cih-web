@@ -45,9 +45,9 @@ export class PlansDialog implements OnInit{
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private dialogRef: MatDialogRef<PlansDialog>
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly dialogRef: MatDialogRef<PlansDialog>
   ) {}
 
   // 🔹 INIT
@@ -71,7 +71,6 @@ export class PlansDialog implements OnInit{
 
   // 🔹 EDIT MODE SETUP
   private enableEditMode(plan: any): void {
-    //console.log(plan);
     this.isEditMode = true;
     this.currentPlanId = plan.id;
 
@@ -98,7 +97,6 @@ export class PlansDialog implements OnInit{
         return; 
       }
 
-    //console.log(formValue);
     try {
       await this.processPlan(formValue);
       this.dialogRef.close({ refresh: true });
