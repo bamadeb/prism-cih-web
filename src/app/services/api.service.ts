@@ -600,10 +600,9 @@ async createCognitoUser(request: any): Promise<string> {
     // ✅ Handle Cognito error properly
     if (res?.statusCode !== 200) {
 
-      throw {
-        code: 'INVALID_PASSWORD',
-        message: res?.error || res?.message || 'Failed to update Cognito user'
-      };
+      throw new Error(
+        res?.error || res?.message || 'Failed to update Cognito user'
+      );
 
     }
 

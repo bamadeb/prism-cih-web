@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { IAppEnvironment } from '../models/iapp-types';
 import CryptoJS from 'crypto-js';
 import { firstValueFrom } from 'rxjs';
-// import { IStorageService } from './storage.service';
+
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +17,7 @@ export class AppEnvService {
     }
 
     encryptionConfig(): boolean {
-        return false;//this.config.storageEncryption;
+        return false; 
     }
     version(): string {
         return this.config.version ?? 'unknown';
@@ -44,7 +44,7 @@ export class AppEnvService {
             } else {
                 this.config = env;
             }
-            //console.log('✅ Environment loaded:', this.config);
+             
         } catch (error) {
             console.error('❌ Error loading environment configuration:', error);
             throw error;

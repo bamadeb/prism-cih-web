@@ -7,11 +7,11 @@ import { Router } from '@angular/router';
 export class HeaderService {
 
   constructor(
-    private userData: UserDataService,
-    private router: Router
+    private readonly userData: UserDataService,
+    private readonly router: Router
   ) {}
 
-  private titleSource = new BehaviorSubject<string>('Dashboard');
+  private readonly titleSource = new BehaviorSubject<string>('Dashboard');
   title$ = this.titleSource.asObservable();
 
   setTitle(title: string) {
@@ -20,7 +20,7 @@ export class HeaderService {
 
     const user = this.userData.getUser();
 
-    if (!user || !user.pageAccess) {
+    if (!user?.pageAccess) {
       this.router.navigate(['/access-denied']);
       return;
     }
