@@ -79,11 +79,11 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
   processLogList: any[] = [];
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title, private router: Router, private auth: UserDataService
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title, private readonly router: Router, private readonly auth: UserDataService
 
   ) {
     this.processMembersFormGroup = this.fb.group({
@@ -119,7 +119,7 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
   onFileSelect(event: any): void {
     const file = event.target.files[0];    
-    if (file && file.type === 'text/csv') {
+    if (file?.type === 'text/csv') {
       this.selectedFile = file;
       this.processMembersFormGroup.patchValue({ file: file });
     } else {
@@ -170,13 +170,13 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
         complete: async (result) => {
           const rows: any[] = result.data;
-          const parsedHeaders: string[] = result.meta.fields || [];
+          //const parsedHeaders: string[] = result.meta.fields || [];
 
-          const expectedHeaders = [
-            'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
-            'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
-            'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
-          ];
+          // const expectedHeaders = [
+          //   'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
+          //   'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
+          //   'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
+          // ];
 
 
 
@@ -369,7 +369,7 @@ this.displayedColumns = [
       if (p3.length === 2) p3 = '20' + p3;
 
       // Determine if DD/MM/YYYY or MM/DD/YYYY
-      if (parseInt(p1, 10) > 12) {
+      if (Number.parseInt(p1, 10) > 12) {
         // DD/MM/YYYY
         return `${p3}-${p2.padStart(2, '0')}-${p1.padStart(2, '0')}`;
       } else {

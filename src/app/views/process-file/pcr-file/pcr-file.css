@@ -3,6 +3,7 @@
   align-items: center;
   gap: 6px;
   color: #555;
+  font-size: 13px;
 }
 .pagecontent {
   padding: 10px;
@@ -20,13 +21,7 @@
   text-transform: uppercase;
 }
 
-.file-preview {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-}
-
+ 
 .summary-row {
   display: flex;
   gap: 20px;
