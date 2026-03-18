@@ -122,14 +122,14 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   constructor(
     errorLogger: ErrorReportingService,
     matDialog: MatDialog,
-    private titleService: Title, private apiService: ConfigService,private userData: UserDataService,
-    public dialog: MatDialog,private benefitsService: BenefitsDialogService,
-    private addActionService: AddActionDialogService,private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
-    private callListService:CallListDialogService,private taskListService:TaskListDialogService,
-    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService,
-    private alternateAddressListService:AlterAddressDialogService,
-    private actionService:ActionHandlerService,
-    private headerService: HeaderService 
+    private readonly titleService: Title, private readonly apiService: ConfigService,private readonly userData: UserDataService,
+    public dialog: MatDialog,private readonly benefitsService: BenefitsDialogService,
+    private readonly addActionService: AddActionDialogService,private readonly qualitygapsService:QualitygapDialogService,private readonly riskgapsService:RiskgapDialogService,
+    private readonly callListService:CallListDialogService,private readonly taskListService:TaskListDialogService,
+    private readonly noLongerPatientService:NolongerPatientDialogService,private readonly alternatePhoneListService:AlterPhoneDialogService,
+    private readonly alternateAddressListService:AlterAddressDialogService,
+    private readonly actionService:ActionHandlerService,
+    private readonly headerService: HeaderService 
 
   ) {
     super(errorLogger, matDialog);

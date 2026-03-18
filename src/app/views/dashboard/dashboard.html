@@ -357,7 +357,7 @@
                         <mat-checkbox (click)="$event.stopPropagation()" (change)="selection.toggle(row)"
                           [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)"></mat-checkbox>
                       
-                      <!-- <a style="margin-left: 15px;" class="txlink" (click)="showErrorPopup()">D</a> -->
+                      
                   
                         <mat-icon class="txlink"  (click)="openAddActionDialog(row.MEM_NO, row.FIRST_NAME + ' ' + row.LAST_NAME,row.BIRTH,row.latest_alt_address || row.OTHER_ADDR1,row.latest_alt_phone || row.OTHER_PHONE,providerTinNameMapping[row.PCP_TAX_ID],row.PCP_TAX_ID)" style="text-decoration:none;">
                          
@@ -390,8 +390,7 @@
                     <div style="height:20px;">&nbsp;</div>
                     <div  class="alignment">
                     <mat-icon>home</mat-icon>
-                    <!-- <span matTooltip="Edit" class="pointer" (click)="addalterAddr(row);copyToClipboard(row.latest_alt_address || row.OTHER_ADDR1);" matTooltipPosition="right">{{
-                      row.latest_alt_address || row.OTHER_ADDR1 }} </span> -->
+                    
                     <span class="pointer address-text" style="color:blue;" title="Click to copy"
                       (click)="copyToClipboard(row.latest_alt_address || row.OTHER_ADDR1)"
                       [matMenuTriggerFor]="editMenu">
@@ -631,13 +630,6 @@
             <mat-header-cell *matHeaderCellDef mat-sort-header> STATUS </mat-header-cell>
             <mat-cell *matCellDef="let row" ><mat-icon (click)="confirmboxUndo(row)" title="Undo" style="cursor: pointer;">undo</mat-icon> </mat-cell>
           </ng-container>
-
-         <!--  <ng-container matColumnDef="LAST_NAME">
-            <mat-header-cell *matHeaderCellDef mat-sort-header> LAST NAME </mat-header-cell>
-            <mat-cell *matCellDef="let row"> {{row.LAST_NAME}} </mat-cell>
-          </ng-container> -->
-
-          
 
           <mat-header-row *matHeaderRowDef="displayedColumnsNolongerpatient"></mat-header-row>
           <mat-row *matRowDef="let row; columns: displayedColumnsNolongerpatient"></mat-row>
