@@ -563,7 +563,7 @@ async openAddActionDialog(
 
 
   try {
-    const actionSaved = await this.addActionService.showAddActionDialog(
+    await this.addActionService.showAddActionDialog(
       medicaid_id,
       member_name,
       member_db,
@@ -581,7 +581,7 @@ async openAddActionDialog(
 }
 
 copyToClipboard(text: string) {
-  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+  if (navigator?.clipboard?.writeText) {
     // Modern supported browser
     navigator.clipboard.writeText(text)
       .then(() => {})
@@ -737,7 +737,7 @@ onNavigatorChange(navigatorId: number): void {
       const values: any = { ...item };
       delete values['PCP_TAX_ID'];
 
-      const num = (v: any) => parseFloat(v || 0);
+      const num = (v: any) => Number.parseFloat(v || 0);
 
       // ---------- PRIORITY CALL ----------
       const priority_count = num(values.priority_count);

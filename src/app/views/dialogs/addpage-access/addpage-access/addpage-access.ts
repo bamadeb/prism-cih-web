@@ -39,10 +39,10 @@ export class AddpageAccess implements OnInit {
   errorMessage: string = '';
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private userData: UserDataService,
-    private apiService: ConfigService,
-    private dialogRef: MatDialogRef<AddpageAccess>
+    private readonly fb: FormBuilder,
+    private readonly userData: UserDataService,
+    private readonly apiService: ConfigService,
+    private readonly dialogRef: MatDialogRef<AddpageAccess>
   ) { }
 
   // 🔹 INIT
@@ -138,7 +138,7 @@ export class AddpageAccess implements OnInit {
 private async update(formValue: any): Promise<void> {
 
   if (!this.currentUserId) {
-    throw { code: 'ID MISSING' };
+    throw new Error('ID MISSING');
   }
 
   try {

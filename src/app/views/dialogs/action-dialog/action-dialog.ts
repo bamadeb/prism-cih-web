@@ -16,7 +16,7 @@ export class ActionDialog {
   htmlContent: string = '';
 
   constructor(
-    private dialogRef: MatDialogRef<ActionDialog>,
+    private readonly dialogRef: MatDialogRef<ActionDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.title = data?.title;
