@@ -94,11 +94,11 @@ roles: any[] = [];
   };
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title
   ) {
     const today = new Date();
     const thirtyDaysBefore = new Date();
@@ -216,9 +216,9 @@ async loadLogreport() {
 
   try {
     const result = await this.apiService.addActionMaster<any>('0');
-    //console.log(result);
+    
     const activityTypes = result.data?.actionActivityType ?? [];
-    //this.navigatorList = result.data?.usersList ?? [];
+  
     this.roles = result?.data?.roles ?? [];
 
     // 🔹 Enrich activity types with display labels

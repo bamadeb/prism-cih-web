@@ -170,15 +170,6 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
         complete: async (result) => {
           const rows: any[] = result.data;
-          //const parsedHeaders: string[] = result.meta.fields || [];
-
-          // const expectedHeaders = [
-          //   'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
-          //   'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
-          //   'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
-          // ];
-
-
 
           // Build array for inserting
           const insertDataArray: any[] = [];

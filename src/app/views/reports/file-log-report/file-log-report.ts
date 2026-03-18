@@ -42,10 +42,10 @@ export class FileLogReport implements OnInit {
   processList: any[] = [];
   logDetails: any[] = []; 
   constructor(
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private headerService: HeaderService,
-    private titleService: Title
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title
   ) {}
 
   ngOnInit(): void {

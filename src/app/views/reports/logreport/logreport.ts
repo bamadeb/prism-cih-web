@@ -56,7 +56,7 @@ export class Logreport implements OnInit, AfterViewInit {
       'action_note'
   ];
 
-private activityLabelMap: Record<string, string> = {
+private readonly activityLabelMap: Record<string, string> = {
   'Call received': 'Calls received',
   'Phone call': 'Phone calls',
   'Home visit': 'Home Visits',
@@ -90,11 +90,11 @@ action_ativity_type: any[] = [];
   };
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title
   ) {
     const today = new Date();
     const thirtyDaysBefore = new Date();
