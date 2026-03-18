@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 export class SharedService {
 
   constructor() { }
-  private eventSubject = new Subject<any>();
+  private readonly eventSubject = new Subject<any>();
 
   sendEvent(data: any) {
     this.eventSubject.next(data);

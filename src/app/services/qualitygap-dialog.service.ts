@@ -9,9 +9,9 @@ import { QualitygapsDialog } from '../views/dialogs/qualitygaps-dialog/qualityga
 export class QualitygapDialogService {
 
   constructor(
-    private apiService: ConfigService,
-    private dialog: MatDialog,
-    private sanitizer: DomSanitizer
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog,
+    private readonly sanitizer: DomSanitizer
   ) {}
 
   // ============================

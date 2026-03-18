@@ -8,8 +8,8 @@ import { EMAIL_ID_KEY, ORG_ID_KEY, USER_ID_KEY, USER_NAME_KEY, USER_KEY } from '
 })
 export class UserDataService {
     constructor(
-        private storage: IStorageService,
-        private router: Router) {
+        private readonly storage: IStorageService,
+        private readonly router: Router) {
     }
     
     setUserId(id: string): void {

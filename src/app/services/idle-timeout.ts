@@ -10,14 +10,14 @@ import { SystemLogService } from './system-log';
 })
 export class IdleTimeoutService {
 
-  private idleTime = 10 * 60 * 1000; // 10 minutes
+  private readonly idleTime = 10 * 60 * 1000; // 10 minutes
   private subscription!: Subscription;
 
   constructor(
-    private router: Router,
-    private userData: UserDataService,
-    private ngZone: NgZone,
-    private systemLogService: SystemLogService
+    private readonly router: Router,
+    private readonly userData: UserDataService,
+    private readonly ngZone: NgZone,
+    private readonly systemLogService: SystemLogService
   ) {}
 
   startWatching() {

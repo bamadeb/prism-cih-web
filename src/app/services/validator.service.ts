@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 export class Validator {
     isAbsoluteURI(url: string): boolean {
-        return (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) ? true : false;
+        return url.startsWith('http://') || url.startsWith('https://');
     }
 
     isNullOrUndefined(value: any): boolean {
@@ -18,7 +18,7 @@ export class Validator {
     }
 
     isNotANumber(value: any): boolean {
-        return isNaN(value);
+        return Number.isNaN(value);
     }
 
     isEmail(email: string): boolean {
