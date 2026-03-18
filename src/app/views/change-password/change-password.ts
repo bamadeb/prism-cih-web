@@ -43,10 +43,10 @@ export class ChangePassword implements OnInit{
   currentIndex = 0;
 
   constructor(
-    private router: Router,
-    private titleService: Title,
-    private apiService: ConfigService,
-    private userData: UserDataService
+    private readonly router: Router,
+    private readonly titleService: Title,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService
   ) { }
 
   ngOnInit() {
@@ -77,12 +77,12 @@ export class ChangePassword implements OnInit{
     try {
       const cognito_username = user.cognito_username;
       if (!cognito_username) {
-        throw { code: 'COGNITO_USERNAME_MISSING' };
+        throw new Error('COGNITO_USERNAME_MISSING');
       }
 
       const response =await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
       console.log('Conito res :',response);
-      if (!response || response.statusCode !== 200) {
+      if (response?.statusCode !== 200) {
         throw new Error(response?.error || 'Password update failed');
       }
       const apiparamUpdate = {
@@ -90,7 +90,7 @@ export class ChangePassword implements OnInit{
         Password: this.newPassword,
         password_last_changed: new Date()
       };
-      const updatequalitygapresult = await this.apiService.prismUserPasswordUpdate<any>(apiparamUpdate);
+      await this.apiService.prismUserPasswordUpdate<any>(apiparamUpdate);
 
 
       // 3️⃣ Clear user session and force re-login
