@@ -8,9 +8,9 @@ export class IntegerPositiveOnlyDirective {
   @Input() min: number = 0;  // Default min value is 0
   @Input() max: number = Infinity;  // Default max value is Infinity
 
-  private regex: RegExp = new RegExp(/^-?\d*$/);
+  private readonly regex: RegExp = new RegExp(/^-?\d*$/);
 
-  constructor(private el: ElementRef, @Optional() private control: NgControl) { }
+  constructor(private readonly el: ElementRef, @Optional() private readonly control: NgControl) { }
 
  @HostListener('input', ['$event'])
 onInputChange(event: Event): void {
@@ -33,10 +33,10 @@ onInputChange(event: Event): void {
   @HostListener('blur')
   onInputBlur(): void {
     const input = this.el.nativeElement as HTMLInputElement;
-    let numericValue = input.value ? parseInt(input.value, 10) : NaN;
+    let numericValue = input.value ? Number.parseInt(input.value, 10) : Number.NaN;
 
     // If empty, set to min
-    if (isNaN(numericValue)) {
+    if (Number.isNaN(numericValue)) {
       numericValue = this.min;
     }
 
@@ -51,7 +51,7 @@ onInputChange(event: Event): void {
     input.value = numericValue.toString();
 
     // Update Angular model
-    if (this.control && this.control.control) {
+    if (this.control?.control) {
       this.control.control.setValue(numericValue, { emitEvent: false });
     }
   }

@@ -10,7 +10,7 @@ export class AutowidthDirective implements OnInit, OnDestroy  {
   @Input() font: string | null = null; // Input property to set the font
   private valueChangesSub: Subscription | null = null;
   
-  constructor(private el: ElementRef,private ngModel: NgModel) { 
+  constructor(private readonly el: ElementRef,private readonly ngModel: NgModel) { 
     this.el.nativeElement.style.width = `${this.minWidth}px`;
   }
   
