@@ -9,9 +9,9 @@ import { RiskgapsDialog } from '../views/dialogs/riskgaps-dialog/riskgaps-dialog
 export class RiskgapDialogService {
 
   constructor(
-    private apiService: ConfigService,
-    private dialog: MatDialog,
-    private sanitizer: DomSanitizer
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog,
+    private readonly sanitizer: DomSanitizer
   ) {}
 
   // ============================

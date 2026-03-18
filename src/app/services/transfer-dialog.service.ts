@@ -5,7 +5,7 @@ import { TransferDialog } from '../views/dialogs/transfer-dialog/transfer-dialog
 @Injectable({ providedIn: 'root' })
 export class TransferDialogService {
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   async open(rows: any[], departmentList: any[]): Promise<any> {
     try {

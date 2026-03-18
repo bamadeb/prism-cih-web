@@ -11,7 +11,7 @@ import { HtmlParser } from '@angular/compiler';
 export class NolongerPatientDialogService {
 
   constructor(
-    private dialog: MatDialog
+    private readonly dialog: MatDialog
   ) {}
 
   // ============================
@@ -46,7 +46,6 @@ export class NolongerPatientDialogService {
   // OPEN CONFIRM DIALOG
   // ============================
   async confirmboxUndo(row: any): Promise<ConfirmDialogResult | undefined> {
-    //console.log(row);
     try {
       const dialogRef = this.dialog.open(ConfirmDialog, {
         width: '80vw',

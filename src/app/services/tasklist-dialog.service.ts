@@ -7,8 +7,8 @@ import { Injectable } from '@angular/core';
 export class TaskListDialogService {
 
   constructor(
-    private dialog: MatDialog,
-    private apiService: ConfigService
+    private readonly dialog: MatDialog,
+    private readonly apiService: ConfigService
   ) {}
 
   async showtaskListDialog(row: any): Promise<MatDialogRef<TaskDialog>> {

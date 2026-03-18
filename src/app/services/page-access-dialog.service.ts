@@ -5,7 +5,7 @@ import { AddpageAccess } from '../views/dialogs/addpage-access/addpage-access/ad
 @Injectable({ providedIn: 'root' })
 export class PageAccessDialogService {
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   /** ---------------- ADD USER ---------------- */
   addDialog(

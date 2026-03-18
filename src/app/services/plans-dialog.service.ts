@@ -5,7 +5,7 @@ import { PlansDialog } from '../views/dialogs/plans-dialog/plans-dialog';
 @Injectable({ providedIn: 'root' })
 export class PlansDialogService {
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   /** ---------------- ADD USER ---------------- */
   addPlansDialog(): MatDialogRef<PlansDialog> {
