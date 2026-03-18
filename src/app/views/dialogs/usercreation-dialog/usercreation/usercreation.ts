@@ -46,19 +46,17 @@ export class Usercreation implements OnInit{
   
     constructor(
       @Inject(MAT_DIALOG_DATA) public data: any,
-      private fb: FormBuilder,
-      private apiService: ConfigService,
-      private userData: UserDataService,
-      private dialogRef: MatDialogRef<Usercreation>
+      private readonly fb: FormBuilder,
+      private readonly apiService: ConfigService,
+      private readonly userData: UserDataService,
+      private readonly dialogRef: MatDialogRef<Usercreation>
     ) {}
   
     // 🔹 INIT
     ngOnInit(): void {
       this.buildForm();
   
-      // if (this.data?.isEditMode && this.data?.plan) {
-      //   this.enableEditMode(this.data.plan);
-      // }
+
     }
   
     // 🔹 FORM BUILDER
@@ -83,18 +81,6 @@ async loadRoles() {
   this.roles = res?.data?.roles ?? [];
 }
   
-    // 🔹 EDIT MODE SETUP
-    // private enableEditMode(plan: any): void { 
-    //   this.isEditMode = true;
-    //   this.currentPlanId = plan.id;
-  
-    //   this.userCreationFormGroup.patchValue({
-    //     plan_name: plan.plan_name,
-    //     start_date: plan.start_date ? new Date(plan.start_date) : null,
-    //     end_date: plan.end_date ? new Date(plan.end_date) : null,
-    //     status: plan.status 
-    //   });       
-    // }
   
     // 🔹 SUBMIT HANDLER
     async submitRequest(): Promise<void> {
@@ -122,7 +108,7 @@ async loadRoles() {
     private async processRequest(formValue: any): Promise<void> {
 
       if (this.isEditMode) {
-        //await this.updatePlan(formValue);
+        
       } else {      
         await this.insertRequest(formValue);
       }
@@ -150,26 +136,13 @@ async loadRoles() {
   
      
   
-    // 🔹 UPDATE PLAN
-    // private async updatePlan(formValue: any): Promise<void> {
-    //   if (!this.currentPlanId) {
-    //     throw { code: 'PLAN_ID_MISSING' };
-    //   }
+
   
     
   
     // 🔹 ERROR HANDLER
     private handleError(error: any): void {
       console.error('❌ Request operation failed:', error);
-  
-      // switch (error?.code) {
-      //   case 'PLAN_ID_MISSING':
-      //     alert('Plan ID missing. Please refresh and try again.');
-      //     break;
-  
-      //   default:
-      //     alert('Something went wrong. Please try again.');
-      // }
     } 
 
      formatPhone(event: Event): void {

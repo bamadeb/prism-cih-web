@@ -6,10 +6,7 @@
 
       <form [formGroup]="processRiskFormGroup" class="filter-row" (ngSubmit)="riskGapsFileSubmit()"
         enctype="multipart/form-data">
-
-        <!-- <mat-label class="file-label">Select Member File</mat-label> -->
-
-        <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
+         <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
           <mat-icon>upload</mat-icon>
           CHOOSE RISK GAPS FILE
         </button>
