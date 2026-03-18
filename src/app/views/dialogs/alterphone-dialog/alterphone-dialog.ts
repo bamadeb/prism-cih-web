@@ -28,11 +28,11 @@ export class AlterphoneDialog implements OnInit{
   isLoading = false;
 
   constructor(
-    private dialogRef: MatDialogRef<AlterphoneDialog>,
+    private readonly dialogRef: MatDialogRef<AlterphoneDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService
   ) {}
 
   ngOnInit(): void {

@@ -26,11 +26,11 @@ export class AlteraddressDialog implements OnInit{
   isLoading = false;
 
   constructor(
-    private dialogRef: MatDialogRef<AlteraddressDialog>,
+    private readonly dialogRef: MatDialogRef<AlteraddressDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService
   ) {}
 
   ngOnInit(): void {

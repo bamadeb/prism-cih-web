@@ -32,9 +32,9 @@ export class ConfirmDialog {
   noteForm!: FormGroup;
 
   constructor(
-    private dialogRef: MatDialogRef<ConfirmDialog>,
-    private apiService: ConfigService, private fb: FormBuilder,
-    private userData: UserDataService,
+    private readonly dialogRef: MatDialogRef<ConfirmDialog>,
+    private readonly apiService: ConfigService, private readonly fb: FormBuilder,
+    private readonly userData: UserDataService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.noteForm = this.fb.group({

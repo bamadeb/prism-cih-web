@@ -45,9 +45,9 @@ export class AdduserDialog implements OnInit {
   errorMessage: string = '';
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private dialogRef: MatDialogRef<AdduserDialog>
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly dialogRef: MatDialogRef<AdduserDialog>
   ) { }
 
   // 🔹 INIT

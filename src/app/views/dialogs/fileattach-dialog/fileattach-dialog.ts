@@ -60,11 +60,11 @@ export class FileattachDialog implements OnInit {
       entity: any;
       type: string;
     },
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private envService: AppEnvService,
-    private userData: UserDataService,
-    private dialogRef: MatDialogRef<FileattachDialog>
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly envService: AppEnvService,
+    private readonly userData: UserDataService,
+    private readonly dialogRef: MatDialogRef<FileattachDialog>
   ) {
     
   }
@@ -86,7 +86,7 @@ export class FileattachDialog implements OnInit {
     this.selectedFile = file;
     this.isStatusOnlyUpdate = false; // 🔁 now file + status
     this.uploadForm.patchValue({ file });
-    //console.log(this.data.type);
+
   }
 
 
@@ -125,7 +125,7 @@ private async updateStatusOnly(status: number): Promise<void> {
     const item = this.data.attachments.find(a => a.id === this.currentId);
     if (item) item.status = status;
 
-    //this.dialogRef.close({ updated: true });
+   
 
   } catch (err) {
     console.error('❌ Status update failed', err);
@@ -169,7 +169,7 @@ private async updateStatusOnly(status: number): Promise<void> {
       // 🔁 refresh list from DB
         await this.loadAttachments();
 
-     // this.dialogRef.close({ uploaded: true });
+     
 
     } catch (error) {
       console.error('❌ File upload failed:', error);
@@ -258,7 +258,7 @@ private async updateFileUrlToDB(
   // UI ACTIONS
   // ===============================
   edit(row: any): void {
-   // console.log('✏️ Edit attachment:', row);
+  
     this.isAddMode = false; 
     this.currentId = row.id;
     this.isStatusOnlyUpdate = true; 
