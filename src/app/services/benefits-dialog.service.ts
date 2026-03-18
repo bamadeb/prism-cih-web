@@ -9,9 +9,9 @@ import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
 export class BenefitsDialogService {
 
   constructor(
-    private apiService: ConfigService,
-    private dialog: MatDialog,
-    private sanitizer: DomSanitizer
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog,
+    private readonly sanitizer: DomSanitizer
   ) {}
 
   // ============================

@@ -9,9 +9,9 @@ import { ActionDialog } from '../views/dialogs/action-dialog/action-dialog';
 export class CallListDialogService {
 
   constructor(
-    private apiService: ConfigService,
-    private dialog: MatDialog,
-    private sanitizer: DomSanitizer
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog,
+    private readonly sanitizer: DomSanitizer
   ) {}
 
   // ============================
@@ -93,7 +93,7 @@ export class CallListDialogService {
     if (!date) return '';
 
     const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
+    if (Number.isNaN(d.getTime())) return '';
 
     return d.toLocaleDateString('en-US', {
       month: '2-digit',
