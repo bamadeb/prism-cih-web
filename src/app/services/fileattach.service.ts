@@ -9,8 +9,8 @@ import { attachmentRequest } from '../models/requests/planRequest';
 export class FileAttachService {
 
   constructor(
-    private dialog: MatDialog,
-    private apiService: ConfigService
+    private readonly dialog: MatDialog,
+    private readonly apiService: ConfigService
   ) {}
 
   async openAttachDialog(data: {
@@ -22,7 +22,6 @@ export class FileAttachService {
 
     try {
       const req = { type: data.type, type_id: data.entity.id };
-      //console.log(req);
       const res = await this.apiService.attachments<any>(req);
       attachments = res?.data ?? [];
     } catch (err) {

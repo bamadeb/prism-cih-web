@@ -11,7 +11,7 @@ export class Auth {
   constructor(
     private readonly httpClient: HttpClient,
     private readonly environmentService: AppEnvService,
-    // private storageService: IStorageService
+ 
   ) {}
 
   async login<TResponse>(request: LoginRequest): Promise<TResponse> {

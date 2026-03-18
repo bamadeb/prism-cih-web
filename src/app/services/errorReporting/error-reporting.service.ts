@@ -12,16 +12,14 @@ import { firstValueFrom } from 'rxjs';
 export class ErrorReportingService {
 
   constructor(
-    private httpClient: HttpClient,
-    private environmentService: AppEnvService) { }
+    private readonly httpClient: HttpClient,
+    private readonly environmentService: AppEnvService) { }
 
   submitErrorReport(errorReport: ErrorReport): Promise<ErrorReport> {
-    //console.log('submitting new error report...');
 
     const requestUrl = `${this.environmentService.endpointUrl()}/api/ErrorReport/insertErrorReport`;
     const headers: HttpHeaders = new  HttpHeaders( {'content-type': 'application/json'});
     const body = JSON.stringify(errorReport);
-    //console.log(body);
     const result = firstValueFrom(this.httpClient.post<ErrorReport>(requestUrl, body, { headers }));
     return result;
   }
@@ -31,8 +29,6 @@ export class ErrorReportingService {
 
     const requestUrl = `${this.environmentService.endpointUrl()}/api/ErrorReport/index?pageIndex=${pageIndex}&rowsPerPage=${rowsPerPage}`;
     const headers: HttpHeaders = new  HttpHeaders( {'content-type': 'application/json'});
-    // const body = JSON.stringify(errorReport);
-    // //console.log(body);
     const result = firstValueFrom(this.httpClient.post<GetAllErrorReportsResponse>(requestUrl, { headers }).pipe(
       map((response) => {
         const data = response.errors;
