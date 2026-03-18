@@ -42,10 +42,10 @@ export class FileLogReport implements OnInit {
   processList: any[] = [];
   logDetails: any[] = []; 
   constructor(
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private headerService: HeaderService,
-    private titleService: Title
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +95,7 @@ export class FileLogReport implements OnInit {
   formatDateTime(dateStr: string): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
+    if (Number.isNaN(d.getTime())) return dateStr;
 
     let hours = d.getHours();
     const minutes = d.getMinutes().toString().padStart(2, '0');
