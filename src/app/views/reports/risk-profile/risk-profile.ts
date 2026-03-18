@@ -257,7 +257,7 @@ formatYMD(date: any): string {
   const d = new Date(date);
 
   // ❌ Invalid date OR epoch date
-  if (isNaN(d.getTime()) || d.getTime() === 0) {
+  if (Number.isNaN(d.getTime()) || d.getTime() === 0) {
     return '';
   }
 

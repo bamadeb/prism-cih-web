@@ -59,7 +59,7 @@ export class OutreachActivity implements OnInit, AfterViewInit {
       'action_note'
   ];
 
-private activityLabelMap: Record<string, string> = {
+private readonly activityLabelMap: Record<string, string> = {
   'Call received': 'Calls received',
   'Phone call': 'Phone calls',
   'Home visit': 'Home Visits',
@@ -218,7 +218,7 @@ async loadLogreport() {
     const result = await this.apiService.addActionMaster<any>('0');
     
     const activityTypes = result.data?.actionActivityType ?? [];
-  
+
     this.roles = result?.data?.roles ?? [];
 
     // 🔹 Enrich activity types with display labels
@@ -263,7 +263,7 @@ async loadLogreport() {
     const formatMDY = (value: any): string => {
       if (!value) return '';
       const d = new Date(value);
-      if (isNaN(d.getTime())) return value; // if not a valid date, return as-is
+      if (Number.isNaN(d.getTime())) return value; // if not a valid date, return as-is
       return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
     };
 

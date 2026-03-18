@@ -95,7 +95,7 @@ export class FileLogReport implements OnInit {
   formatDateTime(dateStr: string): string {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
+    if (Number.isNaN(d.getTime())) return dateStr;
 
     let hours = d.getHours();
     const minutes = d.getMinutes().toString().padStart(2, '0');

@@ -6,7 +6,7 @@ import { MatCardModule } from "@angular/material/card";
 import { MatFormField, MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTableDataSource } from '@angular/material/table';
-// import { DatePipe } from '@angular/common';
+
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from '@angular/material/core'; 
 import { MatInputModule } from '@angular/material/input';
@@ -55,7 +55,7 @@ export class RisksGapReport implements AfterViewInit ,OnInit {
   displayedColumns: string[] = [
   'select',   
   'medicaid_id',
-  // 'Type',
+
   'mode',
   'Gap_Code',
   'MEASURE_DESC',
@@ -78,12 +78,12 @@ export class RisksGapReport implements AfterViewInit ,OnInit {
 
  
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService ,
-    private titleService: Title,
-    private userData: UserDataService,
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService ,
+    private readonly titleService: Title,
+    private readonly userData: UserDataService,
     
   ) {
     const today = new Date();
@@ -161,7 +161,7 @@ formatDateToYMD(dateStr: string): string {
 
     // ✅ TypeScript now knows that 'data' exists
     this.riskGapsReportList = result.data ?? [];
-    //console.log(this.riskGapsReportList);
+    
     this.dataSource.data = this.riskGapsReportList;
 
   } catch (err) {
@@ -323,7 +323,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     gap_code: row.Gap_Code,
     Type: row.Type
   }));
-  //console.log(payload);
+  
   try {
     await this.apiService.deleteGapObservations({ records: payload });
 
@@ -336,7 +336,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     this.dataSource.data = this.riskGapsReportList;
     this.selection.clear();
     this.isLoading = false;
-    //alert('Records removed successfully');
+    
   } catch (err) {
     console.error('Delete failed', err);
     alert('Failed to remove records');
