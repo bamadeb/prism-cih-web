@@ -55,11 +55,11 @@ export class Plans implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
-    private apiService: ConfigService,
-    private plansDialogService: PlansDialogService,
-    private fileAttachService: FileAttachService,
-    private titleService: Title,
-    private headerService: HeaderService
+    private readonly apiService: ConfigService,
+    private readonly plansDialogService: PlansDialogService,
+    private readonly fileAttachService: FileAttachService,
+    private readonly titleService: Title,
+    private readonly headerService: HeaderService
   ) {}
 
   /* ---------------- LIFE CYCLE ---------------- */
