@@ -85,11 +85,11 @@ export class PcrFile implements OnInit, AfterViewInit {
         processLogList: any[] = []; 
        
         constructor(
-          private apiService: ConfigService,
-          private cdr: ChangeDetectorRef,
-          private fb: FormBuilder,
-          private headerService: HeaderService ,
-          private titleService: Title,private router: Router,private auth: UserDataService
+          private readonly apiService: ConfigService,
+          private readonly cdr: ChangeDetectorRef,
+          private readonly fb: FormBuilder,
+          private readonly headerService: HeaderService ,
+          private readonly titleService: Title,private readonly router: Router,private readonly auth: UserDataService
           
         ) {
           this.processPcrFormGroup = this.fb.group({
@@ -125,7 +125,7 @@ export class PcrFile implements OnInit, AfterViewInit {
       
       onFileSelect(event: any): void {
           const file = event.target.files[0];
-          if (file && file.type === 'text/csv') {
+          if (file?.type === 'text/csv') {
             this.selectedFile = file;
             this.processPcrFormGroup.patchValue({ file: file });
           } else { 

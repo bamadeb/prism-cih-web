@@ -85,11 +85,11 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
   processLogList: any[] = [];
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title, private router: Router, private auth: UserDataService
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title, private readonly router: Router, private readonly auth: UserDataService
 
   ) {
     this.processRiskFormGroup = this.fb.group({
@@ -125,7 +125,7 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
 
   onFileSelect(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'text/csv') {
+    if (file?.type === 'text/csv') {
       this.selectedFile = file;
       this.processRiskFormGroup.patchValue({ file: file });
     } else {
@@ -322,7 +322,7 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
     if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val;
 
     // Split on / or - and trim each part
-    const parts = val.split(/[\/\-]/).map((p: string) => p.trim());
+    const parts = val.split(/[-/]/).map((p: string) => p.trim());
     if (parts.length === 3) {
       let [p1, p2, p3] = parts;
 
@@ -330,7 +330,7 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
       if (p3.length === 2) p3 = '20' + p3;
 
       // Determine if DD/MM/YYYY or MM/DD/YYYY
-      if (parseInt(p1, 10) > 12) {
+      if (Number.parseInt(p1, 10) > 12) {
         // DD/MM/YYYY
         return `${p3}-${p2.padStart(2, '0')}-${p1.padStart(2, '0')}`;
       } else {
