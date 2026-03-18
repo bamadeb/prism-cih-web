@@ -7,8 +7,8 @@ import { ConfigService } from './api.service';
 export class AssignPlanDialogService {
 
   constructor(
-    private dialog: MatDialog,
-    private apiService: ConfigService
+    private readonly dialog: MatDialog,
+    private readonly apiService: ConfigService
   ) {}
 
   async open(rows: any[], planList: any[]): Promise<any> {

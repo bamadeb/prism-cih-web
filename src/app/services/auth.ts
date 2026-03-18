@@ -3,15 +3,14 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { LoginRequest } from '../models/requests/loginRequest';
 import { AppEnvService } from './app-env.service';
-// import { IStorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
   constructor(
-    private httpClient: HttpClient,
-    private environmentService: AppEnvService,
+    private readonly httpClient: HttpClient,
+    private readonly environmentService: AppEnvService,
     // private storageService: IStorageService
   ) {}
 

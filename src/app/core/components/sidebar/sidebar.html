@@ -10,7 +10,7 @@
     DASHBOARD
   </a>
 
-  @if (userRole == 7 || userRole == 20) {
+  @if (userRole == 7) {
     <mat-expansion-panel class="mt-50">
       <mat-expansion-panel-header>
         <mat-panel-title>MANAGE</mat-panel-title>
@@ -41,7 +41,7 @@
         <mat-panel-title>REPORTS</mat-panel-title>
       </mat-expansion-panel-header>
           <a mat-list-item routerLink="/riskgapsreport" >GAPS REPORT</a>
-      @if (userRole == 7 || userRole == 20) {        
+      @if (userRole == 7 || userRole == 21) {        
           <a mat-list-item routerLink="/starperformance">STAR PERFORMANCE</a>          
           <a mat-list-item routerLink="/logreport">ACTION LOG REPORT</a>
           <a mat-list-item routerLink="/systemlogreport">SYSTEM LOG REPORT</a>

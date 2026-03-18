@@ -14,7 +14,7 @@ const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private inactivityTimer: any;
-  constructor(private router: Router, private ngZone: NgZone) { this.startInactivityWatcher(); }  // ✅ keep only this, no `router: any`
+  constructor(private readonly router: Router, private readonly ngZone: NgZone) { this.startInactivityWatcher(); }  // ✅ keep only this, no `router: any`
 
   // ✅ Start tracking user activity
   private startInactivityWatcher(): void {
@@ -90,7 +90,7 @@ export class AuthService {
   }
 
   // Congito 
-  private client = new CognitoIdentityProviderClient({
+  private readonly client = new CognitoIdentityProviderClient({
     region: environment.cognito.region
   });
 
