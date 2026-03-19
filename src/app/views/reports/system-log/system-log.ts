@@ -66,11 +66,11 @@ isLoading = false;
 navigatorList: any[] = [];  
   
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title
   ) {
     const today = new Date();
     const thirtyDaysBefore = new Date();
@@ -113,11 +113,13 @@ navigatorList: any[] = [];
     }; 
 
     const result = await this.apiService.getSystemlog<any>(payload);
-    const rawData = Array.isArray(result?.data)
-  ? result.data
-  : Array.isArray(result?.data?.data)
-    ? result.data.data
-    : []; 
+    let rawData = [];
+
+    if (Array.isArray(result?.data)) {
+      rawData = result.data;
+    } else if (Array.isArray(result?.data?.data)) {
+      rawData = result.data.data;
+    }
 
     
      this.dataSource.data = rawData.map((u: any) => ({

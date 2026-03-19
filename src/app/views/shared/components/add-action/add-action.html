@@ -49,14 +49,7 @@
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
 
-                     <!-- 🔴 Error message -->
-                      <!-- <mat-error *ngIf="addActionFormGroup.get('action_date')?.hasError('required')">
-                        Action Date is required
-                      </mat-error>
-
-                      <mat-error *ngIf="addActionFormGroup.get('action_date')?.hasError('matDatepickerParse')">
-                        Invalid date format
-                      </mat-error> -->
+                     
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="w-100 flex-item">
@@ -267,7 +260,7 @@
                     <mat-accordion multi>
 
                       <ng-container *ngFor="let gap of riskGapsList.controls; let i = index" [formGroupName]="i">
-                        <!-- <DIV>{{year.label }} == {{gap.get('PLAN_YEAR')?.value}}</DIV> -->
+                        
                         <mat-expansion-panel class="mb-2"  *ngIf="year.value == (gap.get('PLAN_YEAR')?.value || '')">
                             <input type="hidden" formControlName="RISKGAP_ID">
                           <!-- HEADER -->
@@ -452,9 +445,7 @@
 
 
                         <mat-panel-title class="text-uppercase panel-title-10">
-                          <!-- <mat-checkbox formControlName="PROCESS_STATUS" (click)="$event.stopPropagation()"
-                            (keydown)="$event.stopPropagation()" class="me-2">
-                          </mat-checkbox> -->
+                          
                           <mat-checkbox formControlName="PROCESS_STATUS" [disabled]="true" class="me-2">
                           </mat-checkbox>
                         </mat-panel-title>
@@ -609,14 +600,7 @@
 
           <!-- SUBMIT BUTTON -->
           <div class="text-end mt-3">
-            <!-- <button mat-flat-button color="primary" type="submit">Submit</button> -->
-            <!-- <button mat-flat-button color="primary" type="submit" [disabled]="isProcessing">
-                    @if (!isProcessing) {
-                      Submit
-                    } @else {
-                      <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
-                    }
-            </button> -->
+            
             <button mat-flat-button color="primary" type="submit" [disabled]="isProcessing">
 
               <span *ngIf="!isProcessing">Submit</span>
@@ -795,18 +779,7 @@
                 </mat-error>
               </mat-form-field>
 
-              <!-- <mat-form-field appearance="outline" class="mr">
-                <mat-label>MEASURE YEAR</mat-label>
-                <mat-select formControlName="MEASURE_YEAR" class="txupper">
-                  <mat-option [value]="2026">2026</mat-option>
-                  <mat-option [value]="2025">2025</mat-option>
-                  <mat-option [value]="2024">2024</mat-option>
-                </mat-select>
-                
-                <mat-error *ngIf="measureForm.get('MEASURE_YEAR')?.invalid">
-                  Measure year is required
-                </mat-error>
-              </mat-form-field> -->
+              
 
               <mat-form-field appearance="outline" class="mr" style="width:32%;">
                 <mat-label>MEASURE DATE</mat-label>
@@ -830,7 +803,7 @@
 
               <div>
                 <mat-radio-group formControlName="NUM_COUNT">
-                  <!-- <mat-radio-button [value]="0">NON-COMPLIANCE</mat-radio-button> -->
+                  
                   <mat-radio-button [value]="1">COMPLIANT</mat-radio-button>
                 </mat-radio-group>
 
@@ -951,8 +924,7 @@
           @if (!isLoadingPcpHistory() && pcpVisitDataSource.data.length) {
           <div style="display: flex;">
 
-            <!-- <mat-paginator #mainPaginator [pageSize]="10"
-            [pageSizeOptions]="[10, 25, 50, 100]"></mat-paginator> -->
+            
             <mat-form-field appearance="outline" class="search-box">
               <mat-label>Search</mat-label>
               <input matInput (keyup)="applyFilter($event)" placeholder="Search">
