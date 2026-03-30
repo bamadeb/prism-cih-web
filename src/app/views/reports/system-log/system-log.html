@@ -5,9 +5,9 @@
             <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
                 <!-- NAVIGATORS -->
                 <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
-                    <!-- <mat-label>ALL USERS</mat-label> -->
+                   
                     <mat-select formControlName="user_id">
-                        <!-- <mat-option class="txupper" [value]="">ALL USERS</mat-option> -->
+                        
                         <mat-option class="txupper" *ngFor="let d of navigatorList" [value]="d.ID">
                             {{ d.FistName }} {{ d.LastName }} - ({{ d.ROLE_NAME }})
                         </mat-option>

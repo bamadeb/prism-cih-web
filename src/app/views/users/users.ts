@@ -61,10 +61,10 @@ export class Users implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
-    private apiService: ConfigService,
-    private usersDialogService: UsersDialogService,
-    private titleService: Title,
-    private headerService: HeaderService
+    private readonly apiService: ConfigService,
+    private readonly usersDialogService: UsersDialogService,
+    private readonly titleService: Title,
+    private readonly headerService: HeaderService
   ) {}
 
   /* ---------------- LIFE CYCLE ---------------- */

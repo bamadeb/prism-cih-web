@@ -15,7 +15,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { Title } from '@angular/platform-browser';
 import { ConfigService } from '../../../services/api.service';
 import { HeaderService } from '../../../services/header.service';
-//import { PlansDialogService } from '../../../services/plans-dialog.service';
+
 import { FileAttachService } from '../../../services/fileattach.service';
 import { UserCreationRequestDialogService } from '../../../services/user-creation-service';
 
@@ -67,12 +67,12 @@ export class UserCreationRequest  implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(
-    private apiService: ConfigService,
-    //private plansDialogService: PlansDialogService,
-    private UserCreationDialogService: UserCreationRequestDialogService,    
-    private fileAttachService: FileAttachService,
-    private titleService: Title,
-    private headerService: HeaderService
+    private readonly apiService: ConfigService,
+    
+    private readonly UserCreationDialogService: UserCreationRequestDialogService,    
+    private readonly fileAttachService: FileAttachService,
+    private readonly titleService: Title,
+    private readonly headerService: HeaderService
   ) {}
 
   /* ---------------- LIFE CYCLE ---------------- */
@@ -99,15 +99,7 @@ export class UserCreationRequest  implements OnInit, AfterViewInit {
     try {
       const res = await this.apiService.userRequestList<any>();
       this.dataSource.data = res?.data?.plans ?? [];  
-      //console.log(this.dataSource.data);
-      // this.dataSource.data = plans.map((u: any) => ({ 
-      //   ID: u.ID,
-      //   FIRST_NAME: u.FIRST_NAME ?? '',
-      //   start_date: u.start_date ?? '',
-      //   end_date: u.end_date ?? '', 
-      //   status: u.status,
-      //   planstatus: u.status === 1 ? 'In-active' : 'Active',
-      // }));
+      
 
       this.selection.clear();
 
@@ -151,7 +143,7 @@ export class UserCreationRequest  implements OnInit, AfterViewInit {
 
 
   private openPlanDialog(plan?: any): void {
-    //this.isLoading = true;
+    
     const dialogRef = plan
       ? this.UserCreationDialogService.editPlansDialog(plan)
       : this.UserCreationDialogService.addPlansDialog();

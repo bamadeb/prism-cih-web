@@ -148,12 +148,12 @@ export class AddAction implements OnInit , AfterViewInit {
 
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private userData: UserDataService,
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly userData: UserDataService,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<AddAction>,
-    private fb: FormBuilder,private datePipe: DatePipe
+    private readonly dialogRef: MatDialogRef<AddAction>,
+    private readonly fb: FormBuilder,private readonly datePipe: DatePipe
   ) {
 
     this.addActionFormGroup = this.fb.group({
@@ -516,7 +516,7 @@ export class AddAction implements OnInit , AfterViewInit {
     this.isProcessing = true; // 🔹 show loader
     this.addActionChangeFlag = 1; 
     // 🔹 Validate action_date is a valid date
-    if (!formValues.action_date || isNaN(new Date(formValues.action_date).getTime())) {
+    if (!formValues.action_date || Number.isNaN(new Date(formValues.action_date).getTime())) {
       alert('Please select a valid Action Date');
       this.isProcessing = false;
 
