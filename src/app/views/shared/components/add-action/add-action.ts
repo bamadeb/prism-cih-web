@@ -578,8 +578,7 @@ export class AddAction implements OnInit , AfterViewInit {
         this.getMemberTaskList(formValues.medicaid_id);
         this.getMemberGapsList(formValues.medicaid_id);
         this.resetActionFields();
-        this.isProcessing = false;
-
+        this.isProcessing = false; 
         this.cdr.detectChanges();
 
       } catch (error) {
