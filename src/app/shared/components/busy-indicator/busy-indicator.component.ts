@@ -19,7 +19,7 @@ export class BusyIndicatorComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { message?: string },
-    private dialogRef: MatDialogRef<BusyIndicatorComponent>
+    private readonly dialogRef: MatDialogRef<BusyIndicatorComponent>
   ) {
     if (data?.message) {
       this.message = data.message;

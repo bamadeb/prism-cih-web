@@ -58,7 +58,7 @@ interface RiskSummaryRow {
   templateUrl: './risk-profile.html',
   styleUrl: './risk-profile.css',
 })
-export class RiskProfile {
+export class RiskProfile implements AfterViewInit, OnInit {
   displayedColumns: string[] = [ ]; 
   dynamicDateColumns: string[] = []; 
 
@@ -91,11 +91,11 @@ newRiskCategoryCount: Record<string, number> = {};
   };
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title
   ) {
   
     // ✅ All required controls added
@@ -178,7 +178,7 @@ newRiskCategoryCount: Record<string, number> = {};
     ===================================================== */
     const dateSet = new Set<string>();
     rawData.forEach(r => r.to_date && dateSet.add(r.to_date));
-    this.dynamicDateColumns = Array.from(dateSet).sort();
+    this.dynamicDateColumns = Array.from(dateSet).sort((a, b) => a.localeCompare(b));
 
     /* =====================================================
        4️⃣ GROUP TABLE ROWS
@@ -257,7 +257,7 @@ formatYMD(date: any): string {
   const d = new Date(date);
 
   // ❌ Invalid date OR epoch date
-  if (isNaN(d.getTime()) || d.getTime() === 0) {
+  if (Number.isNaN(d.getTime()) || d.getTime() === 0) {
     return '';
   }
 

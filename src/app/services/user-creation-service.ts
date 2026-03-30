@@ -6,7 +6,7 @@ import { Usercreation } from '../views/dialogs/usercreation-dialog/usercreation/
 @Injectable({ providedIn: 'root' })
 export class UserCreationRequestDialogService {
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   /** ---------------- ADD USER ---------------- */
   addPlansDialog(): MatDialogRef<Usercreation> {

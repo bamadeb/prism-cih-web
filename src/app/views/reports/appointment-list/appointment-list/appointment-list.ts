@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConfigService } from '../../../../services/api.service';
 import { Title } from '@angular/platform-browser';
@@ -37,7 +37,7 @@ interface AppointmentResponse {
 })
 
 
-export class AppointmentList {
+export class AppointmentList implements AfterViewInit,OnInit {
 
   appListFormGroup!: FormGroup;
   isLoading = false;
@@ -62,11 +62,11 @@ export class AppointmentList {
 
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title,
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title,
 
   ) {
     const today = new Date();
@@ -116,11 +116,11 @@ export class AppointmentList {
 
     try { 
       const formvalues= this.appListFormGroup.value;
-      const start_date= this.formatDateOnly(formvalues.start_date);
-      const end_date= this.formatDateOnly(formvalues.end_date);
+      const start_date= this.formatDateToYMD(formvalues.start_date);
+      const end_date= this.formatDateToYMD(formvalues.end_date);
 
       const result = await this.apiService.getAppointmentList<any>({
-        start_date,
+        start_date, 
         end_date
       });
       this.appointmentList = result.data ?? [];
@@ -133,15 +133,16 @@ export class AppointmentList {
       this.cdr.markForCheck();
     }
   }
- private formatDateOnly(date: Date | string | null | undefined): string {
-    if (!date) return '';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+
+  formatDateToYMD(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`; // m/d/Y format
   }
+ 
 
 
 

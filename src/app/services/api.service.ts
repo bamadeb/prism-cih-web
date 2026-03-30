@@ -22,8 +22,8 @@ export class ConfigService {
   }
 
   constructor(
-    private httpClient: HttpClient,
-    private environmentService: AppEnvService,
+    private readonly httpClient: HttpClient,
+    private readonly environmentService: AppEnvService,
 
   ) { }
 
@@ -57,7 +57,6 @@ export class ConfigService {
     return await commonPostApi<TResponse>(
       this.httpClient,
       this.environmentService,
-      //'prismOutreachAllmyworkspaceSP',
       'prismOutreachmemberSP',
       request   
     ); 
@@ -220,6 +219,15 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       this.httpClient,
       this.environmentService,
       'prismGetAddActionMasterData',
+      request   
+    );
+  }
+
+  async getUserListByid<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetuserlistbyrole',
       request   
     );
   }
@@ -442,6 +450,14 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   } 
+   async getTempStarPerformanceBySeccionID<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetTempStarPerformanceBySeccionID',
+      request   
+    );
+  } 
 
   async getSystemlog<TResponse>(request: any): Promise<TResponse> {
     return await commonPostApi<TResponse>(
@@ -524,25 +540,7 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }
 
-  // async createCognitoUser(request: any): Promise<string> {
-  //     const res: any = await commonPostApi(
-  //       this.httpClient,
-  //       this.environmentService,
-  //       'prismCreateCognitoUser',
-  //       request
-  //     );
-  //    // console.log('createCognito : ',res);
-  //     const parsed =
-  //       typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
-
-  //     const cognitoUsername = parsed?.user?.cognitoUsername;
-
-  //     if (!cognitoUsername) {
-  //       throw new Error('Cognito username not returned');
-  //     }
-
-  //     return cognitoUsername;
-  // }
+  
 async createCognitoUser(request: any): Promise<string> {
 
   const res: any = await commonPostApi(
@@ -576,35 +574,7 @@ async createCognitoUser(request: any): Promise<string> {
   return cognitoUsername;
 }
 
-// async updateCognitoUser(
-//     username: string,
-//     attributes: any,
-//     newPassword?: string
-//   ): Promise<any> {
 
-//     const cognitoPayload: any = {
-//       username,
-//       attributes
-//     };
-
-//     // 🔐 Only include password if provided
-//     if (newPassword) {
-//       cognitoPayload.newPassword = newPassword;
-//     }
-
-//     const res: any = await commonPostApi(
-//       this.httpClient,
-//       this.environmentService,
-//       'prismUpdateCognitoUser',
-//       cognitoPayload
-//     );
-
-//     // Optional: validate backend response if needed
-//     if (res?.success === false) {
-//       throw new Error(res?.message || 'Failed to update Cognito user');
-//     }
-//     return res;
-//   }
   async updateCognitoUser(
     username: string,
     attributes: any,
@@ -628,12 +598,11 @@ async createCognitoUser(request: any): Promise<string> {
     );
 
     // ✅ Handle Cognito error properly
-    if (!res || res.statusCode !== 200) {
+    if (res?.statusCode !== 200) {
 
-      throw {
-        code: 'INVALID_PASSWORD',
-        message: res?.error || res?.message || 'Failed to update Cognito user'
-      };
+      throw new Error(
+        res?.error || res?.message || 'Failed to update Cognito user'
+      );
 
     }
 

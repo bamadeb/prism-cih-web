@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject,OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfigService } from '../../../services/api.service'; 
@@ -21,16 +21,16 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
   templateUrl: './alteraddress-dialog.html',
   styleUrl: './alteraddress-dialog.css',
 })
-export class AlteraddressDialog {
+export class AlteraddressDialog implements OnInit{
   addAltaddressFormGroup!: FormGroup;
   isLoading = false;
 
   constructor(
-    private dialogRef: MatDialogRef<AlteraddressDialog>,
+    private readonly dialogRef: MatDialogRef<AlteraddressDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService
   ) {}
 
   ngOnInit(): void {
@@ -85,12 +85,21 @@ export class AlteraddressDialog {
         medicaid_id: this.data.member.medicaid_id,
         alt_address: f.alt_address,
         alt_city: f.alt_city,
-        alt_state: f.alt_state,
+        alt_state: f.alt_state, 
         alt_zip: f.alt_zip,
-        add_date: this.formatDateOnly(f.add_date),
+        add_date: this.formatDateToYMD(f.add_date),
         add_by: user.ID
       }]
     };
+  }
+
+  formatDateToYMD(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`; // m/d/Y format
   }
 
   private logSuccess(): Promise<any> {
@@ -125,12 +134,7 @@ export class AlteraddressDialog {
     this.dialogRef.close();
   }
 
-  private formatDateOnly(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
+  
 
   formatZip(event: Event): void {
     const input = event.target as HTMLInputElement;

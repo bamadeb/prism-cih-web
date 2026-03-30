@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -54,11 +56,11 @@ import * as Papa from 'papaparse';
   templateUrl: './pcr-file.html',
   styleUrl: './pcr-file.css',
 })
-export class PcrFile {
+export class PcrFile implements OnInit, AfterViewInit {
 
   
         /* ---------- FORM & FILE ---------------------------- */
-        processMembersFormGroup!: FormGroup;
+        processPcrFormGroup!: FormGroup;
         selectedFile: File | null = null;
       
         /* ----------- TABLE --------------------------------- */
@@ -83,14 +85,14 @@ export class PcrFile {
         processLogList: any[] = []; 
        
         constructor(
-          private apiService: ConfigService,
-          private cdr: ChangeDetectorRef,
-          private fb: FormBuilder,
-          private headerService: HeaderService ,
-          private titleService: Title,private router: Router,private auth: UserDataService
+          private readonly apiService: ConfigService,
+          private readonly cdr: ChangeDetectorRef,
+          private readonly fb: FormBuilder,
+          private readonly headerService: HeaderService ,
+          private readonly titleService: Title,private readonly router: Router,private readonly auth: UserDataService
           
         ) {
-          this.processMembersFormGroup = this.fb.group({
+          this.processPcrFormGroup = this.fb.group({
             file: [null, Validators.required]
           });
         }
@@ -123,12 +125,12 @@ export class PcrFile {
       
       onFileSelect(event: any): void {
           const file = event.target.files[0];
-          if (file && file.type === 'text/csv') {
+          if (file?.type === 'text/csv') {
             this.selectedFile = file;
-            this.processMembersFormGroup.patchValue({ file: file });
+            this.processPcrFormGroup.patchValue({ file: file });
           } else { 
             this.selectedFile = null; 
-            this.processMembersFormGroup.get('file')?.reset(); 
+            this.processPcrFormGroup.get('file')?.reset(); 
           }
         }
       
@@ -136,15 +138,15 @@ export class PcrFile {
           if (this.fileInput) {
             this.fileInput.nativeElement.value = ''; // ✅ allowed
           }
-          this.processMembersFormGroup.get('file')?.reset();
+          this.processPcrFormGroup.get('file')?.reset();
           this.selectedFile = null;
         }
       
   /* ============================ UPLOAD ============================ */
   async pcrFileSubmit(): Promise<void> {
   
-    if (!this.processMembersFormGroup.valid || !this.selectedFile) {
-      this.processMembersFormGroup.markAllAsTouched();
+    if (!this.processPcrFormGroup.valid || !this.selectedFile) {
+      this.processPcrFormGroup.markAllAsTouched();
       return;
     }
   
@@ -199,15 +201,15 @@ export class PcrFile {
             insertDataArray.push(row);
           });
   
-          //console.log("Insert Data:", insertDataArray);
+
           // ------------------ Batch processing ------------------
           await this.uploadInBatches(insertDataArray);  
   
           // ------------------ Fetch temp members ------------------
-          await this.loadTempMembers();
+          await this.loadTempPcr();
   
           // Reset form + file
-          this.processMembersFormGroup.reset();
+          this.processPcrFormGroup.reset();
           this.selectedFile = null;
           this.resetFile();
           this.isUpload = false;
@@ -276,13 +278,12 @@ export class PcrFile {
           await this.apiService.insert<any, MemberFileRequest>(payload);
       }
       
-      private async loadTempMembers(): Promise<void> {
+      private async loadTempPcr(): Promise<void> {
         const res = await this.apiService.getTempCihPcrBySessionID<any>({
           session_id: this.sessionId
         });
     
-        // console.log('sessionId:'+this.sessionId);
-        // console.log(res);
+
       
         this.tempMemberList = res?.data ?? [];
         this.dataSource.data = this.tempMemberList;

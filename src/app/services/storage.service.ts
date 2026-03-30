@@ -15,7 +15,7 @@ export abstract class IStorageService {
 export class StorageService extends IStorageService {
     isEncryptionEnabled: boolean;
     secretKey: string;
-    constructor (private appEnvService: AppEnvService, private router: Router) {
+    constructor (private readonly appEnvService: AppEnvService, private readonly router: Router) {
         super();
         this.isEncryptionEnabled = this.appEnvService.encryptionConfig();
         this.secretKey = this.generateSecretKey();

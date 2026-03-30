@@ -42,10 +42,10 @@ export class AssignplanDialog implements OnInit {
   @ViewChild('actionSelect') actionSelect!: MatSelect;
 
   constructor(
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService,
-    private dialogRef: MatDialogRef<AssignplanDialog>,
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService,
+    private readonly dialogRef: MatDialogRef<AssignplanDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
@@ -171,7 +171,6 @@ private async verifyPlanExists(
   private afterSuccess(): void {
     this.resetForm();
     this.close();
-    //this.dialogRef.close({ refresh: true });
   }
 
   private resetForm(): void {

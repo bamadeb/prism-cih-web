@@ -9,9 +9,9 @@ import { QualitygapsDialog } from '../views/dialogs/qualitygaps-dialog/qualityga
 export class QualitygapDialogService {
 
   constructor(
-    private apiService: ConfigService,
-    private dialog: MatDialog,
-    private sanitizer: DomSanitizer
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog,
+    private readonly sanitizer: DomSanitizer
   ) {}
 
   // ============================
@@ -38,7 +38,6 @@ export class QualitygapDialogService {
   // OPEN DIALOG
   // ============================
   private openDialog(row: any, qualitygapList: any[]): void {
-    //const html = this.buildHtml(qualitygapList);
 
     const title = `QUALITY GAPS LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
 
@@ -49,74 +48,9 @@ export class QualitygapDialogService {
       data: {
         title,
         qualitygapList
-        //htmlContent: this.sanitizer.bypassSecurityTrustHtml(html)
       }
     });
   }
 
-  // ============================
-  // HTML BUILDER
-  // ============================
-  // private buildHtml(qualitygapList: any[]): string {
-  //   if (!qualitygapList.length) {
-  //     return `<p style="text-align:center;color:#777">No quality gap list available</p>`;
-  //   }
 
-  //   return `
-  //     <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;text-align:left;">
-  //       <thead>
-  //         <tr>
-  //           <th>SL. NO</th>
-  //           <th>MEASURE NAME</th>
-  //           <th>SUB MEASURE</th>
-  //           <th>PROVIDER ID</th>
-  //           <th>PROVIDER NAME</th>
-  //           <th>STATUS</th>
-  //           <th>PROCESS DATE</th>
-  //         </tr>
-  //       </thead>
-  //       <tbody>
-  //         ${qualitygapList.map((q, i) => `
-  //           <tr>
-  //             <td>${i + 1}</td>
-  //             <td>${this.escapeHtml(q.MEASURE_NAME)}</td>
-  //             <td>${this.escapeHtml(q.SUB_MEASURE)}</td>
-  //             <td>${this.escapeHtml(q.PROVIDER_ID)}</td>
-  //             <td>${this.escapeHtml(q.PROVIDER_NAME)}</td>
-  //             <td>${q.PROCESS_STATUS === 1 ? 'Complete' : 'Open'}</td>
-  //             <td>${this.formatDate(q.ADDED_DATE)}</td>
-  //           </tr>
-  //         `).join('')}
-  //       </tbody>
-  //     </table>
-  //   `;
-  // }
-
-  // ============================
-  // HTML ESCAPER (XSS SAFE)
-  // ============================
-  // private escapeHtml(text: string = ''): string {
-  //   return text
-  //     .replace(/&/g, '&amp;')
-  //     .replace(/</g, '&lt;')
-  //     .replace(/>/g, '&gt;')
-  //     .replace(/"/g, '&quot;')
-  //     .replace(/'/g, '&#039;');
-  // }
-
-  // ============================
-  // DATE FORMATTER
-  // ============================
-  // private formatDate(date: any): string {
-  //   if (!date) return '';
-
-  //   const d = new Date(date);
-  //   if (isNaN(d.getTime())) return '';
-
-  //   return d.toLocaleDateString('en-US', {
-  //     month: '2-digit',
-  //     day: '2-digit',
-  //     year: 'numeric'
-  //   });
-  // }
 }

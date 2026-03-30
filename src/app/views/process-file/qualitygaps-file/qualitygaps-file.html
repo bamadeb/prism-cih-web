@@ -4,10 +4,8 @@
     <mat-card class="mb-1">
         <mat-card-content>
 
-            <form [formGroup]="processMembersFormGroup" class="filter-row" (ngSubmit)="qualityFileSubmit()"
+            <form [formGroup]="processQualityFormGroup" class="filter-row" (ngSubmit)="qualityFileSubmit()"
                 enctype="multipart/form-data">
-
-                <!-- <mat-label class="file-label">Select Member File</mat-label> -->
 
                 <button mat-stroked-button color="primary" type="button" (click)="fileInput.click()">
                     <mat-icon>upload</mat-icon>
@@ -23,13 +21,13 @@
 
                 <input #fileInput type="file" hidden (change)="onFileSelect($event)" />
 
-                <mat-error *ngIf="processMembersFormGroup.get('file')?.touched &&
-                 processMembersFormGroup.get('file')?.invalid">
+                <mat-error *ngIf="processQualityFormGroup.get('file')?.touched &&
+                 processQualityFormGroup.get('file')?.invalid">
                     File is required
                 </mat-error>
 
                  <button mat-raised-button color="primary" type="submit"
-                    [disabled]="isUpload || !processMembersFormGroup.valid">
+                    [disabled]="isUpload || !processQualityFormGroup.valid">
                     @if (isUpload) {
                         <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
                     } @else {

@@ -7,9 +7,9 @@ import { NgControl } from '@angular/forms';
 export class IntegerOnlyDirective {
   @Input() min: number = 0; // Default to 0 if no min is provided
   private timeout: any; // Store the timeout reference
-  private regex: RegExp = new RegExp(/^-?\d*$/);
+  private readonly regex: RegExp = new RegExp(/^-?\d*$/);
 
-  constructor(private el: ElementRef, @Optional() private control: NgControl) { }
+  constructor(private readonly el: ElementRef, @Optional() private readonly control: NgControl) { }
 
   @HostListener('input', ['$event'])
   onInputChange(event: Event): void {
@@ -45,7 +45,7 @@ export class IntegerOnlyDirective {
     // Set to "0" if input is empty or just a lone '-'
     if (input.value === '' || input.value === '-' || input.value === '-0') {
       input.value =this.min.toString();
-      if (this.control && this.control.control) {
+      if (this.control?.control) {
         this.control.control.setValue(this.min);  // Update the model
       }
     }

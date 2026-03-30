@@ -10,7 +10,6 @@ export class CryptoService {
    }
 
    encryptUsingAES256(data:string) {
-    ////console.log("this.secretKey",this.secretKey)
     let _key = CryptoJS.enc.Utf8.parse(this.secretKey);
     let _iv = CryptoJS.enc.Utf8.parse(this.secretKey);
     let encrypted = CryptoJS.AES.encrypt(

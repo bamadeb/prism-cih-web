@@ -56,10 +56,10 @@ export class PageAccess implements OnInit, AfterViewInit {
     @ViewChild(MatSort) sort!: MatSort;
   
     constructor(
-      private apiService: ConfigService,
-      private pageDialogService: PageAccessDialogService,
-      private titleService: Title,
-      private headerService: HeaderService
+      private readonly apiService: ConfigService,
+      private readonly pageDialogService: PageAccessDialogService,
+      private readonly titleService: Title,
+      private readonly headerService: HeaderService
     ) {}
   
     /* ---------------- LIFE CYCLE ---------------- */
@@ -83,11 +83,11 @@ export class PageAccess implements OnInit, AfterViewInit {
   
       try {
         const res = await this.apiService.pageaccess<any>();
-        //console.log(res.data);
+        
         const pageaccess = res?.data?.PageAccessList ?? [];  
         this.pagelist = res?.data?.PageList ?? [];
         this.roleList = res?.data?.roleList ?? [];
-        //console.log(users);
+        
         this.dataSource.data = pageaccess.map((u: any) => ({
           id: u.id,
           role_id: u.role_id ?? '',

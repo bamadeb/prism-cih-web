@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -45,11 +47,11 @@ const TABLE = 'MEM_RISK_GAP_TEMP';
   templateUrl: './riskgaps-file.html',
   styleUrl: './riskgaps-file.css',
 })
-export class RiskgapsFile {
+export class RiskgapsFile implements AfterViewInit, OnInit {
 
 
   /* ---------- FORM & FILE ---------------------------- */
-  processMembersFormGroup!: FormGroup;
+  processRiskFormGroup!: FormGroup;
   selectedFile: File | null = null;
 
   /* ----------- TABLE --------------------------------- */
@@ -83,14 +85,14 @@ export class RiskgapsFile {
   processLogList: any[] = [];
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title, private router: Router, private auth: UserDataService
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title, private readonly router: Router, private readonly auth: UserDataService
 
   ) {
-    this.processMembersFormGroup = this.fb.group({
+    this.processRiskFormGroup = this.fb.group({
       file: [null, Validators.required]
     });
   }
@@ -123,12 +125,13 @@ export class RiskgapsFile {
 
   onFileSelect(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'text/csv') {
+    if (file?.type === 'text/csv') {
       this.selectedFile = file;
-      this.processMembersFormGroup.patchValue({ file: file });
+      this.processRiskFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
-      this.processMembersFormGroup.get('file')?.reset();
+      this.processRiskFormGroup.get('file')?.reset();
+      this.isUpload = false;
       alert('Only .csv files are allowed.');
     }
   }
@@ -137,15 +140,15 @@ export class RiskgapsFile {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = ''; // ✅ allowed
     }
-    this.processMembersFormGroup.get('file')?.reset();
+    this.processRiskFormGroup.get('file')?.reset();
     this.selectedFile = null;
   }
 
   /* ============================ UPLOAD ============================ */
   async riskGapsFileSubmit(): Promise<void> {
 
-    if (!this.processMembersFormGroup.valid || !this.selectedFile) {
-      this.processMembersFormGroup.markAllAsTouched();
+    if (!this.processRiskFormGroup.valid || !this.selectedFile) {
+      this.processRiskFormGroup.markAllAsTouched();
       return;
     }
 
@@ -155,7 +158,7 @@ export class RiskgapsFile {
 
     const file = this.selectedFile;
     const ext = file.name.split('.').pop()?.toLowerCase();
-    //console.log(ext);
+
     if (ext !== 'csv') {
       alert('Only .csv files are allowed.');
       this.resetFile();
@@ -204,10 +207,10 @@ export class RiskgapsFile {
           await this.uploadInBatches(insertDataArray);
 
           // ------------------ Fetch temp members ------------------
-          await this.loadTempMembers();
+          await this.loadTempRiskGaps();
 
           // Reset form + file
-          this.processMembersFormGroup.reset();
+          this.processRiskFormGroup.reset();
           this.selectedFile = null;
           this.resetFile();
           this.isUpload = false;
@@ -247,7 +250,7 @@ export class RiskgapsFile {
   /* ============================ API ============================ */
 
   private async uploadInBatches(insertDataArray: any[]): Promise<void> {
-    //console.log('Total Record: '+insertDataArray.length);
+
     const batches = this.chunkArray(insertDataArray, 1000);
 
     for (let i = 0; i < batches.length; i++) {
@@ -269,13 +272,12 @@ export class RiskgapsFile {
     await this.apiService.insert<any, MemberFileRequest>(payload);
   }
 
-  private async loadTempMembers(): Promise<void> {
+  private async loadTempRiskGaps(): Promise<void> {
     const res = await this.apiService.getTempRiskGapsBySeccionID<any>({
       session_id: this.sessionId
     });
 
-    // console.log('sessionId:' + this.sessionId);
-    // console.log(res);
+
 
     this.tempMemberList = res?.data ?? [];
     this.dataSource.data = this.tempMemberList;
@@ -320,7 +322,7 @@ export class RiskgapsFile {
     if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val;
 
     // Split on / or - and trim each part
-    const parts = val.split(/[\/\-]/).map((p: string) => p.trim());
+    const parts = val.split(/[-/]/).map((p: string) => p.trim());
     if (parts.length === 3) {
       let [p1, p2, p3] = parts;
 
@@ -328,7 +330,7 @@ export class RiskgapsFile {
       if (p3.length === 2) p3 = '20' + p3;
 
       // Determine if DD/MM/YYYY or MM/DD/YYYY
-      if (parseInt(p1, 10) > 12) {
+      if (Number.parseInt(p1, 10) > 12) {
         // DD/MM/YYYY
         return `${p3}-${p2.padStart(2, '0')}-${p1.padStart(2, '0')}`;
       } else {

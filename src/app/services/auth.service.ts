@@ -10,11 +10,11 @@ import {
   VerifySoftwareTokenCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 const USER_KEY = 'app_user';
-const INACTIVITY_LIMIT = 60 * 60 * 1000; // 10 minutes in milliseconds
+const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private inactivityTimer: any;
-  constructor(private router: Router, private ngZone: NgZone) { this.startInactivityWatcher(); }  // ✅ keep only this, no `router: any`
+  constructor(private readonly router: Router, private readonly ngZone: NgZone) { this.startInactivityWatcher(); }  // ✅ keep only this, no `router: any`
 
   // ✅ Start tracking user activity
   private startInactivityWatcher(): void {
@@ -40,7 +40,6 @@ export class AuthService {
   private logoutDueToInactivity(): void {
     this.clearUser();
     sessionStorage.clear();
-    //alert('You have been logged out due to 10 minutes of inactivity.');
     this.router.navigate(['/']);
   }
 
@@ -91,7 +90,7 @@ export class AuthService {
   }
 
   // Congito 
-  private client = new CognitoIdentityProviderClient({
+  private readonly client = new CognitoIdentityProviderClient({
     region: environment.cognito.region
   });
 
@@ -119,7 +118,7 @@ export class AuthService {
     });
 
     const result: any = await this.client.send(command);
-    //console.log(result);
+
     // ➤ Case 1: Auth success (no MFA)
     if (result.AuthenticationResult) {
       this.storeTokens(result.AuthenticationResult, username);
@@ -237,19 +236,6 @@ export class AuthService {
     localStorage.setItem('token_expiry', expiry.toString());
   }
 
-
-  // storeTokens(tokens: any, username: string) {
-  //   localStorage.setItem('access_token', tokens.AccessToken);
-  //   localStorage.setItem('id_token', tokens.IdToken);
-  //   localStorage.setItem('username', username);
-
-  //   if (tokens.RefreshToken) {
-  //     localStorage.setItem('refresh_token', tokens.RefreshToken);
-  //   }
-
-  //   const expiry = Date.now() + tokens.ExpiresIn * 1000;
-  //   localStorage.setItem('token_expiry', expiry.toString());
-  // }
 
   isTokenExpired(): boolean {
     const expiry = localStorage.getItem('token_expiry');

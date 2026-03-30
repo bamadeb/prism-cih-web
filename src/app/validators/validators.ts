@@ -20,7 +20,7 @@ export function PasswordMatchValidator(formGroup: FormGroup): { passwordNotMatch
 
 export function FileExtensionValidator(extensions: string[]): ValidatorFn {
     return (formControl: AbstractControl): { pattern: boolean } | null => {
-        if (formControl != null && formControl.value) {
+        if (formControl?.value) {
             const fileNameArray = formControl.value.split('.');
             const extension = fileNameArray[fileNameArray.length - 1];
             if (extensions.includes(extension.toLowerCase())) {

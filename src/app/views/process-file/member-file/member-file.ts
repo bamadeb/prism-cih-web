@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -53,7 +55,7 @@ import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
   templateUrl: './member-file.html',
   styleUrl: './member-file.css',
 })
-export class MemberFile {
+export class MemberFile implements OnInit, AfterViewInit {
 
   /* ---------- FORM & FILE ---------------------------- */
   processMembersFormGroup!: FormGroup;
@@ -91,11 +93,11 @@ export class MemberFile {
   processLogList: any[] = []; 
  
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService ,
-    private titleService: Title,private router: Router,private auth: UserDataService
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService ,
+    private readonly titleService: Title,private readonly router: Router,private readonly auth: UserDataService
     
   ) {
     this.processMembersFormGroup = this.fb.group({
@@ -131,7 +133,7 @@ export class MemberFile {
 
 onFileSelect(event: any): void {
     const file = event.target.files[0];
-    if (file && file.type === 'text/csv') {
+    if (file?.type === 'text/csv') {
       this.selectedFile = file;
       this.processMembersFormGroup.patchValue({ file: file });
     } else { 
@@ -195,8 +197,10 @@ async membersFileSubmit(): Promise<void> {
     this.resetFile();
 
   } catch (error) {
+    this.isUpload = false;
     console.error('Error reading or uploading CSV:', error);
     alert('Error processing member file. Please check your CSV format.');
+    
   } finally {
     this.isUpload = false;
     console.log('finally');
@@ -244,7 +248,6 @@ async processMembers(): Promise<void> {
       insertDataArray: insertDataArray   // ✅ no extra []
     };
 
-    //console.log(payload);
     await this.apiService.insert<any, MemberFileRequest>(payload);
 }
 
@@ -383,7 +386,7 @@ private async loadTempMembers(): Promise<void> {
       if (p3.length === 2) p3 = '20' + p3;
 
       // Determine if DD/MM/YYYY or MM/DD/YYYY
-      if (parseInt(p1, 10) > 12) {
+      if (Number.parseInt(p1, 10) > 12) {
         // DD/MM/YYYY
         return `${p3}-${p2.padStart(2, '0')}-${p1.padStart(2, '0')}`;
       } else {

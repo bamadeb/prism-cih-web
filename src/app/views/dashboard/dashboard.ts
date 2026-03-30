@@ -59,11 +59,7 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   
-  // providerTinNameMapping: Record<string, string> = {
-  //   '200807794': 'Mercado Medical Practice',
-  //   '237082074': 'GPHA',
-  //   '273160687': 'Dr. Milbourne',
-  // };
+
 
   displayedColumns: string[] = ['2', 'MEM_INFO', 'PHONE', 'PCP_TAX_ID', 'PCP_VISIT_FLAG', 'PRIORITY_FLAG', 'upcoming_task_date', 'Call_count', 'risk_gap_count', 'risk_comp_count', 'risk_perf', 'quality_count', 'quality_comp_count', 'quality_perf', '1'];
   displayedColumnsTransfer: string[] = [
@@ -126,19 +122,18 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   constructor(
     errorLogger: ErrorReportingService,
     matDialog: MatDialog,
-    private titleService: Title, private apiService: ConfigService,private userData: UserDataService,
-    public dialog: MatDialog,private benefitsService: BenefitsDialogService,
-    private addActionService: AddActionDialogService,private qualitygapsService:QualitygapDialogService,private riskgapsService:RiskgapDialogService,
-    private callListService:CallListDialogService,private taskListService:TaskListDialogService,
-    private noLongerPatientService:NolongerPatientDialogService,private alternatePhoneListService:AlterPhoneDialogService,
-    private alternateAddressListService:AlterAddressDialogService,
-    private actionService:ActionHandlerService,
-    private headerService: HeaderService 
+    private readonly titleService: Title, private readonly apiService: ConfigService,private readonly userData: UserDataService,
+    public dialog: MatDialog,private readonly benefitsService: BenefitsDialogService,
+    private readonly addActionService: AddActionDialogService,private readonly qualitygapsService:QualitygapDialogService,private readonly riskgapsService:RiskgapDialogService,
+    private readonly callListService:CallListDialogService,private readonly taskListService:TaskListDialogService,
+    private readonly noLongerPatientService:NolongerPatientDialogService,private readonly alternatePhoneListService:AlterPhoneDialogService,
+    private readonly alternateAddressListService:AlterAddressDialogService,
+    private readonly actionService:ActionHandlerService,
+    private readonly headerService: HeaderService 
 
   ) {
     super(errorLogger, matDialog);
-    //const user1 = this.userData.getUser();
-   // console.log(user1); 
+
   }
 
   ngOnInit(): void {
@@ -157,7 +152,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     return await task();
   } catch (err) {
     console.error(err);
-    //onError?.(err);
+
     this.displayError('Something went wrong', 'Please try again');
     return undefined;
   } finally {
@@ -248,17 +243,13 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 async loadTableData(): Promise<void> {
   await this.withLoader(async () => {
     const user = this.userData.getUser();      
-    if(user.role_id == 7){
+    if(user.role_id == 7 || user.role_id == 21){
       this.loginUserId =this.selectedNavigatorId ?? 0;
     }else{
        this.loginUserId=user.ID;
     }
     this.loginRoleId =user.role_id;
-    //console.log(user);
-    //this.loginUserId = this.selectedNavigatorId ?? (user.role_id == 7 ? 0 : user.ID);
-    
-    //console.log('loginUserId: '+this.loginUserId);
-    //console.log('loginRoleId: '+this.loginRoleId);
+
     const request: DashboardRequest = { user_id: this.loginUserId };
     const result = await this.apiService.dashboard<any>(request);
     const members = result?.data || [];
@@ -290,7 +281,7 @@ async loadTableData(): Promise<void> {
     }));
 
     this.selection.clear();
-    //this.dataSource._updateChangeSubscription();
+
     this.dataSource.data = [...this.dataSource.data];
 
     await this.loadprojectoverviewData();
@@ -329,7 +320,7 @@ confirmAction(row: any) {
       const note = result.note;
       this.removeMemberFromTable(row.medicaid_id);
       // 2️⃣ add to no longer patient table
-      //console.log(row);
+
       
       this.nolongerpatientdataSource.data = [
       {
@@ -354,13 +345,13 @@ confirmAction(row: any) {
 }
 
 confirmboxUndo(row: any) {
-  //console.log(row);
+
   this.withLoader(async () => {
     const result = await this.noLongerPatientService.confirmboxUndo(row);
     if (result?.refresh) {
       this.removeNolongerFromTable(row.medicaid_id);
       // 2️⃣ add to no longer patient table
-      //console.log(row);
+
       this.dataSource.data = [
       {
         medicaid_id: row.medicaid_id,
@@ -569,10 +560,10 @@ async openAddActionDialog(
   PCP_TAX_ID: number,
 ) {
   this.isLoading = true;
-  //alert(medicaid_id);
+
 
   try {
-    const actionSaved = await this.addActionService.showAddActionDialog(
+    await this.addActionService.showAddActionDialog(
       medicaid_id,
       member_name,
       member_db,
@@ -590,7 +581,7 @@ async openAddActionDialog(
 }
 
 copyToClipboard(text: string) {
-  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+  if (navigator?.clipboard?.writeText) {
     // Modern supported browser
     navigator.clipboard.writeText(text)
       .then(() => {})
@@ -615,7 +606,7 @@ fallbackCopy(text: string) {
 } 
 
 onNavigatorChange(navigatorId: number): void {
-  //alert(navigatorId);
+
   this.selectedNavigatorId = navigatorId;
   this.loadTableData();
 }
@@ -627,13 +618,13 @@ onNavigatorChange(navigatorId: number): void {
 
     try {
       const res = await this.apiService.poweroverview<any>(request);
-      //console.log('Power Overview:', res);  
+ 
       if (res.data) {
-        //console.log(res.data.NoLongerPatientList);
+
         this.overallSummary = res.data.overallRiskQualitySummary || [];
         this.ownSummary = res.data.ownRiskQualitySummary || [];
         this.navigatorList = res.data.navigatorList || []; 
-        //this.recentActivity = res.data.recentActivity || [];
+
         this.departmentList = res.data.departmentList || [];
         this.planList = res.data.planList || []; 
         this.calculatePerformance(res.data);
@@ -649,7 +640,7 @@ onNavigatorChange(navigatorId: number): void {
 
   loadTransfertabledata(transferlist: any) { 
     if (transferlist.length > 0) {
-      //console.log(transferlist); 
+
       const transferDATA = transferlist.map((r: any, index: number) => ({
         medicaid_id: r.medicaid_id,
         memberName: r.memberName,
@@ -661,7 +652,7 @@ onNavigatorChange(navigatorId: number): void {
         refer_to_name: r.refer_to_name,
         referring_reason: r.referring_reason
       }));
-      //console.log(transferDATA);
+
       this.transferdataSource.data = transferDATA;
     }
   }
@@ -688,7 +679,7 @@ onNavigatorChange(navigatorId: number): void {
         NO_LONGER_PATIENT_DATE: r.NO_LONGER_PATIENT_DATE,
         NO_LONGER_PATIENT_NOTE: r.NO_LONGER_PATIENT_NOTE
       }));
-      //console.log(nopatientDATA);
+
       this.nolongerpatientdataSource.data = nopatientDATA;
     }
   }
@@ -739,19 +730,14 @@ onNavigatorChange(navigatorId: number): void {
     const performanceArray: Record<string, ProviderPerformance>[] = [];
     const totalArray: any = this.initializeTotals();
 
-    // 🔹 Provider TIN → Name mapping
-    // const providerTinNameMapping: Record<string, string> = {
-    //   '200807794': 'Mercado Medical Practice',
-    //   '237082074': 'GPHA',
-    //   '273160687': 'Dr. Milbourne',
-    // };
+
 
     for (const item of performanceList) {
       const pcpId = String(item['PCP_TAX_ID']);
       const values: any = { ...item };
       delete values['PCP_TAX_ID'];
 
-      const num = (v: any) => parseFloat(v || 0);
+      const num = (v: any) => Number.parseFloat(v || 0);
 
       // ---------- PRIORITY CALL ----------
       const priority_count = num(values.priority_count);
@@ -811,8 +797,7 @@ onNavigatorChange(navigatorId: number): void {
       totalArray.total_priority_count_pcp += priority_pcp_visit_count;
       totalArray.total_other_count_pcp += other_pcp_visit_count;
 
-      //console.log(other_pcp_visit_count);
-      //console.log(totalArray.total_other_count_pcp);
+
       values.priority_pcp_visit_percentage = this.percent(priority_pcp_visit_count, priority_count);
       values.priority_pcp_visit_color = this.getColor(values.priority_pcp_visit_percentage);
 
@@ -852,8 +837,8 @@ onNavigatorChange(navigatorId: number): void {
     this.performanceArray = performanceArray;
     this.totalArray = totalArray;
 
-    //console.log('✅ Provider performance summary:', this.performanceArray);
-    //console.log('✅ Totals:', this.totalArray);
+    console.log('✅ Provider performance summary:', this.performanceArray);
+
   }
 
 

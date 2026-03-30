@@ -1,8 +1,10 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import {
@@ -45,11 +47,11 @@ const TABLE = 'MEM_CIH_QUALITY_TEMP';
   templateUrl: './qualitygaps-file.html',
   styleUrl: './qualitygaps-file.css',
 })
-export class QualitygapsFile {
+export class QualitygapsFile implements AfterViewInit, OnInit {
 
 
   /* ---------- FORM & FILE ---------------------------- */
-  processMembersFormGroup!: FormGroup;
+  processQualityFormGroup!: FormGroup;
   selectedFile: File | null = null;
 
   /* ----------- TABLE --------------------------------- */
@@ -83,14 +85,14 @@ export class QualitygapsFile {
   processLogList: any[] = [];
 
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService,
-    private titleService: Title, private router: Router, private auth: UserDataService
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService,
+    private readonly titleService: Title, private readonly router: Router, private readonly auth: UserDataService
 
   ) {
-    this.processMembersFormGroup = this.fb.group({
+    this.processQualityFormGroup = this.fb.group({
       file: [null, Validators.required]
     });
   }
@@ -123,12 +125,13 @@ export class QualitygapsFile {
 
   onFileSelect(event: any): void {
     const file = event.target.files[0];    
-    if (file && file.type === 'text/csv') {
+    if (file?.type === 'text/csv') {
       this.selectedFile = file;
-      this.processMembersFormGroup.patchValue({ file: file });
+      this.processQualityFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
-      this.processMembersFormGroup.get('file')?.reset();
+      this.processQualityFormGroup.get('file')?.reset();
+      this.isUpload = false;
       alert('Only .csv files are allowed.');
     }
   }
@@ -137,15 +140,15 @@ export class QualitygapsFile {
     if (this.fileInput) {
       this.fileInput.nativeElement.value = ''; // ✅ allowed
     }
-    this.processMembersFormGroup.get('file')?.reset();
+    this.processQualityFormGroup.get('file')?.reset();
     this.selectedFile = null;
   }
 
   /* ============================ UPLOAD ============================ */
   async qualityFileSubmit(): Promise<void> {
 
-    if (!this.processMembersFormGroup.valid || !this.selectedFile) {
-      this.processMembersFormGroup.markAllAsTouched();
+    if (!this.processQualityFormGroup.valid || !this.selectedFile) {
+      this.processQualityFormGroup.markAllAsTouched();
       return;
     }
 
@@ -203,15 +206,15 @@ export class QualitygapsFile {
             insertDataArray.push(row);
           });
 
-          //console.log("Insert Data:", insertDataArray);
+
           // ------------------ Batch processing ------------------
           await this.uploadInBatches(insertDataArray);
 
           // ------------------ Fetch temp members ------------------
-          await this.loadTempMembers();
+          await this.loadTempRecords();
 
           // Reset form + file
-          this.processMembersFormGroup.reset();
+          this.processQualityFormGroup.reset();
           this.selectedFile = null;
           this.resetFile();
           this.isUpload = false;
@@ -279,17 +282,16 @@ export class QualitygapsFile {
       insertDataArray: insertDataArray   // ✅ no extra []
     };
 
-    //console.log(payload);
+
     await this.apiService.insert<any, MemberFileRequest>(payload);
   }
 
-  private async loadTempMembers(): Promise<void> {
+  private async loadTempRecords(): Promise<void> {
     const res = await this.apiService.getTempQualityGapsBySeccionID<any>({
       session_id: this.sessionId
     });
 
-    // console.log('sessionId:' + this.sessionId);
-    // console.log(res);
+
 
     this.tempMemberList = res?.data ?? [];
     this.dataSource.data = this.tempMemberList;
@@ -330,7 +332,7 @@ export class QualitygapsFile {
     if (/^\d{4}-\d{2}-\d{2}/.test(val)) return val;
 
     // Split on / or - and trim each part
-    const parts = val.split(/[\/\-]/).map((p: string) => p.trim());
+    const parts = val.split(/[-/]/).map((p: string) => p.trim());
     if (parts.length === 3) {
       let [p1, p2, p3] = parts;
 
@@ -338,7 +340,7 @@ export class QualitygapsFile {
       if (p3.length === 2) p3 = '20' + p3;
 
       // Determine if DD/MM/YYYY or MM/DD/YYYY
-      if (parseInt(p1, 10) > 12) {
+      if (Number.parseInt(p1, 10) > 12) {
         // DD/MM/YYYY
         return `${p3}-${p2.padStart(2, '0')}-${p1.padStart(2, '0')}`;
       } else {

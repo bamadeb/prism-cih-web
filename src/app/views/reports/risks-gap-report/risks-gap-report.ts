@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule,Validators, AbstractControl, ValidationErrors  } from '@angular/forms';
 import { ConfigService } from '../../../services/api.service';
 import { Title } from '@angular/platform-browser';
@@ -6,7 +6,7 @@ import { MatCardModule } from "@angular/material/card";
 import { MatFormField, MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTableDataSource } from '@angular/material/table';
-// import { DatePipe } from '@angular/common';
+
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from '@angular/material/core'; 
 import { MatInputModule } from '@angular/material/input';
@@ -39,7 +39,7 @@ import { UserDataService } from '../../../services/user-data-service';
   ],templateUrl: './risks-gap-report.html',
   styleUrl: './risks-gap-report.css',
 })
-export class RisksGapReport {
+export class RisksGapReport implements AfterViewInit ,OnInit {
 
 
   riskGapsFormGroup!: FormGroup;
@@ -55,7 +55,7 @@ export class RisksGapReport {
   displayedColumns: string[] = [
   'select',   
   'medicaid_id',
-  // 'Type',
+
   'mode',
   'Gap_Code',
   'MEASURE_DESC',
@@ -78,12 +78,12 @@ export class RisksGapReport {
 
  
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,
-    private headerService: HeaderService ,
-    private titleService: Title,
-    private userData: UserDataService,
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,
+    private readonly headerService: HeaderService ,
+    private readonly titleService: Title,
+    private readonly userData: UserDataService,
     
   ) {
     const today = new Date();
@@ -125,6 +125,15 @@ export class RisksGapReport {
     return typeof value === 'string' ? value.toLowerCase() : value;
   };
 }
+
+formatDateToYMD(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`; // m/d/Y format
+  }
   
  async applyFilter() {
   if (this.riskGapsFormGroup.invalid) {
@@ -143,8 +152,8 @@ export class RisksGapReport {
     };
 
     const payload = {
-      start_date: formatDate(start_date),
-      end_date: formatDate(end_date),
+      start_date: this.formatDateToYMD(start_date),
+      end_date: this.formatDateToYMD(end_date),
       gaps_type
     };
 
@@ -152,7 +161,7 @@ export class RisksGapReport {
 
     // ✅ TypeScript now knows that 'data' exists
     this.riskGapsReportList = result.data ?? [];
-    //console.log(this.riskGapsReportList);
+    
     this.dataSource.data = this.riskGapsReportList;
 
   } catch (err) {
@@ -162,8 +171,6 @@ export class RisksGapReport {
     this.cdr.markForCheck();
   }
 }
-
-
 
 
 dateRangeValidator(control: AbstractControl): ValidationErrors | null {
@@ -316,7 +323,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     gap_code: row.Gap_Code,
     Type: row.Type
   }));
-  //console.log(payload);
+  
   try {
     await this.apiService.deleteGapObservations({ records: payload });
 
@@ -329,14 +336,12 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     this.dataSource.data = this.riskGapsReportList;
     this.selection.clear();
     this.isLoading = false;
-    //alert('Records removed successfully');
+    
   } catch (err) {
     console.error('Delete failed', err);
     alert('Failed to remove records');
   }
 }
-
-
 
 }
 

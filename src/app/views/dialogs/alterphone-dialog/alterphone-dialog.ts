@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { PhoneFormatPipe } from "../../../pipes/phone-format.pipe";
@@ -23,16 +23,16 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
   templateUrl: './alterphone-dialog.html',
   styleUrls: ['./alterphone-dialog.css']
 })
-export class AlterphoneDialog {
+export class AlterphoneDialog implements OnInit{
   addAltphoneFormGroup!: FormGroup;
   isLoading = false;
 
   constructor(
-    private dialogRef: MatDialogRef<AlterphoneDialog>,
+    private readonly dialogRef: MatDialogRef<AlterphoneDialog>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService
   ) {}
 
   ngOnInit(): void {

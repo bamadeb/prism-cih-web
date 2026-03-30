@@ -1,16 +1,16 @@
-import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Directive({
   selector: '[appAutowidth]'
 })
-export class AutowidthDirective {
+export class AutowidthDirective implements OnInit, OnDestroy  {
   @Input() minWidth: number=45; // Input property to set the min width
   @Input() font: string | null = null; // Input property to set the font
   private valueChangesSub: Subscription | null = null;
   
-  constructor(private el: ElementRef,private ngModel: NgModel) { 
+  constructor(private readonly el: ElementRef,private readonly ngModel: NgModel) { 
     this.el.nativeElement.style.width = `${this.minWidth}px`;
   }
   

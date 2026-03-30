@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { ConfigService } from '../../../services/api.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { Title } from '@angular/platform-browser';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HeaderService } from '../../../services/header.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-//import { PROVIDER_TIN_MAP } from '../../../constants/constant';
+
 import { CommonModule } from '@angular/common';
 import { MatIcon } from "@angular/material/icon";
 
@@ -26,7 +26,7 @@ import { MatIcon } from "@angular/material/icon";
   templateUrl: './star-performance.html',
   styleUrl: './star-performance.css'
 })
-export class StarPerformance {
+export class StarPerformance implements OnInit {
 
   starPerformanceFormGroup!: FormGroup;
   isLoading = false;
@@ -38,31 +38,18 @@ export class StarPerformance {
   plans: { name: string }[] = [];
 
   measurementYear = 2025;
-  //providerGroup = 'Collective Impact Health';
 
-//   providerTinNameMapping: Record<string, string> = {
-//   '200807794': 'Mercado Medical Practice',
-//   '237082074': 'GPHA',
-//   '273160687': 'Dr. Milbourne',
-// };
 
   years = [2026,2025, 2024, 2023, 2022];
-  //   plans = [
-  //   { id: 'AHC', name: 'AHC' },
-  //   { id: 'Independence', name: 'Independence' }
-  // ];
-  // planTinMap: Record<string, string[]> = {
-  //   AHC: ['237082074', '273160687', '200807794'],         // CHI → 3 TINs
-  //   'Independence': ['111111111', '222222222']            // Plan B → 2 TINs
-  // };
+  
  
 availableTins: { VENDOR_NUM: string; LAST_NAME: string }[] = [];
 currentYear: any;
   constructor(
-    private apiService: ConfigService,
-    private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,private titleService: Title,
-    private headerService: HeaderService 
+    private readonly apiService: ConfigService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly fb: FormBuilder,private titleService: Title,
+    private readonly headerService: HeaderService 
   ) {     
      
     this.starPerformanceFormGroup = this.fb.group({      
@@ -72,12 +59,6 @@ currentYear: any;
     });
   }
 
-//   getProviderGroupByTin(tin: string): string {
-//   const providerName = PROVIDER_TIN_MAP[tin];
-//   return providerName
-//     ? `${providerName}`
-//     : this.providerGroup;
-// }
 
 getProviderGroupByTin(tin: string): string {
   const providerName = this.providerTinMap[tin];
@@ -111,7 +92,7 @@ getProviderGroupByTin(tin: string): string {
 async onPlanChange(planId: string) { 
   const payload ={plan:planId};
   const result = await this.apiService.getVendorListByplan<any>(payload);  
-  //this.availableTins = this.planTinMap[planId] || [];
+  
   this.availableTins = result.data || [];
   console.log(this.availableTins);
 
@@ -138,7 +119,7 @@ async loadVendors() {
   this.vendorPlanList = result.data.vendorPlanList || [];
 
   this.plans = this.vendorPlanList.map((p: any) => ({
-   // id: p.PLAN_ID,     // adjust if API uses different field
+   
     name: p.PLANS // adjust if API uses different field
   }));
 }
@@ -151,9 +132,9 @@ async applyFilter() {
     const currentYear = new Date().getFullYear();
     const payload = { year, plan, tins ,currentYear};  
     this.currentYear = currentYear;
-    //alert(currentYear);
+    
     const result = await this.apiService.getStarPerformanceByYear<any>(payload);
-    //console.log(result.data);
+    
 
     this.starReportList = result?.data || [];
 

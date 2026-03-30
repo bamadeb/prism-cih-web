@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component ,OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -20,14 +20,13 @@ import { Router } from '@angular/router';
 })
 
 
-export class Sidebar {
+export class Sidebar implements OnInit{
   userRole: any;
     constructor(     
-    private userData: UserDataService,private router: Router 
+    private readonly userData: UserDataService,private readonly router: Router 
   ) {
       const user = this.userData.getUser();
     if (!user) {
-      //alert('User not logged in!');
       this.router.navigate(['/login']);
       return;
     }    
@@ -36,7 +35,6 @@ export class Sidebar {
   ngOnInit(): void {
       const user = this.userData.getUser();
     if (!user) {
-      //alert('User not logged in!');
       this.router.navigate(['/login']);
       return;
     }else{

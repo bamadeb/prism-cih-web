@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogTitle, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -21,7 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './qualitygaps-dialog.html',
   styleUrl: './qualitygaps-dialog.css',
 })
-export class QualitygapsDialog {
+export class QualitygapsDialog implements AfterViewInit{
    displayedColumns = [
     'sl',
     'MEASURE_NAME',
@@ -37,7 +37,7 @@ export class QualitygapsDialog {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private dialogRef: MatDialogRef<QualitygapsDialog>
+    private readonly dialogRef: MatDialogRef<QualitygapsDialog>
   ) {
     this.dataSource = new MatTableDataSource(data?.qualitygapList || []);
   }
@@ -51,7 +51,7 @@ export class QualitygapsDialog {
   formatDate(date: any): string {
     if (!date) return '';
     const d = new Date(date);
-    return isNaN(d.getTime())
+    return Number.isNaN(d.getTime())
       ? ''
       : d.toLocaleDateString('en-US');
   }

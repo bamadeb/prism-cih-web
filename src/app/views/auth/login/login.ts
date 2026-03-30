@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component,OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from "@angular/material/card";
 import { FormsModule } from '@angular/forms';
@@ -23,7 +23,7 @@ import { QRCodeComponent   } from 'angularx-qrcode';
 
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
-//import { AngularxQrcodeModule } from 'angularx-qrcode';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -41,7 +41,7 @@ import { ChangeDetectorRef } from '@angular/core';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit{
   username = '';
   password = '';
   userId: number = 0;
@@ -55,18 +55,17 @@ export class Login {
 
   showQrScreen: boolean = false;
   showOtpScreen: boolean = false;
-  //private renderer!: Renderer2;
-  constructor(private router: Router,
-    private authService: Auth,
-    private userData: UserDataService,
-    private titleService: Title,
-    private idleService: IdleTimeoutService,
-    private auth: AuthService,
-    private cdr: ChangeDetectorRef,
+  constructor(private readonly router: Router,
+    private readonly authService: Auth,
+    private readonly userData: UserDataService,
+    private readonly titleService: Title,
+    private readonly idleService: IdleTimeoutService,
+    private readonly auth: AuthService,
+    private readonly cdr: ChangeDetectorRef,
     
    
-    private apiService: ConfigService,
-    private dialog: MatDialog) { }
+    private readonly apiService: ConfigService,
+    private readonly dialog: MatDialog) { }
 
   bgImages = [
     'assets/images/1.jpg',
@@ -79,11 +78,8 @@ export class Login {
 
   ngOnInit() {
     this.titleService.setTitle('PRISM :: LOGIN');
-    //const navigation = this.router.getCurrentNavigation();
-    //this.errorMessage = navigation?.extras?.state?.['message'] || '';
     this.errorMessage = window.history.state?.message || '';
     this.successMessage = window.history.state?.successMessage || '';
-    //console.log(this.errorMessage);
     setInterval(() => {
       this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
     }, 4000); // 4 seconds
@@ -91,17 +87,9 @@ export class Login {
   async onSubmit() {
     this.isLoading = true;
     this.clearError();
-    const request: LoginRequest = {
-      username: this.username,
-      password: this.password
-    };
-
+ 
     try {
       const cognitoResult = await this.auth.login(this.username, this.password);
-
-
-
-      //console.log('✅ Login success:', result);
       if (cognitoResult.status === "SUCCESS") {
         await this.continueBackendLogin();
  
@@ -119,48 +107,22 @@ export class Login {
 
       }
     } catch (error) {
-      //console.log('error: ',error);
       const err = error as Error;
-      //console.log('Error message:', err);
       this.errorMessage = err.message;
     } finally {
       this.isLoading = false;
     }
   }
-  // async setupQrCode() {
-  //   try {
-  //     const response =
-  //       await this.auth.associateSoftwareToken(
-  //         this.session
-  //       );
-  //     this.session = response.Session;
-  //     const secretCode =
-  //       response.SecretCode;
-  //     this.qrCodeData = `otpauth://totp/Prism:${this.username}?secret=${secretCode}&issuer=Prism`;
-  //     this.showQrScreen = true;
-  //   }
-  //   catch (err) {
-  //     this.errorMessage = "Failed to setup MFA";
-  //   }
-  // }
+
 async setupQrCode() {
   try {
-
-    //console.log("setupQrCode session:", this.session);
-
     const response =
       await this.auth.associateSoftwareToken(this.session);
-
-    //console.log("associateSoftwareToken response:", response);
-
     this.session = response.Session;
 
     const secretCode = response.SecretCode;
 
     this.qrCodeData =  `otpauth://totp/Prism:${encodeURIComponent(this.username)}?secret=${secretCode}&issuer=Prism`;
-
-    //console.log("QR Data:", this.qrCodeData);
-
     this.showQrScreen = true;
     this.cdr.detectChanges();
   }
@@ -286,7 +248,10 @@ async setupQrCode() {
   }
 
   addloginHistory() {
-    const logpayload: LogRequest = {
+    const utcDate = new Date().toISOString();   
+    console.log("Login log UTC date:", utcDate);
+
+    const logpayload = {
       table_name: 'MEM_SYSTEM_LOG',
       insertDataArray: [{
         medicaid_id: 0,

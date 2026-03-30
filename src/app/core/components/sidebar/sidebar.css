@@ -1,19 +1,6 @@
-/* .sidebar {
-  width: 220px;
-  background: white;
-  border-right: 1px solid #ddd;
-  padding-top: 50px;
-}
-
-a.active {
-  background-color: rgba(63, 81, 181, 0.15);
-} */
-
-
 .sidenav-container {
   height: 100vh;
 }
-
 .app-sidenav {
   width: 350px;
   background-color: #1569c7;

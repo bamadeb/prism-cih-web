@@ -7,8 +7,8 @@ import { AlteraddressDialog } from '../views/dialogs/alteraddress-dialog/alterad
 export class AlterAddressDialogService {
 
   constructor(
-    private dialog: MatDialog,
-    private apiService: ConfigService
+    private readonly dialog: MatDialog,
+    private readonly apiService: ConfigService
   ) {}
 
   async showalterAddressListDialog(

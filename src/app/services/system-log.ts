@@ -16,7 +16,7 @@ export interface SystemLogPayload {
 })
 export class SystemLogService {
 
-  constructor(private apiService: ConfigService) {}
+  constructor(private readonly apiService: ConfigService) {}
 
   addSystemLog(payload: SystemLogPayload) {
 

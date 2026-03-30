@@ -53,10 +53,10 @@ export class TaskDialog implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private userData: UserDataService,
-    private dialogRef: MatDialogRef<TaskDialog>
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly userData: UserDataService,
+    private readonly dialogRef: MatDialogRef<TaskDialog>
   ) {}
 
   ngOnInit(): void {
@@ -78,7 +78,6 @@ export class TaskDialog implements OnInit {
     // Load real APIs here
      this.apiService.masterdata<any>()
       .then(res => { 
-        //console.log(res.data); 
         this.action_ativity_type = res.data.actionActivityType || [];
         this.navigatorList = res.data.navigatorList || [];       
       });
@@ -96,10 +95,8 @@ export class TaskDialog implements OnInit {
     this.isEditMode = true;
     this.showAddTask = true;
     this.currentTaskId = task.id;
-    //console.log(task.task_date);
     this.addTaskFormGroup.patchValue({
       task_next_panel_id: task.action_id,
-      //task_date: task.task_date,
       task_date: task.task_date ? new Date(task.task_date) : null,
       task_assign_to: task.assign_to,
       task_status: task.status,

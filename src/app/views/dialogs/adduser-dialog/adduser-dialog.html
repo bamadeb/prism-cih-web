@@ -50,7 +50,7 @@
         <!-- EMAIL -->
         <mat-form-field appearance="outline" class="mr email-field mt-5">
           <mat-label>EMAIL</mat-label>
-          <input matInput type="email" formControlName="email" [readonly]="isEditMode" autocomplete="new-email">
+          <input matInput type="email" formControlName="email" [readonly]="isEditMode" autocomplete="email">
           <mat-hint *ngIf="isEditMode">Email cannot be changed</mat-hint>
           <mat-error *ngIf="
             addUserFormGroup.get('email')?.touched &&
@@ -71,27 +71,7 @@
           </mat-error>
         </mat-form-field>
 
-        <!-- PASSWORD -->
-        <!-- <mat-form-field appearance="outline" class="mr common-field">
-          <mat-label>PASSWORD</mat-label>
-
-          <input  matInput type="password" formControlName="password" autocomplete="new-password"
-          >
-
-         
-
-          <mat-error *ngIf="
-            addUserFormGroup.get('password')?.touched &&
-            addUserFormGroup.get('password')?.hasError('required')">
-            Password is required
-          </mat-error>
-
-          <mat-error *ngIf="
-            addUserFormGroup.get('password')?.touched &&
-            addUserFormGroup.get('password')?.hasError('minlength')">
-            Minimum 6 characters required
-          </mat-error>
-        </mat-form-field> -->
+        
 <mat-form-field appearance="outline" class="mr common-field">
   <mat-label>PASSWORD</mat-label>
 

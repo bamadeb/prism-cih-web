@@ -35,7 +35,7 @@ import { PlanRequest, UpdatePlanRequest } from '../../../models/requests/planReq
   templateUrl: './plans-dialog.html',
   styleUrl: './plans-dialog.css',
 })
-export class PlansDialog {
+export class PlansDialog implements OnInit{
 
   plansFormGroup!: FormGroup;
   hidePassword = true;
@@ -45,9 +45,9 @@ export class PlansDialog {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private fb: FormBuilder,
-    private apiService: ConfigService,
-    private dialogRef: MatDialogRef<PlansDialog>
+    private readonly fb: FormBuilder,
+    private readonly apiService: ConfigService,
+    private readonly dialogRef: MatDialogRef<PlansDialog>
   ) {}
 
   // 🔹 INIT
@@ -71,7 +71,6 @@ export class PlansDialog {
 
   // 🔹 EDIT MODE SETUP
   private enableEditMode(plan: any): void {
-    //console.log(plan);
     this.isEditMode = true;
     this.currentPlanId = plan.id;
 
@@ -98,7 +97,6 @@ export class PlansDialog {
         return; 
       }
 
-    //console.log(formValue);
     try {
       await this.processPlan(formValue);
       this.dialogRef.close({ refresh: true });
@@ -125,21 +123,25 @@ export class PlansDialog {
       table_name: 'MEM_PLAN_MASTER',
       insertDataArray: [{
         plan_name: formValue.plan_name,
-        start_date: this.formatDateOnly(formValue.start_date),
-        end_date: this.formatDateOnly(formValue.end_date),
-        status: formValue.status
+        start_date: this.formatDateToYMD(formValue.start_date),
+        end_date: this.formatDateToYMD(formValue.end_date),
+        status: formValue.status 
       }]
     };
 
     await this.apiService.insert<any, PlanRequest>(payload);
   }
 
-  private formatDateOnly(date: Date): string {
-    const year = date.getFullYear();
+  formatDateToYMD(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`; // m/d/Y format
   }
+
+   
 
   // 🔹 UPDATE PLAN
   private async updatePlan(formValue: any): Promise<void> {
@@ -153,8 +155,8 @@ export class PlansDialog {
       id_field_value: this.currentPlanId,
       updateData: {
         plan_name: formValue.plan_name,
-        start_date: this.formatDateOnly(formValue.start_date),
-        end_date: this.formatDateOnly(formValue.end_date),
+        start_date: this.formatDateToYMD(formValue.start_date),
+        end_date: this.formatDateToYMD(formValue.end_date),
         status: Number(formValue.status)
       }
     };

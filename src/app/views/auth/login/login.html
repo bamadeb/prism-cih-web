@@ -100,17 +100,7 @@
   (Google Authenticator, Microsoft Authenticator, Authy, etc.)
         </p>
 
-        <!-- <qrcode
-          [qrdata]="qrCodeData"
-          [width]="200"
-          [errorCorrectionLevel]="'M'">
-        </qrcode> -->
-        <!-- <qrcode
-          *ngIf="qrCodeData"
-          [qrdata]="qrCodeData"
-          [width]="220"
-          [errorCorrectionLevel]="'M'">
-        </qrcode> -->
+       
         <div *ngIf="qrCodeData">
           <qrcode
             [qrdata]="qrCodeData"
@@ -118,15 +108,7 @@
             [errorCorrectionLevel]="'M'">
           </qrcode>
         </div>
-        <!-- <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Enter OTP</mat-label>
-          <input
-            matInput
-            [(ngModel)]="otp"
-            name="firstOtp"
-          >
-          
-        </mat-form-field> -->
+        
         <mat-form-field appearance="outline" class="otp-field">
           <mat-label>Enter OTP</mat-label>
 
@@ -169,15 +151,7 @@
 
         <p>Enter code from your authenticator app</p>
 
-        <!-- <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Authenticator Code</mat-label>
-          <input
-            matInput
-            [(ngModel)]="otp"
-            name="loginOtp"
-            required
-          >
-        </mat-form-field> -->
+        
         <mat-form-field appearance="outline" class="otp-field">
           <mat-label>Authenticator Code</mat-label>
 

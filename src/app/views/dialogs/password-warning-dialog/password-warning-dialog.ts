@@ -21,7 +21,7 @@ export class PasswordWarningDialog {
   isExpired = false;
 
   constructor(
-    private dialogRef: MatDialogRef<PasswordWarningDialog>,
+    private readonly dialogRef: MatDialogRef<PasswordWarningDialog>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       message: string;
