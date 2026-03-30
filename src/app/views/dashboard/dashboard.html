@@ -33,7 +33,7 @@
   </mat-card>
 
 
-  <div *ngIf="isOpen" class="box" style="margin-top: 2px;">
+  <div *ngIf="isOpen" class="box" style="margin-top:2px; overflow:auto;">
    <table class="table">
     <tr>
       <td>
@@ -43,8 +43,7 @@
                 <th>RISK</th>
                 <th>GAPS</th>
                 <th>COMPLETED</th>
-                <th>PERFORMANCE</th>
-              </tr>
+                <th>PERFORMANCE</th>              </tr>
             </thead>
             <tbody>
               <tr>
@@ -146,7 +145,8 @@
     </tr>
     <tr>
       <td colspan="2">
-        <table class="static-table" style="width: 100%;">
+        <div style="overflow: auto;">
+          <table class="static-table" style="width: 100%;">
             <thead>
               <tr>
                 <th>WORK OVERVIEW</th>
@@ -306,6 +306,8 @@
 
             </tbody>
           </table>
+        </div>
+        
       </td>
     </tr>
    </table>
