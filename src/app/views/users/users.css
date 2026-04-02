@@ -19,3 +19,13 @@
   color: #888;
   font-size: 14px;
 }
+.locked-row {
+  background-color: #f0f0f0 !important;
+  color: #9e9e9e;
+}
+
+/* Optional: make icons also dull */
+.locked-row mat-icon {
+  color: #bdbdbd;
+  /*pointer-events: none; */
+}
