@@ -10,7 +10,7 @@ import { ConfigService } from '../../../services/api.service';
 import { IdleTimeoutService } from '../../../services/idle-timeout';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Auth } from '../../../services/auth';
-import { LoginRequest } from '../../../models/requests/loginRequest';
+import { LoginRequest, UsernameRequest } from '../../../models/requests/loginRequest';
 import { MatIconModule } from '@angular/material/icon';
 import { UserDataService } from '../../../services/user-data-service';
 
@@ -91,6 +91,7 @@ export class Login implements OnInit{
     try {
       const cognitoResult = await this.auth.login(this.username, this.password);
       if (cognitoResult.status === "SUCCESS") {
+
         await this.continueBackendLogin();
  
       } else if (cognitoResult.status === "MFA_SETUP") {
@@ -109,11 +110,69 @@ export class Login implements OnInit{
     } catch (error) {
       const err = error as Error;
       this.errorMessage = err.message;
+      
+      if (err.message?.includes("Invalid credentials") || err.name === "NotAuthorizedException") {
+
+          try {
+            if (err.message?.includes("User is disabled.") && err.name === "NotAuthorizedException") {
+              this.errorMessage = "Your account is locked. Please contact the administrator.";
+              return;
+            }
+           
+            const request: UsernameRequest = {
+              username: this.username
+            };
+            const result = await this.authService.loginfailedincrement<any>(request);
+            if (result.is_locked) {
+              
+               const lockeRresult =await this.authService.lockedUser<any>(request);
+              
+              if(lockeRresult.statusCode==200){
+                this.errorMessage = "Your account is locked. Please contact the administrator.";
+              }
+              const message = `Account is locked due to multiple login failures (${this.username}).`;
+              this.logAction('Account Lock', message);
+              
+              return;
+            }
+
+           
+            this.errorMessage = `Invalid credentials. You have used ${result.attempts} of ${result.max_attempts} allowed attempts.`;
+
+          } catch {
+            this.errorMessage = "Login failed. Please try again.";
+          }
+
+          return;
+        }
+
+        // 🔒 User already disabled in Cognito
+        if (err.name === "UserDisabledException") {
+          this.errorMessage = "Your account is locked. Contact admin.";
+          return;
+        }
     } finally {
       this.isLoading = false;
     }
   }
+private logAction(log_name: string, note: string): Promise<any> {
 
+  const user = this.userData.getUser();
+
+  const logPayload = {
+    table_name: 'MEM_SYSTEM_LOG',
+    insertDataArray: [{
+     
+      log_name: log_name,
+      log_details: note,
+      log_status: 'SUCCESS',
+      log_by: 0,
+      action_type: 'LOCK'
+    }]
+  };
+
+  return this.apiService.insert(logPayload);
+}
 async setupQrCode() {
   try {
     const response =
@@ -165,6 +224,10 @@ async setupQrCode() {
   async continueBackendLogin() {
     try {
       this.isLoading = true;
+       const requestUnkock: LoginRequest = {
+        username: this.username
+      };
+      const resultUpdate = await this.authService.loginSuccessReset<any>(requestUnkock);     
       const request: LoginRequest = {
         username: this.username,
         password: this.password

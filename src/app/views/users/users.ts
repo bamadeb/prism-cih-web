@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Title } from '@angular/platform-browser';
-
+import { NolongerPatientDialogService } from '../../services/nolonger-patience-dialog.service';
 import { ConfigService } from '../../services/api.service';
 import { HeaderService } from '../../services/header.service';
 import { UsersDialogService } from '../../services/users-dialog.service';
@@ -64,7 +64,8 @@ export class Users implements OnInit, AfterViewInit {
     private readonly apiService: ConfigService,
     private readonly usersDialogService: UsersDialogService,
     private readonly titleService: Title,
-    private readonly headerService: HeaderService
+    private readonly headerService: HeaderService,
+    private readonly noLongerPatientService:NolongerPatientDialogService
   ) {}
 
   /* ---------------- LIFE CYCLE ---------------- */
@@ -107,7 +108,8 @@ export class Users implements OnInit, AfterViewInit {
         roleId: u.role_id,
         member_status: u.member_status,
         status: u.status,
-        cognito_username: u.cognito_username
+        cognito_username: u.cognito_username,
+        locked: u.LOCKED === true || u.LOCKED === 1
       }));
 
       this.selection.clear();
@@ -147,7 +149,32 @@ export class Users implements OnInit, AfterViewInit {
   }
 
   /* ---------------- FILTER ---------------- */
+    async unlockUser(user: any): Promise<void> {
 
+       const result = await this.noLongerPatientService.confirmUnlockUser(user);
+
+      // if (!result || result?.event !== 'confirm') {
+      //   return;
+      // }
+
+      this.isLoading = true;
+
+      try {
+        // await this.apiService.unlockUser({
+        //   userId: user.ID,
+        //   cognito_username: user.cognito_username
+        // });
+
+        console.info('✅ User unlocked');
+        this.loadTableData();
+
+      } catch (err) {
+        console.error('❌ Unlock failed', err);
+        alert('Failed to unlock user');
+      } finally {
+        this.isLoading = false;
+      }
+    }
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();

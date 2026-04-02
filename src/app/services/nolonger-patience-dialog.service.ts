@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service'; 
 import { ConfirmDialog } from '../views/dialogs/confirm-dialog/confirm-dialog';
+import {UnlockUserConfirm } from '../views/dialogs/unlock-user-confirm/unlock-user-confirm'
 import {MatIconModule} from '@angular/material/icon'
 import { ConfirmDialogResult } from '../models/requests/dashboardRequest';
 import { HtmlParser } from '@angular/compiler';
@@ -87,4 +88,28 @@ export class NolongerPatientDialogService {
       return undefined;
     }
   }
+  async confirmUnlockUser(row: any): Promise<ConfirmDialogResult | undefined> {
+  try {
+    const dialogRef = this.dialog.open(UnlockUserConfirm, {
+      width: '80vw',
+      maxWidth: '500px',
+      data: {
+        title: 'UNLOCK USER',
+        messaage: 'Are you sure you want to unlock this user?',
+        name: `${row.firstName} ${row.lastName}`,
+        email: row.email,
+        role: row.role,
+        action: 'unlock',   // 👈 custom action
+        userId: row.ID,
+        cognito_username: row.cognito_username
+      }
+    });
+
+    return await dialogRef.afterClosed().toPromise();
+
+  } catch (error) {
+    console.error('Unlock dialog failed', error);
+    return undefined;
+  }
+} 
 }

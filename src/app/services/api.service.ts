@@ -617,6 +617,13 @@ async createCognitoUser(request: any): Promise<string> {
     request
   );
 }
-
+  async unlockUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
+  return commonPostApi<TResponse>(
+    this.httpClient,
+    this.environmentService,
+    'prismLockedCognitoUser',
+    request
+  );
+}
 
 }
