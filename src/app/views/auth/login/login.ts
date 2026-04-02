@@ -233,7 +233,7 @@ async setupQrCode() {
         password: this.password
       };
       const result = await this.authService.login<any>(request);
-      if (result.data.length > 0) {
+      if (result.data && result.data.length > 0) {
         const user = result.data[0];
         user.pageAccess = result.pageAccess;
         this.userData.setUser(user);

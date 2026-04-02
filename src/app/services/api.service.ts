@@ -621,7 +621,7 @@ async createCognitoUser(request: any): Promise<string> {
   return commonPostApi<TResponse>(
     this.httpClient,
     this.environmentService,
-    'prismLockedCognitoUser',
+    'prismAdminUnLockedCognitoUser',
     request
   );
 }
