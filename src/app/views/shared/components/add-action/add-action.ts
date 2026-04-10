@@ -108,7 +108,9 @@ export class AddAction implements OnInit , AfterViewInit {
   isLoadingappHistory = signal(false);
  
   cihpcrList: any[] = [];
+  activityList: any[] = [];
   availableTins: any[] = [];
+  showActivityTable: boolean = false;
   pcrColumns: string[] = [
     'DISCHARGE_CC_DESC_1',
     'DISCHARGE_CC_DESC_2',
@@ -122,6 +124,16 @@ export class AddAction implements OnInit , AfterViewInit {
     'READMT_ADMIT_DT',
     'READMT_DISCH_DT'
   ];
+
+   activityColumns: string[] = [
+    'Panel_Name',
+    'action_type',
+    'action_result',
+    'action_date',
+    'action_status',
+    'action_note',
+    'username'
+  ]; 
 
   currentYear: number = new Date().getFullYear();
   previousYear: number = this.currentYear - 1;
@@ -257,6 +269,10 @@ export class AddAction implements OnInit , AfterViewInit {
       });
 
 
+  }
+
+  toggleActivity() {
+    this.showActivityTable = !this.showActivityTable;
   }
 
   ngAfterViewInit() {
@@ -932,6 +948,7 @@ resetActionFields() {
     const result = await this.apiService.getMemberGapsList<any>(request);
 
     this.cihpcrList = result.data.prismCihPcrList || [];
+    this.activityList = result.data.prismActivityList || [];
     this.memberGapList = (result.data.prismGapList || []).map((gap: { Observation_Date: string; }) => ({
       ...gap,
       Observation_Date: this.formatDateToMDY(gap.Observation_Date)

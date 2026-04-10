@@ -323,3 +323,16 @@ mat-error {
   }
 }
 
+
+.activity-table-container {
+  height: 300px;
+  overflow-y: auto;
+}
+ 
+
+th.mat-header-cell {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
