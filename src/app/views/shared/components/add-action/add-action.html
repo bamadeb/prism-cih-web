@@ -564,9 +564,25 @@
                                 </mat-form-field>
 
                                 <!-- CPTPx -->
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                <!-- <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
                                   <mat-label>CPTPx</mat-label>
                                   <input matInput formControlName="CPTPx">
+                                </mat-form-field> -->
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>CPTPx</mat-label>
+
+                                  <input
+                                    type="text"
+                                    matInput
+                                    formControlName="CPTPx"
+                                    [matAutocomplete]="autoCpt">
+
+                                  <mat-autocomplete #autoCpt="matAutocomplete">
+                                    <mat-option *ngFor="let cpt of filteredCptOptions[i] | async; trackBy: trackByCpt" [value]="cpt.code">
+                                      {{ cpt.code }} - {{ cpt.label }}
+                                    </mat-option>
+                                  </mat-autocomplete>
+
                                 </mat-form-field>
                               </div>                             
 

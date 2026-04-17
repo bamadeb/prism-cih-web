@@ -36,6 +36,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';   
 import { FormControl } from '@angular/forms';
 import { Observable, startWith, map } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-add-action',
   imports: [
@@ -99,6 +100,9 @@ export class AddAction implements OnInit , AfterViewInit {
     'added_user_name',
     'added_date'
   ];
+  cptList: any[] = [];              // full list from API
+  
+  filteredCptOptions: Observable<any[]>[] = [];
 
   suppSourceList = [
   { value: 'E', label: 'EHR Standard Supplemental' },
@@ -288,11 +292,7 @@ filteredProviders!: Observable<any[]>;
     const user = this.userData.getUser();
     this.userId = user.ID;
 
-    if (this.medicaid_id) {
-      await this.getMemberTaskList(this.medicaid_id);
-      await this.getMemberGapsList(this.medicaid_id);
-    }   
-    
+  
     const params ={plan:'AHC'};
     const resTin = await this.apiService.getVendorListByplan<any>(params);    
     this.availableTins = resTin.data || [];
@@ -309,11 +309,18 @@ filteredProviders!: Observable<any[]>;
     this.vendorList = result.data.vendorList || [];
     this.appointTypeList = result.data.appointTypeList || [];
     this.hspcsList = result.data.hspcsList || [];
+    this.cptList = result.data.cptList || [];
+    if (this.medicaid_id) {
+      await this.getMemberTaskList(this.medicaid_id);
+      await this.getMemberGapsList(this.medicaid_id);
+    } 
     this.appointmentHistory();
     this.setScheduledActionStatus('17');
     // pcp visit history
     this.setPCPVisitHistory();
-
+  
+        
+    
     this.cdr.detectChanges();
     if (user.role_id === 9) {
       this.addActionFormGroup.get('panel_id')?.setValue(18);
@@ -1176,6 +1183,25 @@ private async updateQualityAndRiskData(
           note: [this.sanitize(t.note)]
         });
 
+const indexq = this.qualityGapsList.length;
+
+this.filteredCptOptions[indexq] = fg.get('CPTPx')!.valueChanges.pipe(
+  startWith(''),
+  debounceTime(300),
+  distinctUntilChanged(),
+  map(value => {
+    const filterValue = (value || '').toLowerCase();
+
+    return this.cptList
+      .filter(cpt =>
+        (cpt.code || '').toLowerCase().includes(filterValue) ||
+        (cpt.label || '').toLowerCase().includes(filterValue)
+      )
+      .slice(0, 20); // 🔥 LIMIT
+  })
+);
+
+
         // 🔥 ADD THIS BLOCK HERE
         fg.valueChanges.subscribe(val => {
 
@@ -1432,5 +1458,8 @@ private async updateQualityAndRiskData(
     const date = value instanceof Date ? value : new Date(value);
     return !isNaN(date.getTime());
   }
+trackByCpt(index: number, item: any) {
+  return item.code;
+}
 }
 
