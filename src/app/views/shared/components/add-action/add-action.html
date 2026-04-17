@@ -590,7 +590,19 @@
                                <div class="d-flex gap-3 align-items-start mb-2">
                                 <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
                                   <mat-label>HCPCSPx</mat-label>
-                                  <input matInput formControlName="HCPCSPx">
+                                  <!-- <input matInput formControlName="HCPCSPx"> -->
+
+                                  <input
+                                    type="text"
+                                    matInput
+                                    formControlName="HCPCSPx"
+                                    [matAutocomplete]="autoHcpcs">
+
+                                  <mat-autocomplete #autoHcpcs="matAutocomplete">
+                                    <mat-option *ngFor="let cpt of filteredhspcsOptions[i] | async; trackBy: trackByCpt" [value]="cpt.HCPCS_Code">
+                                      {{ cpt.HCPCS_Code }} - {{ cpt.subcategory }}
+                                    </mat-option>
+                                  </mat-autocomplete>
                                 </mat-form-field>                           
 
 
@@ -619,7 +631,20 @@
 
                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
                                   <mat-label>ICDDX10</mat-label>
-                                  <input matInput formControlName="ICDDX10">
+                                  <!-- <input matInput formControlName="ICDDX10"> -->
+                                  <input
+                                    type="text"
+                                    matInput
+                                    formControlName="ICDDX10"
+                                    [matAutocomplete]="autoIcd">
+
+                                  <mat-autocomplete #autoIcd="matAutocomplete">
+                                    <mat-option *ngFor="let cpt of filteredicdOptions[i] | async; trackBy: trackByCpt" [value]="cpt.code">
+                                      {{ cpt.code }} - {{ cpt.label }}
+                                    </mat-option>
+                                  </mat-autocomplete>
+                                  
+                                  
                                 </mat-form-field>
                               </div>
 

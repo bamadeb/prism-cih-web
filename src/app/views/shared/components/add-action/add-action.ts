@@ -84,7 +84,7 @@ export class AddAction implements OnInit , AfterViewInit {
   measureList: any[] = [];
   providerList: any[] = [];
   appointTypeList: any[] = [];
-  hspcsList: any[] = [];
+  
   vendorLocationList: any[] = [];
   actionresult_followup_list: any[] = [];
   memberTaskList: any[] = [];
@@ -103,7 +103,10 @@ export class AddAction implements OnInit , AfterViewInit {
   cptList: any[] = [];              // full list from API
   
   filteredCptOptions: Observable<any[]>[] = [];
-
+  hspcsList: any[] = [];
+  filteredhspcsOptions: Observable<any[]>[] = []; 
+  icdList: any[] = [];
+  filteredicdOptions: Observable<any[]>[] = [];
   suppSourceList = [
   { value: 'E', label: 'EHR Standard Supplemental' },
   { value: 'M', label: 'EHR Non-Standard Supplemental' },
@@ -310,6 +313,8 @@ filteredProviders!: Observable<any[]>;
     this.appointTypeList = result.data.appointTypeList || [];
     this.hspcsList = result.data.hspcsList || [];
     this.cptList = result.data.cptList || [];
+    this.icdList = result.data.icdList || [];
+    //console.log('this.icdList');
     if (this.medicaid_id) {
       await this.getMemberTaskList(this.medicaid_id);
       await this.getMemberGapsList(this.medicaid_id);
@@ -1469,11 +1474,39 @@ this.filteredCptOptions[indexq] = fg.get('CPTPx')!.valueChanges.pipe(
         (cpt.code || '').toLowerCase().includes(filterValue) ||
         (cpt.label || '').toLowerCase().includes(filterValue)
       )
-      .slice(0, 20); // 🔥 LIMIT
+      .slice(0, 20000); // 🔥 LIMIT
   })
 );
+this.filteredhspcsOptions[indexq] = fg.get('HCPCSPx')!.valueChanges.pipe(
+  startWith(''),
+  debounceTime(300),
+  distinctUntilChanged(),
+  map(value => {
+    const filterValue = (value || '').toLowerCase();
 
+    return this.hspcsList
+      .filter(cpt =>
+        (cpt.HCPCS_Code || '').toLowerCase().includes(filterValue) ||
+        (cpt.subcategory || '').toLowerCase().includes(filterValue)
+      )
+      .slice(0, 20000); // 🔥 LIMIT
+  })
+);
+this.filteredicdOptions[indexq] = fg.get('ICDDX10')!.valueChanges.pipe(
+  startWith(''),
+  debounceTime(300),
+  distinctUntilChanged(),
+  map(value => {
+    const filterValue = (value || '').toLowerCase();
 
+    return this.icdList
+      .filter(cpt =>
+        (cpt.code || '').toLowerCase().includes(filterValue) ||
+        (cpt.label || '').toLowerCase().includes(filterValue)
+      )
+      .slice(0, 20000); // 🔥 LIMIT
+  })
+);
         // 🔥 ADD THIS BLOCK HERE
         fg.valueChanges.subscribe(val => {
 
