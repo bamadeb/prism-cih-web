@@ -528,26 +528,26 @@
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
-                                  <mat-label>PROVIDER</mat-label>
-                                  <mat-select formControlName="provider_id" style="text-transform: uppercase;">
-                                    @for (provider of providerList; track provider) {
-                                      <mat-option [value]="provider.Provider_ID">
-                                        {{ provider.Provider_ID }} ({{provider.Provider_Name}})
-                                      </mat-option>
-                                    }
-                                  </mat-select>
-                                  <!-- ✅ Error message -->
-                                    <mat-error *ngIf="qgap.get('provider_id')?.hasError('required')">
-                                      Provider is required
-                                    </mat-error>
+                                <mat-label>PROVIDER</mat-label>
 
-                                    <!-- 🔥 Loader -->
-                                  <mat-progress-spinner
-                                    *ngIf="tinLoading[i]"
-                                    matSuffix
-                                    diameter="40">
-                                  </mat-progress-spinner>
-                                </mat-form-field>
+                                <mat-select formControlName="provider_id" style="text-transform: uppercase;">
+                                <mat-option *ngFor="let p of providerLists[i]" [value]="p.Provider_ID">
+                                  {{ p.Provider_ID }} ({{ p.Provider_Name }})
+                                </mat-option>
+                              </mat-select>
+
+                                <!-- ✅ Error message -->
+                                <mat-error *ngIf="qgap.get('provider_id')?.hasError('required')">
+                                  Provider is required
+                                </mat-error>
+
+                                <!-- 🔥 Loader -->
+                                <mat-progress-spinner
+                                  *ngIf="tinLoading[i]"
+                                  matSuffix
+                                  diameter="40">
+                                </mat-progress-spinner>
+                              </mat-form-field>
                               </div>  
 
                               <!-- DOS -->

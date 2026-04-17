@@ -165,6 +165,7 @@ filteredProviders!: Observable<any[]>;
   cihpcrList: any[] = [];
   activityList: any[] = [];
   providers: any[] = [];
+  providerLists: any[][] = [];
 
   showActivityTable: boolean = false;
   pcrColumns: string[] = [
@@ -350,34 +351,40 @@ filteredProviders!: Observable<any[]>;
 
     const row = this.qualityGapsList.at(index);
 
-    // reset before loading
-    row.get('provider_id')?.setValue('');
+    // ❗ ONLY reset if NOT edit mode
+    if (!providerId) {
+      row.get('provider_id')?.setValue('');
+    }
 
     if (!tin) {
-      this.providerList = [];
+      this.providerLists[index] = [];
       return;
     }
 
-    const res = await this.apiService.getProviderListByTin<any>({ tin });
-    const parsedBody = JSON.parse(res.body);
+    const payload = { tin };
 
-    this.providerList = parsedBody.data || [];
-    //console.log('Fetched providers for TIN', tin, this.providerList);
+    const result = await this.apiService.getProviderListByTin<any>(payload);
 
-    // ✅ SET provider AFTER list is ready
-    if (providerId) {
-      const match = this.providerList.find(
-        p => p.Provider_ID == providerId
+    this.providerLists[index] = result.data || [];
+
+    // ✅ IMPORTANT FIX → delay patching until UI is ready
+    if (providerId && this.providerLists[index].length) {
+
+      const match = this.providerLists[index].find(
+        (p: any) => String(p.Provider_ID) === String(providerId)
       );
 
       if (match) {
-        row.get('provider_id')?.setValue(providerId);
+        setTimeout(() => {
+          row.get('provider_id')?.setValue(match.Provider_ID);
+          this.cdr.detectChanges(); // 🔥 force UI update
+        }, 0);
       }
     }
 
   } catch (error) {
     console.error('Error fetching provider list:', error);
-    this.providerList = [];
+    this.providerLists[index] = [];
   } finally {
     this.tinLoading[index] = false;
     this.cdr.detectChanges();
