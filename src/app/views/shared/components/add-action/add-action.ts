@@ -891,7 +891,7 @@ private async updateQualityAndRiskData(
         qualityGap.note
       ].some(v => v !== null && v !== undefined && v !== "");
 
-      if (hasValue) {
+      if (hasValue) { 
 
         // 🔴 TIN VALIDATION
         if (!commonData.tin || commonData.tin.toString().trim() === '') {

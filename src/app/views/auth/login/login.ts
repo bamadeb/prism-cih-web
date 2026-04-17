@@ -260,6 +260,7 @@ async setupQrCode() {
       }
     }
     catch (err: any) {
+      console.log(err);
       this.errorMessage = err.message || "Login failed";
     }
     finally {
