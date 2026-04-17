@@ -346,50 +346,50 @@ filteredProviders!: Observable<any[]>;
   }
 
   async onTinChange(tin: any, index: number, providerId?: string) {
-  try {
-    this.tinLoading[index] = true;
+    try {
+      this.tinLoading[index] = true;
 
-    const row = this.qualityGapsList.at(index);
+      const row = this.qualityGapsList.at(index);
 
-    // ❗ ONLY reset if NOT edit mode
-    if (!providerId) {
-      row.get('provider_id')?.setValue('');
-    }
-
-    if (!tin) {
-      this.providerLists[index] = [];
-      return;
-    }
-
-    const payload = { tin };
-
-    const result = await this.apiService.getProviderListByTin<any>(payload);
-
-    this.providerLists[index] = result.data || [];
-
-    // ✅ IMPORTANT FIX → delay patching until UI is ready
-    if (providerId && this.providerLists[index].length) {
-
-      const match = this.providerLists[index].find(
-        (p: any) => String(p.Provider_ID) === String(providerId)
-      );
-
-      if (match) {
-        setTimeout(() => {
-          row.get('provider_id')?.setValue(match.Provider_ID);
-          this.cdr.detectChanges(); // 🔥 force UI update
-        }, 0);
+      // ❗ ONLY reset if NOT edit mode
+      if (!providerId) {
+        row.get('provider_id')?.setValue('');
       }
-    }
 
-  } catch (error) {
-    console.error('Error fetching provider list:', error);
-    this.providerLists[index] = [];
-  } finally {
-    this.tinLoading[index] = false;
-    this.cdr.detectChanges();
+      if (!tin) {
+        this.providerLists[index] = [];
+        return;
+      }
+
+      const payload = { tin };
+
+      const result = await this.apiService.getProviderListByTin<any>(payload);
+
+      this.providerLists[index] = result.data || [];
+      //console.log('providerLists:',result);
+      // ✅ IMPORTANT FIX → delay patching until UI is ready
+      if (providerId && this.providerLists[index].length) {
+
+        const match = this.providerLists[index].find(
+          (p: any) => String(p.Provider_ID) === String(providerId)
+        );
+
+        if (match) {
+          setTimeout(() => {
+            row.get('provider_id')?.setValue(match.Provider_ID);
+            this.cdr.detectChanges(); // 🔥 force UI update
+          }, 0);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error fetching provider list:', error);
+      this.providerLists[index] = [];
+    } finally {
+      this.tinLoading[index] = false;
+      this.cdr.detectChanges();
+    }
   }
-}
 
  
 
