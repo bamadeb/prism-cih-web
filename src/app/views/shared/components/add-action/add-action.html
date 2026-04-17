@@ -173,6 +173,59 @@
 
             </div>
           </div>
+          <!-- ACTIVITY LIST -->
+          <div class="p-3 mt-3">
+             <h4 (click)="toggleActivity()" style="cursor:pointer;">
+              <b>ACTIVITY LIST</b>
+            </h4>    
+            <div *ngIf="showActivityTable" class="activity-table-container">        
+              <table mat-table [dataSource]="activityList" class="mat-elevation-z8 full-width" class="text-uppercase">
+              <ng-container matColumnDef="Panel_Name">
+                <th mat-header-cell *matHeaderCellDef>ACTIVITY CATEGORY</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.Panel_Name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="action_type">
+                <th mat-header-cell *matHeaderCellDef>ACTIVITY TYPE</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.action_type }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="action_result">
+                <th mat-header-cell *matHeaderCellDef>ACTION RESULT</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.action_result }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="action_date">
+                <th mat-header-cell *matHeaderCellDef>ACTION DATE</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.action_date | date:'MM/dd/yyyy' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="action_status">
+                <th mat-header-cell *matHeaderCellDef>ACTION STATUS</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.action_status }}</td>
+              </ng-container>   
+              <ng-container matColumnDef="action_note">
+                <th mat-header-cell *matHeaderCellDef style="width: 45%;">ACTION NOTE</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.action_note }}</td>     
+              </ng-container>           
+
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef>ADD BY</th>
+                <td mat-cell *matCellDef="let activity">{{ activity.username }}</td>
+              </ng-container>   
+              
+               <!-- Header & Row -->
+              <tr mat-header-row *matHeaderRowDef="activityColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: activityColumns;"></tr>
+
+              <!-- No Data -->
+              <tr class="mat-row" *matNoDataRow>
+                <td colspan="11" class="text-center">No records found</td>
+              </tr>
+
+              </table>
+              </div> 
+          </div>
 
           <!-- PCR TABLE INSIDE FORM -->
           <div class="p-3 mt-3">
