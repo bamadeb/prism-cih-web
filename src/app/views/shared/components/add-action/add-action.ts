@@ -357,6 +357,7 @@ filteredProviders!: Observable<any[]>;
     const parsedBody = JSON.parse(res.body);
 
     this.providerList = parsedBody.data || [];
+    //console.log('Fetched providers for TIN', tin, this.providerList);
 
     // ✅ SET provider AFTER list is ready
     if (providerId) {
@@ -825,6 +826,7 @@ private async updateQualityAndRiskData(
       note: riskGap.note
     };
 
+    // ✅ UPDATE only if dirty
     if (riskGap.risk_gap_id) {
       if (fg.dirty) {
         riskObsUpdateArray.push({
@@ -835,10 +837,20 @@ private async updateQualityAndRiskData(
       }
     } else {
       const hasAnyValue = [
-        riskGap.Observation_Date,
-        riskGap.Observation_Code,
-        riskGap.Observation_Result,
-        riskGap.note
+          riskGap.Observation_Date,
+          riskGap.Observation_Code,
+          riskGap.CPT_Code_Modifier,
+          riskGap.Observation_Code_Set,
+          riskGap.Observation_Result,
+          riskGap.Service_Provider_NPI,
+          riskGap.Service_Provider_Taxonomy_Code,
+          riskGap.Service_Provider_Name,
+          riskGap.Service_Provider_Type,
+          riskGap.Service_Provider_RxProviderFlag,
+          riskGap.Provider_Group_NPI,
+          riskGap.Provider_Group_Taxonomy_Code,
+          riskGap.Provider_Group_Name,
+          riskGap.note
       ].some(v => v !== null && v !== undefined && v !== "");
 
       if (hasAnyValue) {
@@ -865,23 +877,150 @@ private async updateQualityAndRiskData(
     }
 
     const commonData = {
-      medicaid_id,
-      Type: qualityGap.Type,
-      Gap_Code: qualityGap.SUB_MEASURE,
-      Observation_Date: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),
-      Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
-      Observation_Code: qualityGap.Observation_Code,
-      Observation_Result: qualityGap.Observation_Result,
-      Source: 'CIH',
+        medicaid_id,
+        Type: qualityGap.Type,
+        Gap_Code: qualityGap.SUB_MEASURE,
+        Observation_Date: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),         
+        Observation_Year: new Date(qualityGap.Observation_Date).getFullYear(),
+        Observation_Code: qualityGap.Observation_Code,
+        CPT_Code_Modifier: qualityGap.CPT_Code_Modifier,
+        Observation_Code_Set: qualityGap.Observation_Code_Set,
+        Observation_Result: qualityGap.Observation_Result,
+        Service_Provider_NPI: qualityGap.Service_Provider_NPI,
+        Service_Provider_Taxonomy_Code: qualityGap.Service_Provider_Taxonomy_Code,
+        Service_Provider_Name: qualityGap.Service_Provider_Name,
+        Service_Provider_Type: qualityGap.Service_Provider_Type,
+        Service_Provider_RxProviderFlag: qualityGap.Service_Provider_RxProviderFlag,
+        Provider_Group_NPI: qualityGap.Provider_Group_NPI,
+        Provider_Group_Taxonomy_Code: qualityGap.Provider_Group_Taxonomy_Code,
+        Provider_Group_Name: qualityGap.Provider_Group_Name,
+        Source: 'CIH',
 
-      tin: qualityGap.tin,
-      provider_id: qualityGap.provider_id,
-      note: qualityGap.note
+        // 🔥 ADD THESE
+        tin: qualityGap.tin,
+        provider_id: qualityGap.provider_id,
+        DOSThru: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),
+        CPTPx: qualityGap.CPTPx,
+        HCPCSPx: qualityGap.HCPCSPx,
+        LOINC: qualityGap.LOINC,
+        SNOMED: qualityGap.SNOMED,
+        ICDDX: qualityGap.ICDDX,
+        ICDDX10: qualityGap.ICDDX10,
+        RxNorm: qualityGap.RxNorm,
+        CVX: qualityGap.CVX,
+        Modifier: qualityGap.Modifier,
+        RxProviderFlag: qualityGap.RxProviderFlag,
+        PCPFlag: qualityGap.PCPFlag,
+        QuantityDispensed: qualityGap.QuantityDispensed,
+        //ICDPx: qualityGap.ICDPx,
+        //ICDPx10: qualityGap.ICDPx10,
+        SuppSource: qualityGap.SuppSource,
+        LOINCAnswer: qualityGap.LOINCAnswer,
+        Result: qualityGap.Result,
+        //Sex: qualityGap.Sex,
+        note: qualityGap.note
     };
 
+    //console.log('commonData:',commonData);
+
+    // ✅ UPDATE only if dirty
     if (qualityGap.quality_gap_id) {
 
       if (fg.dirty) {
+
+        // 🔴 TIN VALIDATION
+        if (!commonData.tin || commonData.tin.toString().trim() === '') {
+          alert('TIN is required for quality gap entries');
+
+          fg.get('tin')?.setErrors({ required: true });
+          fg.get('tin')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 PROVIDER VALIDATION
+        if (!commonData.provider_id || commonData.provider_id.toString().trim() === '') {
+          alert('Provider is required for quality gap entries');
+
+          fg.get('provider_id')?.setErrors({ required: true });
+          fg.get('provider_id')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        
+        // 🔴 DOS VALIDATION
+        if (!commonData.Observation_Date || commonData.Observation_Date.toString().trim() === '') {
+          alert('DOS is required for quality gap entries');
+
+          fg.get('Observation_Date')?.setErrors({ required: true });
+          fg.get('Observation_Date')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // ✅ 🔥 AT LEAST ONE CODE REQUIRED VALIDATION
+        const hasAtLeastOneCode =
+          (commonData.CPTPx && commonData.CPTPx.toString().trim() !== '') ||
+          (commonData.HCPCSPx && commonData.HCPCSPx.toString().trim() !== '') ||
+          (commonData.ICDDX10 && commonData.ICDDX10.toString().trim() !== '');
+
+        if (!hasAtLeastOneCode) {
+          alert('Enter at least one code (CPTPx or HCPCSPx or ICDDX10)');
+
+          // ❗ Set error on all 3 fields for better UX
+          //fg.get('CPTPx')?.setErrors({ required: true });
+         // fg.get('HCPCSPx')?.setErrors({ required: true });
+          //fg.get('ICDDX10')?.setErrors({ required: true });
+
+          fg.get('CPTPx')?.markAsTouched();
+          fg.get('HCPCSPx')?.markAsTouched();
+          fg.get('ICDDX10')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 RxProviderFlag
+        if (commonData.RxProviderFlag === null ||
+  commonData.RxProviderFlag === undefined ||
+  commonData.RxProviderFlag.toString().trim() === '') {
+          alert('RxProviderFlag is required for quality gap entries');
+
+          fg.get('RxProviderFlag')?.setErrors({ required: true });
+          fg.get('RxProviderFlag')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 PCPFlag
+        if (commonData.PCPFlag === null ||
+  commonData.PCPFlag === undefined ||
+  commonData.PCPFlag.toString().trim() === '') {
+          alert('PCPFlag is required for quality gap entries');
+
+          fg.get('PCPFlag')?.setErrors({ required: true });
+          fg.get('PCPFlag')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 SuppSource
+        if (!commonData.SuppSource || commonData.SuppSource.toString().trim() === '') {
+          alert('Supp Source is required for quality gap entries');
+
+          fg.get('SuppSource')?.setErrors({ required: true });
+          fg.get('SuppSource')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
         riskObsUpdateArray.push({
           ...commonData,
           id: qualityGap.quality_gap_id,
@@ -893,9 +1032,42 @@ private async updateQualityAndRiskData(
 
       const hasValue = [
         qualityGap.Observation_Date,
-        qualityGap.Observation_Result,
-        qualityGap.tin,
-        qualityGap.note
+          qualityGap.Observation_Code,
+          qualityGap.CPT_Code_Modifier,
+          qualityGap.Observation_Code_Set,
+          qualityGap.Observation_Result,
+          qualityGap.Service_Provider_NPI,
+          qualityGap.Service_Provider_Taxonomy_Code,
+          qualityGap.Service_Provider_Name,
+          qualityGap.Service_Provider_Type,
+          qualityGap.Service_Provider_RxProviderFlag,
+          qualityGap.Provider_Group_NPI,
+          qualityGap.Provider_Group_Taxonomy_Code,
+          qualityGap.Provider_Group_Name,
+
+          // additional fields
+          qualityGap.tin,
+          qualityGap.provider_id,
+          qualityGap.Observation_Date, 
+          qualityGap.CPTPx,
+          qualityGap.HCPCSPx,
+          qualityGap.LOINC,
+          qualityGap.SNOMED,
+          qualityGap.ICDDX,
+          qualityGap.ICDDX10,
+          qualityGap.RxNorm,
+          qualityGap.CVX,
+          qualityGap.Modifier,
+          qualityGap.RxProviderFlag,
+          qualityGap.PCPFlag,
+          qualityGap.QuantityDispensed,
+          //qualityGap.ICDPx,
+         // qualityGap.ICDPx10,
+          qualityGap.SuppSource,
+          qualityGap.LOINCAnswer,
+          qualityGap.Result,
+          //qualityGap.Sex,  
+          qualityGap.note
       ].some(v => v !== null && v !== undefined && v !== "");
 
       if (hasValue) { 
@@ -911,11 +1083,83 @@ private async updateQualityAndRiskData(
           return;
         }
 
+        // 🔴 PROVIDER VALIDATION
         if (!commonData.provider_id || commonData.provider_id.toString().trim() === '') {
           alert('Provider is required for quality gap entries');
 
           fg.get('provider_id')?.setErrors({ required: true });
           fg.get('provider_id')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        
+        // 🔴 DOS VALIDATION
+        if (!commonData.Observation_Date || commonData.Observation_Date.toString().trim() === '') {
+          alert('DOS is required for quality gap entries');
+
+          fg.get('Observation_Date')?.setErrors({ required: true });
+          fg.get('Observation_Date')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // ✅ 🔥 AT LEAST ONE CODE REQUIRED VALIDATION
+        const hasAtLeastOneCode =
+          (commonData.CPTPx && commonData.CPTPx.toString().trim() !== '') ||
+          (commonData.HCPCSPx && commonData.HCPCSPx.toString().trim() !== '') ||
+          (commonData.ICDDX10 && commonData.ICDDX10.toString().trim() !== '');
+
+        if (!hasAtLeastOneCode) {
+          alert('Enter at least one code (CPTPx or HCPCSPx or ICDDX10)');
+
+          // ❗ Set error on all 3 fields for better UX
+          //fg.get('CPTPx')?.setErrors({ required: true });
+         // fg.get('HCPCSPx')?.setErrors({ required: true });
+          //fg.get('ICDDX10')?.setErrors({ required: true });
+
+          fg.get('CPTPx')?.markAsTouched();
+          fg.get('HCPCSPx')?.markAsTouched();
+          fg.get('ICDDX10')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 RxProviderFlag
+        if (commonData.RxProviderFlag === null ||
+  commonData.RxProviderFlag === undefined ||
+  commonData.RxProviderFlag.toString().trim() === '') {
+          alert('RxProviderFlag is required for quality gap entries');
+
+          fg.get('RxProviderFlag')?.setErrors({ required: true });
+          fg.get('RxProviderFlag')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 PCPFlag
+        if (commonData.PCPFlag === null ||
+  commonData.PCPFlag === undefined ||
+  commonData.PCPFlag.toString().trim() === '') {
+          alert('PCPFlag is required for quality gap entries');
+
+          fg.get('PCPFlag')?.setErrors({ required: true });
+          fg.get('PCPFlag')?.markAsTouched();
+
+          isValid = false;
+          return;
+        }
+
+        // 🔴 SuppSource
+        if (!commonData.SuppSource || commonData.SuppSource.toString().trim() === '') {
+          alert('Supp Source is required for quality gap entries');
+
+          fg.get('SuppSource')?.setErrors({ required: true });
+          fg.get('SuppSource')?.markAsTouched();
 
           isValid = false;
           return;
@@ -937,50 +1181,78 @@ private async updateQualityAndRiskData(
   }
 
   try {
+     /* ----------------------------------
+         STEP 1: UNSET MEMBER GAP STATUS
+      -----------------------------------*/
+      const paramsunsetq = {
+        medicaid_id: medicaid_id,
+        action_id: action_id
+      };
+      const result = await this.apiService.unSetMemberGapsStatus<any>(paramsunsetq);
 
-    await this.apiService.unSetMemberGapsStatus<any>({
-      medicaid_id,
-      action_id
-    });
 
-    if (diagCodes.length) {
-      await this.apiService.updategapStatus<any>({
-        medicaid_id,
-        diag_codes: `'${diagCodes.join("','")}'`,
-        action_id
-      });
-    }
+    /* ----------------------------------
+         STEP 2: UPDATE RISK STATUS
+      -----------------------------------*/
+      const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
+      if(diagVal){
+         const paramsupdate = {
+          medicaid_id: medicaid_id,
+          diag_codes: diagVal,
+          action_id: action_id
+        };
+        const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
+      }
 
-    if (qualitySubMeasures.length) {
-      await this.apiService.updatequalityStatus<any>({
-        medicaid_id,
-        measur_code_val: `'${qualitySubMeasures.join("','")}'`,
-        action_id
-      });
-    }
+    /* ----------------------------------
+         STEP 3: UPDATE QUALITY STATUS
+      -----------------------------------*/
+      const subMeasureVal = qualitySubMeasures.length > 0 ? `'${qualitySubMeasures.join("','")}'` : '';
+      if(subMeasureVal){
+        const qualityparamsupdate = {
+          medicaid_id: medicaid_id,
+          measur_code_val: subMeasureVal,
+          action_id: action_id
+        };
+        const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
+      }
 
-    if (riskObsUpdateArray.length) {
-      await this.apiService.multipleRowAndFieldUpdate<any>({
-        table_name: "MEM_GAP_OBSERVATION_DATA",
-        id_field_name: "id",
-        updates: riskObsUpdateArray
-      });
-    }
+    /* ----------------------------------
+         STEP 4: UPDATE OBSERVATIONS
+      -----------------------------------*/
+      if (riskObsUpdateArray.length) {
+        const apiparamUpdate = {
+          table_name: "MEM_GAP_OBSERVATION_DATA",
+          id_field_name: "id",
+          updates: riskObsUpdateArray
+        };
+        const updatequalitygapresult = await this.apiService.multipleRowAndFieldUpdate<any>(apiparamUpdate);
 
-    if (riskObsInsertArray.length) {
-      await this.apiService.multipleRowInsert({
-        table_name: 'MEM_GAP_OBSERVATION_DATA',
-        insertDataArray: riskObsInsertArray
-      });
-    }
+      }
 
-    if (UpdateArray.length) {
-      UpdateArray.forEach((row: any) => {
-        if (row.PLANYEAR != row.PLAN_YEAR) {
-          this.apiService.updatePlanyearForRiskgap<any>(row);
-        }
-      });
-    }
+    /* ----------------------------------
+         STEP 5: INSERT OBSERVATIONS
+      -----------------------------------*/
+      if (riskObsInsertArray.length) {
+        await this.apiService.multipleRowInsert({
+          table_name: 'MEM_GAP_OBSERVATION_DATA',
+          insertDataArray: riskObsInsertArray
+        });
+      }
+
+
+    /* ----------------------------------
+        STEP 4: UPDATE PLAN YEAR
+     -----------------------------------*/
+
+      if (UpdateArray.length) {
+        UpdateArray.forEach((newArray: any) => {
+          if (newArray.PLANYEAR != newArray.PLAN_YEAR) {
+
+            this.apiService.updatePlanyearForRiskgap<any>(newArray);
+          }
+        })
+      }
 
   } catch (error) {
     console.error('❌ Error updating quality/risk data:', error);
@@ -1232,7 +1504,6 @@ this.filteredCptOptions[indexq] = fg.get('CPTPx')!.valueChanges.pipe(
         });
 
 
-
         // 🔁 Auto-check based on Observation_Result
         fg.get('Observation_Result')?.valueChanges.subscribe(value => {
           fg.get('PROCESS_STATUS')?.setValue(!!value, { emitEvent: false });
@@ -1306,9 +1577,6 @@ this.filteredCptOptions[indexq] = fg.get('CPTPx')!.valueChanges.pipe(
       this.isLoading = false;
     }
   }
-
-
-
 
   private addStarPerformanceRow() {
     const f = this.measureForm.value;
