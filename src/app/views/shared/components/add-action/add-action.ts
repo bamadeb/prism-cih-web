@@ -804,7 +804,7 @@ resetActionFields() {
           qualityGap.Provider_Group_Name,
           qualityGap.note
         ].some(v => v !== null && v !== undefined && v !== "");
-        console.log('hasValue:',hasValue);
+       // console.log('hasValue:',hasValue);
         if (hasValue) {
 
           riskObsInsertArray.push({
@@ -833,24 +833,29 @@ resetActionFields() {
          STEP 2: UPDATE RISK STATUS
       -----------------------------------*/
       const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
+      if(diagVal){
+        const paramsupdate = {
+          medicaid_id: medicaid_id,
+          diag_codes: diagVal,
+          action_id: action_id
+        };
+        const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
+      }
 
-      const paramsupdate = {
-        medicaid_id: medicaid_id,
-        diag_codes: diagVal,
-        action_id: action_id
-      };
-      const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
 
       /* ----------------------------------
          STEP 3: UPDATE QUALITY STATUS
       -----------------------------------*/
       const subMeasureVal = qualitySubMeasures.length > 0 ? `'${qualitySubMeasures.join("','")}'` : '';
+      if(subMeasureVal){
       const qualityparamsupdate = {
         medicaid_id: medicaid_id,
         measur_code_val: subMeasureVal,
         action_id: action_id
       };
       const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
+      }
+
 
      
       /* ----------------------------------
@@ -870,6 +875,7 @@ resetActionFields() {
          STEP 5: INSERT OBSERVATIONS
       -----------------------------------*/
       if (riskObsInsertArray.length) {
+        console.log('riskObsInsertArray:', riskObsInsertArray);
         await this.apiService.multipleRowInsert({
           table_name: 'MEM_GAP_OBSERVATION_DATA',
           insertDataArray: riskObsInsertArray
