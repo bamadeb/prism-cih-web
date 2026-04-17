@@ -94,7 +94,7 @@ async onPlanChange(planId: string) {
   const result = await this.apiService.getVendorListByplan<any>(payload);  
   
   this.availableTins = result.data || [];
-  console.log(this.availableTins);
+  //console.log(this.availableTins);
 
   
   // Reset selected TINs when plan changes

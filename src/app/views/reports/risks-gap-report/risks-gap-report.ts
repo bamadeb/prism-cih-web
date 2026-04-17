@@ -21,6 +21,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatIcon } from "@angular/material/icon";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { UserDataService } from '../../../services/user-data-service';
+import { MatDialogClose } from "@angular/material/dialog";
 
 
 
@@ -33,7 +34,7 @@ import { UserDataService } from '../../../services/user-data-service';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatButtonModule, MatIcon, MatCheckbox],
+    MatButtonModule, MatIcon, MatCheckbox, MatDialogClose],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],templateUrl: './risks-gap-report.html',
@@ -52,10 +53,9 @@ export class RisksGapReport implements AfterViewInit ,OnInit {
 
   @ViewChild('mainPaginator') paginator!: MatPaginator;
   @ViewChild('mainSort') sort!: MatSort;
-  displayedColumns: string[] = [
-  'select',   
+  riskColumns: string[] = [
+  'select',
   'medicaid_id',
-
   'mode',
   'Gap_Code',
   'MEASURE_DESC',
@@ -75,6 +75,31 @@ export class RisksGapReport implements AfterViewInit ,OnInit {
   'Provider_Group_Name',
   'Source'
 ];
+
+qualityColumns: string[] = [
+  'select',
+  'medicaid_id',
+  'mode',
+  'PROVIDER_ID', 
+  'ObservationDate',
+  'DOSThru',
+  'CPTPx',
+  'HCPCSPx',
+  'LOINC',
+  'SNOMED',
+  'ICDDX',
+  'ICDDX10',
+  'RxNorm',
+  'CVX',
+  'Result',
+  'RxProviderFlag',
+  'PCPFlag',
+  'QuantityDispensed',
+  'SuppSource',
+  'Observation_Result',
+  'LOINCAnswer'
+];
+  displayedColumns: string[] =[];
 
  
   constructor(
@@ -160,9 +185,15 @@ formatDateToYMD(dateStr: string): string {
     const result = await this.apiService.getGapsObservationData(payload);
 
     // ✅ TypeScript now knows that 'data' exists
-    this.riskGapsReportList = result.data ?? [];
-    
+    this.riskGapsReportList = result.data ?? [];    
     this.dataSource.data = this.riskGapsReportList;
+
+    // ✅ SWITCH COLUMNS HERE
+    if (gaps_type === 'quality') {
+      this.displayedColumns = this.qualityColumns;
+    } else {
+      this.displayedColumns = this.riskColumns;
+    }
 
   } catch (err) {
     console.error('Risk gaps load failed', err);
@@ -189,72 +220,128 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
 
 
    
-    downloadCsv(): void {
+   downloadCsv(): void {
   try {
     if (!this.riskGapsReportList.length) {
       alert('No data available to download.');
       return;
     }
 
-    const header = [
-      'MEMBER ID',
-      'PATIENT MEMBER ID',
-      'PATIENT CMS MEDICARE NUMBER',
-      'MEMBER FIRST NAME',
-      'MEMBER LAST NAME',
-      'MEMBER DOB',
-      'OBSERVATION DATE',
-      'OBSERVATION YEAR',
-      'OBSERVATION CODE',
-      'CPT CODE MODIFIER',
-      'OBSERVATION CODE SET',
-      'OBSERVATION RESULT',
-      'SERVICE PROVIDER NPI',
-      'SERVICE PROVIDER TAXONOMY CODE',
-      'SERVICE PROVIDER NAME',
-      'SERVICE PROVIDER TYPE',
-      'SERVICE PROVIDER RXPROVIDERFLAG',
-      'PROVIDER GROUP NPI',
-      'PROVIDER GROUP TAXONOMY CODE',
-      'PROVIDER GROUP NAME',
-      'SOURCE'
-    ];
+    const gapsType = this.riskGapsFormGroup.get('gaps_type')?.value;
 
-    const rows = this.riskGapsReportList.map(item =>
-      [
-        item.RECIP_NO ?? '',
-        item.RECIP_NO ?? '',
-        item.MEDICARE_NO ?? '',
-        item.FIRST_NAME ?? '',
-        item.LAST_NAME ?? '',
-        item.BIRTH ?? '',
-        item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
-        item.Observation_Year ?? '',
-        item.Observation_Code ?? '',
-        item.CPT_Code_Modifier ?? '',
-        item.Observation_Code_Set ?? '',
-        item.Observation_Result ?? '',
-        item.Service_Provider_NPI ?? '',
-        item.Service_Provider_Taxonomy_Code ?? '',
-        item.Service_Provider_Name ?? '',
-        item.Service_Provider_Type ?? '',
-        item.Service_Provider_RxProviderFlag ?? '',
-        item.Provider_Group_NPI ?? '',
-        item.Provider_Group_Taxonomy_Code ?? '',
-        item.Provider_Group_Name ?? '',
-        item.Source ?? ''
-      ]
-        .map(v => v.toString().replace(/\|/g, ' '))
-        .join('|')
-    );
+    let header: string[] = [];
+    let rows: string[] = [];
+
+    // ✅ RISK DOWNLOAD
+    if (gapsType === 'risk') {
+      header = [
+        'MEMBER ID',
+        'PATIENT MEMBER ID',
+        'PATIENT CMS MEDICARE NUMBER',
+        'MEMBER FIRST NAME',
+        'MEMBER LAST NAME',
+        'MEMBER DOB',
+        'OBSERVATION DATE',
+        'OBSERVATION YEAR',
+        'OBSERVATION CODE',
+        'CPT CODE MODIFIER',
+        'OBSERVATION CODE SET',
+        'OBSERVATION RESULT',
+        'SERVICE PROVIDER NPI',
+        'SERVICE PROVIDER TAXONOMY CODE',
+        'SERVICE PROVIDER NAME',
+        'SERVICE PROVIDER TYPE',
+        'SERVICE PROVIDER RXPROVIDERFLAG',
+        'PROVIDER GROUP NPI',
+        'PROVIDER GROUP TAXONOMY CODE',
+        'PROVIDER GROUP NAME',
+        'SOURCE'
+      ];
+
+      rows = this.riskGapsReportList.map(item =>
+        [
+          item.RECIP_NO ?? '',
+          item.RECIP_NO ?? '',
+          item.MEDICARE_NO ?? '',
+          item.FIRST_NAME ?? '',
+          item.LAST_NAME ?? '',
+          item.BIRTH ?? '',
+          item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
+          item.Observation_Year ?? '',
+          item.Observation_Code ?? '',
+          item.CPT_Code_Modifier ?? '',
+          item.Observation_Code_Set ?? '',
+          item.Observation_Result ?? '',
+          item.Service_Provider_NPI ?? '',
+          item.Service_Provider_Taxonomy_Code ?? '',
+          item.Service_Provider_Name ?? '',
+          item.Service_Provider_Type ?? '',
+          item.Service_Provider_RxProviderFlag ?? '',
+          item.Provider_Group_NPI ?? '',
+          item.Provider_Group_Taxonomy_Code ?? '',
+          item.Provider_Group_Name ?? '',
+          item.Source ?? ''
+        ]
+          .map(v => v.toString().replace(/\|/g, ' '))
+          .join('|')
+      );
+    }
+
+    // ✅ QUALITY DOWNLOAD
+    else if (gapsType === 'quality') { 
+      header = [
+        'MemberKey',
+        'ProviderKey',
+        'DOS',
+        'DOSThru',
+        'CPTPx',
+        'HCPCSPx',
+        'LOINC',
+        'SNOMED',
+        'ICDDX',
+        'ICDDX10',
+        'RxNorm',
+        'CVX',
+        'Result',
+        'RxProviderFlag',
+        'PCPFlag',
+        'QuantityDispensed',
+        'SuppSource',
+        'ObservationResult',
+        'LOINCAnswer'
+      ];
+
+      rows = this.riskGapsReportList.map(item =>
+        [
+          item.RECIP_NO ?? '',
+          item.PROVIDER_ID ?? '',
+          item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
+          item.DOSThru !== '01/01/1900' ? item.DOSThru : '',
+          item.CPTPx ?? '',
+          item.HCPCSPx ?? '',
+          item.LOINC ?? '',
+          item.SNOMED ?? '',
+          item.ICDDX ?? '',
+          item.ICDDX10 ?? '',
+          item.RxNorm ?? '',
+          item.CVX ?? '',
+          item.Result ?? '',
+          item.RxProviderFlag ?? '',
+          item.PCPFlag ?? '',
+          item.QuantityDispensed ?? '',
+          item.SuppSource ?? '',
+          item.Observation_Result ?? '',
+          item.LOINCAnswer ?? ''
+        ]
+          .map(v => (v ?? '').toString().replace(/\|/g, ' '))
+          .join('|')
+      );
+    }
 
     const csv = [header.join('|'), ...rows].join('\n');
-
     const now = new Date();
-    const filename = `GAPS_CIH_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).CSV`;
-
+    const filename = `GAPS_${(gapsType || 'UNKNOWN').toUpperCase()}_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).CSV`;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;

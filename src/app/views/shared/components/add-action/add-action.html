@@ -511,139 +511,196 @@
                       <!-- BODY -->
                       <div class="row mt-3">
 
-                        <!-- Observation Date -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Date</mat-label>
+                        <div class="row">                          
 
-                            <input matInput [matDatepicker]="picker" formControlName="Observation_Date"
-                              placeholder="MM/DD/YYYY" (keydown)="allowOnlyDateChars($event)" maxlength="10" />
+                              <div class="d-flex gap-3 align-items-start mb-2">
+                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>TINS</mat-label>
+                                   <mat-select formControlName="tin" style="text-transform: uppercase;"  (selectionChange)="onTinChange($event.value, i)">
+                                      @for (tin of availableTins; track tin) {
+                                      <mat-option [value]="tin.VENDOR_NUM" class="txupper"> {{tin.LAST_NAME}} ({{tin.VENDOR_NUM}})</mat-option>
+                                      }
+                                  </mat-select>
+                                   <!-- ✅ Error message -->
+                                    <mat-error *ngIf="qgap.get('tin')?.hasError('required')">
+                                      TIN is required
+                                    </mat-error>
+                                </mat-form-field>
 
-                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                            <mat-datepicker #picker></mat-datepicker>
-                          </mat-form-field>
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>PROVIDER</mat-label>
+                                  <mat-select formControlName="provider_id" style="text-transform: uppercase;">
+                                    @for (provider of providerList; track provider) {
+                                      <mat-option [value]="provider.Provider_ID">
+                                        {{ provider.Provider_ID }}
+                                      </mat-option>
+                                    }
+                                  </mat-select>
+                                  <!-- ✅ Error message -->
+                                    <mat-error *ngIf="qgap.get('provider_id')?.hasError('required')">
+                                      Provider is required
+                                    </mat-error>
+
+                                    <!-- 🔥 Loader -->
+                                  <mat-progress-spinner
+                                    *ngIf="tinLoading[i]"
+                                    matSuffix
+                                    diameter="40">
+                                  </mat-progress-spinner>
+                                </mat-form-field>
+                              </div>  
+
+                              <!-- DOS -->
+                             <div class="d-flex gap-3 align-items-start mb-2"> 
+                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>DOS</mat-label>
+                                  <input matInput [matDatepicker]="dosPicker"
+                                        formControlName="Observation_Date"
+                                        placeholder="MM/DD/YYYY"
+                                        (keydown)="allowOnlyDateChars($event)"
+                                        maxlength="10" />
+                                  <mat-datepicker-toggle matSuffix [for]="dosPicker"></mat-datepicker-toggle>
+                                  <mat-datepicker #dosPicker></mat-datepicker>
+                                </mat-form-field>
+
+                                <!-- CPTPx -->
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>CPTPx</mat-label>
+                                  <input matInput formControlName="CPTPx">
+                                </mat-form-field>
+                              </div>                             
+
+                              <!-- HCPCSPx -->
+                               <div class="d-flex gap-3 align-items-start mb-2">
+                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>HCPCSPx</mat-label>
+                                  <input matInput formControlName="HCPCSPx">
+                                </mat-form-field>                           
+
+
+                                  <!-- <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>HCPCSPx</mat-label>
+                                  <mat-select formControlName="HCPCSPx">
+                                    <mat-option *ngFor="let item of hspcsList" [value]="item.HCPCS_Code">
+                                      {{ item.HCPCS_Code }}
+                                    </mat-option>
+                                  </mat-select>
+                                </mat-form-field> -->
+
+                                 <!-- SNOMED -->
+                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>SNOMED</mat-label>
+                                  <input matInput formControlName="SNOMED">
+                                </mat-form-field>
+                              </div>                  
+
+                              <!-- ICDDX -->
+                              <div class="d-flex gap-3 align-items-start mb-2">
+                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>ICDDX</mat-label>
+                                  <input matInput formControlName="ICDDX">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>ICDDX10</mat-label>
+                                  <input matInput formControlName="ICDDX10">
+                                </mat-form-field>
+                              </div>
+
+                               <!-- LOINC -->
+                               <div class="d-flex gap-3 align-items-start mb-2">
+                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>LOINC</mat-label>
+                                  <input matInput formControlName="LOINC">
+                                </mat-form-field>
+
+                                <!-- LOINC Answer -->
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;" *ngIf="qgap.get('LOINC')?.value?.trim()">
+                                    <mat-label>LOINC Answer</mat-label>
+                                    <input matInput formControlName="LOINCAnswer">
+                                </mat-form-field>
+                              </div>      
+
+                              <!-- RxNorm -->
+                              <div class="d-flex gap-3 align-items-start mb-2">
+                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>RxNorm</mat-label>
+                                  <input matInput formControlName="RxNorm">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>CVX</mat-label>
+                                  <input matInput formControlName="CVX">
+                                </mat-form-field>
+                              </div>  
+
+                              <!-- RxProviderFlag -->
+                               <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Rx PROVIDER FLAG</label>
+                                <mat-radio-group formControlName="RxProviderFlag" class="d-flex gap-3">
+                                  <mat-radio-button [value]="1">YES</mat-radio-button>
+                                  <mat-radio-button [value]="0">NO</mat-radio-button>
+                                </mat-radio-group>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                              <!-- PCPFlag -->
+                                <label class="form-label fw-semibold">PCP FLAG</label>
+                                <mat-radio-group formControlName="PCPFlag" class="d-flex gap-3">
+                                  <mat-radio-button [value]="1">YES</mat-radio-button>
+                                  <mat-radio-button [value]="0">NO</mat-radio-button>
+                                </mat-radio-group>
+                              </div>  
+                              
+
+                              <!-- Quantity Dispensed -->
+                              <div class="d-flex gap-3 align-items-start mb-2">
+                                  <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                  <mat-label>Quantity Dispensed</mat-label>
+                                  <input matInput formControlName="QuantityDispensed">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                  <mat-label>RESULT</mat-label>
+                                  <input matInput formControlName="Observation_Result" (keypress)="allowAlphaNumeric($event)">
+                                </mat-form-field>
+                              </div> 
+
+                              <!-- SuppSource -->                               
+                              <div class="col-lg-3 col-md-6 mb-2">
+                                <mat-form-field appearance="outline" class="w-100">
+                                  <mat-label>SUPP SOURCE</mat-label>
+                                  <mat-select formControlName="SuppSource">
+                                    <mat-option *ngFor="let item of suppSourceList" [value]="item.value">
+                                      {{ item.value }} - {{ item.label }}
+                                    </mat-option>
+                                  </mat-select>
+                                </mat-form-field>
+                              </div>
+
+                             <!-- Observation Result -->
+                               <!-- <div class="col-lg-3 col-md-6 mb-3">
+                                <label class="form-label fw-semibold">OBSERVATION RESULT</label>
+                                <mat-radio-group formControlName="Observation_Result" class="d-flex gap-3">
+                                  <mat-radio-button value="Rejected">Rejected</mat-radio-button>
+                                  <mat-radio-button value="Addressed">Addressed</mat-radio-button>
+                                  <mat-radio-button value="Trumped">Trumped</mat-radio-button>
+                                </mat-radio-group>
+                              </div>   --> 
+
+                              <!-- Note -->
+                              <div class="col-lg-9 col-md-12 mb-2">
+                                <mat-form-field appearance="outline" class="w-100">
+                                  <mat-label>NOTE</mat-label>
+                                  <textarea matInput rows="2" formControlName="note" style="height:32px;"></textarea>
+                                </mat-form-field>
+                              </div>                             
+
                         </div>
-
-                        <!-- Observation Code -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Code</mat-label>
-                            <input matInput formControlName="Observation_Code">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- CPT Code Modifier -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>CPT Code Modifier</mat-label>
-                            <input matInput formControlName="CPT_Code_Modifier">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Observation Code Set -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Code Set</mat-label>
-                            <input matInput formControlName="Observation_Code_Set">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Observation Result -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Observation Result</mat-label>
-                            <mat-select formControlName="Observation_Result">
-                              <mat-option value="">-- Observation Result --</mat-option>
-                              <mat-option value="Rejected">Rejected</mat-option>
-                              <mat-option value="Addressed">Addressed</mat-option>
-                              <mat-option value="Trumped">Trumped</mat-option>
-                            </mat-select>
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider NPI -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Service Provider NPI</mat-label>
-                            <input matInput formControlName="Service_Provider_NPI">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider Taxonomy -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Taxonomy Code</mat-label>
-                            <input matInput formControlName="Service_Provider_Taxonomy_Code">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider Name -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Service Provider Name</mat-label>
-                            <input matInput formControlName="Service_Provider_Name">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Service Provider Type -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Service Provider Type</mat-label>
-                            <input matInput formControlName="Service_Provider_Type">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Rx Provider Flag -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Rx Provider Flag</mat-label>
-                            <input matInput formControlName="Service_Provider_RxProviderFlag">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Provider Group NPI -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Group NPI</mat-label>
-                            <input matInput formControlName="Provider_Group_NPI">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Provider Group Taxonomy -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Group Taxonomy</mat-label>
-                            <input matInput formControlName="Provider_Group_Taxonomy_Code">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Provider Group Name -->
-                        <div class="col-lg-3 col-md-6 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Provider Group Name</mat-label>
-                            <input matInput formControlName="Provider_Group_Name">
-                          </mat-form-field>
-                        </div>
-
-                        <!-- Note -->
-                        <div class="col-lg-9 col-md-12 mb-2">
-                          <mat-form-field appearance="outline" class="w-100">
-                            <mat-label>Note</mat-label>
-                            <textarea matInput rows="2" formControlName="note" style="height:32px;"></textarea>
-                          </mat-form-field>
-                        </div>
-
                       </div>
-
                     </mat-expansion-panel>
 
                   </ng-container>
 
                 </mat-accordion>
               </div>
-
-
-
 
             </div>
             <div>

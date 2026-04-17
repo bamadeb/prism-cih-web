@@ -531,6 +531,15 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
     );
   }
 
+  async getProviderListByTin<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismGetproviderIdByTin',
+      request   
+    );
+  }
+
   async updatePlanyearForRiskgap<TResponse>(request: any): Promise<TResponse> {
     return await commonPostApi<TResponse>(
       this.httpClient,

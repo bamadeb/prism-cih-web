@@ -24,6 +24,7 @@ import { PageAccess } from './views/rolewise-page/page-access/page-access';
 import { StarPerformanceFile } from './views/process-file/star-performance-file/star-performance-file';
 
 import { OutreachActivity } from './views/reports/outreach-activity/outreach-activity/outreach-activity';
+import { AutocompleteDemo } from './views/autocomplete-demo/autocomplete-demo/autocomplete-demo';
 
 
 
@@ -162,6 +163,13 @@ export const routes: Routes = [
     component: MainLayout,
     children: [
       { path: 'outreach-activity', component: OutreachActivity },
+    ]
+  },
+   {
+    path: '',
+    component: MainLayout,
+    children: [
+      { path: 'autocomplete', component: AutocompleteDemo },
     ]
   },
   {
