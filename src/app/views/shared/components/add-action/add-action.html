@@ -532,7 +532,7 @@
                                   <mat-select formControlName="provider_id" style="text-transform: uppercase;">
                                     @for (provider of providerList; track provider) {
                                       <mat-option [value]="provider.Provider_ID">
-                                        {{ provider.Provider_ID }}
+                                        {{ provider.Provider_ID }} ({{provider.Provider_Name}})
                                       </mat-option>
                                     }
                                   </mat-select>
@@ -659,7 +659,7 @@
 
                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
                                   <mat-label>RESULT</mat-label>
-                                  <input matInput formControlName="Observation_Result" (keypress)="allowAlphaNumeric($event)">
+                                  <input matInput formControlName="Observation_Result" >
                                 </mat-form-field>
                               </div> 
 
