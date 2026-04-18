@@ -934,8 +934,11 @@ private async updateQualityAndRiskData(
     };
 
     //console.log('commonData:',commonData);
-
+    const providerId = Number(commonData.provider_id);
+//alert(typeof providerId); 
     // ✅ UPDATE only if dirty
+    //console.log('qualityGap.quality_gap_id:', qualityGap);
+    //alert('qualityGap.quality_gap_id: ' + qualityGap.quality_gap_id);
     if (qualityGap.quality_gap_id) {
 
       if (fg.dirty) {
@@ -951,8 +954,10 @@ private async updateQualityAndRiskData(
           return;
         }
 
+        //alert('TIN: ' + commonData.tin + '\nProvider ID: ' + commonData.provider_id);
+
         // 🔴 PROVIDER VALIDATION
-        if (!commonData.provider_id || commonData.provider_id.toString().trim() === '') {
+        if (!providerId) {
           alert('Provider is required for quality gap entries');
 
           fg.get('provider_id')?.setErrors({ required: true });
@@ -1057,7 +1062,6 @@ private async updateQualityAndRiskData(
           qualityGap.Provider_Group_Taxonomy_Code,
           qualityGap.Provider_Group_Name,
 
-          // additional fields
           qualityGap.tin,
           qualityGap.provider_id,
           qualityGap.Observation_Date, 
@@ -1073,14 +1077,20 @@ private async updateQualityAndRiskData(
           qualityGap.RxProviderFlag,
           qualityGap.PCPFlag,
           qualityGap.QuantityDispensed,
-          //qualityGap.ICDPx,
-         // qualityGap.ICDPx10,
+
           qualityGap.SuppSource,
           qualityGap.LOINCAnswer,
           qualityGap.Result,
-          //qualityGap.Sex,  
+           
           qualityGap.note
-      ].some(v => v !== null && v !== undefined && v !== "");
+      ].some(v => {
+  return (
+    v !== null &&
+    v !== undefined &&
+    v.toString().trim() !== "" &&
+    v.toString().toLowerCase() !== "null"
+  );
+});
 
       if (hasValue) { 
 
@@ -1094,9 +1104,11 @@ private async updateQualityAndRiskData(
           isValid = false;
           return;
         }
+        //alert('Provider ID: ' + providerId);
 
         // 🔴 PROVIDER VALIDATION
-        if (!commonData.provider_id || commonData.provider_id.toString().trim() === '') {
+        if (!providerId) {
+
           alert('Provider is required for quality gap entries');
 
           fg.get('provider_id')?.setErrors({ required: true });
@@ -1430,7 +1442,7 @@ private async updateQualityAndRiskData(
           
           // 🔥 ADD THESE NEW FIELDS (IMPORTANT)
           // ✅ REQUIRED FIELD
-          tin: [this.sanitize(t.tin)],
+          tin: [String(t.tin)],
           provider_id: [this.sanitize(t.provider_id)],
           CPTPx: [this.sanitize(t.CPTPx)],          
           HCPCSPx: [this.sanitize(t.HCPCSPx)],
