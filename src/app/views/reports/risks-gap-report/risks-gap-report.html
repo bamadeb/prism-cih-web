@@ -45,7 +45,7 @@
                 </mat-progress-spinner>
               }
         </button>
-         <mat-icon (click)="downloadCsv()" style="cursor: pointer;" title="Download csv" style="margin-top:15px;">download</mat-icon>   
+         <mat-icon (click)="downloadCsv()"  title="Download csv" style="margin-top:15px;cursor: pointer;">download</mat-icon>   
                    
 
       </form>
@@ -200,9 +200,14 @@
         <!-- Quality Data -->
 
          <ng-container matColumnDef="PROVIDER_ID">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Provider ID</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Provider</th>
           <td mat-cell *matCellDef="let row">{{ row.provider_id }}</td>
         </ng-container> 
+
+         <ng-container matColumnDef="DOS">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>DOS</th>
+          <td mat-cell *matCellDef="let row">{{ row.ObservationDate }}</td>
+        </ng-container>
 
         <ng-container matColumnDef="DOSThru">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>DOSThru</th>
