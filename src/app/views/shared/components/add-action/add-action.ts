@@ -420,6 +420,7 @@ filteredProviders!: Observable<any[]>;
 
 
   async onVendorChange(vendorId: string) {
+    //alert('Vendor changed: ' + vendorId); // Debug alert
     if (!vendorId) return;
 
     // 🔄 Reset dependent fields
@@ -436,6 +437,7 @@ filteredProviders!: Observable<any[]>;
       const result = await this.apiService.getProviderList<any>({
         vendor_id: vendorId
       });
+      console.log('API result for provider list:', result.data);
 
       this.providerList = result.data.providerList || [];
       this.vendorLocationList = result.data.vendorLocationList || [];
