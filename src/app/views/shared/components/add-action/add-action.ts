@@ -791,6 +791,7 @@ private async updateQualityAndRiskData(
   const diagCodes: string[] = [];
   const qualitySubMeasures: string[] = [];
   const riskObsInsertArray: any[] = [];
+  const qualityObsInsertArray: any[] = [];
   const riskObsUpdateArray: any[] = [];
   const UpdateArray: any[] = [];
 
@@ -1004,9 +1005,7 @@ private async updateQualityAndRiskData(
         }
 
         // 🔴 RxProviderFlag
-        if (commonData.RxProviderFlag === null ||
-  commonData.RxProviderFlag === undefined ||
-  commonData.RxProviderFlag.toString().trim() === '') {
+        if (commonData.RxProviderFlag === null || commonData.RxProviderFlag === undefined || commonData.RxProviderFlag.toString().trim() === '') {
           alert('RxProviderFlag is required for quality gap entries');
 
           fg.get('RxProviderFlag')?.setErrors({ required: true });
@@ -1017,9 +1016,7 @@ private async updateQualityAndRiskData(
         }
 
         // 🔴 PCPFlag
-        if (commonData.PCPFlag === null ||
-  commonData.PCPFlag === undefined ||
-  commonData.PCPFlag.toString().trim() === '') {
+        if (commonData.PCPFlag === null || commonData.PCPFlag === undefined || commonData.PCPFlag.toString().trim() === '') {
           alert('PCPFlag is required for quality gap entries');
 
           fg.get('PCPFlag')?.setErrors({ required: true });
@@ -1155,9 +1152,7 @@ private async updateQualityAndRiskData(
         }
 
         // 🔴 RxProviderFlag
-        if (commonData.RxProviderFlag === null ||
-  commonData.RxProviderFlag === undefined ||
-  commonData.RxProviderFlag.toString().trim() === '') {
+        if (commonData.RxProviderFlag === null || commonData.RxProviderFlag === undefined || commonData.RxProviderFlag.toString().trim() === '') {
           alert('RxProviderFlag is required for quality gap entries');
 
           fg.get('RxProviderFlag')?.setErrors({ required: true });
@@ -1168,9 +1163,7 @@ private async updateQualityAndRiskData(
         }
 
         // 🔴 PCPFlag
-        if (commonData.PCPFlag === null ||
-  commonData.PCPFlag === undefined ||
-  commonData.PCPFlag.toString().trim() === '') {
+        if (commonData.PCPFlag === null || commonData.PCPFlag === undefined || commonData.PCPFlag.toString().trim() === '') {
           alert('PCPFlag is required for quality gap entries');
 
           fg.get('PCPFlag')?.setErrors({ required: true });
@@ -1191,7 +1184,7 @@ private async updateQualityAndRiskData(
           return;
         }
 
-        riskObsInsertArray.push({
+        qualityObsInsertArray.push({
           ...commonData,
           added_by: this.userId,
           added_date: new Date()
@@ -1263,6 +1256,15 @@ private async updateQualityAndRiskData(
         await this.apiService.multipleRowInsert({
           table_name: 'MEM_GAP_OBSERVATION_DATA',
           insertDataArray: riskObsInsertArray
+        });
+      }
+    /* ----------------------------------
+         STEP 5: INSERT OBSERVATIONS
+      -----------------------------------*/
+      if (qualityObsInsertArray.length) {
+        await this.apiService.multipleRowInsert({
+          table_name: 'MEM_GAP_OBSERVATION_DATA',
+          insertDataArray: qualityObsInsertArray
         });
       }
 
