@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { IdleTimeoutService } from './services/idle-timeout';
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -18,6 +19,10 @@ export class App implements OnInit {
 
     // Start idle monitoring
     this.idleService.startWatching();
+  }
 
+  ngOnDestroy(): void {
+    // ✅ Prevent memory leaks
+    this.idleService.stopWatching();
   }
 }
