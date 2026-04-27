@@ -222,6 +222,14 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
       request   
     );
   }
+  async prismVendorMasterlist<TResponse>(request: any): Promise<TResponse> {
+    return await commonPostApi<TResponse>(
+      this.httpClient,
+      this.environmentService,
+      'prismVendorMasterlist',
+      request   
+    );
+  }
 
   async getUserListByid<TResponse>(request: any): Promise<TResponse> {
     return await commonPostApi<TResponse>(

@@ -169,9 +169,9 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   }
 
   async loadVendors() {
-    const result = await this.apiService.addActionMaster<any>('');
-    this.vendorList = result.data.vendorList || [];
-
+    const result = await this.apiService.prismVendorMasterlist<any>('');
+    this.vendorList = result.data || [];
+    //console.log('vendorList',this.vendorList);
     this.providerTinNameMapping = this.vendorList.reduce(
       (map: Record<string, string>, v: any) => {
         map[String(v.VENDOR_NUM)] = v.LAST_NAME;
