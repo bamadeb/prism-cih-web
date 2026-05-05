@@ -21,7 +21,6 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-logreport',
@@ -69,7 +68,6 @@ getActivityLabel(type: string): string {
 }
 
 dataSource = new MatTableDataSource<any>([]);
-selection = new SelectionModel<any>(true, []);
 
 @ViewChild('mainPaginator') paginator!: MatPaginator;
 @ViewChild('mainSort') sort!: MatSort;
@@ -77,7 +75,7 @@ selection = new SelectionModel<any>(true, []);
 actionLogFormGroup!: FormGroup;
 isLoading = false;
 totalCount = 0;
-activityCount: Record<string, number> = [] as any;
+activityCount: Record<string, number> = {};
 actionLogReportList: any[] = [];
 navigatorList: any[] = [];
 action_ativity_type: any[] = [];  
@@ -163,8 +161,6 @@ action_ativity_type: any[] = [];
         action_note: u.action_note ?? ''
       };
     });
-
-    this.selection.clear();
 
   } finally {
     this.isLoading = false;

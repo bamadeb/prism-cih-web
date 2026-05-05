@@ -132,49 +132,24 @@ export class Users implements OnInit, AfterViewInit {
   }
 
   private openUserDialog(user?: any): void {
-    this.isLoading = true;
-
     const dialogRef = user
       ? this.usersDialogService.editUsersDialog(this.roles, this.departments, user)
       : this.usersDialogService.addUsersDialog(this.roles, this.departments);
 
     dialogRef.afterClosed().subscribe(result => {
-      this.isLoading = false;
-
       if (result?.refresh) {
-        console.info('🔄 Reloading users');
         this.loadTableData();
       }
     });
   }
 
-  /* ---------------- FILTER ---------------- */
-    async unlockUser(user: any): Promise<void> {
-
-       const result = await this.noLongerPatientService.confirmUnlockUser(user);
-
-      // if (!result || result?.event !== 'confirm') {
-      //   return;
-      // }
-
-      this.isLoading = true;
-
-      try {
-        // await this.apiService.unlockUser({
-        //   userId: user.ID,
-        //   cognito_username: user.cognito_username
-        // });
-
-        console.info('✅ User unlocked');
-        this.loadTableData();
-
-      } catch (err) {
-        console.error('❌ Unlock failed', err);
-        alert('Failed to unlock user');
-      } finally {
-        this.isLoading = false;
-      }
+  /* ---------------- UNLOCK ---------------- */
+  async unlockUser(user: any): Promise<void> {
+    const result = await this.noLongerPatientService.confirmUnlockUser(user);
+    if (result?.refresh) {
+      this.loadTableData();
     }
+  }
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();

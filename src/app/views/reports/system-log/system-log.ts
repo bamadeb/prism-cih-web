@@ -21,7 +21,6 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-system-log',
@@ -56,7 +55,6 @@ export class SystemLog implements OnInit, AfterViewInit {
   ];
 
 dataSource = new MatTableDataSource<any>([]);
-selection = new SelectionModel<any>(true, []);
 
 @ViewChild('mainPaginator') paginator!: MatPaginator;
 @ViewChild('mainSort') sort!: MatSort;
@@ -78,7 +76,7 @@ navigatorList: any[] = [];
 
     // ✅ All required controls added
     this.actionLogFormGroup = this.fb.group({
-      user_id: [3],      
+      user_id: [null],
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required],
     },{ validators: this.dateRangeValidator });
@@ -130,7 +128,6 @@ navigatorList: any[] = [];
         add_date: this.convertToLocal(u.add_date) ?? ''
       }));
 
-    this.selection.clear();
   } finally {
     this.isLoading = false;
     this.cdr.markForCheck(); // ✅ OnPush safe
@@ -138,7 +135,8 @@ navigatorList: any[] = [];
 }
 
 
-convertToLocal(apiDate: any): string { 
+convertToLocal(apiDate: any): string {
+  if (!apiDate) return '';
   return new Date(apiDate).toLocaleString();
 }
  

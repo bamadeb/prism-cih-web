@@ -18,6 +18,7 @@ showAddActionDialog(medicaid_id: string,  member_name: string,  member_dob: stri
   const dialogRef = this.dialog.open(AddAction, {
     width: '95vw',
     maxWidth: '100vw',
+    maxHeight: '95vh',
     panelClass: 'add-action-dialog',
     data: { medicaid_id, member_name, member_dob,addr, phone, practice,PCP_TAX_ID }
   });

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule,Validators, AbstractControl
 import { ConfigService } from '../../../services/api.service';
 import { Title } from '@angular/platform-browser';
 import { MatCardModule } from "@angular/material/card";
-import { MatFormField, MatFormFieldModule } from "@angular/material/form-field";
+import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTableDataSource } from '@angular/material/table';
 
@@ -21,7 +21,6 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatIcon } from "@angular/material/icon";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { UserDataService } from '../../../services/user-data-service';
-import { MatDialogClose } from "@angular/material/dialog";
 
 
 
@@ -29,12 +28,12 @@ import { MatDialogClose } from "@angular/material/dialog";
   selector: 'app-risks-gap-report',
  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule, MatDatepickerModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
+  imports: [MatCardModule, MatFormFieldModule, MatSelectModule, MatDatepickerModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatButtonModule, MatIcon, MatCheckbox, MatDialogClose],
+    MatButtonModule, MatIcon, MatCheckbox],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
   ],templateUrl: './risks-gap-report.html',
@@ -168,12 +167,7 @@ formatDateToYMD(dateStr: string): string {
   this.isLoading = true;
 
   try {
-    const { start_date, end_date,gaps_type } = this.riskGapsFormGroup.value;
-
-    const formatDate = (d: string | Date) => {
-      const date = new Date(d);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD
-    };
+    const { start_date, end_date, gaps_type } = this.riskGapsFormGroup.value;
 
     const payload = {
       start_date: this.formatDateToYMD(start_date),
@@ -356,7 +350,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   /** Selects all rows if not all selected; otherwise clear selection */
   masterToggle() {
     const selectableRows = this.dataSource.data.filter(
-      row => row.add_by === this.userId
+      row => row.added_by === this.userId
     );
 
     if (this.selection.selected.length === selectableRows.length) {
@@ -383,7 +377,7 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
 
   isAllSelected() {
     const selectableRows = this.dataSource.data.filter(
-      row => row.add_by === this.userId
+      row => row.added_by === this.userId
     );
     return this.selection.selected.length === selectableRows.length;
   }
@@ -409,19 +403,20 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   try {
     await this.apiService.deleteGapObservations({ records: payload });
 
-    // remove from UI
     const selected = new Set(this.selection.selected);
     this.riskGapsReportList = this.riskGapsReportList.filter(
       row => !selected.has(row)
     );
-
     this.dataSource.data = this.riskGapsReportList;
     this.selection.clear();
-    this.isLoading = false;
-    
+    this.cdr.markForCheck();
+
   } catch (err) {
     console.error('Delete failed', err);
     alert('Failed to remove records');
+  } finally {
+    this.isLoading = false;
+    this.cdr.markForCheck();
   }
 }
 

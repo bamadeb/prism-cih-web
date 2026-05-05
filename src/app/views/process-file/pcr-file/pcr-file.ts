@@ -274,7 +274,6 @@ export class PcrFile implements OnInit, AfterViewInit {
             table_name: TABLE,
             insertDataArray: insertDataArray   // ✅ no extra []
           };      
-          console.log(payload);
           await this.apiService.insert<any, MemberFileRequest>(payload);
       }
       

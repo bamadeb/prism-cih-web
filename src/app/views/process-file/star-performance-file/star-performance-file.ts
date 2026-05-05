@@ -34,7 +34,7 @@ import * as Papa from 'papaparse';
 const TABLE = 'MEM_STAR_PERFORMANCE_REPORT_DATA_TEMP';
 
 @Component({
-  selector: 'app-qualitygaps-file',
+  selector: 'app-star-performance-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
@@ -250,7 +250,7 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
     this.isProcessing = true;
     try {
-      const res = await this.apiService.processQualityGapsSeccionID<any>({
+      const res = await this.apiService.processStarPerformanceSeccionID<any>({
         session_id: this.sessionId
       });
       this.processLogList = res?.data?.loglist ?? [];
@@ -301,8 +301,6 @@ private async loadTempStarPerformance(): Promise<void> {
   const res = await this.apiService.getTempStarPerformanceBySeccionID<any>({
     session_id: this.sessionId
   });
-
-  console.log(res);
 
   const rawData = res?.data ?? [];
 

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { ConfigService } from '../../../services/api.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -6,10 +6,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { Title } from '@angular/platform-browser';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { HeaderService } from '../../../services/header.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
 import { CommonModule } from '@angular/common';
 import { MatIcon } from "@angular/material/icon";
 
@@ -22,7 +20,7 @@ import { MatIcon } from "@angular/material/icon";
     MatButtonModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
-    MatDatepickerModule, MatIcon],
+    MatIcon],
   templateUrl: './star-performance.html',
   styleUrl: './star-performance.css'
 })

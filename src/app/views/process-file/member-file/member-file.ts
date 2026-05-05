@@ -203,7 +203,6 @@ async membersFileSubmit(): Promise<void> {
     
   } finally {
     this.isUpload = false;
-    console.log('finally');
   }
 } 
 

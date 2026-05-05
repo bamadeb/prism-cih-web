@@ -1,4 +1,4 @@
-import { Component,OnInit} from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from "@angular/material/card";
 import { FormsModule } from '@angular/forms';
@@ -41,17 +41,19 @@ import { ChangeDetectorRef } from '@angular/core';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login implements OnInit{
+export class Login implements OnInit, OnDestroy {
   username = '';
   password = '';
   userId: number = 0;
   isLoading = false;
   errorMessage = '';
-  errorMsg: any;
   successMessage = '';
   session: string = '';
   qrCodeData: string = '';
   otp: string = '';
+  private intervalId!: ReturnType<typeof setInterval>;
+  @ViewChild('firstOtpInput') firstOtpInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('loginOtpInput') loginOtpInput!: ElementRef<HTMLInputElement>;
 
   showQrScreen: boolean = false;
   showOtpScreen: boolean = false;
@@ -80,9 +82,13 @@ export class Login implements OnInit{
     this.titleService.setTitle('PRISM :: LOGIN');
     this.errorMessage = window.history.state?.message || '';
     this.successMessage = window.history.state?.successMessage || '';
-    setInterval(() => {
+    this.intervalId = setInterval(() => {
       this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
-    }, 4000); // 4 seconds
+    }, 4000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.intervalId);
   }
   async onSubmit() {
     this.isLoading = true;
@@ -103,8 +109,10 @@ export class Login implements OnInit{
       } else if (cognitoResult.status === "SOFTWARE_TOKEN_MFA") {
 
         this.session = cognitoResult.session;
-
+        this.otp = '';
         this.showOtpScreen = true;
+        this.cdr.detectChanges();
+        setTimeout(() => this.loginOtpInput?.nativeElement?.focus(), 0);
 
       }
     } catch (error) {
@@ -156,9 +164,6 @@ export class Login implements OnInit{
     }
   }
 private logAction(log_name: string, note: string): Promise<any> {
-
-  const user = this.userData.getUser();
-
   const logPayload = {
     table_name: 'MEM_SYSTEM_LOG',
     insertDataArray: [{
@@ -181,9 +186,11 @@ async setupQrCode() {
 
     const secretCode = response.SecretCode;
 
-    this.qrCodeData =  `otpauth://totp/Prism:${encodeURIComponent(this.username)}?secret=${secretCode}&issuer=Prism`;
+    this.qrCodeData = `otpauth://totp/Prism:${encodeURIComponent(this.username)}?secret=${secretCode}&issuer=Prism`;
+    this.otp = '';
     this.showQrScreen = true;
     this.cdr.detectChanges();
+    setTimeout(() => this.firstOtpInput?.nativeElement?.focus(), 0);
   }
   catch (err) {
     console.error(err);
@@ -191,34 +198,31 @@ async setupQrCode() {
   }
 }  
   async verifyFirstOtp() {
+    this.isLoading = true;
     try {
-      const verify = await this.auth.verifySoftwareToken(this.session,this.otp);
-    // ✅ CHECK if session exists
+      const verify = await this.auth.verifySoftwareToken(this.session, this.otp);
       if (!verify.Session) {
         throw new Error("Session missing from Cognito response");
-      }      
-      await this.auth.confirmMfaSetup(
-        this.username,
-        verify.Session,
-        this.otp
-      );
+      }
+      await this.auth.confirmMfaSetup(this.username, verify.Session, this.otp);
       this.showQrScreen = false;
-      this.continueBackendLogin();
-    }
-    catch {
-      this.errorMessage =
-        "Invalid OTP";
+      await this.continueBackendLogin();
+    } catch {
+      this.errorMessage = 'Invalid OTP';
+    } finally {
+      this.isLoading = false;
     }
   }
   async verifyLoginOtp() {
+    this.isLoading = true;
     try {
-      await this.auth.verifyLoginOtp(this.username,this.session,this.otp);
+      await this.auth.verifyLoginOtp(this.username, this.session, this.otp);
       this.showOtpScreen = false;
-      this.continueBackendLogin();
-    }
-    catch {
-      this.errorMessage =
-        "Invalid OTP";
+      await this.continueBackendLogin();
+    } catch {
+      this.errorMessage = 'Invalid OTP';
+    } finally {
+      this.isLoading = false;
     }
   }
   async continueBackendLogin() {
@@ -260,13 +264,23 @@ async setupQrCode() {
       }
     }
     catch (err: any) {
-      console.log(err);
       this.errorMessage = err.message || "Login failed";
     }
     finally {
       this.isLoading = false;
     }
   }  
+  onOtpInput(value: string) {
+    this.errorMessage = '';
+    if (value.length === 6) {
+      if (this.showQrScreen) {
+        this.verifyFirstOtp();
+      } else if (this.showOtpScreen) {
+        this.verifyLoginOtp();
+      }
+    }
+  }
+
   clearError() {
     this.errorMessage = '';
   }
@@ -285,7 +299,6 @@ async setupQrCode() {
     });
 
     dialogRef.afterClosed().subscribe((action: 'change' | 'skip') => {
-      console.log("action : ", action);
       // 🔒 Expired → must reset
       if (isExpired) {
         if (action === 'change') {
@@ -312,9 +325,6 @@ async setupQrCode() {
   }
 
   addloginHistory() {
-    const utcDate = new Date().toISOString();   
-    console.log("Login log UTC date:", utcDate);
-
     const logpayload = {
       table_name: 'MEM_SYSTEM_LOG',
       insertDataArray: [{

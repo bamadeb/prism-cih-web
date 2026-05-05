@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { AppEnvService } from '../services/app-env.service';
 
 export async function commonPostApi<T>(
@@ -26,7 +26,7 @@ export async function commonPostApi<T>(
   });
 
   return await firstValueFrom(
-    http.post<T>(url, JSON.stringify(body), { headers })
+    http.post<T>(url, JSON.stringify(body), { headers }).pipe(timeout(90000))
   );
 }
 
