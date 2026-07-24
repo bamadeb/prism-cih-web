@@ -8,12 +8,14 @@
                     <h3 class="fnormal">TOTAL</h3>
                 </mat-card-content>             
             </mat-card>
-             <mat-card class="wd" *ngFor="let a of action_ativity_type">
-                <mat-card-title class="fbold">{{ activityCount[a.action_type] || 0 }}</mat-card-title>          
+             @for (a of action_ativity_type; track a.action_type) {
+            <mat-card class="wd">
+                <mat-card-title class="fbold">{{ activityCount[a.action_type] || 0 }}</mat-card-title>
                 <mat-card-content>
                     <h3 class="fnormal">{{ a.display_label }}</h3>
-                </mat-card-content>             
-            </mat-card>              
+                </mat-card-content>
+            </mat-card>
+            }            
             </div>
 
             <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()" style="margin-top: 15px;">
@@ -22,9 +24,11 @@
                     <mat-label>ALL USERS</mat-label>
                     <mat-select formControlName="navigator_id">
                         <mat-option class="txupper" [value]="">ALL USERS</mat-option>
-                        <mat-option class="txupper" *ngFor="let d of navigatorList" [value]="d.ID">
+                        @for (d of navigatorList; track d.ID) {
+                        <mat-option class="txupper" [value]="d.ID">
                             {{ d.FistName }} {{ d.LastName }} - ({{ d.ROLE_NAME }})
                         </mat-option>
+                        }
                     </mat-select>
                 </mat-form-field>
 
@@ -33,9 +37,11 @@
                     <mat-label>ACTIVITY TYPE</mat-label>
                     <mat-select formControlName="activity_type">
                         <mat-option class="txupper" [value]="">ALL ACTIVITY TYPE</mat-option>
-                        <mat-option class="txupper" *ngFor="let t of action_ativity_type" [value]="t.id">
+                        @for (t of action_ativity_type; track t.id) {
+                        <mat-option class="txupper" [value]="t.id">
                             {{ t.action_type }}
                         </mat-option>
+                        }
                     </mat-select>
                 </mat-form-field>
 
@@ -83,9 +89,11 @@
         <mat-card-content>
 
         <!-- LOADER -->
-        <div class="table-loader" *ngIf="isLoading" >
+        @if (isLoading) {
+        <div class="table-loader">
             <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
         </div>
+        }
 
         
 

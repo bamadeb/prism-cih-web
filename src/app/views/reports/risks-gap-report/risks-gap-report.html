@@ -47,7 +47,7 @@
         End Date must be after Start Date
       </mat-error>
       </mat-form-field> 
-          <button mat-raised-button color="primary" [disabled]="riskGapsFormGroup.invalid" (click)="applyFilter()">
+          <button mat-raised-button color="primary" type="submit" [disabled]="riskGapsFormGroup.invalid">
           @if (!isLoading) {
                 SEARCH
               } @else {
@@ -97,7 +97,7 @@
 
       <div class="project-header table-wrapper" [hidden]="isLoading">        
 
-        <table   mat-table  [dataSource]="dataSource"  matSort  class="mat-elevation-z1 txupper" [hidden]="isLoading">
+        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z1 txupper">
 
           <ng-container matColumnDef="select" sticky>
             <th mat-header-cell *matHeaderCellDef>
@@ -336,8 +336,4 @@
     </mat-card-content>
   </mat-card> 
 
-</div>
-
-<div class="dialog-loader" *ngIf="isLoading">
-    <mat-spinner diameter="10"></mat-spinner>
 </div>

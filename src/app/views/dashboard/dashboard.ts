@@ -35,7 +35,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { ActionHandlerService } from '../../services/action.service'; 
 import { HeaderService } from '../../services/header.service'; 
 import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button'; 
+import { MatButtonModule } from '@angular/material/button';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -111,9 +112,6 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   providerTinNameMapping: Record<string, string> = {};
   vendorList: any[] = [];
 
-  entry: any = {}; 
-  alt_phone: any[] = []; 
-  members: any[] = [];
   selection = new SelectionModel<any>(true, []); // true = multiple selection
   selectedAction: string | null = null; 
   selectedNavigatorId: number = 0;
@@ -123,7 +121,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     errorLogger: ErrorReportingService,
     matDialog: MatDialog,
     private readonly titleService: Title, private readonly apiService: ConfigService,private readonly userData: UserDataService,
-    public dialog: MatDialog,private readonly benefitsService: BenefitsDialogService,
+    private readonly benefitsService: BenefitsDialogService,
     private readonly addActionService: AddActionDialogService,private readonly qualitygapsService:QualitygapDialogService,private readonly riskgapsService:RiskgapDialogService,
     private readonly callListService:CallListDialogService,private readonly taskListService:TaskListDialogService,
     private readonly noLongerPatientService:NolongerPatientDialogService,private readonly alternatePhoneListService:AlterPhoneDialogService,
@@ -136,17 +134,14 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.titleService.setTitle('PRISM :: DASHBOARD');
     this.headerService.setTitle('DASHBOARD');
-    this.loadVendors();
-    this.loadTableData();
+
+    await Promise.all([this.loadTableData(), this.loadVendors()]);
   }
 
-  private async withLoader<T>(
-  task: () => Promise<T>,
-  onError?: (err: any) => void
-): Promise<T | undefined> {
+  private async withLoader<T>(task: () => Promise<T>): Promise<T | undefined> {
   this.isLoading = true;
   try {
     return await task();
@@ -164,21 +159,24 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   /** Whether all rows are selected */
   isAllSelected() {
     const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
+    const numRows = this.dataSource.filteredData.length;
     return numSelected === numRows;
   }
 
-  async loadVendors() {
-    const result = await this.apiService.prismVendorMasterlist<any>('');
-    this.vendorList = result.data || [];
-    //console.log('vendorList',this.vendorList);
-    this.providerTinNameMapping = this.vendorList.reduce(
-      (map: Record<string, string>, v: any) => {
-        map[String(v.VENDOR_NUM)] = v.LAST_NAME;
-        return map;
-      },
-      {}
-    );
+  async loadVendors(): Promise<void> {
+    try {
+      const result = await this.apiService.prismVendorMasterlist<any>('');
+      this.vendorList = result.data || [];
+      this.providerTinNameMapping = this.vendorList.reduce(
+        (map: Record<string, string>, v: any) => {
+          map[String(v.VENDOR_NUM)] = v.LAST_NAME;
+          return map;
+        },
+        {}
+      );
+    } catch (err) {
+      console.error('Failed to load vendors', err);
+    }
   }
 
   /** Selects all rows if not all selected; otherwise clear selection */
@@ -186,7 +184,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
     if (this.isAllSelected()) {
       this.selection.clear();
     } else {
-      this.dataSource.data.forEach(row => this.selection.select(row));
+      this.dataSource.filteredData.forEach(row => this.selection.select(row));
     }
   }
 
@@ -242,13 +240,13 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
 /** Load dashboard data from API */
 async loadTableData(): Promise<void> {
   await this.withLoader(async () => {
-    const user = this.userData.getUser();      
-    if(user.role_id == 7 || user.role_id == 21){
-      this.loginUserId =this.selectedNavigatorId ?? 0;
-    }else{
-       this.loginUserId=user.ID;
+    const user = this.userData.getUser();
+    if (user.role_id === 7 || user.role_id === 21) {
+      this.loginUserId = this.selectedNavigatorId;
+    } else {
+      this.loginUserId = user.ID;
     }
-    this.loginRoleId =user.role_id;
+    this.loginRoleId = user.role_id;
 
     const request: DashboardRequest = { user_id: this.loginUserId };
     const result = await this.apiService.dashboard<any>(request);
@@ -281,11 +279,10 @@ async loadTableData(): Promise<void> {
     }));
 
     this.selection.clear();
-
-    this.dataSource.data = [...this.dataSource.data];
-
-    await this.loadprojectoverviewData();
   });
+
+  // Load overview stats in background — does not block the member table spinner
+  this.loadprojectoverviewData();
 }
 
 showRiskgaps(row: any) { 
@@ -335,10 +332,7 @@ confirmAction(row: any) {
         NO_LONGER_PATIENT_DATE: this.formatMDY(new Date())
       },
       ...this.nolongerpatientdataSource.data
-    ]; 
-
-    // refresh table
-    this.nolongerpatientdataSource._updateChangeSubscription();
+    ];
 
     }
   });
@@ -366,6 +360,8 @@ confirmboxUndo(row: any) {
         PCP_TAX_ID: row.PCP_TAX_ID,
         PCP_VISIT_DATE: row.PCP_VISIT_DATE,
         PCP_VISIT_FLAG: row.PCP_VISIT_FLAG,
+        PCP_VISIT_PRE_DATE: row.PCP_VISIT_PRE_DATE,
+        PCP_VISIT_PRE_FLAG: row.PCP_VISIT_PRE_FLAG,
         PRIORITY_FLAG: row.PRIORITY_FLAG,
         upcoming_task_date: row.upcoming_task_date || 'N/A',
         Call_count: row.Call_count,
@@ -379,9 +375,6 @@ confirmboxUndo(row: any) {
       ...this.dataSource.data
     ];
 
-    // refresh table
-    this.dataSource._updateChangeSubscription();
-
     }
   });
 }
@@ -393,8 +386,6 @@ removeNolongerFromTable(medicaidId: number): void {
   );
 
   this.nolongerpatientdataSource.data = updatedData;
-  // 🔁 refresh paginator & table
-  this.nolongerpatientdataSource._updateChangeSubscription();
 } 
 
 formatMDY(date: Date): string {
@@ -410,8 +401,6 @@ removeMemberFromTable(medicaidId: number): void {
   );
 
   this.dataSource.data = updatedData;
-  // 🔁 refresh paginator & table
-  this.dataSource._updateChangeSubscription();
 } 
 
 async onActionChange(event: MatSelectChange) {
@@ -451,18 +440,18 @@ removeRowsFromTable(rows: any[]) {
 addalterAddr(row: any) {
   this.withLoader(async () => {
     const dialogRef = await this.alternateAddressListService.showalterAddressListDialog(row);
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
       if (result?.refresh) {
         this.syncMemberAltAddress(result.medicaid_id);
       }
     });
   });
-} 
+}
 
 addalternativePhone(row: any) {
   this.withLoader(async () => {
     const dialogRef = await this.alternatePhoneListService.showalterPhoneListDialog(row);
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
       if (result?.refresh) {
         this.syncMemberAltPhone(result.medicaid_id);
       }
@@ -494,17 +483,15 @@ private updateRow(medicaidId: number, changes: any) {
   const index = this.dataSource.data.findIndex(m => m.medicaid_id === medicaidId);
   if (index === -1) return;
 
-  this.dataSource.data[index] = {
-    ...this.dataSource.data[index],
-    ...changes
-  };
-  this.dataSource._updateChangeSubscription();
+  const updated = [...this.dataSource.data];
+  updated[index] = { ...updated[index], ...changes };
+  this.dataSource.data = updated;
 }
 
 showTasklist(row: any) {
   this.withLoader(async () => {
     const dialogRef = await this.taskListService.showtaskListDialog(row);
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
       if (result?.refresh) {
         this.refreshMemberRow(result.medicaid_id);
       }
@@ -513,40 +500,25 @@ showTasklist(row: any) {
 }   
 
   async refreshMemberRow(medicaid_id: string): Promise<void> {
-    try {
-      const request: DashboardRequest = {
-        user_id: this.loginUserId
-      };
-
-      const res = await this.apiService.dashboard<any>(request);
+    await this.withLoader(async () => {
+      const res = await this.apiService.dashboard<any>({ user_id: this.loginUserId });
       const members = res.data || [];
-
-      const updatedMember = members.find(
-        (m: any) => m.medicaid_id === medicaid_id
-      );
-
+      const updatedMember = members.find((m: any) => m.medicaid_id === medicaid_id);
       if (!updatedMember) return;
 
-      const index = this.dataSource.data.findIndex(
-        m => m.medicaid_id === medicaid_id
-      );
-
+      const index = this.dataSource.data.findIndex(m => m.medicaid_id === medicaid_id);
       if (index !== -1) {
-        this.dataSource.data[index] = {
-          ...this.dataSource.data[index],
+        const updated = [...this.dataSource.data];
+        updated[index] = {
+          ...updated[index],
           upcoming_task_date: updatedMember.upcoming_task_date,
           Call_count: updatedMember.Call_count,
           risk_gap_count: updatedMember.risk_gap_count,
           quality_count: updatedMember.quality_count
         };
-
-        // 🔁 trigger table refresh
-        this.dataSource._updateChangeSubscription();
+        this.dataSource.data = updated;
       }
-
-    } catch (err) {
-      console.error('Member refresh failed', err);
-    }
+    });
   }
 
 
@@ -559,25 +531,12 @@ async openAddActionDialog(
   practice: string,
   PCP_TAX_ID: number,
 ) {
-  this.isLoading = true;
-
-
-  try {
+  await this.withLoader(async () => {
     await this.addActionService.showAddActionDialog(
-      medicaid_id,
-      member_name,
-      member_db,
-      addr,
-      phone,
-      practice,PCP_TAX_ID
+      medicaid_id, member_name, member_db, addr, phone, practice, PCP_TAX_ID
     );
-    this.loadTableData();
-    this.isLoading = false;
-  } catch (err) {
-    console.error(err);
-  } finally {
-    this.isLoading = false;
-  }
+    await this.loadTableData();
+  });
 }
 
 copyToClipboard(text: string) {
@@ -633,13 +592,13 @@ onNavigatorChange(navigatorId: number): void {
       }
 
     } catch (error) {
-      console.log('error:' + error);
+      console.error('loadprojectoverviewData failed:', error);
     }
 
   }
 
-  loadTransfertabledata(transferlist: any) { 
-    if (transferlist.length > 0) {
+  loadTransfertabledata(transferlist: any) {
+    if (transferlist?.length > 0) {
 
       const transferDATA = transferlist.map((r: any, index: number) => ({
         medicaid_id: r.medicaid_id,
@@ -658,7 +617,7 @@ onNavigatorChange(navigatorId: number): void {
   }
 
   loadNopatienttabledata(nolongerpatientlist: any) {
-    if (nolongerpatientlist.length > 0) {
+    if (nolongerpatientlist?.length > 0) {
       const nopatientDATA = nolongerpatientlist.map((r: any, index: number) => ({
         medicaid_id: r.medicaid_id,
         memberName: r.memberName,

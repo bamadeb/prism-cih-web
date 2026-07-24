@@ -1,6 +1,14 @@
-<h3 mat-dialog-title class="text-uppercase" style="font-size: 20px;"> {{ data.member_name }} | #{{ this.medicaid_id }}
+<h3 mat-dialog-title class="text-uppercase dialog-title"> {{ data.member_name }} | #{{ this.medicaid_id }}
   | {{ this.member_dob }} | {{ data.addr }} | {{ data.phone | phoneFormat }} | {{ data.practice }}</h3>
 <mat-dialog-content>
+
+  @if (isInitializing()) {
+  <div class="init-loader-overlay">
+    <mat-progress-spinner diameter="56" mode="indeterminate"></mat-progress-spinner>
+    <span class="init-loader-label">Loading...</span>
+  </div>
+  }
+
   <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
     <mat-tab label="TO-DO/DONE">
       <div>
@@ -179,7 +187,7 @@
               <b>ACTIVITY LIST</b>
             </h4>    
             <div *ngIf="showActivityTable" class="activity-table-container">        
-              <table mat-table [dataSource]="activityList" class="mat-elevation-z8 full-width" class="text-uppercase">
+              <table mat-table [dataSource]="activityList" class="mat-elevation-z8 full-width text-uppercase">
               <ng-container matColumnDef="Panel_Name">
                 <th mat-header-cell *matHeaderCellDef>ACTIVITY CATEGORY</th>
                 <td mat-cell *matCellDef="let activity">{{ activity.Panel_Name }}</td>
@@ -327,9 +335,9 @@
                             </mat-panel-title>
 
                             <mat-panel-description class="panel-desc-100 text-uppercase">
-                              {{ gap.get('DIAG_DESC')?.value }} | {{ gap.get('DIAG_CODE')?.value }} 
-                              | {{ gap.get('HCC_CATEGORY')?.value }} | {{ gap.get('HCC_MODEL')?.value }} 
-                              | {{ gap.get('RELEVANT_DATE')?.value }} | {{ gap.get('PROCESS_STATUS')?.value === 1 ? 'COMPLETE' : 'OPEN' }}
+                              {{ gap.get('DIAG_DESC')?.value }} | {{ gap.get('DIAG_CODE')?.value }}
+                              | {{ gap.get('HCC_CATEGORY')?.value }} | {{ gap.get('HCC_MODEL')?.value }}
+                              | {{ gap.get('RELEVANT_DATE')?.value }} | {{ gap.get('PROCESS_STATUS')?.value ? 'COMPLETE' : 'OPEN' }}
                             </mat-panel-description>
                           </mat-expansion-panel-header>
 
@@ -504,7 +512,7 @@
                         </mat-panel-title>
 
                         <mat-panel-description class="panel-desc-100 text-uppercase">
-                          {{ qgap.get('MEASURE_NAME')?.value }} | {{ qgap.get('SUB_MEASURE')?.value }} | {{ qgap.get('PROCESS_STATUS')?.value === 1 ? 'COMPLETE' : 'OPEN' }}
+                          {{ qgap.get('MEASURE_NAME')?.value }} | {{ qgap.get('SUB_MEASURE')?.value }} | {{ qgap.get('PROCESS_STATUS')?.value ? 'COMPLETE' : 'OPEN' }}
                         </mat-panel-description>
                       </mat-expansion-panel-header>
 
@@ -564,10 +572,6 @@
                                 </mat-form-field>
 
                                 <!-- CPTPx -->
-                                <!-- <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
-                                  <mat-label>CPTPx</mat-label>
-                                  <input matInput formControlName="CPTPx">
-                                </mat-form-field> -->
                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
                                   <mat-label>CPTPx</mat-label>
 
@@ -605,15 +609,6 @@
                                   </mat-autocomplete>
                                 </mat-form-field>                           
 
-
-                                  <!-- <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
-                                  <mat-label>HCPCSPx</mat-label>
-                                  <mat-select formControlName="HCPCSPx">
-                                    <mat-option *ngFor="let item of hspcsList" [value]="item.HCPCS_Code">
-                                      {{ item.HCPCS_Code }}
-                                    </mat-option>
-                                  </mat-select>
-                                </mat-form-field> -->
 
                                  <!-- SNOMED -->
                                  <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
@@ -716,16 +711,6 @@
                                 </mat-form-field>
                               </div>
 
-                             <!-- Observation Result -->
-                               <!-- <div class="col-lg-3 col-md-6 mb-3">
-                                <label class="form-label fw-semibold">OBSERVATION RESULT</label>
-                                <mat-radio-group formControlName="Observation_Result" class="d-flex gap-3">
-                                  <mat-radio-button value="Rejected">Rejected</mat-radio-button>
-                                  <mat-radio-button value="Addressed">Addressed</mat-radio-button>
-                                  <mat-radio-button value="Trumped">Trumped</mat-radio-button>
-                                </mat-radio-group>
-                              </div>   --> 
-
                               <!-- Note -->
                               <div class="col-lg-9 col-md-12 mb-2">
                                 <mat-form-field appearance="outline" class="w-100">
@@ -783,66 +768,68 @@
             {{ appSuccessMessage() }}
           </div><br>
           }
-          <mat-form-field appearance="outline" class="mr" style="margin-top:15px;width: 20%;">
-            <mat-label>VENDOR</mat-label>
-            <mat-select formControlName="vendor_id" class="txupper" (selectionChange)="onVendorChange($event.value)">
-              <mat-option class="txupper" *ngFor="let vendor of vendorList" [value]="vendor.VENDOR_NUM">
-                {{ vendor.ABBR }} ({{ vendor.VENDOR_NUM }})</mat-option>
-            </mat-select>
-          </mat-form-field>
 
-          <mat-form-field appearance="outline" class="mr">
-            <mat-label>PROVIDER</mat-label>
-            <mat-select formControlName="provider_id" class="txupper">
-              <mat-option *ngFor="let provider of providerList" [value]="provider.provider_id">
-                {{ provider.provider_first_name }} {{ provider.provider_last_name }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <div class="appt-form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>VENDOR</mat-label>
+              <mat-select formControlName="vendor_id" class="txupper" (selectionChange)="onVendorChange($event.value)">
+                <mat-option class="txupper" *ngFor="let vendor of vendorList" [value]="vendor.VENDOR_NUM">
+                  {{ vendor.ABBR }} ({{ vendor.VENDOR_NUM }})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
+            <mat-form-field appearance="outline">
+              <mat-label>PROVIDER</mat-label>
+              <mat-select formControlName="provider_id" class="txupper">
+                <mat-option *ngFor="let provider of providerList" [value]="provider.provider_id">
+                  {{ provider.provider_first_name }} {{ provider.provider_last_name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="mr">
-            <mat-label>APPOINTMENT DATE</mat-label>
-            <input matInput [matDatepicker]="picker1" formControlName="appointment_date" placeholder="APPOINTMENT DATE"
-              readonly />
-            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-            <mat-datepicker #picker1></mat-datepicker>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>APPOINTMENT DATE</mat-label>
+              <input matInput [matDatepicker]="picker1" formControlName="appointment_date" placeholder="APPOINTMENT DATE" readonly />
+              <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="mr">
-            <mat-label> STATUS</mat-label>
-            <mat-select formControlName="action_status" class="txupper">
-              <mat-option class="txupper" value="Scheduled">Scheduled</mat-option>
-              <mat-option class="txupper" value="Rescheduled">Rescheduled</mat-option>
-              <mat-option class="txupper" value="Failure">Failure</mat-option>
-              <mat-option class="txupper" value="Success">Success</mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>STATUS</mat-label>
+              <mat-select formControlName="action_status" class="txupper">
+                <mat-option class="txupper" value="Scheduled">Scheduled</mat-option>
+                <mat-option class="txupper" value="Rescheduled">Rescheduled</mat-option>
+                <mat-option class="txupper" value="Failure">Failure</mat-option>
+                <mat-option class="txupper" value="Success">Success</mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" style="width: 15%;" class="mr">
-            <mat-label>PLACE</mat-label>
-            <mat-select formControlName="place_of_appointment" class="txupper">
-              <mat-option class="txupper" *ngFor="let vendorL of vendorLocationList" [value]="vendorL.BILLING_ADDR_1">
-                {{ vendorL.BILLING_ADDR_1 }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>PLACE</mat-label>
+              <mat-select formControlName="place_of_appointment" class="txupper">
+                <mat-option class="txupper" *ngFor="let vendorL of vendorLocationList" [value]="vendorL.BILLING_ADDR_1">
+                  {{ vendorL.BILLING_ADDR_1 }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="mr">
-            <mat-label>APPOINTMENT TYPE</mat-label>
-            <mat-select formControlName="appointment_type" class="txupper">
-              <mat-option class="txupper" *ngFor="let appType of appointTypeList" [value]="appType.id">
-                {{ appType.type }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <div class="mr">
-            <mat-label>TIME</mat-label>
-            <input type="time" formControlName="appointment_time">
+            <mat-form-field appearance="outline">
+              <mat-label>APPOINTMENT TYPE</mat-label>
+              <mat-select formControlName="appointment_type" class="txupper">
+                <mat-option class="txupper" *ngFor="let appType of appointTypeList" [value]="appType.id">
+                  {{ appType.type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div class="time-field">
+              <label>TIME</label>
+              <input type="time" formControlName="appointment_time">
+            </div>
           </div>
 
-
-          <mat-form-field appearance="fill" class="w-100 textarea-no-ripple ">
+          <mat-form-field appearance="fill" class="w-100 textarea-no-ripple" style="margin-top: 15px;">
             <mat-label>TYPE YOUR TEXT...</mat-label>
             <textarea matInput formControlName="appointment_note" rows="2"></textarea>
           </mat-form-field>
@@ -934,9 +921,9 @@
 
               <mat-form-field appearance="outline" class="mr" style="width:32%;">
                 <mat-label>MEASURE DATE</mat-label>
-                <input matInput [matDatepicker]="pcpPicker" formControlName="MEASURE_DATE" readonly>
-                <mat-datepicker-toggle matSuffix [for]="pcpPicker"></mat-datepicker-toggle>
-                <mat-datepicker #pcpPicker></mat-datepicker>
+                <input matInput [matDatepicker]="measureDatePicker" formControlName="MEASURE_DATE" readonly>
+                <mat-datepicker-toggle matSuffix [for]="measureDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #measureDatePicker></mat-datepicker>
               </mat-form-field>
 
 
@@ -1043,7 +1030,7 @@
             </mat-form-field>
 
             <!-- NOTE -->
-            <mat-form-field appearance="outline" style="width: 57%;">
+            <mat-form-field appearance="outline" style="flex: 1; min-width: 200px;">
               <mat-label>NOTE</mat-label>
               <input matInput formControlName="pcp_visit_message" placeholder="PCP VISIT NOTE">
             </mat-form-field>
@@ -1125,6 +1112,7 @@
             <tr mat-row *matRowDef="let row; columns: PCPVisitDisplayedColumns;"></tr>
 
           </table>
+          <mat-paginator #mainPaginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
           }
 
           @if (!isLoadingPcpHistory() && !pcpVisitDataSource.data.length) {
@@ -1140,5 +1128,5 @@
 </mat-dialog-content>
 
 <mat-dialog-actions>
-  <button matButton mat-dialog-close>CLOSE</button>
+  <button mat-button mat-dialog-close>CLOSE</button>
 </mat-dialog-actions>

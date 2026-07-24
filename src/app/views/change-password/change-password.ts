@@ -1,4 +1,4 @@
-import { Component,OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from "@angular/material/card";
@@ -27,7 +27,7 @@ import { UserDataService } from '../../services/user-data-service';
   templateUrl: './change-password.html',
   styleUrl: './change-password.css',
 })
-export class ChangePassword implements OnInit{
+export class ChangePassword implements OnInit, OnDestroy {
 
   newPassword = '';
   confirmPassword = '';
@@ -41,6 +41,11 @@ export class ChangePassword implements OnInit{
     'assets/images/4.jpg'
   ];
   currentIndex = 0;
+  private intervalId!: ReturnType<typeof setInterval>;
+
+  get passwordMismatch(): boolean {
+    return !!this.confirmPassword && this.newPassword !== this.confirmPassword;
+  }
 
   constructor(
     private readonly router: Router,
@@ -51,20 +56,28 @@ export class ChangePassword implements OnInit{
 
   ngOnInit() {
     this.titleService.setTitle('PRISM :: CHANGE PASSWORD');
-
-    setInterval(() => {
+    this.intervalId = setInterval(() => {
       this.currentIndex = (this.currentIndex + 1) % this.bgImages.length;
     }, 4000);
   }
 
+  ngOnDestroy(): void {
+    clearInterval(this.intervalId);
+  }
+
   async onSubmit(): Promise<void> {
     this.clearError();
-    const riskObsUpdateArray: any[] = [];
+
     if (this.newPassword !== this.confirmPassword) {
       this.errorMessage = 'Passwords do not match';
       return;
     }
 
+    const policyError = this.validatePasswordPolicy(this.newPassword);
+    if (policyError) {
+      this.errorMessage = policyError;
+      return;
+    }
 
     const user = this.userData.getUser();
     if (!user) {
@@ -80,44 +93,42 @@ export class ChangePassword implements OnInit{
         throw new Error('COGNITO_USERNAME_MISSING');
       }
 
-      const response =await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
-      console.log('Conito res :',response);
+      const response = await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
       if (response?.statusCode !== 200) {
         throw new Error(response?.error || 'Password update failed');
       }
-      const apiparamUpdate = {
+
+      await this.apiService.prismUserPasswordUpdate<any>({
         ID: user.ID,
         Password: this.newPassword,
         password_last_changed: new Date()
-      };
-      await this.apiService.prismUserPasswordUpdate<any>(apiparamUpdate);
+      });
 
-
-      // 3️⃣ Clear user session and force re-login
       this.userData.clearUser();
-
       this.router.navigate(['/login'], {
-        state: {
-          successMessage: 'Password changed successfully. Please login.'
-        }
+        state: { successMessage: 'Password changed successfully. Please login.' }
       });
 
     } catch (error: any) {
-        console.error('Password update failed', error);
-
-  // Show Cognito error message
-        if (error?.error) {
-          this.errorMessage = error.error;
-        }
-        else if (error?.message) {
-          this.errorMessage = error.message;
-        }
-        else {
-          this.errorMessage = 'Password does not meet password policy requirements.';
-        }
+      if (error?.error) {
+        this.errorMessage = error.error;
+      } else if (error?.message) {
+        this.errorMessage = error.message;
+      } else {
+        this.errorMessage = 'Password does not meet password policy requirements.';
+      }
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private validatePasswordPolicy(password: string): string | null {
+    if (password.length < 15)        return 'Password must be at least 15 characters.';
+    if (!/[A-Z]/.test(password))     return 'Password must include at least one uppercase letter.';
+    if (!/[a-z]/.test(password))     return 'Password must include at least one lowercase letter.';
+    if (!/[0-9]/.test(password))     return 'Password must include at least one number.';
+    if (!/[!@#$%^&*]/.test(password)) return 'Password must include at least one special character (! @ # $ % ^ & *).';
+    return null;
   }
 
   clearError(): void {

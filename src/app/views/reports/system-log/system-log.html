@@ -5,14 +5,16 @@
             <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
                 <!-- NAVIGATORS -->
                 <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
-                   
+                    <mat-label>ALL USERS</mat-label>
                     <mat-select formControlName="user_id">
-                        
-                        <mat-option class="txupper" *ngFor="let d of navigatorList" [value]="d.ID">
+                        <mat-option class="txupper" [value]="null">ALL USERS</mat-option>
+                        @for (d of navigatorList; track d.ID) {
+                        <mat-option class="txupper" [value]="d.ID">
                             {{ d.FistName }} {{ d.LastName }} - ({{ d.ROLE_NAME }})
                         </mat-option>
+                        }
                     </mat-select>
-                </mat-form-field> 
+                </mat-form-field>
 
                 <mat-form-field appearance="outline">
                 <mat-label>START DATE</mat-label>
@@ -45,9 +47,11 @@
         <mat-card-content>
 
         <!-- LOADER -->
-        <div class="table-loader" *ngIf="isLoading" >
+        @if (isLoading) {
+        <div class="table-loader">
             <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-        </div>        
+        </div>
+        }
 
         <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
         <div [hidden]="isLoading" class="table-toolbar">

@@ -7,7 +7,7 @@ export class PageAccessDialogService {
 
   constructor(private readonly dialog: MatDialog) {}
 
-  /** ---------------- ADD USER ---------------- */
+  /** ---------------- ADD PAGE ACCESS ---------------- */
   addDialog(
     roles: any[],
     pagelist: any[]
@@ -21,7 +21,7 @@ export class PageAccessDialogService {
     });
   }
 
-  /** ---------------- EDIT USER ---------------- */
+  /** ---------------- EDIT PAGE ACCESS ---------------- */
   editDialog(
     roles: any[],
     pagelist: any[],

@@ -8,7 +8,6 @@ import { UpdateMemberRequest, LogRequest } from '../../../models/requests/dashbo
 import { ConfigService } from '../../../services/api.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
-import { PhoneFormatPipe } from '../../../pipes/phone-format.pipe';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -23,7 +22,7 @@ import { Auth } from '../../../services/auth';
     MatDialogModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinner, PhoneFormatPipe, ReactiveFormsModule
+    MatProgressSpinner, ReactiveFormsModule
   ],
   templateUrl: './unlock-user-confirm.html',
   styleUrl: './unlock-user-confirm.css'

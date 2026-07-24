@@ -11,8 +11,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { SelectionModel } from '@angular/cdk/collections';
 import { Title } from '@angular/platform-browser';
+import { take } from 'rxjs';
 import { ConfigService } from '../../../services/api.service';
 import { HeaderService } from '../../../services/header.service';
 import { PageAccessDialogService } from '../../../services/page-access-dialog.service';
@@ -46,7 +46,6 @@ export class PageAccess implements OnInit, AfterViewInit {
     ];
   
     dataSource = new MatTableDataSource<any>([]);
-    selection = new SelectionModel<any>(true, []);
   
     pagelist: any[] = [];
     roleList: any[] = [];
@@ -98,8 +97,6 @@ export class PageAccess implements OnInit, AfterViewInit {
           page_name: u.page_name 
         }));
   
-        this.selection.clear();
-  
       } catch (err) {
         console.error('❌ Failed to load', err);
       } finally {
@@ -124,11 +121,10 @@ export class PageAccess implements OnInit, AfterViewInit {
         ? this.pageDialogService.editDialog(this.roleList, this.pagelist, pageaccess)
         : this.pageDialogService.addDialog(this.roleList, this.pagelist);
   
-      dialogRef.afterClosed().subscribe(result => {
+      dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
         this.isLoading = false;
-  
+
         if (result?.refresh) {
-          console.info('🔄 Reloading Page access list');
           this.loadTableData();
         }
       });

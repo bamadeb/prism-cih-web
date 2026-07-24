@@ -101,18 +101,21 @@
         </p>
 
        
-        <div *ngIf="qrCodeData">
+        @if (qrCodeData) {
+        <div>
           <qrcode
             [qrdata]="qrCodeData"
             [width]="220"
             [errorCorrectionLevel]="'M'">
           </qrcode>
         </div>
+        }
         
         <mat-form-field appearance="outline" class="otp-field">
           <mat-label>Enter OTP</mat-label>
 
           <input
+            #firstOtpInput
             matInput
             [(ngModel)]="otp"
             name="firstOtp"
@@ -121,6 +124,7 @@
             pattern="[0-9]*"
             class="otp-input"
             placeholder="------"
+            (ngModelChange)="onOtpInput($event)"
           >
 
         </mat-form-field>
@@ -128,10 +132,12 @@
           <button
             mat-flat-button
             color="primary"
-            (click)="verifyFirstOtp()" [disabled]="!otp">
-
-            Verify & Continue
-
+            (click)="verifyFirstOtp()"
+            [disabled]="!otp || isLoading">
+            @if (!isLoading) { Verify & Continue }
+            @else {
+              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+            }
           </button>
         </div>
 
@@ -156,6 +162,7 @@
           <mat-label>Authenticator Code</mat-label>
 
           <input
+            #loginOtpInput
             matInput
             [(ngModel)]="otp"
             name="loginOtp"
@@ -164,6 +171,7 @@
             pattern="[0-9]*"
             class="otp-input"
             placeholder="------"
+            (ngModelChange)="onOtpInput($event)"
           >
 
         </mat-form-field>
@@ -173,10 +181,12 @@
           <button
             mat-flat-button
             color="primary"
-            (click)="verifyLoginOtp()" [disabled]="!otp">
-
-            Verify & Login
-
+            (click)="verifyLoginOtp()"
+            [disabled]="!otp || isLoading">
+            @if (!isLoading) { Verify & Login }
+            @else {
+              <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+            }
           </button>
 
         </div>
