@@ -1,19 +1,18 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule,Validators, AbstractControl, ValidationErrors  } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConfigService } from '../../../services/api.service';
 import { Title } from '@angular/platform-browser';
 import { MatCardModule } from "@angular/material/card";
 import { MatFormField, MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { MatTableDataSource } from '@angular/material/table';
-
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { provideNativeDateAdapter } from '@angular/material/core'; 
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; 
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HeaderService } from '../../../services/header.service';
 import { MatButtonModule } from '@angular/material/button';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -27,7 +26,7 @@ import { MatDialogClose } from "@angular/material/dialog";
 
 @Component({
   selector: 'app-risks-gap-report',
- standalone: true,
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatCardModule, MatFormField, MatFormFieldModule, MatSelectModule, MatDatepickerModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
     CommonModule,
@@ -37,16 +36,17 @@ import { MatDialogClose } from "@angular/material/dialog";
     MatButtonModule, MatIcon, MatCheckbox, MatDialogClose],
   providers: [
     provideNativeDateAdapter()   // <-- REQUIRED FIX
-  ],templateUrl: './risks-gap-report.html',
+  ], templateUrl: './risks-gap-report.html',
   styleUrl: './risks-gap-report.css',
 })
-export class RisksGapReport implements AfterViewInit ,OnInit {
+export class RisksGapReport implements AfterViewInit, OnInit {
 
 
   riskGapsFormGroup!: FormGroup;
   isLoading = false;
   userId: string | null = null;
   riskGapsReportList: any[] = [];
+  availableTins: { VENDOR_NUM: string; LAST_NAME: string }[] = [];
 
   dataSource = new MatTableDataSource<any>([]);
   selection = new SelectionModel<any>(true, []);
@@ -54,103 +54,118 @@ export class RisksGapReport implements AfterViewInit ,OnInit {
   @ViewChild('mainPaginator') paginator!: MatPaginator;
   @ViewChild('mainSort') sort!: MatSort;
   riskColumns: string[] = [
-  'select',
-  'medicaid_id',
-  'mode',
-  'Gap_Code',
-  'MEASURE_DESC',
-  'ObservationDate',
-  'Observation_Year',
-  'Observation_Code',
-  'CPT_Code_Modifier',
-  'Observation_Code_Set',
-  'Observation_Result',
-  'Service_Provider_NPI',
-  'Service_Provider_Taxonomy_Code',
-  'Service_Provider_Name',
-  'Service_Provider_Type',
-  'Service_Provider_RxProviderFlag',
-  'Provider_Group_NPI',
-  'Provider_Group_Taxonomy_Code',
-  'Provider_Group_Name',
-  'Source'
-];
+    'select',
+    'medicaid_id',
+    'mode',
+    'Gap_Code',
+    'MEASURE_DESC',
+    'ObservationDate',
+    'Observation_Year',
+    'Observation_Code',
+    'CPT_Code_Modifier',
+    'Observation_Code_Set',
+    'Observation_Result',
+    'Service_Provider_NPI',
+    'Service_Provider_Taxonomy_Code',
+    'Service_Provider_Name',
+    'Service_Provider_Type',
+    'Service_Provider_RxProviderFlag',
+    'Provider_Group_NPI',
+    'Provider_Group_Taxonomy_Code',
+    'Provider_Group_Name',
+    'Source'
+  ];
 
-qualityColumns: string[] = [
-  'select',
-  'medicaid_id',
-  'mode',
-  'PROVIDER_ID', 
-  'DOS',
-  'DOSThru',
-  'CPTPx',
-  'HCPCSPx',
-  'LOINC',
-  'SNOMED',
-  'ICDDX',
-  'ICDDX10',
-  'RxNorm',
-  'CVX',
-  'Observation_Result',
-  'RxProviderFlag',
-  'PCPFlag',
-  'QuantityDispensed',
-  'SuppSource', 
-  'LOINCAnswer'
-];
-  displayedColumns: string[] =[];
+  qualityColumns: string[] = [
+    'select',
+    'medicaid_id',
+    'mode',
+    'PROVIDER_ID',
+    'DOS',
+    'DOSThru',
+    'CPTPx',
+    'HCPCSPx',
+    'LOINC',
+    'SNOMED',
+    'ICDDX',
+    'ICDDX10',
+    'RxNorm',
+    'CVX',
+    'Observation_Result',
+    'RxProviderFlag',
+    'PCPFlag',
+    'QuantityDispensed',
+    'SuppSource',
+    'LOINCAnswer'
+  ];
+  displayedColumns: string[] = [];
 
- 
+
   constructor(
     private readonly apiService: ConfigService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
-    private readonly headerService: HeaderService ,
+    private readonly headerService: HeaderService,
     private readonly titleService: Title,
     private readonly userData: UserDataService,
-    
+
   ) {
     const today = new Date();
 
     const thirtyDaysBefore = new Date();
     thirtyDaysBefore.setDate(today.getDate() - 30);
-    this.riskGapsFormGroup = this.fb.group({ 
+    this.riskGapsFormGroup = this.fb.group({
       gaps_type: ['risk'],
+      tin: [''],
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required]
     },
-    { validators: this.dateRangeValidator } // ✅ custom validator
-  );
+      { validators: this.dateRangeValidator } // ✅ custom validator
+    );
   }
 
-  async ngOnInit() { 
+  async ngOnInit() {
     this.titleService.setTitle('PRISM :: GAPS REPORT');
     this.headerService.setTitle('GAPS REPORT');
     const user = this.userData.getUser();
-    this.userId = user.ID; 
-    // Load page 
+    this.userId = user.ID;
+    this.riskGapsFormGroup.get('gaps_type')?.valueChanges.subscribe(type => {
+      if (type !== 'quality') {
+        this.riskGapsFormGroup.get('tin')?.setValue('');
+      }
+    });
+    await this.loadTins();
     await this.applyFilter();
   }
 
-  
+  async loadTins() {
+    try {
+      const result = await this.apiService.addActionMaster<any>({});
+      this.availableTins = result.data?.vendorList || [];
+    } catch (err) {
+      console.error('TIN load failed', err);
+    }
+  }
+
+
 
   ngAfterViewInit(): void {
-  if (this.paginator) {
-    this.dataSource.paginator = this.paginator;
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+    }
+
+
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
+    }
+
+    this.dataSource.sortingDataAccessor = (item, property) => {
+      const value = item[property];
+      return typeof value === 'string' ? value.toLowerCase() : value;
+    };
   }
-  
 
-  if (this.sort) {
-    this.dataSource.sort = this.sort;
-  }
-
-  this.dataSource.sortingDataAccessor = (item, property) => {
-    const value = item[property];
-    return typeof value === 'string' ? value.toLowerCase() : value;
-  };
-}
-
-formatDateToYMD(dateStr: string): string {
+  formatDateToYMD(dateStr: string): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -158,69 +173,71 @@ formatDateToYMD(dateStr: string): string {
     const year = date.getFullYear();
     return `${year}-${month}-${day}`; // m/d/Y format
   }
-  
- async applyFilter() {
-  if (this.riskGapsFormGroup.invalid) {
-    this.riskGapsFormGroup.markAllAsTouched();
-    return;
-  }
 
-  this.isLoading = true;
-
-  try {
-    const { start_date, end_date,gaps_type } = this.riskGapsFormGroup.value;
-
-    const formatDate = (d: string | Date) => {
-      const date = new Date(d);
-      return date.toISOString().split('T')[0]; // YYYY-MM-DD
-    };
-
-    const payload = {
-      start_date: this.formatDateToYMD(start_date),
-      end_date: this.formatDateToYMD(end_date),
-      gaps_type
-    };
-
-    const result = await this.apiService.getGapsObservationData(payload);
-
-    // ✅ TypeScript now knows that 'data' exists
-    this.riskGapsReportList = result.data ?? [];    
-    this.dataSource.data = this.riskGapsReportList;
-
-    // ✅ SWITCH COLUMNS HERE
-    if (gaps_type === 'quality') {
-      this.displayedColumns = this.qualityColumns;
-    } else {
-      this.displayedColumns = this.riskColumns;
+  async applyFilter() {
+    if (this.riskGapsFormGroup.invalid) {
+      this.riskGapsFormGroup.markAllAsTouched();
+      return;
     }
 
-  } catch (err) {
-    console.error('Risk gaps load failed', err);
-  } finally {
-    this.isLoading = false;
-    this.cdr.markForCheck();
+    this.isLoading = true;
+
+    try {
+      const { start_date, end_date, gaps_type, tin } = this.riskGapsFormGroup.value;
+
+      const formatDate = (d: string | Date) => {
+        const date = new Date(d);
+        return date.toISOString().split('T')[0]; // YYYY-MM-DD
+      };
+
+      const payload = {
+        start_date: this.formatDateToYMD(start_date),
+        end_date: this.formatDateToYMD(end_date),
+        gaps_type,
+        tin: tin || ''
+      };
+
+      const result = await this.apiService.getGapsObservationData(payload);
+
+      // ✅ TypeScript now knows that 'data' exists
+      this.riskGapsReportList = result.data ?? [];
+      this.dataSource.data = this.riskGapsReportList;
+
+      // ✅ SWITCH COLUMNS HERE
+      if (gaps_type === 'quality') {
+        this.displayedColumns = this.qualityColumns;
+      } else {
+        this.displayedColumns = this.riskColumns;
+      }
+
+    } catch (err) {
+      console.error('Risk gaps load failed', err);
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
   }
-}
 
 
-dateRangeValidator(control: AbstractControl): ValidationErrors | null {
-  const start = control.get('start_date')?.value;
-  const end = control.get('end_date')?.value;
+  dateRangeValidator(control: AbstractControl): ValidationErrors | null {
+    const start = control.get('start_date')?.value;
+    const end = control.get('end_date')?.value;
 
-  if (!start || !end) return null;
+    if (!start || !end) return null;
 
-  const startDate = new Date(start).getTime();
-  const endDate = new Date(end).getTime();
+    const startDate = new Date(start).getTime();
+    const endDate = new Date(end).getTime();
 
-  return endDate >= startDate
-    ? null
-    : { dateRangeInvalid: true };
-}
+    return endDate >= startDate
+      ? null
+      : { dateRangeInvalid: true };
+  }
 
 
-   
-   downloadCsv(): void {
+
+  downloadCsv(): void {
   try {
+
     if (!this.riskGapsReportList.length) {
       alert('No data available to download.');
       return;
@@ -231,8 +248,11 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
     let header: string[] = [];
     let rows: string[] = [];
 
-    // ✅ RISK DOWNLOAD
+    // =========================
+    // RISK DOWNLOAD
+    // =========================
     if (gapsType === 'risk') {
+
       header = [
         'MEMBER ID',
         'PATIENT MEMBER ID',
@@ -281,13 +301,20 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
           item.Provider_Group_Name ?? '',
           item.Source ?? ''
         ]
-          .map(v => v.toString().replace(/\|/g, ' '))
-          .join('|')
+          .map(value =>
+            `"${(value ?? '')
+              .toString()
+              .replace(/"/g, '""')}"`
+          )
+          .join(',')
       );
     }
 
-    // ✅ QUALITY DOWNLOAD
-    else if (gapsType === 'quality') { 
+    // =========================
+    // QUALITY DOWNLOAD
+    // =========================
+    else if (gapsType === 'quality') {
+
       header = [
         'MemberKey',
         'ProviderKey',
@@ -296,14 +323,14 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
         'CPTPx',
         'HCPCSPx',
         'LOINC',
-        'SNOMED',         
+        'SNOMED',
         'ICDDX10',
         'RxNorm',
-        'CVX',        
+        'CVX',
         'RxProviderFlag',
         'PCPFlag',
         'QuantityDispensed',
-        'SuppSource', 
+        'SuppSource',
         'Result',
         'LOINCAnswer'
       ];
@@ -312,41 +339,202 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
         [
           item.RECIP_NO ?? '',
           item.provider_id ?? '',
-          item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
-          item.DOSThru !== '01/01/1900' ? item.DOSThru : '',
+          item.ObservationDate !== '01/01/1900'
+            ? item.ObservationDate
+            : '',
+          item.DOSThru !== '01/01/1900'
+            ? item.DOSThru
+            : '',
           item.CPTPx ?? '',
           item.HCPCSPx ?? '',
           item.LOINC ?? '',
-          item.SNOMED ?? '',          
+          item.SNOMED ?? '',
           item.ICDDX10 ?? '',
           item.RxNorm ?? '',
-          item.CVX ?? '',          
+          item.CVX ?? '',
           item.RxProviderFlag ?? '',
           item.PCPFlag ?? '',
           item.QuantityDispensed ?? '',
-          item.SuppSource ?? '', 
+          item.SuppSource ?? '',
           item.Observation_Result ?? '',
           item.LOINCAnswer ?? ''
         ]
-          .map(v => (v ?? '').toString().replace(/\|/g, ' '))
-          .join('|')
+          .map(value =>
+            `"${(value ?? '')
+              .toString()
+              .replace(/"/g, '""')}"`
+          )
+          .join(',')
       );
     }
 
-    const csv = [header.join('|'), ...rows].join('\n');
+    // =========================
+    // CREATE CSV
+    // =========================
+    const csvContent = [
+      header.map(h => `"${h}"`).join(','),
+      ...rows
+    ].join('\n');
+
+    // =========================
+    // FILE NAME
+    // =========================
     const now = new Date();
-    const filename = `GAPS_${(gapsType || 'UNKNOWN').toUpperCase()}_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).CSV`;
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+    const filename =
+      `GAPS_${(gapsType || 'UNKNOWN')
+        .toUpperCase()}_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).csv`;
+
+    // =========================
+    // DOWNLOAD FILE
+    // =========================
+    const blob = new Blob(
+      [csvContent],
+      { type: 'text/csv;charset=utf-8;' }
+    );
+
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
 
   } catch (error) {
     console.error('CSV download failed:', error);
     alert('Failed to download CSV.');
   }
 }
+
+  downloadPipedelimeter(): void {
+    try {
+      if (!this.riskGapsReportList.length) {
+        alert('No data available to download.');
+        return;
+      }
+
+      const gapsType = this.riskGapsFormGroup.get('gaps_type')?.value;
+
+      let header: string[] = [];
+      let rows: string[] = [];
+
+      // ✅ RISK DOWNLOAD
+      if (gapsType === 'risk') {
+        header = [
+          'MEMBER ID',
+          'PATIENT MEMBER ID',
+          'PATIENT CMS MEDICARE NUMBER',
+          'MEMBER FIRST NAME',
+          'MEMBER LAST NAME',
+          'MEMBER DOB',
+          'OBSERVATION DATE',
+          'OBSERVATION YEAR',
+          'OBSERVATION CODE',
+          'CPT CODE MODIFIER',
+          'OBSERVATION CODE SET',
+          'OBSERVATION RESULT',
+          'SERVICE PROVIDER NPI',
+          'SERVICE PROVIDER TAXONOMY CODE',
+          'SERVICE PROVIDER NAME',
+          'SERVICE PROVIDER TYPE',
+          'SERVICE PROVIDER RXPROVIDERFLAG',
+          'PROVIDER GROUP NPI',
+          'PROVIDER GROUP TAXONOMY CODE',
+          'PROVIDER GROUP NAME',
+          'SOURCE'
+        ];
+
+        rows = this.riskGapsReportList.map(item =>
+          [
+            item.RECIP_NO ?? '',
+            item.RECIP_NO ?? '',
+            item.MEDICARE_NO ?? '',
+            item.FIRST_NAME ?? '',
+            item.LAST_NAME ?? '',
+            item.BIRTH ?? '',
+            item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
+            item.Observation_Year ?? '',
+            item.Observation_Code ?? '',
+            item.CPT_Code_Modifier ?? '',
+            item.Observation_Code_Set ?? '',
+            item.Observation_Result ?? '',
+            item.Service_Provider_NPI ?? '',
+            item.Service_Provider_Taxonomy_Code ?? '',
+            item.Service_Provider_Name ?? '',
+            item.Service_Provider_Type ?? '',
+            item.Service_Provider_RxProviderFlag ?? '',
+            item.Provider_Group_NPI ?? '',
+            item.Provider_Group_Taxonomy_Code ?? '',
+            item.Provider_Group_Name ?? '',
+            item.Source ?? ''
+          ]
+            .map(v => (v ?? '').toString().replace(/\|/g, ' '))
+            .join('|')
+        );
+      }
+
+      // ✅ QUALITY DOWNLOAD
+      else if (gapsType === 'quality') {
+        header = [
+          'MemberKey',
+          'ProviderKey',
+          'DOS',
+          'DOSThru',
+          'CPTPx',
+          'HCPCSPx',
+          'LOINC',
+          'SNOMED',
+          'ICDDX10',
+          'RxNorm',
+          'CVX',
+          'RxProviderFlag',
+          'PCPFlag',
+          'QuantityDispensed',
+          'SuppSource',
+          'Result',
+          'LOINCAnswer'
+        ];
+
+        rows = this.riskGapsReportList.map(item =>
+          [
+            item.RECIP_NO ?? '',
+            item.provider_id ?? '',
+            item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
+            item.DOSThru !== '01/01/1900' ? item.DOSThru : '',
+            item.CPTPx ?? '',
+            item.HCPCSPx ?? '',
+            item.LOINC ?? '',
+            item.SNOMED ?? '',
+            item.ICDDX10 ?? '',
+            item.RxNorm ?? '',
+            item.CVX ?? '',
+            item.RxProviderFlag ?? '',
+            item.PCPFlag ?? '',
+            item.QuantityDispensed ?? '',
+            item.SuppSource ?? '',
+            item.Observation_Result ?? '',
+            item.LOINCAnswer ?? ''
+          ]
+            .map(v => (v ?? '').toString().replace(/\|/g, ' '))
+            .join('|')
+        );
+      }
+
+      const csv = [header.join('|'), ...rows].join('\n');
+      const now = new Date();
+      const filename = `GAPS_${(gapsType || 'UNKNOWN').toUpperCase()}_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).CSV`;
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+
+    } catch (error) {
+      console.error('CSV download failed:', error);
+      alert('Failed to download CSV.');
+    }
+  }
 
   filter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
@@ -368,10 +556,10 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   }
 
   getSelectedRows(): any[] {
-  return this.selection.selected;
+    return this.selection.selected;
   }
 
-  
+
 
   /** Checkbox label (accessibility) */
   checkboxLabel(row?: any): string {
@@ -389,41 +577,41 @@ dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   }
 
 
- async removeSelected(): Promise<void> {
-  if (!this.selection.hasValue()) return;
+  async removeSelected(): Promise<void> {
+    if (!this.selection.hasValue()) return;
 
-  const confirmed = confirm(
-    `Remove ${this.selection.selected.length} selected record(s)?`
-  );
-  if (!confirmed) return;
-
-  this.isLoading = true;
-  // collect payload
-  const payload = this.selection.selected.map(row => ({
-    id: row.id,
-    subscriber_number: row.SUBSCRIBER_NUMBER,
-    gap_code: row.Gap_Code,
-    Type: row.Type
-  }));
-  
-  try {
-    await this.apiService.deleteGapObservations({ records: payload });
-
-    // remove from UI
-    const selected = new Set(this.selection.selected);
-    this.riskGapsReportList = this.riskGapsReportList.filter(
-      row => !selected.has(row)
+    const confirmed = confirm(
+      `Remove ${this.selection.selected.length} selected record(s)?`
     );
+    if (!confirmed) return;
 
-    this.dataSource.data = this.riskGapsReportList;
-    this.selection.clear();
-    this.isLoading = false;
-    
-  } catch (err) {
-    console.error('Delete failed', err);
-    alert('Failed to remove records');
+    this.isLoading = true;
+    // collect payload
+    const payload = this.selection.selected.map(row => ({
+      id: row.id,
+      subscriber_number: row.SUBSCRIBER_NUMBER,
+      gap_code: row.Gap_Code,
+      Type: row.Type
+    }));
+
+    try {
+      await this.apiService.deleteGapObservations({ records: payload });
+
+      // remove from UI
+      const selected = new Set(this.selection.selected);
+      this.riskGapsReportList = this.riskGapsReportList.filter(
+        row => !selected.has(row)
+      );
+
+      this.dataSource.data = this.riskGapsReportList;
+      this.selection.clear();
+      this.isLoading = false;
+
+    } catch (err) {
+      console.error('Delete failed', err);
+      alert('Failed to remove records');
+    }
   }
-}
 
 }
 

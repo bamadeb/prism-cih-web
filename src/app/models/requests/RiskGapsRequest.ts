@@ -2,6 +2,7 @@ export class RiskGapsRequest {
   start_date?: any;
   end_date?: any;
   gaps_type?: string;
+  tin?: string;
 }
 
 // Single report row

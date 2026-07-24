@@ -8,10 +8,22 @@
               <mat-label>GAPS</mat-label>
               <mat-select formControlName="gaps_type">
                 <mat-option value="risk" class="txupper"> RISK</mat-option>
-                <mat-option value="quality" class="txupper"> QUALITY </mat-option>  
+                <mat-option value="quality" class="txupper"> QUALITY </mat-option>
               </mat-select>
           </mat-form-field>
-                         
+
+          @if (riskGapsFormGroup.get('gaps_type')?.value === 'quality') {
+            <mat-form-field appearance="outline" style="margin-top:18px; min-width:220px;">
+              <mat-label>TIN</mat-label>
+              <mat-select formControlName="tin">
+                <mat-option value="">ALL</mat-option>
+                @for (tin of availableTins; track tin.VENDOR_NUM) {
+                  <mat-option [value]="tin.VENDOR_NUM" class="txupper">{{tin.LAST_NAME}} ({{tin.VENDOR_NUM}})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
        <mat-form-field appearance="outline" style="margin-top:18px;">
         <mat-label>START DATE</mat-label>
         <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
@@ -45,7 +57,17 @@
                 </mat-progress-spinner>
               }
         </button>
-         <mat-icon (click)="downloadCsv()"  title="Download csv" style="margin-top:15px;cursor: pointer;">download</mat-icon>   
+        
+         <!-- <mat-icon (click)="downloadPipedelimeter()"  title="Download pipe delimited file" style="margin-top:15px;cursor: pointer;">download</mat-icon>  Download Pipe-Delimited File
+         <mat-icon (click)="downloadCsv()"  title="Download csv" style="margin-top:15px;cursor: pointer;">download</mat-icon>    -->
+         
+         
+          
+         <button type="button" mat-raised-button color="primary" (click)="downloadPipedelimeter()"  title="Download Pipe-Delimited File">
+          <mat-icon>download</mat-icon>  Download Pipe-Delimited File</button>
+
+         <button type="button" mat-raised-button color="primary" (click)="downloadCsv()"  title="Download CSV">
+          <mat-icon>download</mat-icon> Download CSV </button>    
                    
 
       </form>
