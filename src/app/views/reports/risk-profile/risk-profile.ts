@@ -100,7 +100,7 @@ newRiskCategoryCount: Record<string, number> = {};
   
     // ✅ All required controls added
     this.actionLogFormGroup = this.fb.group({
-      user_id: [null], 
+      user_id: [''],
     });
   }
 
@@ -130,7 +130,11 @@ newRiskCategoryCount: Record<string, number> = {};
     });
 
     const rawData: RiskSummaryRow[] = data?.riskSummary ?? [];
-    this.user_list = data?.userlist ?? [];
+    // Only populate the dropdown from the initial, unfiltered load so selecting
+    // a single user doesn't shrink the list to just that user's own record.
+    if (!this.user_list.length) {
+      this.user_list = data?.userlist ?? [];
+    }
     this.riskLevel = data?.riskLevel ?? [];
 
     /* =====================================================

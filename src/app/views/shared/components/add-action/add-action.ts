@@ -98,6 +98,7 @@ export class AddAction implements OnInit , AfterViewInit {
   filteredhspcsOptions: Observable<any[]>[] = []; 
   icdList: any[] = [];
   filteredicdOptions: Observable<any[]>[] = [];
+  filteredicdOptions2: Observable<any[]>[] = [];
   suppSourceList = [
   { value: 'E', label: 'EHR Standard Supplemental' },
   { value: 'M', label: 'EHR Non-Standard Supplemental' },
@@ -922,6 +923,8 @@ private async updateQualityAndRiskData(
         SNOMED: qualityGap.SNOMED,
         ICDDX: qualityGap.ICDDX,
         ICDDX10: qualityGap.ICDDX10,
+        ICDDX_2: qualityGap.ICDDX_2,
+        ICDDX10_2: qualityGap.ICDDX10_2,
         RxNorm: qualityGap.RxNorm,
         CVX: qualityGap.CVX,
         Modifier: qualityGap.Modifier,
@@ -1071,6 +1074,8 @@ private async updateQualityAndRiskData(
           qualityGap.SNOMED,
           qualityGap.ICDDX,
           qualityGap.ICDDX10,
+          qualityGap.ICDDX_2,
+          qualityGap.ICDDX10_2,
           qualityGap.RxNorm,
           qualityGap.CVX,
           qualityGap.Modifier,
@@ -1453,6 +1458,8 @@ private async updateQualityAndRiskData(
           SNOMED: [this.sanitize(t.SNOMED)],
           ICDDX: [this.sanitize(t.ICDDX)],
           ICDDX10: [this.sanitize(t.ICDDX10)],
+          ICDDX_2: [this.sanitize(t.ICDDX_2)],
+          ICDDX10_2: [this.sanitize(t.ICDDX10_2)],
           RxNorm: [this.sanitize(t.RxNorm)],
           CVX: [this.sanitize(t.CVX)],
           Modifier: [this.sanitize(t.Modifier)],
@@ -1529,6 +1536,21 @@ this.filteredicdOptions[indexq] = fg.get('ICDDX10')!.valueChanges.pipe(
       .slice(0, 50);
   })
 );
+this.filteredicdOptions2[indexq] = fg.get('ICDDX10_2')!.valueChanges.pipe(
+  startWith(''),
+  debounceTime(300),
+  distinctUntilChanged(),
+  map(value => {
+    const filterValue = (value || '').toLowerCase();
+
+    return this.icdList
+      .filter(cpt =>
+        (cpt.code || '').toLowerCase().includes(filterValue) ||
+        (cpt.label || '').toLowerCase().includes(filterValue)
+      )
+      .slice(0, 50);
+  })
+);
         fg.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
           const hasAnyValue =
@@ -1538,6 +1560,8 @@ this.filteredicdOptions[indexq] = fg.get('ICDDX10')!.valueChanges.pipe(
             val.SNOMED ||
             val.ICDDX ||
             val.ICDDX10 ||
+            val.ICDDX_2 ||
+            val.ICDDX10_2 ||
             val.LOINC ||
             val.RxNorm ||
             val.CVX ||
