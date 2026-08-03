@@ -898,32 +898,34 @@
 
         </form>
       </div>
-      <table class="comparison-table">
-        <thead>
-          <tr>
-            <th>APPOINTMENT DATE</th>
-            <th>TYPE</th>
-            <th>VENDOR</th>
-            <th>PROVIDER ID</th>
-            <th>STATUS</th>
-            <th>PLACE</th>
-            <th>NOTE</th>
-            <th>ADDED BY</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let app of appointmentList; trackBy: trackByMedicaidIdapp">
-            <td>{{ app.action_date | date:'MM/dd/yyyy' }} {{ app.action_time }}</td>
-            <td>{{ app.type }}</td>
-            <td>{{ app.vendor_id }}</td>
-            <td>{{ app.provider_id }}</td>
-            <td>{{ app.status }}</td>
-            <td>{{ app.place_of_appointment }}</td>
-            <td>{{ app.note }}</td>
-            <td>{{ app.FistName }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <mat-card class="comparison-card">
+        <table class="comparison-table appointment-table">
+          <thead>
+            <tr>
+              <th>APPOINTMENT DATE</th>
+              <th>TYPE</th>
+              <th>VENDOR</th>
+              <th>PROVIDER ID</th>
+              <th>STATUS</th>
+              <th>PLACE</th>
+              <th>NOTE</th>
+              <th>ADDED BY</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let app of appointmentList; trackBy: trackByMedicaidIdapp">
+              <td>{{ app.action_date | date:'MM/dd/yyyy' }} {{ app.action_time }}</td>
+              <td>{{ app.type }}</td>
+              <td>{{ app.vendor_id }}</td>
+              <td>{{ app.provider_id }}</td>
+              <td>{{ app.status }}</td>
+              <td>{{ app.place_of_appointment }}</td>
+              <td>{{ app.note }}</td>
+              <td>{{ app.FistName }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </mat-card>
     </mat-tab>
     <mat-tab label="STAR PERFORMANCE">
       <div>
@@ -1027,7 +1029,7 @@
                   style="text-decoration: underline;cursor:pointer;font-weight: normal;float: right;"
                   *ngIf="!showContent" (click)="toggleContent()">+Add</a></h3>
             </div>
-            <table class="comparison-table">
+            <table class="comparison-table prism-table">
               <thead>
                 <tr>
                   <th>MEASURE</th>

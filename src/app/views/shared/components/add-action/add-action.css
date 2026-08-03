@@ -267,12 +267,36 @@ mat-error {
   max-height: 260px; 
 }
 
-.mat-header-cell {
-  font-weight: 600;
-  font-size: 13px;
+.mat-mdc-table {
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.mat-cell {
+.mat-mdc-header-row {
+  background: #00ced1;
+}
+
+.mat-mdc-header-cell {
+  color: #fff !important;
+  font-weight: 600 !important;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.mat-mdc-header-cell:first-child {
+  border-top-left-radius: 10px;
+}
+
+.mat-mdc-header-cell:last-child {
+  border-top-right-radius: 10px;
+}
+
+.mat-mdc-header-cell:first-child,
+.mat-mdc-cell:first-child {
+  padding-left: 20px !important;
+}
+
+.mat-mdc-cell {
   font-size: 13px;
 }
 
@@ -293,8 +317,46 @@ mat-error {
 .comparison-card {
   padding: 12px;
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
+
+/* APPOINTMENT tab table — fixed layout so all 8 columns fit the card
+   width instead of overflowing, with wrapping instead of truncation. */
+.appointment-table {
+  table-layout: fixed;
+}
+
+.appointment-table th,
+.appointment-table td {
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.appointment-table th:nth-child(1), .appointment-table td:nth-child(1) { width: 14%; }
+.appointment-table th:nth-child(2), .appointment-table td:nth-child(2) { width: 9%; }
+.appointment-table th:nth-child(3), .appointment-table td:nth-child(3) { width: 10%; }
+.appointment-table th:nth-child(4), .appointment-table td:nth-child(4) { width: 10%; }
+.appointment-table th:nth-child(5), .appointment-table td:nth-child(5) { width: 9%; }
+.appointment-table th:nth-child(6), .appointment-table td:nth-child(6) { width: 16%; }
+.appointment-table th:nth-child(7), .appointment-table td:nth-child(7) { width: 18%; }
+.appointment-table th:nth-child(8), .appointment-table td:nth-child(8) { width: 14%; }
+
+/* STAR PERFORMANCE tab — PRISM table — same fixed-width fit as above. */
+.prism-table {
+  table-layout: fixed;
+}
+
+.prism-table th,
+.prism-table td {
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.prism-table th:nth-child(1), .prism-table td:nth-child(1) { width: 35%; }
+.prism-table th:nth-child(2), .prism-table td:nth-child(2) { width: 20%; }
+.prism-table th:nth-child(3), .prism-table td:nth-child(3) { width: 25%; }
+.prism-table th:nth-child(4), .prism-table td:nth-child(4) { width: 20%; }
 
 .table-title {
   text-align: center;
@@ -314,6 +376,19 @@ mat-error {
   padding: 8px;
   border-bottom: none;
   text-align: left;
+}
+
+.comparison-table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.comparison-table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.comparison-table th:first-child,
+.comparison-table td:first-child {
+  padding-left: 16px;
 }
 
 .comparison-table td {
