@@ -11,3 +11,7 @@ mat-dialog-content {
   max-height: 65vh;
   overflow: auto;
 }
+
+.mat-column-sl {
+  padding-left: 20px !important;
+}

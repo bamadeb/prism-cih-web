@@ -82,7 +82,7 @@
           <!-- BUTTON -->
           <div class="bot_12">
             <div><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
-            <div><button mat-raised-button color="primary" (click)="close()">Close</button></div>
+            <div><button mat-stroked-button type="button" (click)="close()">Close</button></div>
           </div>
 
         </form>
@@ -105,7 +105,7 @@
         <tbody>
 
           <tr *ngFor="let alter of data.alt_address">
-            <td>
+            <td class="address-cell">
               <span *ngIf="alter.alt_address">{{ alter.alt_address }}</span>
               <span *ngIf="alter.alt_city">, {{ alter.alt_city }}</span>
               <span *ngIf="alter.alt_state">, {{ alter.alt_state }}</span>

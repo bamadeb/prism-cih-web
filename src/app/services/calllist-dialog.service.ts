@@ -61,28 +61,30 @@ export class CallListDialogService {
     }
 
     return `
-      <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>DATE</th>
-            <th>ACTION</th>
-            <th>OUTCOME</th>
-            <th>NOTE</th>
-          </tr>
-        </thead>
-        <tbody style="text-align:center;">
-          ${callList.map((q, i) => `
+      <div style="border:1px solid #e3e8ef; border-radius:10px; overflow:hidden;">
+        <table class="table table-striped txupper" style="width:100%; border-collapse:collapse;">
+          <thead>
             <tr>
-              <td>${i + 1}</td>
-              <td>${this.formatDate(q.action_date)}</td>
-              <td>${q.action_type ?? ''}</td>
-              <td>${q.action_result ?? ''}</td>
-              <td>${q.action_note ?? ''}</td>
+              <th>Sl.No</th>
+              <th>DATE</th>
+              <th>ACTION</th>
+              <th>OUTCOME</th>
+              <th>NOTE</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>
+          </thead>
+          <tbody style="text-align:center;">
+            ${callList.map((q, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${this.formatDate(q.action_date)}</td>
+                <td>${q.action_type ?? ''}</td>
+                <td>${q.action_result ?? ''}</td>
+                <td>${q.action_note ?? ''}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
     `;
   }
 

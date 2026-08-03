@@ -23,6 +23,190 @@ margin-right: 15px;
   font-weight: normal !important;   /* Removes bold */
 }
 
+/* ==========================================================================
+   Professional dialog design system (applies to every Angular Material
+   dialog across the app via attribute/class selectors already in use)
+   ========================================================================== */
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 20px !important;
+  overflow: hidden;
+}
+
+[mat-dialog-title] {
+  font-weight: 600;
+  letter-spacing: .2px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin: 0 0 24px 0 !important;
+  border-bottom: 3px solid #00ced1;
+}
+
+mat-dialog-actions,
+[mat-dialog-actions] {
+  gap: 10px;
+  padding-top: 12px !important;
+  margin-top: 8px;
+  border-top: 1px solid #e3e8ef;
+}
+
+.mat-mdc-dialog-container mat-card {
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+}
+
+.mat-mdc-dialog-container .mat-mdc-header-row {
+  background: #00ced1;
+}
+
+.mat-mdc-dialog-container .mat-mdc-header-cell {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 11.5px !important;
+  letter-spacing: .3px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.mat-mdc-dialog-container .mat-mdc-header-row .mat-mdc-header-cell:first-child {
+  border-top-left-radius: 10px;
+}
+
+.mat-mdc-dialog-container .mat-mdc-header-row .mat-mdc-header-cell:last-child {
+  border-top-right-radius: 10px;
+}
+
+.mat-mdc-dialog-container .mat-mdc-row:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.mat-mdc-dialog-container .mat-mdc-row:hover {
+  background-color: #f4f8fc;
+}
+
+.dialog-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 9999;
+}
+
+.table,
+.table-striped {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table thead,
+.table-striped thead {
+  background: #00ced1;
+  color: #fff;
+}
+
+.table th,
+.table td,
+.table-striped th,
+.table-striped td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e3e8ef;
+  text-align: left;
+}
+
+.table thead th:first-child,
+.table-striped thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.table thead th:last-child,
+.table-striped thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.table-card {
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table tbody tr:nth-child(even),
+.table-striped tbody tr:nth-child(even) {
+  background-color: #f6f8fb;
+}
+
+.table tbody tr:hover,
+.table-striped tbody tr:hover {
+  background-color: #e6fbfb;
+}
+
+/* ==========================================================================
+   Layout/spacing utility classes referenced across dialog templates
+   (kept minimal — only the ones actually used in the codebase)
+   ========================================================================== */
+.d-flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.align-items-center { align-items: center; }
+.align-items-start { align-items: flex-start; }
+.justify-content-start { justify-content: flex-start; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.justify-content-end { justify-content: flex-end; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 16px; }
+
+.w-100 { width: 100%; }
+.text-end { text-align: right; }
+.text-start { text-align: left; }
+.fw-bold { font-weight: 700; }
+.fw-semibold { font-weight: 600; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: 4px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 16px; }
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 16px; }
+.me-1 { margin-right: 4px; }
+.me-2 { margin-right: 8px; }
+.me-3 { margin-right: 16px; }
+.ms-1 { margin-left: 4px; }
+.ms-2 { margin-left: 8px; }
+.ms-3 { margin-left: 16px; }
+.p-3 { padding: 16px; }
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8px;
+}
+
+.row > [class*="col-"] {
+  padding: 0 8px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .col-md-6 { width: 50%; }
+  .col-md-12 { width: 100%; }
+}
+
+@media (min-width: 992px) {
+  .col-lg-3 { width: 25%; }
+  .col-lg-9 { width: 75%; }
+}
+
 .mat-mdc-tab-label-container{
   flex-grow: 0!important;
 }

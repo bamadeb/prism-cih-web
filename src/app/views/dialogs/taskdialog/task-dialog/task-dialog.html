@@ -87,7 +87,8 @@
   </mat-card>
 
   <!-- TASK LIST -->
-  <table class="table table-striped txupper" style="width: 100%;text-align: left;margin-top: 10px;;">
+  <div class="table-card" style="margin-top: 10px;">
+  <table class="table table-striped txupper" style="width: 100%;text-align: left;">
     <thead>
       <tr>
         <th>Task</th>
@@ -118,6 +119,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 
   <div class="text-end mt-3" style="text-align: right;">
     <button mat-raised-button color="primary" (click)="close()">Close</button>

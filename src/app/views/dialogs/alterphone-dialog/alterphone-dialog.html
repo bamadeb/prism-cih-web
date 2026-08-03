@@ -23,7 +23,7 @@
                             <div class="bot_12" style="margin-top:10px;">
                                 <div><button mat-raised-button color="primary" type="submit"
                                         [disabled]="isLoading">SUBMIT </button></div>
-                                <div><button mat-raised-button color="primary"
+                                <div><button mat-stroked-button type="button"
                                         (click)="close()">Close</button></div>
                             </div>
 
@@ -34,6 +34,7 @@
             </td>
             <td style="width: 65%;">
                 <!-- ALTERNATIVE PHONE LIST -->
+                <div class="table-card">
                 <table class="table table-striped txupper" style="width: 100%;text-align: left;">
                     <thead>
                         <tr>
@@ -56,6 +57,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </td>
         </tr>
     </table>

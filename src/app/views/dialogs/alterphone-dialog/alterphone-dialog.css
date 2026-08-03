@@ -6,7 +6,18 @@
 }
 .bot_12{
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.dialog-title-center {
+  text-align: center;
+  width: 100%;
+  text-transform: uppercase;
+  font-weight: 600 !important;
+  font-size: 17px;
+  letter-spacing: .3px;
+  color: #1f2937;
 }
 .error_message{
   margin-top:-18px!important;

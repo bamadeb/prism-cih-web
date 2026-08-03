@@ -26,4 +26,4 @@
   text-align: center;
   text-transform: uppercase;
 }
-.bot_12{display:flex; justify-content: space-between;}
+.bot_12{display:flex; justify-content: flex-start; gap: 12px; margin-top: 8px;}

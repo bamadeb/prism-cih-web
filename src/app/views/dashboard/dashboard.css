@@ -1,35 +1,60 @@
+/* ==========================================================================
+   Design tokens (scoped to this component's root element)
+   ========================================================================== */
+.pagecontent {
+  --dash-primary: #00767c;
+  --dash-primary-dark: #003f44;
+  --dash-accent: #00ced1;
+  --dash-accent-dark: #00999c;
+  --dash-bg-soft: #f6f8fb;
+  --dash-border: #e3e8ef;
+  --dash-text: #1f2937;
+  --dash-text-muted: #64748b;
+  --dash-success: #15803d;
+  --dash-success-bg: #ecfdf3;
+  --dash-warning: #b45309;
+  --dash-warning-bg: #fffaeb;
+  --dash-danger: #b91c1c;
+  --dash-danger-bg: #fef2f2;
+  --dash-radius-md: 10px;
+  --dash-radius-sm: 6px;
+  --dash-control-h: 44px;
+  --dash-shadow-sm: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .08);
+  --dash-shadow-md: 0 4px 16px rgba(15, 23, 42, .08);
+  color: var(--dash-text);
+}
+
 table {
   width: 100%;
 }
 
 mat-form-field {
-  width:200px;
+  width: 200px;
 }
 
 .text-uppercase {
   text-transform: uppercase;
-} 
-
- 
-.search-box {
-  width: 200px;  
-} 
-
-.search-box input { 
-  height: 20px;
-} 
-
-.custom-tabs ::ng-deep .mat-tab-label {
-  font-weight: bold;
-  text-transform: uppercase;
 }
 
+.search-box {
+  width: 220px;
+}
 
+.search-box input {
+  height: 20px;
+}
 
-.action-bar {
-  display: flex;
-  justify-content: flex-end;
-  
+/* ==========================================================================
+   Header card
+   ========================================================================== */
+.header-card {
+  border-radius: var(--dash-radius-md);
+  box-shadow: var(--dash-shadow-sm);
+  overflow: hidden;
+}
+
+.header-card .mat-mdc-card-content {
+  padding: 0 !important;
 }
 
 .project-header {
@@ -37,185 +62,375 @@ mat-form-field {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  
+  gap: 24px;
+  background: none;
+  color: var(--dash-text);
+  padding: 14px 20px;
 }
 
-.grid-two {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+.overview-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--dash-control-h);
+  box-sizing: border-box;
+  color: var(--dash-primary);
+  cursor: pointer;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(0, 206, 209, .1);
+  transition: background .15s ease;
 }
 
-.bg-header {
-  background-color: #f5f5f5;
-  font-weight: bold;
-  text-transform: uppercase;
+.overview-toggle:hover {
+  background: rgba(0, 206, 209, .2);
 }
 
-.title {
-  font-size: 18px;
-  font-weight: bold;
-  text-decoration: underline;
+.overview-toggle .mat-icon {
+  color: var(--dash-primary);
+}
+
+.overview-toggle span {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-decoration: none !important;
+}
+
+.navigator-wrap {
+  display: flex;
+  align-items: center;
+  height: var(--dash-control-h);
+}
+
+.navigator-wrap mat-form-field {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  height: var(--dash-control-h);
 }
 
 .navigator-select {
   width: 250px;
- 
 }
 
-.red {
-    border-radius: 50%;
-    background-color: #dc3545;
-    width: 14px;
-    height: 14px;
+.navigator-select .mat-mdc-text-field-wrapper,
+.navigator-select .mdc-text-field--outlined {
+  height: var(--dash-control-h) !important;
 }
 
-.green {
-    border-radius: 50%;
-    background-color:green;
-    width: 14px;
-    height: 14px;
+.navigator-select .mat-mdc-form-field-flex {
+  height: var(--dash-control-h) !important;
+  align-items: center !important;
 }
 
-.loader-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
+.navigator-select .mat-mdc-form-field-infix {
+  height: auto !important;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.navigator-select .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+.navigator-select .mat-mdc-text-field-wrapper {
+  background: #fff;
+  border-radius: var(--dash-radius-sm);
+}
+
+/* ==========================================================================
+   Overview stat panels (RISK / QUALITY / WORK OVERVIEW)
+   ========================================================================== */
+.box {
+  margin-top: 12px !important;
+  overflow: auto;
+}
+
+.box > .table {
   width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  border-collapse: separate;
+  border-spacing: 12px 12px;
+  margin: -12px;
 }
 
-.mat-mdc-card-content:last-child {
-    padding-bottom: 0px !important;
+.box > .table > tbody > tr > td {
+  vertical-align: top;
+  padding: 0;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  box-shadow: var(--dash-shadow-sm);
+  overflow: hidden;
 }
 
 .static-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: Arial, sans-serif;
+  font-size: 13px;
 }
 
-.static-table th, 
+.static-table th,
 .static-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+  border: none;
+  border-bottom: 1px solid var(--dash-border);
+  padding: 10px 14px;
   text-align: left;
 }
 
 .static-table thead {
-  background-color: darkturquoise;
-  color: white;
+  background: var(--dash-accent);
+  color: #fff;
 }
 
-.static-table tr:nth-child(even) {
-  background-color: #f2f2f2;
+.static-table thead th {
+  font-weight: 400;
+  letter-spacing: .4px;
+  border-bottom: none;
 }
 
-.activity-row {
-  display: flex;
-  align-items: center;
-  padding: 8px 0;
+.static-table tbody tr:nth-child(even) {
+  background-color: var(--dash-bg-soft);
 }
 
-.activity-date {
-  width: 30%;
-  font-weight: 500;
+.static-table tbody tr:hover {
+  background-color: #eef2ff;
 }
 
-.activity-dot {
-  margin-right: 16px;
-  font-size: 12px;
+.static-table tbody tr td:first-child {
+  font-weight: 400;
+  color: var(--dash-text);
 }
 
-.activity-text {
-  width: 60%;
-  font-size: 14px;
+.group-end td {
+  border-bottom: 2px solid var(--dash-text) !important;
 }
 
-.half-screen {
-  width: 50%;
+.total-row td {
+  background-color: #eef2f7 !important;
+  font-weight: 400 !important;
+  border-top: 2px solid var(--dash-text);
+  border-bottom: 2px solid var(--dash-text);
+}
+
+.work-overview-card .static-table {
+  font-size: 12.5px;
+}
+
+.work-overview-card .static-table thead th {
+  white-space: nowrap;
+}
+
+.work-overview-card .static-table tbody tr td:last-child {
+  font-weight: 400;
+  background-color: #f1f5f9;
+}
+
+.perf-badge {
+  font-weight: 400;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .04);
+}
+
+/* ==========================================================================
+   Tabs
+   ========================================================================== */
+.custom-tabs {
+  margin-top: 16px;
+  display: block;
+}
+
+.custom-tabs ::ng-deep .mat-mdc-tab-header {
+  border-bottom: 1px solid var(--dash-border);
+}
+
+.custom-tabs ::ng-deep .mat-tab-label,
+.custom-tabs ::ng-deep .mdc-tab__text-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  color: var(--dash-text-muted);
+}
+
+.custom-tabs ::ng-deep .mdc-tab-indicator__content--underline {
+  border-color: var(--dash-accent) !important;
+  border-top-width: 3px !important;
+}
+
+.custom-tabs ::ng-deep .mdc-tab--active .mdc-tab__text-label {
+  color: var(--dash-primary) !important;
 }
 
 .custom-tabs .mat-tab-label {
-  flex: 1; /* default equal width tabs */
+  flex: 1;
 }
 
-/* LAST TAB override → shrink width */
 .custom-tabs .mat-tab-label:last-child {
   flex: 0 0 auto !important;
-  width: 70px !important;      /* adjust width as needed */
+  width: 70px !important;
   padding: 0 !important;
 }
 
-/* Make the form-field fit nicely */
 .custom-tabs .mat-tab-label:last-child .mat-form-field {
   width: 60%;
   margin: 0;
 }
 
-.txlink{
-  cursor: pointer;
-  text-decoration: underline;
+.tab-content {
+  padding-top: 14px;
 }
 
-::ng-deep .xl-dialog .mat-dialog-container {
-  width: 100% !important;
-  max-width: 900px !important;
-  margin: auto !important;
-  border-radius: 14px;
-  padding: 24px;
-} 
-
-.pointer {
-  cursor: pointer; 
+.tab-content mat-card {
+  border-radius: var(--dash-radius-md);
+  box-shadow: var(--dash-shadow-sm);
 }
 
-.project-header2
-{text-decoration: underline;cursor: pointer; font-size: 18px;line-height:20px;margin-left:20px;margin-right:20px;}
-
-.address-text {
-  cursor: pointer;
+/* ==========================================================================
+   Toolbar (search / action / paginator row above tables)
+   ========================================================================== */
+.table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 8px;
 }
 
-.mat-menu-panel {
-  min-height: 15px !important;
-  padding: 0;
-}
-.txcenter{
-  text-align: center;
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
 }
 
-.txright{
-  text-align: right;
+/* ==========================================================================
+   Data tables (mat-table)
+   ========================================================================== */
+.mat-mdc-table {
+  width: 100%;
+  border-radius: var(--dash-radius-md);
+  overflow: hidden;
 }
 
-.mat-column-referring_reason {
-  flex: 0 0 30%;   /* fixed width */
-  width: 30%;
-  max-width: 30%;
+.mat-mdc-header-row {
+  background: var(--dash-accent);
+}
+
+.mat-mdc-header-cell {
+  font-weight: 700 !important;
+  color: #fff !important;
+  text-transform: uppercase;
+  font-size: 11.5px !important;
+  letter-spacing: .3px;
+  border-bottom: 2px solid var(--dash-accent-dark) !important;
+}
+
+.mat-mdc-row:hover {
+  background-color: #f4f8fc;
+}
+
+.mat-mdc-row:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.mat-column-medicaid_id {
+  padding-left: 20px !important;
+  flex: 0 0 8%;
+  width: 8%;
+  max-width: 8%;
+}
+
+/* TRANSFER + NO LONGER PATIENT tables — shared columns */
+.mat-column-memberName {
+  flex: 0 0 11%;
+  width: 11%;
+  max-width: 11%;
+}
+
+.mat-column-BIRTH {
+  flex: 0 0 7%;
+  width: 7%;
+  max-width: 7%;
+}
+
+.mat-column-phone {
+  flex: 0 0 8%;
+  width: 8%;
+  max-width: 8%;
+}
+
+.mat-column-address {
+  flex: 0 0 14%;
+  width: 14%;
+  max-width: 14%;
   word-wrap: break-word;
   white-space: normal;
 }
 
-.pcp-cell {
-  text-align: center;
+/* TRANSFER table only */
+.mat-column-refer_by_name {
+  flex: 0 0 8%;
+  width: 8%;
+  max-width: 8%;
 }
 
+.mat-column-refer_to_name {
+  flex: 0 0 8%;
+  width: 8%;
+  max-width: 8%;
+}
+
+.mat-column-added_date {
+  flex: 0 0 6%;
+  width: 6%;
+  max-width: 6%;
+}
+
+/* NO LONGER PATIENT table only */
+.mat-column-NO_LONGER_PATIENT_DATE {
+  flex: 0 0 10%;
+  width: 10%;
+  max-width: 10%;
+}
+
+.mat-column-NO_LONGER_PATIENT_NOTE {
+  flex: 0 0 34%;
+  width: 34%;
+  max-width: 34%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+/* Shared with the MEMBERS tab's icon-only ACTION column */
+.mat-column-1 {
+  flex: 0 0 6%;
+  width: 6%;
+  max-width: 6%;
+}
+
+.mat-mdc-cell {
+  font-size: 12.5px;
+}
+
+/* ==========================================================================
+   Small utility bits reused across the template
+   ========================================================================== */
 .dot-wrapper {
   display: flex;
-  flex-direction: column;   /* stack rows vertically */
+  flex-direction: column;
   gap: 4px;
-  align-items: center;      /* center the rows */
+  align-items: center;
 }
 
 .dot-row {
   display: flex;
-  align-items: center;      /* align dot + date */
+  align-items: center;
   gap: 6px;
 }
 
@@ -225,45 +440,115 @@ mat-form-field {
   border-radius: 50%;
 }
 
-.green {
+.dot.green {
   background-color: #2e7d32;
 }
 
-.red {
+.dot.red {
   background-color: #c62828;
 }
 
 .date-text {
   display: inline-block;
-  width: 78px;          /* fixed width for MM/dd */
-  text-align: left;  
+  width: 78px;
+  text-align: left;
   line-height: 1.2;
+  font-size: 12px;
+  color: var(--dash-text-muted);
 }
 
-
-.mat-icon 
-{font-size: 20px;}
-
-
-
-
-.alignment
-{display: flex; align-items: center; cursor: pointer;
+.pcp-cell {
+  text-align: center;
 }
+
+.txlink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--dash-primary) !important;
+}
+
+.txcenter {
+  text-align: center;
+}
+
+.txright {
+  text-align: right;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.address-text {
+  cursor: pointer;
+  color: var(--dash-primary);
+}
+
+.alignment {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 4px;
+}
+
 .icon-cell {
   display: flex;
-  justify-content: center;   /* horizontal center */
-  align-items: center;       /* vertical center */
-  gap: 8px;                  /* space between icons */
-  
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.mat-icon {
+  font-size: 20px;
+}
+
+.mat-column-referring_reason {
+  flex: 0 0 30%;
+  width: 30%;
+  max-width: 30%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.mat-mdc-card-content:last-child {
+  padding-bottom: 0px !important;
 }
 
 .mat-mdc-card-content {
-    display: block;
-    padding: 0 16px 16px 16px;
+  display: block;
+  padding: 0 16px 16px 16px;
 }
 
 .mat-mdc-menu-content {
-   padding:0px;
+  padding: 0px;
 }
-.mat-mdc-paginator {background-color:#f4f2f2;}
+
+.mat-mdc-paginator {
+  background-color: transparent;
+}
+
+.mat-mdc-form-field-icon-suffix,
+.mat-mdc-menu-panel {
+  min-height: 15px;
+}
+
+::ng-deep .xl-dialog .mat-dialog-container {
+  width: 100% !important;
+  max-width: 900px !important;
+  margin: auto !important;
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.loader-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}

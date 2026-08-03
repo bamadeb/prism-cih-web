@@ -283,6 +283,8 @@ mat-error {
 
 .comparison-card {
   padding: 12px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .table-title {
@@ -298,9 +300,10 @@ mat-error {
 }
 
 .comparison-table th {
-  background: #f1f5f9;
+  background: #00ced1;
+  color: #fff;
   padding: 8px;
-  border-bottom: 2px solid #cbd5e1;
+  border-bottom: none;
   text-align: left;
 }
 

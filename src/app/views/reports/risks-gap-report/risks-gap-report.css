@@ -1,6 +1,8 @@
 .table-wrapper {
   width: 100%;
-  overflow-x: auto;        /* ✅ allow horizontal scroll */
+  overflow: auto;          /* ✅ allow horizontal + vertical scroll */
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
 }
 
 table {
@@ -9,11 +11,35 @@ table {
   border-collapse: collapse;
 }
 
-.mat-header-cell,
-.mat-cell {
+.mat-mdc-header-cell,
+.mat-mdc-cell {
   white-space: nowrap;     /* ✅ prevents text wrapping */
+  font-size: 12.5px;
 }
 
+.mat-mdc-header-row {
+  background: #00ced1;
+}
+
+.mat-mdc-header-cell {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 11px !important;
+  letter-spacing: .3px;
+}
+
+.mat-mdc-row:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.mat-mdc-row:hover {
+  background-color: #f4f8fc;
+}
+
+.cdk-table-sticky {
+  box-shadow: 2px 0 4px rgba(15, 23, 42, .08);
+}
 
 .centered-table {
   width: auto;               /* prevents full-width stretch */
@@ -62,14 +88,19 @@ table {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  padding-bottom: 10px;
 }
 .mat-column-medicaid_id {
-  position: sticky;
-  left: 0;
   background: #fff;
-  z-index: 2;
   min-width: 140px;
-} 
+}
+
+.mat-column-MEASURE_DESC {
+  width: 180px;
+  max-width: 180px;
+  white-space: normal !important;
+  overflow-wrap: break-word;
+}
 
 .table-container {
   position: relative;
@@ -83,4 +114,9 @@ table {
   height: 300px;
 }
 
-
+.no-data {
+  text-align: center;
+  padding: 24px;
+  color: #888;
+  font-size: 14px;
+}

@@ -22,17 +22,34 @@
 
 .attachments-card {
   padding: 12px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .attachments-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 13px;
+}
+
+.attachments-table thead {
+  background: #00ced1;
+  color: #fff;
 }
 
 .attachments-table th,
 .attachments-table td {
-  padding: 8px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e3e8ef;
+  text-align: left;
+}
+
+.attachments-table tbody tr:nth-child(even) {
+  background-color: #f6f8fb;
+}
+
+.attachments-table tbody tr:hover {
+  background-color: #e6fbfb;
 }
 
 .actions {

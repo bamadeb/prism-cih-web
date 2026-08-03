@@ -40,42 +40,12 @@
     <!-- Messages -->
     <button mat-icon-button [matMenuTriggerFor]="messageMenu">
        <mat-icon style="color:#fff!important;">chat</mat-icon>
-      <span class="badge-circle badge-success">3</span>
     </button>
 
     <mat-menu #messageMenu="matMenu" class="message-menu">
-      <div class="menu-header" style="padding:0px 10px!important;">
-        You have 3 new messages
+      <div class="menu-header">
+        You have 0 new messages
       </div>
-      <mat-divider></mat-divider>
-
-      <button mat-menu-item class="message-item">
-        <div style="float:left;"><img src="assets/images/messages-1.jpg" class="rounded-circle me-2" /></div>
-        <div class="text_mes">
-          <strong>Maria Hudson</strong>
-          <div class="msg-text">Velit asperiores et ducimus...</div>
-          <small>4 hrs. ago</small>
-        </div>
-      </button>
-
-      <button mat-menu-item class="message-item">
-        <div style="float:left;"><img src="assets/images/messages-2.jpg" class="rounded-circle me-2" /></div>
-        <div class="text_mes">
-          <strong>Anna Nelson</strong>
-          <div class="msg-text">Velit asperiores et ducimus...</div>
-          <small>6 hrs. ago</small>
-        </div>
-      </button>
-
-      <button mat-menu-item class="message-item">
-        <div style="float:left;"><img src="assets/images/messages-3.jpg" class="rounded-circle me-2" /></div>
-      <div class="text_mes">
-          <strong>David Muldon</strong>
-          <div class="msg-text">Velit asperiores et ducimus...</div>
-          <small>8 hrs. ago</small>
-        </div>
-      </button>
-
       <mat-divider></mat-divider>
       <button mat-menu-item>Show all messages</button>
     </mat-menu>

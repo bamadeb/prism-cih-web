@@ -4,45 +4,168 @@
   align-items: center;       /* vertical */
   min-height: 200px;         /* give space to center vertically */
 }
-.wd{
-  width: 20%;
+
+/* ==========================================================================
+   Summary stat cards (TOTAL + activity type counts)
+   ========================================================================== */
+.summary-cards {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
 }
 
+.wd {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+  border-top: 3px solid #00ced1;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.wd:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .1);
+  transform: translateY(-1px);
+}
+
+.wd .mat-mdc-card-header,
+.wd mat-card-title {
+  color: #00767c;
+  font-size: 22px !important;
+  margin: 6px 0 0 0 !important;
+  padding: 8px 6px 0 6px !important;
+}
+
+.wd mat-card-content {
+  padding: 2px 6px 8px 6px !important;
+}
+
+.fbold {
+  font-weight: 700;
+}
+
+.fnormal {
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .2px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+}
+
+/* ==========================================================================
+   Filter row
+   ========================================================================== */
+.filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+}
+
+.search-btn {
+  margin-top: -17px;
+}
+
+/* ==========================================================================
+   Table
+   ========================================================================== */
 .table-toolbar {
   display: flex;
   justify-content: space-between; /* ✅ important */
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  padding-bottom: 10px;
 }
 
-.summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+table {
+  width: 100%;
 }
 
-mat-card {
+.mat-mdc-table {
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mat-mdc-header-row {
+  background: #00ced1;
+}
+
+.mat-mdc-header-cell {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 11.5px !important;
+  letter-spacing: .3px;
+}
+
+.mat-mdc-row:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.mat-mdc-row:hover {
+  background-color: #f4f8fc;
+}
+
+.mat-mdc-cell {
+  font-size: 12.5px;
+}
+
+.mat-column-medicaid_id {
+  padding-left: 20px !important;
+  flex: 0 0 10%;
+  width: 10%;
+  max-width: 10%;
+}
+
+.mat-column-Panel_Name {
+  flex: 0 0 10%;
+  width: 10%;
+  max-width: 10%;
+}
+
+.mat-column-action_type {
+  flex: 0 0 10%;
+  width: 10%;
+  max-width: 10%;
+}
+
+.mat-column-action_result {
+  flex: 0 0 8%;
+  width: 8%;
+  max-width: 8%;
+}
+
+.mat-column-action_status {
+  flex: 0 0 7%;
+  width: 7%;
+  max-width: 7%;
+}
+
+.mat-column-action_date {
+  flex: 0 0 5%;
+  width: 5%;
+  max-width: 5%;
+}
+
+.mat-column-action_note {
+  flex: 0 0 50%;
+  width: 50%;
+  max-width: 50%;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.no-data {
   text-align: center;
+  padding: 24px;
+  color: #888;
+  font-size: 14px;
 }
-
-mat-card h2 {
-  color: #1e88e5;
-  font-size: 28px;
-  margin: 0;
-}
-
-mat-card p {
-  margin: 4px 0 0;
-  color: #1e88e5;
-  font-weight: 500;
-}
-.fbold{
-  font-weight: bold;
-}
-
-.fnormal{
-  font-weight: normal;
-}
-
-
