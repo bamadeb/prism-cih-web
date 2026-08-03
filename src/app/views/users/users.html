@@ -3,13 +3,13 @@
         <mat-card>
           <mat-card-content>
             <!-- Search box -->
-            <div style="display:flex; justify-content:flex-end;"> 
-               <div style="justify-content:left;margin-top:14px;">
-                <a style="cursor: pointer; text-decoration: underline;margin: 50px;" (click)="addUser();">+ ADD USER</a></div>  
-              <div style="justify-content:left;">
-                <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSizeOptions]="[10, 25, 50, 100]"
-                  [pageSize]="10"></mat-paginator>
-              </div>
+            <div class="table-toolbar">
+              <button mat-raised-button color="primary" (click)="addUser();">
+                <mat-icon>add</mat-icon> ADD USER
+              </button>
+
+              <mat-paginator #mainPaginator [length]="dataSource.filteredData.length" [pageSizeOptions]="[10, 25, 50, 100]"
+                [pageSize]="10"></mat-paginator>
 
               <mat-form-field appearance="outline" class="search-box">
                 <mat-label>Search</mat-label>
@@ -17,9 +17,9 @@
               </mat-form-field>
             </div>
             <!-- Data Table -->
-            <div class="mat-elevation-z8" style="overflow:auto;">
-              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort">                 
-                  
+            <div class="table-card" style="overflow:auto;">
+              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="w-100">
+
                 <ng-container matColumnDef="firstName">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
                   <td mat-cell *matCellDef="let row">{{ row.firstName }}</td>
@@ -30,10 +30,9 @@
                 </ng-container>
                 <ng-container matColumnDef="email">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-                  <td mat-cell *matCellDef="let row" class="txlink" >{{ row.email
-                    }}</td>
+                  <td mat-cell *matCellDef="let row">{{ row.email }}</td>
                 </ng-container>
-                <ng-container matColumnDef="department" class="mt-2">
+                <ng-container matColumnDef="department">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>Department</th>
                   <td mat-cell *matCellDef="let row">{{ row.department }}</td>
                 </ng-container>
@@ -44,18 +43,24 @@
                 </ng-container>
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-                  <td mat-cell *matCellDef="let row">{{ row.locked ? 'Locked' : row.status }}</td>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="status-badge" [ngClass]="getStatusClass(row)">{{ row.locked ? 'Locked' : row.status }}</span>
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="1">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>ACTION</th>
-                  <td mat-cell *matCellDef="let row">  <mat-icon class="txlink" (click)="editUser(row)" title="Edit" style="cursor: pointer;">edit</mat-icon>     <mat-icon 
-      *ngIf="row.locked"
-      class="txlink"
-      (click)="unlockUser(row)"
-      title="Unlock User"
-      style="cursor: pointer; color: #4caf50;">
-      lock_open
-    </mat-icon></td>
+                  <td mat-cell *matCellDef="let row">
+                    <div class="icon-cell">
+                      <mat-icon class="action-icon" (click)="editUser(row)" title="Edit">edit</mat-icon>
+                      <mat-icon
+                        *ngIf="row.locked"
+                        class="action-icon action-icon-unlock"
+                        (click)="unlockUser(row)"
+                        title="Unlock User">
+                        lock_open
+                      </mat-icon>
+                    </div>
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"  [ngClass]="{'locked-row': row.locked}"></tr>

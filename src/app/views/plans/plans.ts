@@ -154,6 +154,12 @@ export class Plans implements OnInit, AfterViewInit {
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
-  } 
+  }
+
+  /* ---------------- DISPLAY HELPERS ---------------- */
+
+  getPlanStatusClass(row: any): string {
+    return row.status === 1 ? 'status-inactive' : 'status-active';
+  }
 
 }

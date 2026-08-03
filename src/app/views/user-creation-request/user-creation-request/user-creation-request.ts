@@ -163,6 +163,17 @@ export class UserCreationRequest  implements OnInit, AfterViewInit {
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
-  } 
+  }
+
+  /* ---------------- DISPLAY HELPERS ---------------- */
+
+  getRequestStatusClass(row: any): string {
+    switch (row.STATUS) {
+      case 2: return 'status-active';    // COMPLETED
+      case 1: return 'status-inactive';  // IN-PROCESS
+      case 3: return 'status-cancelled'; // CANCEL
+      default: return 'status-new';      // NEW
+    }
+  }
 
 }
