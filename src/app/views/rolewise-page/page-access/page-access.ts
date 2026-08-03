@@ -137,4 +137,14 @@ export class PageAccess implements OnInit, AfterViewInit {
       this.dataSource.filter = value.trim().toLowerCase();
     }
 
+    /* ---------------- DISPLAY HELPERS ---------------- */
+
+    getPageAccessStatusClass(row: any): string {
+      const status = (row.status_text ?? '').toString().trim().toLowerCase();
+      if (status === 'in-active' || status === 'inactive' || row.status === 1) {
+        return 'status-inactive';
+      }
+      return 'status-active';
+    }
+
 }

@@ -4,11 +4,13 @@
           <mat-card-content>
             <!-- Search box -->
             <div class="table-toolbar">
+ 
               <div class="toolbar-left">
                 <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSizeOptions]="[10, 25, 50, 100]"
                   [pageSize]="10"></mat-paginator>
                 <a class="add-user-link" (click)="add();">+ ADD PAGE</a>
               </div>
+ 
 
               <mat-form-field appearance="outline" class="search-box">
                 <mat-label>Search</mat-label>
@@ -16,24 +18,32 @@
               </mat-form-field>
             </div>
             <!-- Data Table -->
+ 
             <div class="table-wrapper">
               <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">
+ 
                   <ng-container matColumnDef="page_name">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>Page</th>
                   <td mat-cell *matCellDef="let row">{{ row.page_name }}</td>
-                </ng-container> 
+                </ng-container>
                 <ng-container matColumnDef="ROLE_NAME">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
                   <td mat-cell *matCellDef="let row">{{ row.ROLE_NAME }}</td>
                 </ng-container>
-               
+
                 <ng-container matColumnDef="status_text">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-                  <td mat-cell *matCellDef="let row">{{ row.status_text }}</td>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="status-badge">{{ row.status_text }}</span>
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="1">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>ACTION</th>
-                  <td mat-cell *matCellDef="let row">  <mat-icon class="txlink" (click)="edit(row)" title="Edit" style="cursor: pointer;">edit</mat-icon> </td>
+                  <td mat-cell *matCellDef="let row">
+                    <div class="icon-cell">
+                      <mat-icon class="action-icon" (click)="edit(row)" title="Edit">edit</mat-icon>
+                    </div>
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

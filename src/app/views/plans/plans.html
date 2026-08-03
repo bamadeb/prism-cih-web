@@ -4,11 +4,13 @@
           <mat-card-content>
             <!-- Search box -->
             <div class="table-toolbar">
+
               <div class="toolbar-left">
                 <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSizeOptions]="[10, 25, 50, 100]"
                   [pageSize]="10"></mat-paginator>
                 <a class="add-user-link" (click)="addPlan();">+ ADD PLAN</a>
               </div>
+
 
               <mat-form-field appearance="outline" class="search-box">
                 <mat-label>Search</mat-label>
@@ -16,9 +18,11 @@
               </mat-form-field>
             </div>
             <!-- Data Table -->
+ 
             <div class="table-wrapper">
               <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">
                   
+ 
                 <ng-container matColumnDef="plan_name">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>PLAN NAME</th>
                   <td mat-cell *matCellDef="let row">{{ row.plan_name }}</td>
@@ -29,17 +33,21 @@
                 </ng-container>
                 <ng-container matColumnDef="end_date">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>END DATE</th>
-                  <td mat-cell *matCellDef="let row" class="txlink" >{{ row.end_date }}</td>
-                </ng-container> 
+                  <td mat-cell *matCellDef="let row">{{ row.end_date }}</td>
+                </ng-container>
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>STATUS</th>
-                  <td mat-cell *matCellDef="let row">{{ row.planstatus }}</td>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="status-badge">{{ row.planstatus }}</span>
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="1">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>ACTION</th>
-                  <td mat-cell *matCellDef="let row">  
-                    <mat-icon class="txlink" (click)="editPlan(row)" title="Edit" style="cursor: pointer;">edit</mat-icon> 
-                    <mat-icon class="txlink"  (click)="attach(row,'plan')" title="Attachments" style="cursor: pointer;">attach_file</mat-icon> 
+                  <td mat-cell *matCellDef="let row">
+                    <div class="icon-cell">
+                      <mat-icon class="action-icon" (click)="editPlan(row)" title="Edit">edit</mat-icon>
+                      <mat-icon class="action-icon" (click)="attach(row,'plan')" title="Attachments">attach_file</mat-icon>
+                    </div>
                   </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

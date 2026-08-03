@@ -154,4 +154,19 @@ export class Users implements OnInit, AfterViewInit {
     const value = (event.target as HTMLInputElement).value ?? '';
     this.dataSource.filter = value.trim().toLowerCase();
   }
+
+  /* ---------------- DISPLAY HELPERS ---------------- */
+
+  getStatusClass(row: any): string {
+    if (row.locked) {
+      return 'status-locked';
+    }
+
+    const status = (row.status ?? '').toString().trim().toLowerCase();
+    if (status === 'in-active' || status === 'inactive' || status === '1') {
+      return 'status-inactive';
+    }
+
+    return 'status-active';
+  }
 }

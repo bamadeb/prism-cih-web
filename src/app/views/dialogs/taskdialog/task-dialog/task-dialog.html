@@ -16,7 +16,8 @@
       <form [formGroup]="addTaskFormGroup" (ngSubmit)="submitTask()" class="txupper">
 
         <!-- TASK TYPE -->
-        <mat-radio-group formControlName="task_next_panel_id" class="d-flex gap-3 flex-wrap">
+        <label class="form-label">Task Type</label>
+        <mat-radio-group formControlName="task_next_panel_id" class="d-flex gap-3 flex-wrap task-type-group">
           <mat-radio-button *ngFor="let t of action_ativity_type" [value]="t.id">
             {{ t.action_type }}
           </mat-radio-button>
@@ -25,56 +26,56 @@
         <mat-error *ngIf="addTaskFormGroup.get('task_next_panel_id')?.touched &&
                           addTaskFormGroup.get('task_next_panel_id')?.invalid">
           Task type required
-        </mat-error><br>
+        </mat-error>
 
-        <!-- DATE -->
-        <mat-form-field appearance="outline" class="w-100 mt-2" style="margin-right: 5px;">
-          <mat-label>Task Date</mat-label>
-          <input matInput [matDatepicker]="dp" formControlName="task_date" readonly>
-          <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-          <mat-datepicker #dp></mat-datepicker>
-          <mat-error *ngIf="addTaskFormGroup.get('task_date')?.touched &&
-                          addTaskFormGroup.get('task_date')?.invalid">
-          Task date required
-        </mat-error> 
-        </mat-form-field>
+        <!-- DATE / ASSIGN / STATUS -->
+        <div class="d-flex gap-3 task-fields-row">
+          <mat-form-field appearance="outline" class="task-field">
+            <mat-label>Task Date</mat-label>
+            <input matInput [matDatepicker]="dp" formControlName="task_date" readonly>
+            <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+            <mat-datepicker #dp></mat-datepicker>
+            <mat-error *ngIf="addTaskFormGroup.get('task_date')?.touched &&
+                            addTaskFormGroup.get('task_date')?.invalid">
+            Task date required
+          </mat-error>
+          </mat-form-field>
 
-        <!-- ASSIGN -->
-        <mat-form-field appearance="outline" class="w-100 mt-3" style="margin-right: 5px;">
-          <mat-label>Assign To</mat-label>
-          <mat-select formControlName="task_assign_to">
-            <mat-option *ngFor="let n of navigatorList" [value]="n.ID" class="txupper">
-              {{ n.FistName }} {{ n.LastName }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="addTaskFormGroup.get('task_assign_to')?.touched &&
-                          addTaskFormGroup.get('task_assign_to')?.invalid">
-          Assign to required
-        </mat-error> 
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="task-field">
+            <mat-label>Assign To</mat-label>
+            <mat-select formControlName="task_assign_to">
+              <mat-option *ngFor="let n of navigatorList" [value]="n.ID" class="txupper">
+                {{ n.FistName }} {{ n.LastName }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="addTaskFormGroup.get('task_assign_to')?.touched &&
+                            addTaskFormGroup.get('task_assign_to')?.invalid">
+            Assign to required
+          </mat-error>
+          </mat-form-field>
 
-        <!-- STATUS -->
-        <mat-form-field appearance="outline" class="w-100 mt-3">
-          <mat-label>Status</mat-label>
-          <mat-select formControlName="task_status">
-            <mat-option value="Open">OPEN</mat-option>
-            <mat-option value="In-Process">IN-PROCESS</mat-option>
-            <mat-option value="Successful">SUCCESSFUL</mat-option>
-          </mat-select>
-          <mat-error *ngIf="addTaskFormGroup.get('task_status')?.touched &&
-                          addTaskFormGroup.get('task_status')?.invalid">
-         Task status required
-        </mat-error> 
-        </mat-form-field><br>
+          <mat-form-field appearance="outline" class="task-field">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="task_status">
+              <mat-option value="Open">OPEN</mat-option>
+              <mat-option value="In-Process">IN-PROCESS</mat-option>
+              <mat-option value="Successful">SUCCESSFUL</mat-option>
+            </mat-select>
+            <mat-error *ngIf="addTaskFormGroup.get('task_status')?.touched &&
+                            addTaskFormGroup.get('task_status')?.invalid">
+           Task status required
+          </mat-error>
+          </mat-form-field>
+        </div>
 
         <!-- NOTE -->
-        <mat-form-field  class="w-100 mt-3" style="margin-bottom:20px;">
+        <mat-form-field appearance="outline" class="w-100">
           <mat-label>Comment</mat-label>
-          <textarea matInput rows="2" cols="100%" formControlName="task_action_note" style="text-transform: none;"></textarea>
+          <textarea matInput rows="2" formControlName="task_action_note" style="text-transform: none;"></textarea>
         </mat-form-field>
 
         <!-- BUTTON -->
-        <div>
+        <div class="task-form-actions">
           <button mat-raised-button color="primary"
                   type="submit"
                   [disabled]="isLoading">
