@@ -4,37 +4,148 @@
   align-items: center;       /* vertical */
   min-height: 200px;         /* give space to center vertically */
 }
-.wd{
-  width: 20%;
-}
 
+/* SUMMARY CARDS */
 .summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 14px;
+  margin-bottom: 6px;
+  overflow-x: auto;
 }
 
-mat-card {
-  text-align: center;
-}
-
-mat-card h2 {
-  color: #1e88e5;
-  font-size: 28px;
+/* .wd previously forced width:20%, which — inside a flex row — computed
+   against each item's own shrunk size and collapsed the cards. Reset it
+   and let all cards share the row equally so they stay on one line. */
+.summary-cards mat-card.wd {
+  width: auto;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 92px;
   margin: 0;
+  padding: 14px 18px;
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e6e9f0;
+  border-left: 4px solid darkturquoise;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, .06);
+  transition: box-shadow .2s ease, transform .2s ease;
 }
 
-mat-card p {
-  margin: 4px 0 0;
-  color: #1e88e5;
-  font-weight: 500;
+.summary-cards mat-card.wd:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, .12);
+  transform: translateY(-2px);
 }
+
+/* Severity-coded to match the risk-high/medium/low colors already used
+   in the table below: IN CRISIS L3 (highest) -> low risk (lowest). */
+.summary-cards mat-card.wd:nth-of-type(1) { border-left-color: #b71c1c; }
+.summary-cards mat-card.wd:nth-of-type(1) mat-card-title.fbold { color: #b71c1c; }
+
+.summary-cards mat-card.wd:nth-of-type(2) { border-left-color: #a86b00; }
+.summary-cards mat-card.wd:nth-of-type(2) mat-card-title.fbold { color: #a86b00; }
+
+.summary-cards mat-card.wd:nth-of-type(3) { border-left-color: #1b5e20; }
+.summary-cards mat-card.wd:nth-of-type(3) mat-card-title.fbold { color: #1b5e20; }
+
+.summary-cards mat-card-title.fbold {
+  font-size: 26px;
+  line-height: 1.15;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.summary-cards mat-card-content {
+  padding: 4px 0 0 !important;
+  margin: 0 !important;
+}
+
+.summary-cards h3.fnormal {
+  margin: 0 !important;
+  color: #667085;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
 .fbold{
   font-weight: bold;
 }
 
 .fnormal{
   font-weight: normal;
+}
+
+/* TOOLBAR (paginator + user filter + search) */
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-row {
+  align-items: center;
+  margin: 0 !important;
+}
+
+/* TABLE */
+.table-wrapper {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+}
+
+.table-wrapper table {
+  width: 100%;
+}
+
+.table-wrapper .mat-mdc-header-row {
+  background: darkturquoise;
+}
+
+.table-wrapper .mat-mdc-header-cell {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 11.5px !important;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+
+.table-wrapper .mat-mdc-cell {
+  font-size: 13px;
+}
+
+.table-wrapper .mat-mdc-row:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.table-wrapper .mat-mdc-row:hover {
+  background-color: #f4f8fc;
+}
+
+.no-data {
+  text-align: center;
+  padding: 28px;
+  color: #888;
+  font-size: 14px;
 }
 
 .child-table {
@@ -66,7 +177,3 @@ mat-card p {
   color: #1b5e20;
   font-weight: 600;
 }
-
-
-
-

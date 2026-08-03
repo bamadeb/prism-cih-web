@@ -1,8 +1,7 @@
 <div class="pagecontent">
     <mat-card style="margin-bottom: 15px;">
         <mat-card-content style="text-align:center">
-            <div style="display: flex; margin-bottom: 10px; color:dodgerblue" class="txupper summary-cards">
-            
+            <div class="txupper summary-cards">
             <mat-card class="wd" *ngFor="let card of statusCards; trackBy: trackByLabel">
             <mat-card-title class="fbold">
                 {{ card.count }}
@@ -12,7 +11,6 @@
                 <h3 class="fnormal">{{ card.label }}</h3>
             </mat-card-content>
             </mat-card>
-                        
             </div>
 
              
@@ -28,9 +26,10 @@
 
             <!-- TABLE + PAGINATOR ALWAYS PRESENT -->
             <div [hidden]="isLoading">
-                <div style="display:flex; justify-content:flex-end;">
-                    <div style="justify-content:left;">
-
+                <div class="table-toolbar">
+                    <div class="toolbar-left">
+                        <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]">
+                        </mat-paginator>
                         <form [formGroup]="actionLogFormGroup" class="filter-row">
                         <mat-form-field appearance="outline" class="mr">
                             <mat-label>ALL USERS</mat-label>
@@ -39,7 +38,7 @@
                             class="txupper"
                             (selectionChange)="applyFilter()">
                             <mat-option  class="txupper" [value]="">ALL USERS</mat-option>
-                                
+
                             <mat-option
                                 class="txupper"
                                 *ngFor="let u of user_list"
@@ -50,17 +49,15 @@
                             </mat-select>
                         </mat-form-field>
                         </form>
-
-                    </div>  
-                    <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSize]="25" [pageSizeOptions]="[10, 25, 50, 100]">
-                    </mat-paginator>
+                    </div>
                     <mat-form-field appearance="outline" >
                         <mat-label>Search</mat-label>
                         <input matInput (keyup)="filter($event)" placeholder="Search records">
                     </mat-form-field>
                 </div>
 
-                <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">  
+                <div class="table-wrapper">
+                <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">
                     
                     <!-- MEDICAID ID -->
                     <ng-container matColumnDef="member_name">
@@ -130,6 +127,7 @@
                         </td>
                     </tr>
                 </table>
+                </div>
             </div>
         </mat-card-content>
     </mat-card>

@@ -1,19 +1,19 @@
 <div class="pagecontent">
     <mat-card>
         <mat-card-content style="text-align:center">
-            <div style="display: flex; margin-bottom: 10px; color:dodgerblue" class="txupper summary-cards">
-            <mat-card class="wd">
-                <mat-card-title class="fbold">{{ totalCount }}</mat-card-title>          
+            <div class="txupper summary-cards">
+            <mat-card class="wd summary-total">
+                <mat-card-title class="fbold">{{ totalCount }}</mat-card-title>
                 <mat-card-content>
                     <h3 class="fnormal">TOTAL</h3>
-                </mat-card-content>             
+                </mat-card-content>
             </mat-card>
              <mat-card class="wd" *ngFor="let a of action_ativity_type">
-                <mat-card-title class="fbold">{{ activityCount[a.action_type] || 0 }}</mat-card-title>          
+                <mat-card-title class="fbold">{{ activityCount[a.action_type] || 0 }}</mat-card-title>
                 <mat-card-content>
                     <h3 class="fnormal">{{ a.display_label }}</h3>
-                </mat-card-content>             
-            </mat-card>              
+                </mat-card-content>
+            </mat-card>
             </div>
 
             <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()" style="margin-top: 15px;">
@@ -76,8 +76,9 @@
                 </mat-error>
                 </mat-form-field>
 
-                <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid" style="margin-top:-10px; margin-right: 25px;;">SEARCH</button>
-                 <mat-icon (click)="downloadCsv()" style="cursor: pointer;margin-top: 10px;" title="Download csv">download</mat-icon>   
+                <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid" class="search-btn">SEARCH</button>
+                <mat-icon (click)="downloadCsv()" class="download-icon" title="Download csv">download</mat-icon>
+
             </form>
         </mat-card-content>
     </mat-card>
@@ -105,6 +106,7 @@
           <input matInput (keyup)="filter($event)" placeholder="Search records">
       </mat-form-field>
 
+        <div class="table-wrapper">
         <table mat-table
                 [dataSource]="dataSource"
                 matSort
@@ -169,7 +171,8 @@
                 </td>
             </tr>
         </table>
-        </div>             
+        </div>
+        </div>
 
         </mat-card-content>
     </mat-card>

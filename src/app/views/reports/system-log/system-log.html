@@ -1,55 +1,13 @@
 <div class="pagecontent">
     <mat-card>
-        <mat-card-content style="text-align:center">           
-
-            <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
-                <!-- NAVIGATORS -->
-                <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
-                    <mat-label>ALL USERS</mat-label>
-                    <mat-select formControlName="user_id">
-                        <mat-option class="txupper" [value]="null">ALL USERS</mat-option>
-                        @for (d of navigatorList; track d.ID) {
-                        <mat-option class="txupper" [value]="d.ID">
-                            {{ d.FistName }} {{ d.LastName }} - ({{ d.ROLE_NAME }})
-                        </mat-option>
-                        }
-                    </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                <mat-label>START DATE</mat-label>
-                <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
-                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-                <mat-error *ngIf="actionLogFormGroup.get('start_date')?.hasError('required')">
-                    Start date is required
-                </mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="mr">
-                <mat-label>END DATE</mat-label>
-                <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
-                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-                <mat-error *ngIf="actionLogFormGroup.get('end_date')?.hasError('required')">
-                    End date is required
-                </mat-error>
-                <mat-error *ngIf="actionLogFormGroup.hasError('dateRangeInvalid')">
-                    End date must be after Start Date
-                </mat-error>
-                </mat-form-field>
-                <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid">SEARCH</button>
-            </form>
-        </mat-card-content>
-    </mat-card>
-
-    <mat-card>
         <mat-card-content>
 
         <!-- LOADER -->
         @if (isLoading) {
         <div class="table-loader">
-            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+            <div class="loader-card">
+                <mat-progress-spinner mode="indeterminate" diameter="46"></mat-progress-spinner>
+            </div>
         </div>
         }
 
@@ -61,11 +19,54 @@
             [pageSize]="10"
             [pageSizeOptions]="[10, 25, 50, 100]">
         </mat-paginator>
+
+        <form [formGroup]="actionLogFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
+            <!-- NAVIGATORS -->
+            <mat-form-field appearance="outline" class="mr txupper all-users-field">
+                <mat-label>ALL USERS</mat-label>
+                <mat-select formControlName="user_id">
+                    <mat-option class="txupper" [value]="null">ALL USERS</mat-option>
+                    @for (d of navigatorList; track d.ID) {
+                    <mat-option class="txupper" [value]="d.ID">
+                        {{ d.FistName }} {{ d.LastName }} - ({{ d.ROLE_NAME }})
+                    </mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+            <mat-label>START DATE</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="start_date" readonly>
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-error *ngIf="actionLogFormGroup.get('start_date')?.hasError('required')">
+                Start date is required
+            </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="mr">
+            <mat-label>END DATE</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            <mat-error *ngIf="actionLogFormGroup.get('end_date')?.hasError('required')">
+                End date is required
+            </mat-error>
+            <mat-error *ngIf="actionLogFormGroup.hasError('dateRangeInvalid')">
+                End date must be after Start Date
+            </mat-error>
+            </mat-form-field>
+            <button mat-raised-button color="primary" type="submit" [disabled]="actionLogFormGroup.invalid" class="search-btn">SEARCH</button>
+        </form>
+
         <mat-form-field appearance="outline" >
           <mat-label>Search</mat-label>
           <input matInput (keyup)="filter($event)" placeholder="Search records">
         </mat-form-field>
 
+        </div>
+
+        <div class="table-wrapper" [hidden]="isLoading">
         <table mat-table
                 [dataSource]="dataSource"
                 matSort
@@ -113,9 +114,6 @@
             </tr>
         </table>
         </div>
-
-
-             
 
         </mat-card-content>
     </mat-card>
