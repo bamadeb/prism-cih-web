@@ -3,15 +3,12 @@
         <mat-card>
           <mat-card-content>
             <!-- Search box -->
-            <div style="display:flex; justify-content:flex-end;"> 
-               <div style="justify-content:left;margin-top: 15px;">
-                <a href="assets/sample_file/new-user-account-request-form.pdf" target="_blank" style="float: left;">NEW USER ACCOUNT REQUEST</a>
-               
-                <a style="cursor: pointer; text-decoration: underline;margin: 50px;" (click)="add();">+ CREATE NEW ACCOUNT</a>
-              </div>  
-              <div style="justify-content:left;">
+            <div class="table-toolbar">
+              <div class="toolbar-left">
                 <mat-paginator style="background-color: #f4f3f3;" #mainPaginator [pageSizeOptions]="[10, 25, 50, 100]"
                   [pageSize]="10"></mat-paginator>
+                <a href="assets/sample_file/new-user-account-request-form.pdf" target="_blank" class="secondary-link">NEW USER ACCOUNT REQUEST</a>
+                <a class="add-user-link" (click)="add();">+ CREATE NEW ACCOUNT</a>
               </div>
 
               <mat-form-field appearance="outline" class="search-box">
@@ -20,8 +17,8 @@
               </mat-form-field>
             </div>
             <!-- Data Table -->
-            <div class="mat-elevation-z8">
-              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">                 
+            <div class="table-wrapper">
+              <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">
                   
                 <ng-container matColumnDef="FIRST_NAME">
                   <th mat-header-cell *matHeaderCellDef mat-sort-header>FIRST NAME</th>

@@ -2,10 +2,10 @@
   <mat-card>
     <mat-card-content>
 
-      <form [formGroup]="actionLogFormGroup">
+      <form [formGroup]="actionLogFormGroup" class="filter-row">
 
         <!-- FILE TYPE -->
-        <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
+        <mat-form-field appearance="outline" class="mr txupper filter-field">
           <mat-label>SELECT FILE TYPE</mat-label>
           <mat-select   formControlName="process_type"  (selectionChange)="onProcessTypeChange()">
             <mat-option class="txupper" value="Member Process">Member File Process</mat-option>
@@ -15,7 +15,7 @@
         </mat-form-field>
 
         <!-- PROCESS LIST -->
-        <mat-form-field appearance="outline" class="mr txupper" style="width: 25%;">
+        <mat-form-field appearance="outline" class="mr txupper filter-field">
           <mat-label>SELECT PROCESS</mat-label>
           <mat-select
             formControlName="process_list"
@@ -31,7 +31,9 @@
         </mat-form-field>
 
       </form>
-      <table mat-table  [dataSource]="logDetails" class="txupper"> 
+
+      <div class="table-wrapper">
+      <table mat-table  [dataSource]="logDetails" class="txupper">
             <!-- SL NO -->
             <ng-container matColumnDef="slno">
                 <th mat-header-cell *matHeaderCellDef> Sl No </th>
@@ -71,6 +73,7 @@
             <tr mat-row *matRowDef="let row; columns: logDisplayedColumns"></tr> 
 
             </table>
+      </div>
 
              <div class="no-record" *ngIf="!isLoading && logDetails?.length === 0">
               No records found

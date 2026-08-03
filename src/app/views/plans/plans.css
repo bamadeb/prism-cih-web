@@ -1,3 +1,83 @@
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.add-user-link {
+  cursor: pointer;
+  color: darkturquoise;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: .3px;
+  text-decoration: none;
+}
+
+.add-user-link:hover {
+  text-decoration: underline;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+}
+
+.table-wrapper table {
+  width: 100%;
+}
+
+.table-wrapper .mat-mdc-header-row {
+  background: darkturquoise;
+}
+
+.table-wrapper .mat-mdc-header-cell {
+  color: #fff !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  font-size: 11.5px !important;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  padding: 0 20px !important;
+}
+
+.table-wrapper .mat-mdc-cell {
+  font-size: 13px;
+  padding: 14px 20px !important;
+  vertical-align: middle;
+}
+
+.table-wrapper .mat-mdc-row:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.table-wrapper .mat-mdc-row:hover {
+  background-color: #f4f8fc;
+}
+
+/* ACTION column — center the edit/attachment icons instead of them
+   sitting flush against the left edge of a wide, mostly-empty cell. */
+.table-wrapper .mat-column-1 {
+  text-align: center;
+}
+
+.table-wrapper .mat-column-1 mat-icon {
+  vertical-align: middle;
+  margin: 0 4px;
+}
+
 .loader-backdrop {
   position: fixed;
   top: 0;
