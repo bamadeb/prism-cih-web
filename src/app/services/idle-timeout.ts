@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { fromEvent, merge, Subscription, timer } from 'rxjs';
 import { switchMap, startWith, debounceTime } from 'rxjs/operators';
 import { UserDataService } from './user-data-service';
@@ -10,7 +11,7 @@ import { SystemLogService } from './system-log';
 })
 export class IdleTimeoutService {
 
-  private readonly idleTime = 20 * 60 * 1000; // ✅ 10 minutes
+  private readonly idleTime = 30 * 60 * 1000; // ✅ 30 minutes
   private subscription!: Subscription;
   private storageSubscription!: Subscription;
 
@@ -18,7 +19,8 @@ export class IdleTimeoutService {
     private readonly router: Router,
     private readonly userData: UserDataService,
     private readonly ngZone: NgZone,
-    private readonly systemLogService: SystemLogService
+    private readonly systemLogService: SystemLogService,
+    private readonly dialog: MatDialog
   ) {}
 
   startWatching() {
@@ -89,6 +91,10 @@ export class IdleTimeoutService {
   }
 
   logout() {
+
+    // ✅ Close any open dialog/popup first, so nothing is left floating
+    // over the login page once the session is cleared.
+    this.dialog.closeAll();
 
     const user = this.userData.getUser();
 

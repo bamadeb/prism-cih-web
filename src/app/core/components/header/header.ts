@@ -1,11 +1,12 @@
 import { Component, Input,OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { Router } from '@angular/router'; 
-import { MatIconModule, MatIcon } from '@angular/material/icon';  
+import { Router } from '@angular/router';
+import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { MatMenuModule, MatMenu } from '@angular/material/menu';
-import { MatDivider } from '@angular/material/divider'; 
-import { CommonModule } from '@angular/common'; 
+import { MatDialog } from '@angular/material/dialog';
+import { MatDivider } from '@angular/material/divider';
+import { CommonModule } from '@angular/common';
 import { MatSidenav } from '@angular/material/sidenav';
 import { UserDataService } from '../../../services/user-data-service';
 import { HeaderService } from '../../../services/header.service';
@@ -26,7 +27,7 @@ export class Header implements OnInit {
   userId!: number;
   userEmail!: string;
   title$!: Observable<string>;
-  constructor(private readonly router: Router,private readonly userData: UserDataService,private readonly headerService: HeaderService,private readonly idleService: IdleTimeoutService, private readonly systemLogService:SystemLogService ) {}
+  constructor(private readonly router: Router,private readonly userData: UserDataService,private readonly headerService: HeaderService,private readonly idleService: IdleTimeoutService, private readonly systemLogService:SystemLogService, private readonly dialog: MatDialog ) {}
    ngOnInit(): void {
     this.title$ = this.headerService.title$;
     const user = this.userData.getUser(); 
@@ -39,6 +40,7 @@ export class Header implements OnInit {
     this.userEmail = user.EmailID;     
   }  
   logout() {
+    this.dialog.closeAll();
     this.systemLogService.addSystemLog({
       log_name: 'LOGOUT',
       log_details: `Logout by ${this.userEmail}`,

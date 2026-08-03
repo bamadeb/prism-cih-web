@@ -499,14 +499,14 @@
 
                   <ng-container *ngFor="let qgap of qualityGapsList.controls; let i = index" [formGroupName]="i">
 
-                    <mat-expansion-panel class="mb-2">
+                    <mat-expansion-panel class="mb-2" [expanded]="invalidQualityPanelIndex === i" [attr.data-qpanel-index]="i">
 
                       <!-- HEADER -->
                       <mat-expansion-panel-header style="height: auto;font-size: 13px;">
 
 
                         <mat-panel-title class="text-uppercase panel-title-10">
-                          
+
                           <mat-checkbox formControlName="PROCESS_STATUS" [disabled]="true" class="me-2">
                           </mat-checkbox>
                         </mat-panel-title>
@@ -706,20 +706,28 @@
                                 </mat-form-field>
                               </div>  
 
-                              <!-- RxProviderFlag -->
-                               <div class="col-lg-3 col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Rx PROVIDER FLAG</label>
-                                <mat-radio-group formControlName="RxProviderFlag" class="d-flex gap-3">
-                                  <mat-radio-button [value]="1">YES</mat-radio-button>
-                                  <mat-radio-button [value]="0">NO</mat-radio-button>
-                                </mat-radio-group>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                              <!-- PCPFlag -->
-                                <label class="form-label fw-semibold">PCP FLAG</label>
-                                <mat-radio-group formControlName="PCPFlag" class="d-flex gap-3">
-                                  <mat-radio-button [value]="1">YES</mat-radio-button>
-                                  <mat-radio-button [value]="0">NO</mat-radio-button>
-                                </mat-radio-group>
-                              </div>  
+                              <!-- RxProviderFlag / PCPFlag -->
+                              <div class="d-flex gap-3 align-items-start mb-3">
+                                <div style="width: 49%;">
+                                  <label class="form-label fw-semibold">Rx PROVIDER FLAG</label>
+                                  <mat-radio-group formControlName="RxProviderFlag" class="d-flex gap-3"
+                                    [class.field-error]="qgap.get('RxProviderFlag')?.invalid && qgap.get('RxProviderFlag')?.touched"
+                                    (change)="qgap.get('RxProviderFlag')?.setErrors(null)">
+                                    <mat-radio-button [value]="1">YES</mat-radio-button>
+                                    <mat-radio-button [value]="0">NO</mat-radio-button>
+                                  </mat-radio-group>
+                                </div>
+
+                                <div style="width: 49%;">
+                                  <label class="form-label fw-semibold">PCP FLAG</label>
+                                  <mat-radio-group formControlName="PCPFlag" class="d-flex gap-3"
+                                    [class.field-error]="qgap.get('PCPFlag')?.invalid && qgap.get('PCPFlag')?.touched"
+                                    (change)="qgap.get('PCPFlag')?.setErrors(null)">
+                                    <mat-radio-button [value]="1">YES</mat-radio-button>
+                                    <mat-radio-button [value]="0">NO</mat-radio-button>
+                                  </mat-radio-group>
+                                </div>
+                              </div>
                               
 
                               <!-- Quantity Dispensed -->

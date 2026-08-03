@@ -142,10 +142,21 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   }
 
   private async withLoader<T>(task: () => Promise<T>): Promise<T | undefined> {
+  // Session already gone (e.g. auto logout fired while this was queued) — nothing to do.
+  if (!this.userData.isLoggedIn()) {
+    return undefined;
+  }
+
   this.isLoading = true;
   try {
     return await task();
   } catch (err) {
+    // Don't show "something went wrong" for a request that failed because
+    // the user was logged out mid-flight — the login page is already showing.
+    if (!this.userData.isLoggedIn()) {
+      return undefined;
+    }
+
     console.error(err);
 
     this.displayError('Something went wrong', 'Please try again');
@@ -535,6 +546,13 @@ async openAddActionDialog(
     await this.addActionService.showAddActionDialog(
       medicaid_id, member_name, member_db, addr, phone, practice, PCP_TAX_ID
     );
+
+    // The dialog can be closed by an auto logout while it was open —
+    // skip the refresh call if the session is already gone.
+    if (!this.userData.isLoggedIn()) {
+      return;
+    }
+
     await this.loadTableData();
   });
 }

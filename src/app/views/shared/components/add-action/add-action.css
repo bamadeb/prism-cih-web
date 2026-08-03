@@ -35,6 +35,15 @@ textarea.mat-mdc-input-element {
   color: #333;
 }
 
+/* Highlight a required field (e.g. a mat-radio-group) that failed
+   validation on submit — mat-form-field controls already get this
+   automatically from Angular Material, radio groups need it explicitly. */
+.field-error {
+  border: 1px solid #d32f2f;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
 /* Fix textarea height */
 textarea[matInput] {
   

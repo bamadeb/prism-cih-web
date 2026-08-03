@@ -29,6 +29,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Observable, startWith, map } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 @Component({
   selector: 'app-add-action',
   imports: [
@@ -360,7 +361,7 @@ export class AddAction implements OnInit , AfterViewInit {
         return;
       }
 
-      const payload = { tin };
+      const payload = { tin: String(tin) };
 
       const result = await this.apiService.getProviderListByTin<any>(payload);
 
@@ -405,6 +406,45 @@ export class AddAction implements OnInit , AfterViewInit {
   }
   get qualityGapsList(): FormArray {
     return this.addActionFormGroup.get('qualityGapsList') as FormArray;
+  }
+
+  // Index of the quality gap panel that should be force-expanded because
+  // it failed validation on submit (see focusQualityField below).
+  invalidQualityPanelIndex: number | null = null;
+
+  /** Expands the quality gap panel containing `fg`, then scrolls to and
+   *  focuses the invalid field so the user can immediately see and fix it. */
+  private focusQualityField(fg: FormGroup, fieldName: string): void {
+    const index = this.qualityGapsList.controls.indexOf(fg);
+    if (index === -1) {
+      return;
+    }
+
+    this.invalidQualityPanelIndex = index;
+
+    setTimeout(() => {
+      const panel = document.querySelector(`[data-qpanel-index="${index}"]`);
+      const field = panel?.querySelector(`[formcontrolname="${fieldName}"]`) as HTMLElement | null;
+      (field ?? panel)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      field?.focus?.();
+    }, 200);
+  }
+
+  /** Professional replacement for the native browser alert() for required-field messages.
+   *  `onClosed` (if given) runs after the user dismisses the dialog — use it to scroll/focus
+   *  the invalid field so it isn't hidden behind the still-open dialog. */
+  private showRequiredFieldAlert(message: string, onClosed?: () => void): void {
+    const dialogRef = this.dialog.open(ErrorDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Required Field',
+        errorMessage: message
+      }
+    });
+
+    if (onClosed) {
+      dialogRef.afterClosed().subscribe(() => onClosed());
+    }
   }
   async setScheduledActionStatus(id: string) {
     const user = this.userData.getUser();
@@ -664,7 +704,7 @@ export class AddAction implements OnInit , AfterViewInit {
     this.addActionChangeFlag = 1; 
     // 🔹 Validate action_date is a valid date
     if (!formValues.action_date || Number.isNaN(new Date(formValues.action_date).getTime())) {
-      alert('Please select a valid Action Date');
+      this.showRequiredFieldAlert('Please select a valid Action Date');
       this.isProcessing = false;
 
       setTimeout(() => {
@@ -952,10 +992,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 TIN VALIDATION
         if (!commonData.tin || commonData.tin.toString().trim() === '') {
-          alert('TIN is required for quality gap entries');
-
           fg.get('tin')?.setErrors({ required: true });
           fg.get('tin')?.markAsTouched();
+          this.showRequiredFieldAlert('TIN is required for quality gap entries', () => this.focusQualityField(fg, 'tin'));
 
           isValid = false;
           return;
@@ -965,10 +1004,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 PROVIDER VALIDATION
         if (!providerId) {
-          alert('Provider is required for quality gap entries');
-
           fg.get('provider_id')?.setErrors({ required: true });
           fg.get('provider_id')?.markAsTouched();
+          this.showRequiredFieldAlert('Provider is required for quality gap entries', () => this.focusQualityField(fg, 'provider_id'));
 
           isValid = false;
           return;
@@ -977,10 +1015,9 @@ private async updateQualityAndRiskData(
         
         // 🔴 DOS VALIDATION
         if (!commonData.Observation_Date || commonData.Observation_Date.toString().trim() === '') {
-          alert('DOS is required for quality gap entries');
-
           fg.get('Observation_Date')?.setErrors({ required: true });
           fg.get('Observation_Date')?.markAsTouched();
+          this.showRequiredFieldAlert('DOS is required for quality gap entries', () => this.focusQualityField(fg, 'Observation_Date'));
 
           isValid = false;
           return;
@@ -993,8 +1030,6 @@ private async updateQualityAndRiskData(
           (commonData.ICDDX10 && commonData.ICDDX10.toString().trim() !== '');
 
         if (!hasAtLeastOneCode) {
-          alert('Enter at least one code (CPTPx or HCPCSPx or ICDDX10)');
-
           // ❗ Set error on all 3 fields for better UX
           //fg.get('CPTPx')?.setErrors({ required: true });
          // fg.get('HCPCSPx')?.setErrors({ required: true });
@@ -1003,6 +1038,7 @@ private async updateQualityAndRiskData(
           fg.get('CPTPx')?.markAsTouched();
           fg.get('HCPCSPx')?.markAsTouched();
           fg.get('ICDDX10')?.markAsTouched();
+          this.showRequiredFieldAlert('Enter at least one code (CPTPx or HCPCSPx or ICDDX10)', () => this.focusQualityField(fg, 'CPTPx'));
 
           isValid = false;
           return;
@@ -1010,10 +1046,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 RxProviderFlag
         if (commonData.RxProviderFlag === null || commonData.RxProviderFlag === undefined || commonData.RxProviderFlag.toString().trim() === '') {
-          alert('RxProviderFlag is required for quality gap entries');
-
           fg.get('RxProviderFlag')?.setErrors({ required: true });
           fg.get('RxProviderFlag')?.markAsTouched();
+          this.showRequiredFieldAlert('RxProviderFlag is required for quality gap entries', () => this.focusQualityField(fg, 'RxProviderFlag'));
 
           isValid = false;
           return;
@@ -1021,10 +1056,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 PCPFlag
         if (commonData.PCPFlag === null || commonData.PCPFlag === undefined || commonData.PCPFlag.toString().trim() === '') {
-          alert('PCPFlag is required for quality gap entries');
-
           fg.get('PCPFlag')?.setErrors({ required: true });
           fg.get('PCPFlag')?.markAsTouched();
+          this.showRequiredFieldAlert('PCPFlag is required for quality gap entries', () => this.focusQualityField(fg, 'PCPFlag'));
 
           isValid = false;
           return;
@@ -1032,10 +1066,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 SuppSource
         if (!commonData.SuppSource || commonData.SuppSource.toString().trim() === '') {
-          alert('Supp Source is required for quality gap entries');
-
           fg.get('SuppSource')?.setErrors({ required: true });
           fg.get('SuppSource')?.markAsTouched();
+          this.showRequiredFieldAlert('Supp Source is required for quality gap entries', () => this.focusQualityField(fg, 'SuppSource'));
 
           isValid = false;
           return;
@@ -1101,10 +1134,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 TIN VALIDATION
         if (!commonData.tin || commonData.tin.toString().trim() === '') {
-          alert('TIN is required for quality gap entries');
-
           fg.get('tin')?.setErrors({ required: true });
           fg.get('tin')?.markAsTouched();
+          this.showRequiredFieldAlert('TIN is required for quality gap entries', () => this.focusQualityField(fg, 'tin'));
 
           isValid = false;
           return;
@@ -1114,10 +1146,9 @@ private async updateQualityAndRiskData(
         // 🔴 PROVIDER VALIDATION
         if (!providerId) {
 
-          alert('Provider is required for quality gap entries');
-
           fg.get('provider_id')?.setErrors({ required: true });
           fg.get('provider_id')?.markAsTouched();
+          this.showRequiredFieldAlert('Provider is required for quality gap entries', () => this.focusQualityField(fg, 'provider_id'));
 
           isValid = false;
           return;
@@ -1126,10 +1157,9 @@ private async updateQualityAndRiskData(
         
         // 🔴 DOS VALIDATION
         if (!commonData.Observation_Date || commonData.Observation_Date.toString().trim() === '') {
-          alert('DOS is required for quality gap entries');
-
           fg.get('Observation_Date')?.setErrors({ required: true });
           fg.get('Observation_Date')?.markAsTouched();
+          this.showRequiredFieldAlert('DOS is required for quality gap entries', () => this.focusQualityField(fg, 'Observation_Date'));
 
           isValid = false;
           return;
@@ -1142,8 +1172,6 @@ private async updateQualityAndRiskData(
           (commonData.ICDDX10 && commonData.ICDDX10.toString().trim() !== '');
 
         if (!hasAtLeastOneCode) {
-          alert('Enter at least one code (CPTPx or HCPCSPx or ICDDX10)');
-
           // ❗ Set error on all 3 fields for better UX
           //fg.get('CPTPx')?.setErrors({ required: true });
          // fg.get('HCPCSPx')?.setErrors({ required: true });
@@ -1152,6 +1180,7 @@ private async updateQualityAndRiskData(
           fg.get('CPTPx')?.markAsTouched();
           fg.get('HCPCSPx')?.markAsTouched();
           fg.get('ICDDX10')?.markAsTouched();
+          this.showRequiredFieldAlert('Enter at least one code (CPTPx or HCPCSPx or ICDDX10)', () => this.focusQualityField(fg, 'CPTPx'));
 
           isValid = false;
           return;
@@ -1159,10 +1188,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 RxProviderFlag
         if (commonData.RxProviderFlag === null || commonData.RxProviderFlag === undefined || commonData.RxProviderFlag.toString().trim() === '') {
-          alert('RxProviderFlag is required for quality gap entries');
-
           fg.get('RxProviderFlag')?.setErrors({ required: true });
           fg.get('RxProviderFlag')?.markAsTouched();
+          this.showRequiredFieldAlert('RxProviderFlag is required for quality gap entries', () => this.focusQualityField(fg, 'RxProviderFlag'));
 
           isValid = false;
           return;
@@ -1170,10 +1198,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 PCPFlag
         if (commonData.PCPFlag === null || commonData.PCPFlag === undefined || commonData.PCPFlag.toString().trim() === '') {
-          alert('PCPFlag is required for quality gap entries');
-
           fg.get('PCPFlag')?.setErrors({ required: true });
           fg.get('PCPFlag')?.markAsTouched();
+          this.showRequiredFieldAlert('PCPFlag is required for quality gap entries', () => this.focusQualityField(fg, 'PCPFlag'));
 
           isValid = false;
           return;
@@ -1181,10 +1208,9 @@ private async updateQualityAndRiskData(
 
         // 🔴 SuppSource
         if (!commonData.SuppSource || commonData.SuppSource.toString().trim() === '') {
-          alert('Supp Source is required for quality gap entries');
-
           fg.get('SuppSource')?.setErrors({ required: true });
           fg.get('SuppSource')?.markAsTouched();
+          this.showRequiredFieldAlert('Supp Source is required for quality gap entries', () => this.focusQualityField(fg, 'SuppSource'));
 
           isValid = false;
           return;
