@@ -8,3 +8,32 @@
     top: 2px;
     right: 0;
 }
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.task-type-group {
+  margin-bottom: 8px;
+  row-gap: 10px !important;
+}
+
+.task-fields-row {
+  margin-top: 18px;
+  align-items: flex-start;
+}
+
+.task-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
