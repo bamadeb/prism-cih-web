@@ -207,6 +207,15 @@ mat-dialog-actions,
   .col-lg-9 { width: 75%; }
 }
 
+/* A .d-flex used as a 2-field sub-row directly inside a .row grid must
+   always take the full row width, so it starts its own line instead of
+   shrinking to content and sharing a line with a neighboring row. */
+.row > .d-flex {
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .mat-mdc-tab-label-container{
   flex-grow: 0!important;
 }
