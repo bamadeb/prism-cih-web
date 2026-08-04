@@ -2,28 +2,6 @@ import { Routes } from '@angular/router';
 import { AuthLayout } from './core/layout/auth-layout/auth-layout';
 import { Login } from './views/auth/login/login';
 import { MainLayout } from './core/layout/main-layout/main-layout';
-import { Dashboard } from './views/dashboard/dashboard';
-import { Users } from './views/users/users';
-import { StarPerformance } from './views/reports/star-performance/star-performance';
-import { RisksGapReport } from './views/reports/risks-gap-report/risks-gap-report';
-import { Plans } from './views/plans/plans';
-import { Logreport } from './views/reports/logreport/logreport';
-import { RiskProfile } from './views/reports/risk-profile/risk-profile';
-import { MemberFile } from './views/process-file/member-file/member-file';
-import { RiskgapsFile } from './views/process-file/riskgaps-file/riskgaps-file';
-import { QualitygapsFile } from './views/process-file/qualitygaps-file/qualitygaps-file';
-import { SystemLog } from './views/reports/system-log/system-log';
-import { FileLogReport } from './views/reports/file-log-report/file-log-report';
-import { PcrFile } from './views/process-file/pcr-file/pcr-file';
-import { AppointmentList } from './views/reports/appointment-list/appointment-list/appointment-list';
-import { ChangePassword } from './views/change-password/change-password';
-import { UserCreationRequest } from './views/user-creation-request/user-creation-request/user-creation-request';
-import { AccessDenied } from './views/access-denied/access-denied/access-denied';
-import { PageAccess } from './views/rolewise-page/page-access/page-access';
-
-import { StarPerformanceFile } from './views/process-file/star-performance-file/star-performance-file';
-
-import { OutreachActivity } from './views/reports/outreach-activity/outreach-activity/outreach-activity';
 //import { AutocompleteDemo } from './views/autocomplete-demo/autocomplete-demo/autocomplete-demo';
 
 
@@ -41,128 +19,185 @@ export const routes: Routes = [
     path: '',
     component: AuthLayout,
     children: [
-      { path: 'change-password', component: ChangePassword },
+      {
+        path: 'change-password',
+        loadComponent: () => import('./views/change-password/change-password').then(m => m.ChangePassword),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'dashboard', component: Dashboard },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./views/dashboard/dashboard').then(m => m.Dashboard),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'users', component: Users },
+      {
+        path: 'users',
+        loadComponent: () => import('./views/users/users').then(m => m.Users),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'plans', component: Plans },
+      {
+        path: 'plans',
+        loadComponent: () => import('./views/plans/plans').then(m => m.Plans),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'usercreation-request', component: UserCreationRequest },
+      {
+        path: 'usercreation-request',
+        loadComponent: () => import('./views/user-creation-request/user-creation-request/user-creation-request').then(m => m.UserCreationRequest),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'starperformance', component: StarPerformance },
+      {
+        path: 'starperformance',
+        loadComponent: () => import('./views/reports/star-performance/star-performance').then(m => m.StarPerformance),
+      },
     ]
   },{
     path: '',
     component: MainLayout,
     children: [
-      { path: 'logreport', component: Logreport },
+      {
+        path: 'logreport',
+        loadComponent: () => import('./views/reports/logreport/logreport').then(m => m.Logreport),
+      },
     ]
   },{
     path: '',
     component: MainLayout,
     children: [
-      { path: 'systemlogreport', component: SystemLog },
+      {
+        path: 'systemlogreport',
+        loadComponent: () => import('./views/reports/system-log/system-log').then(m => m.SystemLog),
+      },
     ]
   },{
     path: '',
     component: MainLayout,
     children: [
-      { path: 'filelogreport', component: FileLogReport },
+      {
+        path: 'filelogreport',
+        loadComponent: () => import('./views/reports/file-log-report/file-log-report').then(m => m.FileLogReport),
+      },
     ]
   },{
     path: '',
     component: MainLayout,
     children: [
-      { path: 'risk-profile', component: RiskProfile },
+      {
+        path: 'risk-profile',
+        loadComponent: () => import('./views/reports/risk-profile/risk-profile').then(m => m.RiskProfile),
+      },
     ]
   },{
     path: '',
     component: MainLayout,
     children: [
-      { path: 'appointment-list', component: AppointmentList },
+      {
+        path: 'appointment-list',
+        loadComponent: () => import('./views/reports/appointment-list/appointment-list/appointment-list').then(m => m.AppointmentList),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'process-member-file', component: MemberFile },
+      {
+        path: 'process-member-file',
+        loadComponent: () => import('./views/process-file/member-file/member-file').then(m => m.MemberFile),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'process-riskgaps-file', component: RiskgapsFile },
+      {
+        path: 'process-riskgaps-file',
+        loadComponent: () => import('./views/process-file/riskgaps-file/riskgaps-file').then(m => m.RiskgapsFile),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'process-qualitygaps-file', component: QualitygapsFile },
+      {
+        path: 'process-qualitygaps-file',
+        loadComponent: () => import('./views/process-file/qualitygaps-file/qualitygaps-file').then(m => m.QualitygapsFile),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'process-pcr-file', component: PcrFile },
+      {
+        path: 'process-pcr-file',
+        loadComponent: () => import('./views/process-file/pcr-file/pcr-file').then(m => m.PcrFile),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'process-star-performance-file', component: StarPerformanceFile },
+      {
+        path: 'process-star-performance-file',
+        loadComponent: () => import('./views/process-file/star-performance-file/star-performance-file').then(m => m.StarPerformanceFile),
+      },
     ]
   },
    {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'access-denied', component: AccessDenied },
+      {
+        path: 'access-denied',
+        loadComponent: () => import('./views/access-denied/access-denied/access-denied').then(m => m.AccessDenied),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'page-access', component: PageAccess },
+      {
+        path: 'page-access',
+        loadComponent: () => import('./views/rolewise-page/page-access/page-access').then(m => m.PageAccess),
+      },
     ]
   },
   {
     path: '',
     component: MainLayout,
     children: [
-      { path: 'outreach-activity', component: OutreachActivity },
+      {
+        path: 'outreach-activity',
+        loadComponent: () => import('./views/reports/outreach-activity/outreach-activity/outreach-activity').then(m => m.OutreachActivity),
+      },
     ]
   },
   //  {
@@ -176,10 +211,12 @@ export const routes: Routes = [
     path: '',
     component: MainLayout,
     children: [
-      { path: 'riskgapsreport', component: RisksGapReport },
+      {
+        path: 'riskgapsreport',
+        loadComponent: () => import('./views/reports/risks-gap-report/risks-gap-report').then(m => m.RisksGapReport),
+      },
     ]
   },
   { path: '**', redirectTo: 'login' }
 ];
-
 

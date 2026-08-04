@@ -100,6 +100,7 @@ export class Dashboard extends BaseComponent implements OnInit, AfterViewInit {
   loginRoleId: number | null = null;
   isLoading = false;
   isOpen = false;
+  isOverviewLoading = false;
   overallSummary: any = {};
   ownSummary: any = {};
   departmentList: any = {};
@@ -593,17 +594,19 @@ onNavigatorChange(navigatorId: number): void {
       user_id: this.loginUserId
     };
 
+    this.isOverviewLoading = true;
+
     try {
       const res = await this.apiService.poweroverview<any>(request);
- 
+
       if (res.data) {
 
         this.overallSummary = res.data.overallRiskQualitySummary || [];
         this.ownSummary = res.data.ownRiskQualitySummary || [];
-        this.navigatorList = res.data.navigatorList || []; 
+        this.navigatorList = res.data.navigatorList || [];
 
         this.departmentList = res.data.departmentList || [];
-        this.planList = res.data.planList || []; 
+        this.planList = res.data.planList || [];
         this.calculatePerformance(res.data);
         this.loadTransfertabledata(res.data.referralList);
         this.loadNopatienttabledata(res.data.NoLongerPatientList);
@@ -611,6 +614,8 @@ onNavigatorChange(navigatorId: number): void {
 
     } catch (error) {
       console.error('loadprojectoverviewData failed:', error);
+    } finally {
+      this.isOverviewLoading = false;
     }
 
   }

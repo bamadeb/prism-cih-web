@@ -13,7 +13,8 @@
         <!-- Right button -->
         <div class="navigator-wrap">
           <mat-form-field appearance="outline" class="navigator-select txupper" *ngIf="loginRoleId === 7">
-            <mat-select placeholder="ALL NAVIGATORS" [value]="selectedNavigatorId"
+            <mat-select [placeholder]="isOverviewLoading ? 'LOADING...' : 'ALL NAVIGATORS'" [value]="selectedNavigatorId"
+              [disabled]="isOverviewLoading"
               (selectionChange)="onNavigatorChange($event.value)">
               <mat-option [value]="0">ALL NAVIGATORS</mat-option>
               <mat-option *ngFor="let n of navigatorList" [value]="n.ID" class="txupper">
@@ -29,7 +30,10 @@
 
 
   <div *ngIf="isOpen" class="box" style="margin-top:2px; overflow:auto;">
-   <table class="table">
+   <div *ngIf="isOverviewLoading" class="overview-loading">
+     <mat-spinner diameter="40"></mat-spinner>
+   </div>
+   <table class="table" *ngIf="!isOverviewLoading">
     <tr>
       <td>
         <div class="stat-card stat-risk">

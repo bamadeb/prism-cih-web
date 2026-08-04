@@ -150,6 +150,13 @@ mat-form-field {
   overflow: auto;
 }
 
+.overview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+
 .box > .table {
   width: 100%;
   border-collapse: separate;
