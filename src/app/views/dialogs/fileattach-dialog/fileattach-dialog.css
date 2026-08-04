@@ -33,7 +33,7 @@
 }
 
 .attachments-table thead {
-  background: #00ced1;
+  background: var(--brand-primary);
   color: #fff;
 }
 

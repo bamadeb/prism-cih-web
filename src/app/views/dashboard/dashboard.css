@@ -2,9 +2,9 @@
    Design tokens (scoped to this component's root element)
    ========================================================================== */
 .pagecontent {
-  --dash-primary: #00767c;
+  --dash-primary: var(--brand-primary-dark);
   --dash-primary-dark: #003f44;
-  --dash-accent: #00ced1;
+  --dash-accent: var(--brand-primary);
   --dash-accent-dark: #00999c;
   --dash-bg-soft: #f6f8fb;
   --dash-border: #e3e8ef;

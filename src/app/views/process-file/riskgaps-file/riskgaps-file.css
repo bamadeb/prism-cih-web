@@ -78,7 +78,7 @@
 .sample-link a {
   font-weight: 600;
   text-transform: uppercase;
-  color: darkturquoise;
+  color: var(--brand-primary);
 }
 
 /* TOOLBAR */
@@ -109,7 +109,7 @@
 }
 
 .table-wrapper .mat-mdc-header-row {
-  background: darkturquoise;
+  background: var(--brand-primary);
 }
 
 .table-wrapper .mat-mdc-header-cell {
@@ -160,7 +160,7 @@ td.mat-column-MBR_ID {
 th.mat-column-MBR_ID {
   position: sticky;
   left: 0;
-  background: darkturquoise !important;
+  background: var(--brand-primary) !important;
   z-index: 3;
   min-width: 150px;
   padding: 0 24px !important;
@@ -217,7 +217,7 @@ th.mat-column-MBR_ID {
 }
 
 .process-log-table th {
-  background: darkturquoise;
+  background: var(--brand-primary);
   color: #fff;
   font-weight: 600;
   text-transform: uppercase;

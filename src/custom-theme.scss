@@ -15,6 +15,27 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
+  // ---- Brand color — change these to retint the whole app ----
+  // Professional blue palette.
+  --brand-primary: #1565c0;
+  --brand-primary-dark: #0d47a1;
+  --brand-on-primary: #ffffff;
+  --brand-primary-container: #e3f2fd;
+  --brand-on-primary-container: #0d47a1;
+
+  // Point Material's own system tokens at the brand variables so built-in
+  // components (buttons, form-field focus, etc.) follow the same color.
+  --mat-sys-primary: var(--brand-primary);
+  --mat-sys-on-primary: var(--brand-on-primary);
+  --mat-sys-primary-container: var(--brand-primary-container);
+  --mat-sys-on-primary-container: var(--brand-on-primary-container);
+  --mat-sys-primary-fixed: var(--brand-primary-container);
+  --mat-sys-primary-fixed-dim: var(--brand-primary);
+  --mat-sys-on-primary-fixed: var(--brand-on-primary-container);
+  --mat-sys-on-primary-fixed-variant: var(--brand-on-primary-container);
+  --mat-sys-inverse-primary: var(--brand-primary);
+  --mat-sys-surface-tint: var(--brand-primary);
 }
 
 body {

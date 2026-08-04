@@ -9,7 +9,7 @@
   </div>
   }
 
-  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [dynamicHeight]="true">
     <mat-tab label="TO-DO/DONE">
       <div>
 
@@ -733,7 +733,7 @@
                               <!-- Quantity Dispensed -->
                               <div class="d-flex gap-3 align-items-start mb-2">
                                   <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
-                                  <mat-label>Quantity Dispensed</mat-label>
+                                  <mat-label>QUANTITY DISPENSED</mat-label>
                                   <input matInput formControlName="QuantityDispensed">
                                 </mat-form-field>
 
@@ -755,21 +755,6 @@
                                 </mat-form-field>
                               </div>
 
-                              <!-- Provider Taxonomy Code -->
-                              <div class="col-lg-3 col-md-6 mb-2">
-                                <mat-form-field appearance="outline" class="w-100">
-                                  <mat-label>Provider Taxonomy Code</mat-label>
-                                  <input matInput formControlName="Service_Provider_Taxonomy_Code">
-                                </mat-form-field>
-                              </div>
-
-                              <!-- Service Provider Type -->
-                              <div class="col-lg-3 col-md-6 mb-2">
-                                <mat-form-field appearance="outline" class="w-100">
-                                  <mat-label>Service Provider Type</mat-label>
-                                  <input matInput formControlName="Service_Provider_Type">
-                                </mat-form-field>
-                              </div>
 
                               <!-- Note -->
                               <div class="col-lg-9 col-md-12 mb-2">
@@ -1189,6 +1174,6 @@
   </mat-tab-group>
 </mat-dialog-content>
 
-<mat-dialog-actions>
+<mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>CLOSE</button>
 </mat-dialog-actions>

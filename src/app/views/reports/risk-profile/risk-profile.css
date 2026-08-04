@@ -30,7 +30,7 @@
   text-align: left;
   background: #fff;
   border: 1px solid #e6e9f0;
-  border-left: 4px solid darkturquoise;
+  border-left: 4px solid var(--brand-primary);
   border-radius: 10px;
   box-shadow: 0 1px 4px rgba(15, 23, 42, .06);
   transition: box-shadow .2s ease, transform .2s ease;
@@ -117,7 +117,7 @@
 }
 
 .table-wrapper .mat-mdc-header-row {
-  background: darkturquoise;
+  background: var(--brand-primary);
 }
 
 .table-wrapper .mat-mdc-header-cell {

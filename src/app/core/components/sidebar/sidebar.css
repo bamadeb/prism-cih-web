@@ -3,7 +3,7 @@
 }
 .app-sidenav {
   width: 350px;
-  background-color: #1569c7;
+  background-color: var(--brand-primary);
   color: #fff;
 }
 
@@ -18,6 +18,21 @@
 
 mat-nav-list a {
   color: #fff !important;
+}
+
+/* The DASHBOARD link sits directly on the blue sidenav background (unlike
+   the other links, which are nested inside white expansion panels), but
+   Angular Material's list-item icon/text colors come from CSS custom
+   properties set on nested spans (--mat-list-list-item-*), which win over
+   the plain `color` rule above since that inheritance is overridden by an
+   explicitly-set color further down the tree. Override those tokens here,
+   scoped to the direct child only, so the other (white-panel) links keep
+   their normal dark-on-white styling. */
+mat-nav-list > a {
+  --mat-list-list-item-label-text-color: #fff;
+  --mat-list-list-item-hover-label-text-color: #fff;
+  --mat-list-list-item-focus-label-text-color: #fff;
+  --mat-list-list-item-leading-icon-color: #fff;
 }
 
 .custom-expansion {

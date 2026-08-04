@@ -8,7 +8,7 @@
   color: #1f2937;
   padding-bottom: 12px;
   margin-bottom: 4px;
-  border-bottom: 3px solid #00ced1;
+  border-bottom: 3px solid var(--brand-primary);
 }
 
 .dialog-layout {
@@ -40,7 +40,7 @@
 .right-table thead th {
   position: sticky;
   top: 0;
-  background: #00ced1;
+  background: var(--brand-primary);
   color: #fff;
   font-weight: 600;
   letter-spacing: .3px;

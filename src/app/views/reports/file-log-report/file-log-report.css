@@ -22,7 +22,7 @@
 }
 
 .table-wrapper .mat-mdc-header-row {
-  background: darkturquoise;
+  background: var(--brand-primary);
 }
 
 .table-wrapper .mat-mdc-header-cell {

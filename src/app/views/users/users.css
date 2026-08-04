@@ -16,7 +16,7 @@
 
 .add-user-link {
   cursor: pointer;
-  color: darkturquoise;
+  color: var(--brand-primary);
   font-weight: 600;
   text-transform: uppercase;
   font-size: 13px;
@@ -40,7 +40,7 @@
 }
 
 .table-wrapper .mat-mdc-header-row {
-  background: darkturquoise;
+  background: var(--brand-primary);
 }
 
 .table-wrapper .mat-mdc-header-cell {
@@ -129,7 +129,7 @@
 }
 
 .mat-mdc-header-row {
-  background: #00ced1;
+  background: var(--brand-primary);
 }
 
 .mat-mdc-header-cell {
@@ -202,7 +202,7 @@
 
 .action-icon {
   cursor: pointer;
-  color: #00767c;
+  color: var(--brand-primary-dark);
   font-size: 20px;
 }
 

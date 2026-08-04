@@ -38,7 +38,7 @@ margin-right: 15px;
   padding-top: 12px;
   padding-bottom: 12px;
   margin: 0 0 24px 0 !important;
-  border-bottom: 3px solid #00ced1;
+  border-bottom: 3px solid var(--brand-primary);
 }
 
 mat-dialog-actions,
@@ -56,7 +56,7 @@ mat-dialog-actions,
 }
 
 .mat-mdc-dialog-container .mat-mdc-header-row {
-  background: #00ced1;
+  background: var(--brand-primary);
 }
 
 .mat-mdc-dialog-container .mat-mdc-header-cell {
@@ -108,7 +108,7 @@ mat-dialog-actions,
 
 .table thead,
 .table-striped thead {
-  background: #00ced1;
+  background: var(--brand-primary);
   color: #fff;
 }
 

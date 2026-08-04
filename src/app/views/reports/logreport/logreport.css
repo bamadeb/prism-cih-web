@@ -20,7 +20,7 @@
   overflow: hidden;
   border: 1px solid #e3e8ef;
   border-radius: 10px;
-  border-top: 3px solid #00ced1;
+  border-top: 3px solid var(--brand-primary);
   box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
   transition: box-shadow .15s ease, transform .15s ease;
 }
@@ -32,7 +32,7 @@
 
 .wd .mat-mdc-card-header,
 .wd mat-card-title {
-  color: #00767c;
+  color: var(--brand-primary-dark);
   font-size: 22px !important;
   margin: 6px 0 0 0 !important;
   padding: 8px 6px 0 6px !important;
@@ -62,14 +62,14 @@
    ========================================================================== */
 .filter-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
   gap: 16px;
   justify-content: center;
 }
 
 .search-btn {
-  margin-top: -17px;
+  height: 44px;
 }
 
 /* ==========================================================================
@@ -95,7 +95,7 @@ table {
 }
 
 .mat-mdc-header-row {
-  background: #00ced1;
+  background: var(--brand-primary);
 }
 
 .mat-mdc-header-cell {

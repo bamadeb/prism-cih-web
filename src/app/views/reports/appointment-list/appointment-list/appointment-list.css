@@ -18,7 +18,7 @@ table {
 }
 
 .mat-mdc-header-row {
-  background: darkturquoise;
+  background: var(--brand-primary);
 }
 
 .mat-mdc-header-cell {
@@ -82,7 +82,7 @@ table {
 
 .filter-row .search-btn {
   height: 44px;
-  min-width: 100px;
+  margin-bottom: 14px;
 }
 
 .filter-row .download-icon {
@@ -91,7 +91,7 @@ table {
 }
 
 .filter-row .download-icon:hover {
-  color: darkturquoise;
+  color: var(--brand-primary);
 }
 
 /* Grid (not flex) so the middle filter form sits at the true center of
@@ -140,7 +140,7 @@ td.mat-column-medicaid_id {
 th.mat-column-medicaid_id {
   position: sticky;
   left: 0;
-  background: darkturquoise;
+  background: var(--brand-primary);
   z-index: 3;
   min-width: 160px;
   padding: 0 24px !important;
