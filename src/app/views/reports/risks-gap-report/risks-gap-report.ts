@@ -324,11 +324,15 @@ export class RisksGapReport implements AfterViewInit, OnInit {
         'ProviderKey',
         'DOS',
         'DOSThru',
+        'ServiceProviderTaxonomyCode',
+        'ServiceProviderType',
         'CPTPx',
         'HCPCSPx',
         'LOINC',
         'SNOMED',
         'ICDDX10',
+        'ICDDX 2',
+        'ICDDX10 2',
         'RxNorm',
         'CVX',
         'RxProviderFlag',
@@ -349,11 +353,15 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           item.DOSThru !== '01/01/1900'
             ? item.DOSThru
             : '',
+          item.Service_Provider_Taxonomy_Code ?? '',
+          item.Service_Provider_Type ?? '',
           item.CPTPx ?? '',
           item.HCPCSPx ?? '',
           item.LOINC ?? '',
           item.SNOMED ?? '',
           item.ICDDX10 ?? '',
+          item.ICDDX_2 ?? '',
+          item.ICDDX10_2 ?? '',
           item.RxNorm ?? '',
           item.CVX ?? '',
           item.RxProviderFlag ?? '',
@@ -387,7 +395,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
 
     const filename =
       `GAPS_${(gapsType || 'UNKNOWN')
-        .toUpperCase()}_FILE_(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).csv`;
+        .toUpperCase()}_FILE_CSV(${now.getMonth() + 1}-${now.getDate()}-${now.getFullYear()}).csv`;
 
     // =========================
     // DOWNLOAD FILE
@@ -485,11 +493,15 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           'ProviderKey',
           'DOS',
           'DOSThru',
+          'ServiceProviderTaxonomyCode',
+          'ServiceProviderType',
           'CPTPx',
           'HCPCSPx',
           'LOINC',
           'SNOMED',
           'ICDDX10',
+          'ICDDX 2',
+          'ICDDX10 2',
           'RxNorm',
           'CVX',
           'RxProviderFlag',
@@ -506,11 +518,15 @@ export class RisksGapReport implements AfterViewInit, OnInit {
             item.provider_id ?? '',
             item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
             item.DOSThru !== '01/01/1900' ? item.DOSThru : '',
+            item.Service_Provider_Taxonomy_Code ?? '',
+            item.Service_Provider_Type ?? '',
             item.CPTPx ?? '',
             item.HCPCSPx ?? '',
             item.LOINC ?? '',
             item.SNOMED ?? '',
             item.ICDDX10 ?? '',
+            item.ICDDX_2 ?? '',
+            item.ICDDX10_2 ?? '',
             item.RxNorm ?? '',
             item.CVX ?? '',
             item.RxProviderFlag ?? '',
