@@ -562,12 +562,20 @@
                               <div class="d-flex gap-3 align-items-start mb-2">
                                 <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
                                   <mat-label>PROVIDER TAXONOMY CODE</mat-label>
-                                  <input matInput formControlName="Service_Provider_Taxonomy_Code">
+                                  <mat-select formControlName="Service_Provider_Taxonomy_Code" style="text-transform: uppercase;">
+                                    <mat-option *ngFor="let t of taxonomyList" [value]="t.code">
+                                      {{ (t.provider_specialty + ' - ' + t.code) | uppercase }}
+                                    </mat-option>
+                                  </mat-select>
                                 </mat-form-field>
 
                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
                                   <mat-label>SERVICE PROVIDER TYPE</mat-label>
-                                  <input matInput formControlName="Service_Provider_Type">
+                                  <mat-select formControlName="Service_Provider_Type" style="text-transform: uppercase;">
+                                    <mat-option *ngFor="let s of serviceProviderTypeList" [value]="s.name">
+                                      {{ s.name | uppercase }}
+                                    </mat-option>
+                                  </mat-select>
                                 </mat-form-field>
                               </div>
 

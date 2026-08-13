@@ -85,6 +85,8 @@ export class AddAction implements OnInit , AfterViewInit {
   memberPCPVisitList: any[] = [];
   pcpType: any[] = [];
   vendorList: any[] = [];
+  taxonomyList: any[] = [];
+  serviceProviderTypeList: any[] = [];
   PCPVisitDisplayedColumns: string[] = [
     'visit_date',
     'visit_type',
@@ -303,6 +305,8 @@ export class AddAction implements OnInit , AfterViewInit {
       this.measureList = result.data.measureList || [];
       this.pcpType = result.data.pcpType || [];
       this.vendorList = result.data.vendorList || [];
+      this.taxonomyList = result.data.taxonomyList || [];
+      this.serviceProviderTypeList = result.data.serviceProviderTypeList || [];
       this.appointTypeList = result.data.appointTypeList || [];
       this.hspcsList = result.data.hspcsList || [];
       this.cptList = result.data.cptList || [];
