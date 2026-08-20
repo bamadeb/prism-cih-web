@@ -425,6 +425,12 @@ export class AddAction implements OnInit , AfterViewInit {
     }
 
     this.invalidQualityPanelIndex = index;
+    // This runs from a MatDialog's afterClosed() callback, which is outside
+    // this OnPush component's own template/event bindings, so the
+    // invalidQualityPanelIndex change above won't be picked up on its own —
+    // force a check now so the panel's [expanded] binding (and the rest of
+    // the quality gap list) re-renders against the current, unchanged data.
+    this.cdr.detectChanges();
 
     setTimeout(() => {
       const panel = document.querySelector(`[data-qpanel-index="${index}"]`);
@@ -438,6 +444,7 @@ export class AddAction implements OnInit , AfterViewInit {
    *  `onClosed` (if given) runs after the user dismisses the dialog — use it to scroll/focus
    *  the invalid field so it isn't hidden behind the still-open dialog. */
   private showRequiredFieldAlert(message: string, onClosed?: () => void): void {
+    console.warn('[DEBUG required-field alert]', message); // TEMP diagnostic — remove after root cause confirmed
     const dialogRef = this.dialog.open(ErrorDialogComponent, {
       width: '420px',
       data: {
@@ -736,7 +743,13 @@ export class AddAction implements OnInit , AfterViewInit {
       };
       let insertedActionId = 0;
       try {
-        if (formValues.action_result_id) {
+        // Gap edits (risk or quality) need a real action_id to link their
+        // status update to — without one, the observation row gets saved
+        // but the gap falls out of the list on refresh (see
+        // updateQualityAndRiskData). So create the action row whenever
+        // there's a result selected OR pending gap edits, not just the former.
+        const hasGapEdits = this.riskGapsList.dirty || this.qualityGapsList.dirty;
+        if (formValues.action_result_id || hasGapEdits) {
           const result = await this.apiService.multipleRowInsert<any>(apiPayload);
           insertedActionId = result.insertedIds;
         }
@@ -764,8 +777,16 @@ export class AddAction implements OnInit , AfterViewInit {
         const isValid = await this.updateQualityAndRiskData(formValues, insertedActionId);
         if (!isValid) return;
 
-        this.getMemberTaskList(formValues.medicaid_id);
-        this.getMemberGapsList(formValues.medicaid_id);
+        // Must be awaited: isProcessing (which gates the Submit button) gets
+        // reset in the finally block below. If these fire-and-forget, the
+        // button re-enables before this refresh finishes, so a fast second
+        // submit can start rebuilding qualityGapsList (in setQualityGapsData)
+        // while this refresh is still mid-rebuild, and a row this refresh
+        // was about to re-add gets lost in the overlap.
+        await Promise.all([
+          this.getMemberTaskList(formValues.medicaid_id),
+          this.getMemberGapsList(formValues.medicaid_id)
+        ]);
         this.resetActionFields();
         this.cdr.detectChanges();
 
@@ -797,8 +818,12 @@ export class AddAction implements OnInit , AfterViewInit {
         const isValid = await this.updateQualityAndRiskData(formValues, action_id);
         if (!isValid) return;
 
-        this.getMemberTaskList(formValues.medicaid_id);
-        this.getMemberGapsList(formValues.medicaid_id);
+        // See the matching comment in the insert-mode branch above — must
+        // be awaited so a fast second submit can't race this refresh.
+        await Promise.all([
+          this.getMemberTaskList(formValues.medicaid_id),
+          this.getMemberGapsList(formValues.medicaid_id)
+        ]);
         this.resetActionFields();
         this.cdr.detectChanges();
       } catch (error) {
@@ -827,6 +852,27 @@ resetActionFields() {
     });
 }
  
+/** After a bulk insert into MEM_GAP_OBSERVATION_DATA, writes each new row's
+ *  id back onto the FormGroup it came from (same order as insertDataArray),
+ *  so a later submit treats it as an existing row (UPDATE) instead of
+ *  inserting it again. `insertedIds` may come back as a single id (one row)
+ *  or an array (multiple rows) — handle both. Even if the id can't be
+ *  mapped back for some reason, _insertedThisSession still blocks a
+ *  duplicate insert on the next submit. */
+private applyInsertedGapIds(formGroups: FormGroup[], idField: 'risk_gap_id' | 'quality_gap_id', result: any): void {
+  const rawIds = result?.insertedIds;
+  const ids: any[] = Array.isArray(rawIds) ? rawIds : (rawIds !== undefined && rawIds !== null ? [rawIds] : []);
+
+  formGroups.forEach((fg, i) => {
+    const newId = ids[i];
+    if (newId !== undefined && newId !== null) {
+      fg.get(idField)?.setValue(newId, { emitEvent: false });
+    }
+    fg.get('_insertedThisSession')?.setValue(true, { emitEvent: false });
+    fg.markAsPristine();
+  });
+}
+
 private async updateQualityAndRiskData(
   formValues: any,
   action_id: number
@@ -840,6 +886,11 @@ private async updateQualityAndRiskData(
   const qualityObsInsertArray: any[] = [];
   const riskObsUpdateArray: any[] = [];
   const UpdateArray: any[] = [];
+  // Parallel to riskObsInsertArray/qualityObsInsertArray — same index as
+  // the row it came from, so the id returned by the insert call can be
+  // written back onto the right FormGroup (see applyInsertedGapIds below).
+  const riskObsInsertFormGroups: FormGroup[] = [];
+  const qualityObsInsertFormGroups: FormGroup[] = [];
 
   let isValid = true; // ✅ validation flag
 
@@ -896,7 +947,15 @@ private async updateQualityAndRiskData(
           updated_date: new Date()
         });
       }
-    } else {
+    } else if (!riskGap._insertedThisSession) {
+      // Note: unlike the update branch above, this has never checked
+      // fg.dirty — it only looks at whether the fields hold a value. Once a
+      // row has no risk_gap_id but its fields are already populated from a
+      // prior successful insert (e.g. the row was preserved locally because
+      // a refetch didn't return it — see setQualityGapsData), submitting
+      // again would re-insert the same data as a brand-new duplicate row
+      // every time. _insertedThisSession (set below once the insert call
+      // succeeds) is the guard against that.
       const hasAnyValue = [
           riskGap.Observation_Date,
           riskGap.Observation_Code,
@@ -920,6 +979,7 @@ private async updateQualityAndRiskData(
           added_by: this.userId,
           added_date: new Date()
         });
+        riskObsInsertFormGroups.push(fg);
       }
     }
   });
@@ -1083,9 +1143,23 @@ private async updateQualityAndRiskData(
           id: qualityGap.quality_gap_id,
           updated_date: new Date()
         });
+
+        // Required clinical fields are filled in, so this gap has been
+        // addressed even if the free-text "Result" field is still blank.
+        // Without this, the observation gets saved but the gap's status
+        // is never marked closed, so it drops off the list on refresh
+        // (it no longer qualifies as "open", but was never marked "closed" either).
+        if (qualityGap.SUB_MEASURE && !qualitySubMeasures.includes(qualityGap.SUB_MEASURE)) {
+          qualitySubMeasures.push(qualityGap.SUB_MEASURE);
+        }
       }
 
-    } else {
+    } else if (!qualityGap._insertedThisSession) {
+      // Same _insertedThisSession guard as the risk gap insert branch —
+      // without it, a row whose fields are already filled in from a prior
+      // successful insert (but which never got a real quality_gap_id back,
+      // e.g. because a refetch didn't return it) would be re-inserted as a
+      // brand-new duplicate row on every subsequent submit.
 
       const hasValue = [
         qualityGap.Observation_Date,
@@ -1225,17 +1299,52 @@ private async updateQualityAndRiskData(
           added_by: this.userId,
           added_date: new Date()
         });
+        qualityObsInsertFormGroups.push(fg);
+
+        // Same as the update branch: a newly-captured observation with all
+        // required clinical fields means the gap is addressed, so mark it
+        // closed even though the free-text "Result" field is still blank.
+        if (qualityGap.SUB_MEASURE && !qualitySubMeasures.includes(qualityGap.SUB_MEASURE)) {
+          qualitySubMeasures.push(qualityGap.SUB_MEASURE);
+        }
       }
     }
+  });
+
+  // TEMP diagnostic — remove after root cause confirmed
+  console.warn('[DEBUG updateQualityAndRiskData]', {
+    action_id,
+    isValid,
+    diagCodes,
+    qualitySubMeasures,
+    riskObsInsertArrayLen: riskObsInsertArray.length,
+    riskObsUpdateArrayLen: riskObsUpdateArray.length,
+    qualityObsInsertArrayLen: qualityObsInsertArray.length
   });
 
   // ⛔ STOP IF INVALID
   if (!isValid) {
     this.isProcessing = false;
+    // Same OnPush staleness concern as focusQualityField: nothing about the
+    // quality/risk gap lists actually changed, but force a check so the
+    // dialog reflects that unchanged state immediately instead of whatever
+    // was last rendered.
+    this.cdr.detectChanges();
     return false;
   }
 
   try {
+    /* ----------------------------------
+       STEP 1-3 are status changes scoped to a specific logged action.
+       Without a real action_id (e.g. the user edited a gap but never
+       picked an Action Result, so no MEM_MEMBER_ACTION_FOLLOW_UP row
+       was created) these must NOT run: calling unSetMemberGapsStatus
+       with action_id 0 wipes/reassigns gap status for the member and
+       makes the just-edited gap disappear from the list on refresh,
+       even though its observation data (Steps 4-5 below) was saved
+       correctly.
+    -----------------------------------*/
+    if (action_id) {
      /* ----------------------------------
          STEP 1: UNSET MEMBER GAP STATUS
       -----------------------------------*/
@@ -1271,6 +1380,7 @@ private async updateQualityAndRiskData(
         };
         const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
       }
+    }
 
     /* ----------------------------------
          STEP 4: UPDATE OBSERVATIONS
@@ -1289,19 +1399,21 @@ private async updateQualityAndRiskData(
          STEP 5: INSERT OBSERVATIONS
       -----------------------------------*/
       if (riskObsInsertArray.length) {
-        await this.apiService.multipleRowInsert({
+        const riskInsertResult = await this.apiService.multipleRowInsert<any>({
           table_name: 'MEM_GAP_OBSERVATION_DATA',
           insertDataArray: riskObsInsertArray
         });
+        this.applyInsertedGapIds(riskObsInsertFormGroups, 'risk_gap_id', riskInsertResult);
       }
     /* ----------------------------------
          STEP 5: INSERT OBSERVATIONS
       -----------------------------------*/
       if (qualityObsInsertArray.length) {
-        await this.apiService.multipleRowInsert({
+        const qualityInsertResult = await this.apiService.multipleRowInsert<any>({
           table_name: 'MEM_GAP_OBSERVATION_DATA',
           insertDataArray: qualityObsInsertArray
         });
+        this.applyInsertedGapIds(qualityObsInsertFormGroups, 'quality_gap_id', qualityInsertResult);
       }
 
 
@@ -1344,7 +1456,23 @@ private async updateQualityAndRiskData(
     this.memberTaskList = result.data || [];
 
   }
-  async getMemberGapsList(medicaid_id: string) {
+  // Chains every getMemberGapsList call onto the previous one so they run
+  // strictly one at a time. This was called both from ngOnInit's initial
+  // load and after every submit without ever being awaited by the caller
+  // in a way that ruled out overlap — e.g. the initial load could still be
+  // in flight when a fast first submit kicked off another call, and two
+  // concurrent setQualityGapsData rebuilds trampling each other's snapshot
+  // of the "current" list is exactly how a row can silently drop out.
+  private qualityGapsRefreshChain: Promise<void> = Promise.resolve();
+
+  getMemberGapsList(medicaid_id: string): Promise<void> {
+    this.qualityGapsRefreshChain = this.qualityGapsRefreshChain
+      .catch(() => { /* don't let a prior failure block future refreshes */ })
+      .then(() => this.getMemberGapsListInternal(medicaid_id));
+    return this.qualityGapsRefreshChain;
+  }
+
+  private async getMemberGapsListInternal(medicaid_id: string) {
     const request = {
       medicaid_id: medicaid_id
     };
@@ -1385,6 +1513,10 @@ private async updateQualityAndRiskData(
           PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
           risk_gap_id: [t.id],
+          // Set to true right after a successful insert (see
+          // applyInsertedGapIds) so a repeated submit can't re-insert the
+          // same data as a duplicate row while risk_gap_id is still unset.
+          _insertedThisSession: [false],
           Type: ['risk'],
           Gap_Code: [this.sanitize(t.Gap_Code)],
 
@@ -1445,9 +1577,104 @@ private async updateQualityAndRiskData(
   sanitize(value: any) {
     return value === null || value === undefined || value === 'null' ? '' : value;
   }
+
+  /** Builds the CPT/HCPCS/ICD autocomplete streams for the quality gap row
+   *  at `index`. Shared by newly-built rows and rows re-appended by
+   *  setQualityGapsData after a refetch, since either way the array slot
+   *  needs a fresh, correctly-indexed Observable. */
+  private registerQualityGapAutocomplete(fg: FormGroup, index: number): void {
+    this.filteredCptOptions[index] = fg.get('CPTPx')!.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      map(value => {
+        const filterValue = (value || '').toLowerCase();
+        return this.cptList
+          .filter(cpt =>
+            (cpt.code || '').toLowerCase().includes(filterValue) ||
+            (cpt.label || '').toLowerCase().includes(filterValue)
+          )
+          .slice(0, 50);
+      })
+    );
+    this.filteredhspcsOptions[index] = fg.get('HCPCSPx')!.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      map(value => {
+        const filterValue = (value || '').toLowerCase();
+        return this.hspcsList
+          .filter(cpt =>
+            (cpt.HCPCS_Code || '').toLowerCase().includes(filterValue) ||
+            (cpt.subcategory || '').toLowerCase().includes(filterValue)
+          )
+          .slice(0, 50);
+      })
+    );
+    this.filteredicdOptions[index] = fg.get('ICDDX10')!.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      map(value => {
+        const filterValue = (value || '').toLowerCase();
+        return this.icdList
+          .filter(cpt =>
+            (cpt.code || '').toLowerCase().includes(filterValue) ||
+            (cpt.label || '').toLowerCase().includes(filterValue)
+          )
+          .slice(0, 50);
+      })
+    );
+    this.filteredicdOptions2[index] = fg.get('ICDDX10_2')!.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      map(value => {
+        const filterValue = (value || '').toLowerCase();
+        return this.icdList
+          .filter(cpt =>
+            (cpt.code || '').toLowerCase().includes(filterValue) ||
+            (cpt.label || '').toLowerCase().includes(filterValue)
+          )
+          .slice(0, 50);
+      })
+    );
+  }
+
   async setQualityGapsData(qualityGapsdata: any) {
+    // A gap the user just filled in and saved can be briefly missing from
+    // the server's response (e.g. it no longer counts as "open" but hasn't
+    // been reflected as "complete" yet). Snapshot the rows currently shown
+    // so any of them absent from the fresh data stay visible instead of
+    // disappearing from the list.
+    // SUB_MEASURE alone isn't a unique row id — separate gap requirements
+    // (e.g. "Kidney Health Evaluation" and "Diabetes - Eye Exam") can share
+    // the same code as alternate paths to the same measure, while still
+    // being distinct rows that must each stay listed. Match on the pair.
+    const qualityGapRowKey = (subMeasure: any, measureName: any) =>
+      `${subMeasure ?? ''}|${measureName ?? ''}`;
+
+    const staleControls = this.qualityGapsList.controls.filter((fg: any) => {
+      const subMeasure = fg.get('SUB_MEASURE')?.value;
+      if (!subMeasure) return false;
+      const rowKey = qualityGapRowKey(subMeasure, fg.get('MEASURE_NAME')?.value);
+      return !(qualityGapsdata || []).some(
+        (t: any) => qualityGapRowKey(t.SUB_MEASURE, t.MEASURE_NAME) === rowKey
+      );
+    }) as FormGroup[];
+
+    // TEMP diagnostic — remove after root cause confirmed
+    console.warn('[DEBUG setQualityGapsData called]', {
+      incomingCount: (qualityGapsdata || []).length,
+      previousCount: this.qualityGapsList.length,
+      previousRows: this.qualityGapsList.controls.map((fg: any) =>
+        `${fg.get('SUB_MEASURE')?.value}|${fg.get('MEASURE_NAME')?.value}`
+      )
+    });
+    console.trace('[DEBUG setQualityGapsData call stack]');
+
     // Clear existing list
-    this.qualityGapsList.clear();    
+    this.qualityGapsList.clear();
 
     if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
       qualityGapsdata.forEach((t: any) => {
@@ -1459,6 +1686,9 @@ private async updateQualityAndRiskData(
           PROCESS_STATUS: [{ value: !!t.Observation_Result, disabled: true }],
 
           quality_gap_id: [t.id],
+          // See the matching field on the risk gap FormGroup — prevents a
+          // repeated submit from re-inserting the same row as a duplicate.
+          _insertedThisSession: [false],
           Type: ['quality'],
           Gap_Code: [this.sanitize(t.Gap_Code)],
 
@@ -1521,66 +1751,7 @@ private async updateQualityAndRiskData(
 
 const indexq = this.qualityGapsList.length;
 
-this.filteredCptOptions[indexq] = fg.get('CPTPx')!.valueChanges.pipe(
-  startWith(''),
-  debounceTime(300),
-  distinctUntilChanged(),
-  map(value => {
-    const filterValue = (value || '').toLowerCase();
-
-    return this.cptList
-      .filter(cpt =>
-        (cpt.code || '').toLowerCase().includes(filterValue) ||
-        (cpt.label || '').toLowerCase().includes(filterValue)
-      )
-      .slice(0, 50);
-  })
-);
-this.filteredhspcsOptions[indexq] = fg.get('HCPCSPx')!.valueChanges.pipe(
-  startWith(''),
-  debounceTime(300),
-  distinctUntilChanged(),
-  map(value => {
-    const filterValue = (value || '').toLowerCase();
-
-    return this.hspcsList
-      .filter(cpt =>
-        (cpt.HCPCS_Code || '').toLowerCase().includes(filterValue) ||
-        (cpt.subcategory || '').toLowerCase().includes(filterValue)
-      )
-      .slice(0, 50);
-  })
-);
-this.filteredicdOptions[indexq] = fg.get('ICDDX10')!.valueChanges.pipe(
-  startWith(''),
-  debounceTime(300),
-  distinctUntilChanged(),
-  map(value => {
-    const filterValue = (value || '').toLowerCase();
-
-    return this.icdList
-      .filter(cpt =>
-        (cpt.code || '').toLowerCase().includes(filterValue) ||
-        (cpt.label || '').toLowerCase().includes(filterValue)
-      )
-      .slice(0, 50);
-  })
-);
-this.filteredicdOptions2[indexq] = fg.get('ICDDX10_2')!.valueChanges.pipe(
-  startWith(''),
-  debounceTime(300),
-  distinctUntilChanged(),
-  map(value => {
-    const filterValue = (value || '').toLowerCase();
-
-    return this.icdList
-      .filter(cpt =>
-        (cpt.code || '').toLowerCase().includes(filterValue) ||
-        (cpt.label || '').toLowerCase().includes(filterValue)
-      )
-      .slice(0, 50);
-  })
-);
+this.registerQualityGapAutocomplete(fg, indexq);
         fg.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
           const hasAnyValue =
@@ -1628,6 +1799,22 @@ this.filteredicdOptions2[indexq] = fg.get('ICDDX10_2')!.valueChanges.pipe(
         }
       });
     }
+
+    // Re-append rows the fresh fetch omitted. These FormGroups already have
+    // their valueChanges subscriptions wired up from when they were first
+    // built — only the position-indexed autocomplete streams need redoing
+    // since they moved to a new index in the array.
+    staleControls.forEach((fg: FormGroup) => {
+      const index = this.qualityGapsList.length;
+      this.registerQualityGapAutocomplete(fg, index);
+      this.qualityGapsList.push(fg);
+
+      const tin = fg.get('tin')?.value;
+      const providerId = fg.get('provider_id')?.value;
+      if (tin) {
+        this.onTinChange(tin, index, providerId);
+      }
+    });
 
   }
 
