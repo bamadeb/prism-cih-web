@@ -793,10 +793,12 @@ export class AddAction implements OnInit , AfterViewInit {
       let insertedActionId = 0;
       try {
         // Only create a MEM_MEMBER_ACTION_FOLLOW_UP row when the user actually
-        // picked an Action Result. Previously this also fired whenever a risk
-        // or quality gap was merely dirty, so every failed gap-validation
-        // submit (e.g. a required field like Provider left blank) still
-        // silently inserted an orphan action row with no result attached.
+        // picked an Action Result — creating it on any dirty field inserted an
+        // orphan row for submits that fail required-field validation. Gap-only
+        // edits (no Action Result picked) fall back to action_id 0 below;
+        // updateQualityAndRiskData no longer requires a real action_id to run
+        // STEP 1-3 (including prismUpdatequalityStatus), so the gap's status
+        // still gets updated either way.
         if (formValues.action_result_id) {
           const result = await this.apiService.multipleRowInsert<any>(apiPayload);
           insertedActionId = result.insertedIds;
@@ -1380,53 +1382,47 @@ private async updateQualityAndRiskData(
     return false;
   }
 
+  // No gating on action_id here anymore — if the caller didn't pass a real
+  // one (e.g. gap edits with no Action Result picked, so no
+  // MEM_MEMBER_ACTION_FOLLOW_UP row was created), it defaults to 0 and
+  // STEP 1-3 still run with it so the gap's status update (including
+  // prismUpdatequalityStatus) always fires once validation has passed.
+  action_id = action_id || 0;
+
   try {
     /* ----------------------------------
-       STEP 1-3 are status changes scoped to a specific logged action.
-       Without a real action_id (e.g. the user edited a gap but never
-       picked an Action Result, so no MEM_MEMBER_ACTION_FOLLOW_UP row
-       was created) these must NOT run: calling unSetMemberGapsStatus
-       with action_id 0 wipes/reassigns gap status for the member and
-       makes the just-edited gap disappear from the list on refresh,
-       even though its observation data (Steps 4-5 below) was saved
-       correctly.
+       STEP 1: UNSET MEMBER GAP STATUS
     -----------------------------------*/
-    if (action_id) {
-     /* ----------------------------------
-         STEP 1: UNSET MEMBER GAP STATUS
-      -----------------------------------*/
-      const paramsunsetq = {
-        medicaid_id: medicaid_id,
-        action_id: action_id
-      };
-      const result = await this.apiService.unSetMemberGapsStatus<any>(paramsunsetq);
-
+    const paramsunsetq = {
+      medicaid_id: medicaid_id,
+      action_id: action_id
+    };
+    const result = await this.apiService.unSetMemberGapsStatus<any>(paramsunsetq);
 
     /* ----------------------------------
          STEP 2: UPDATE RISK STATUS
       -----------------------------------*/
-      const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
-      if(diagVal){
-         const paramsupdate = {
-          medicaid_id: medicaid_id,
-          diag_codes: diagVal,
-          action_id: action_id
-        };
-        const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
-      }
+    const diagVal = diagCodes.length > 0 ? `'${diagCodes.join("','")}'` : '';
+    if(diagVal){
+       const paramsupdate = {
+        medicaid_id: medicaid_id,
+        diag_codes: diagVal,
+        action_id: action_id
+      };
+      const updategapresult = await this.apiService.updategapStatus<any>(paramsupdate);
+    }
 
     /* ----------------------------------
          STEP 3: UPDATE QUALITY STATUS
       -----------------------------------*/
-      const subMeasureVal = qualitySubMeasures.length > 0 ? `'${qualitySubMeasures.join("','")}'` : '';
-      if(subMeasureVal){
-        const qualityparamsupdate = {
-          medicaid_id: medicaid_id,
-          measur_code_val: subMeasureVal,
-          action_id: action_id
-        };
-        const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
-      }
+    const subMeasureVal = qualitySubMeasures.length > 0 ? `'${qualitySubMeasures.join("','")}'` : '';
+    if(subMeasureVal){
+      const qualityparamsupdate = {
+        medicaid_id: medicaid_id,
+        measur_code_val: subMeasureVal,
+        action_id: action_id
+      };
+      const updatequalitygapresult = await this.apiService.updatequalityStatus<any>(qualityparamsupdate);
     }
 
     /* ----------------------------------
