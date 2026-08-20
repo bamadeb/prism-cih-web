@@ -499,7 +499,7 @@
 
                   <ng-container *ngFor="let qgap of qualityGapsList.controls; let i = index" [formGroupName]="i">
 
-                    <mat-expansion-panel class="mb-2" [expanded]="invalidQualityPanelIndex === i" [attr.data-qpanel-index]="i">
+                    <mat-expansion-panel class="mb-2" [expanded]="isQualityPanelExpanded(i)" (expandedChange)="onQualityPanelExpandedChange(i, $event)" [attr.data-qpanel-index]="i">
 
                       <!-- HEADER -->
                       <mat-expansion-panel-header style="height: auto;font-size: 13px;">
@@ -770,6 +770,15 @@
                                   <mat-label>NOTE</mat-label>
                                   <textarea matInput rows="2" formControlName="note" style="height:32px;"></textarea>
                                 </mat-form-field>
+                              </div>
+
+                              <!-- Undo an accidental edit (e.g. a stray Yes/No tap on
+                                   RxProviderFlag) without having to fill in every other
+                                   required field just to get past submit validation. -->
+                              <div class="d-flex justify-content-end mb-1" *ngIf="qgap.dirty">
+                                <button type="button" mat-stroked-button color="warn" (click)="resetQualityGapRow(i)">
+                                  <mat-icon>restart_alt</mat-icon> RESET
+                                </button>
                               </div>
 
                         </div>

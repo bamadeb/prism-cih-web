@@ -412,9 +412,59 @@ export class AddAction implements OnInit , AfterViewInit {
     return this.addActionFormGroup.get('qualityGapsList') as FormArray;
   }
 
-  // Index of the quality gap panel that should be force-expanded because
-  // it failed validation on submit (see focusQualityField below).
-  invalidQualityPanelIndex: number | null = null;
+  // Which quality gap panels are currently expanded, keyed by their index in
+  // qualityGapsList. Previously this was a single `invalidQualityPanelIndex`
+  // scalar one-way-bound via [expanded]="invalidQualityPanelIndex === i" with
+  // no (expandedChange) handler. That meant a manual expand/collapse click by
+  // the user was never written back into the component's state, so the next
+  // detectChanges() (e.g. from a second failed submit re-focusing the same
+  // still-invalid field) recomputed the *same* boolean the binding last saw
+  // and Angular's binding optimizer skipped re-applying it — leaving
+  // MatExpansionPanel's internal open/close state fighting Angular's model
+  // and, after enough of that churn, the panel rendering with an empty
+  // header. Tracking each row's expanded state explicitly and syncing it via
+  // (expandedChange) keeps the manual toggle and the forced-open-on-error
+  // behavior consistent with each other instead of fighting.
+  qualityGapExpandedIndices = new Set<number>();
+
+  isQualityPanelExpanded(index: number): boolean {
+    return this.qualityGapExpandedIndices.has(index);
+  }
+
+  onQualityPanelExpandedChange(index: number, expanded: boolean): void {
+    if (expanded) {
+      this.qualityGapExpandedIndices.add(index);
+    } else {
+      this.qualityGapExpandedIndices.delete(index);
+    }
+  }
+
+  // Snapshot of each quality gap row's values as loaded (or last saved),
+  // used by resetQualityGapRow() to let the user undo an accidental touch —
+  // e.g. tapping RxProviderFlag Yes/No on a gap they didn't mean to fill in —
+  // without being forced to complete every other required field just to get
+  // past validation on submit.
+  private qualityGapInitialValues = new Map<FormGroup, any>();
+
+  /** Reverts the quality gap row at `index` back to its last-loaded values,
+   *  clearing dirty/touched state and any manually-set required-field errors
+   *  so it no longer blocks submit. */
+  resetQualityGapRow(index: number): void {
+    const fg = this.qualityGapsList.at(index) as FormGroup;
+    if (!fg) {
+      return;
+    }
+
+    const initial = this.qualityGapInitialValues.get(fg) ?? {};
+    // emitEvent left at its default (true) so this row's valueChanges
+    // subscriptions — which sync PROCESS_STATUS to Observation_Result and
+    // toggle tin's required validator — re-run against the reverted values.
+    fg.reset(initial);
+    fg.markAsPristine();
+    fg.markAsUntouched();
+    this.qualityGapExpandedIndices.delete(index);
+    this.cdr.detectChanges();
+  }
 
   /** Expands the quality gap panel containing `fg`, then scrolls to and
    *  focuses the invalid field so the user can immediately see and fix it. */
@@ -424,10 +474,10 @@ export class AddAction implements OnInit , AfterViewInit {
       return;
     }
 
-    this.invalidQualityPanelIndex = index;
+    this.qualityGapExpandedIndices.add(index);
     // This runs from a MatDialog's afterClosed() callback, which is outside
     // this OnPush component's own template/event bindings, so the
-    // invalidQualityPanelIndex change above won't be picked up on its own —
+    // qualityGapExpandedIndices change above won't be picked up on its own —
     // force a check now so the panel's [expanded] binding (and the rest of
     // the quality gap list) re-renders against the current, unchanged data.
     this.cdr.detectChanges();
@@ -444,7 +494,6 @@ export class AddAction implements OnInit , AfterViewInit {
    *  `onClosed` (if given) runs after the user dismisses the dialog — use it to scroll/focus
    *  the invalid field so it isn't hidden behind the still-open dialog. */
   private showRequiredFieldAlert(message: string, onClosed?: () => void): void {
-    console.warn('[DEBUG required-field alert]', message); // TEMP diagnostic — remove after root cause confirmed
     const dialogRef = this.dialog.open(ErrorDialogComponent, {
       width: '420px',
       data: {
@@ -743,13 +792,12 @@ export class AddAction implements OnInit , AfterViewInit {
       };
       let insertedActionId = 0;
       try {
-        // Gap edits (risk or quality) need a real action_id to link their
-        // status update to — without one, the observation row gets saved
-        // but the gap falls out of the list on refresh (see
-        // updateQualityAndRiskData). So create the action row whenever
-        // there's a result selected OR pending gap edits, not just the former.
-        const hasGapEdits = this.riskGapsList.dirty || this.qualityGapsList.dirty;
-        if (formValues.action_result_id || hasGapEdits) {
+        // Only create a MEM_MEMBER_ACTION_FOLLOW_UP row when the user actually
+        // picked an Action Result. Previously this also fired whenever a risk
+        // or quality gap was merely dirty, so every failed gap-validation
+        // submit (e.g. a required field like Provider left blank) still
+        // silently inserted an orphan action row with no result attached.
+        if (formValues.action_result_id) {
           const result = await this.apiService.multipleRowInsert<any>(apiPayload);
           insertedActionId = result.insertedIds;
         }
@@ -1311,17 +1359,6 @@ private async updateQualityAndRiskData(
     }
   });
 
-  // TEMP diagnostic — remove after root cause confirmed
-  console.warn('[DEBUG updateQualityAndRiskData]', {
-    action_id,
-    isValid,
-    diagCodes,
-    qualitySubMeasures,
-    riskObsInsertArrayLen: riskObsInsertArray.length,
-    riskObsUpdateArrayLen: riskObsUpdateArray.length,
-    qualityObsInsertArrayLen: qualityObsInsertArray.length
-  });
-
   // ⛔ STOP IF INVALID
   if (!isValid) {
     this.isProcessing = false;
@@ -1663,18 +1700,11 @@ private async updateQualityAndRiskData(
       );
     }) as FormGroup[];
 
-    // TEMP diagnostic — remove after root cause confirmed
-    console.warn('[DEBUG setQualityGapsData called]', {
-      incomingCount: (qualityGapsdata || []).length,
-      previousCount: this.qualityGapsList.length,
-      previousRows: this.qualityGapsList.controls.map((fg: any) =>
-        `${fg.get('SUB_MEASURE')?.value}|${fg.get('MEASURE_NAME')?.value}`
-      )
-    });
-    console.trace('[DEBUG setQualityGapsData call stack]');
-
     // Clear existing list
     this.qualityGapsList.clear();
+    // Row indices are about to be rebuilt from scratch, so any expanded
+    // state keyed by the old indices no longer refers to the same rows.
+    this.qualityGapExpandedIndices.clear();
 
     if (qualityGapsdata && Array.isArray(qualityGapsdata)) {
       qualityGapsdata.forEach((t: any) => {
@@ -1790,6 +1820,7 @@ this.registerQualityGapAutocomplete(fg, indexq);
           });
         fg.markAsPristine();
         fg.markAsUntouched();
+        this.qualityGapInitialValues.set(fg, fg.getRawValue());
         this.qualityGapsList.push(fg);
         // ✅ Auto trigger on page load if tin exists
         const index = this.qualityGapsList.length - 1;
@@ -1816,6 +1847,17 @@ this.registerQualityGapAutocomplete(fg, indexq);
       }
     });
 
+    // Drop reset-snapshot entries for rows that got rebuilt with a brand new
+    // FormGroup instance this call, so old, no-longer-referenced FormGroups
+    // (and their snapshots) can be garbage collected instead of accumulating
+    // across every refresh in a long-lived dialog session. staleControls'
+    // FormGroups are still live (re-pushed above), so their entries survive.
+    const liveControls = new Set(this.qualityGapsList.controls);
+    for (const key of this.qualityGapInitialValues.keys()) {
+      if (!liveControls.has(key)) {
+        this.qualityGapInitialValues.delete(key);
+      }
+    }
   }
 
   toggleContent() {

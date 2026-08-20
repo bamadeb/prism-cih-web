@@ -156,6 +156,14 @@ mat-error {
   white-space: normal;
 }
 
+::ng-deep .panel-desc-100 {
+  flex: 0 0 95%;
+  max-width: 95%;
+  display: flex;
+  align-items: center;
+  white-space: normal;
+}
+
  .mat-mdc-tab-body-active {
   overflow-y: hidden !important;
 }
