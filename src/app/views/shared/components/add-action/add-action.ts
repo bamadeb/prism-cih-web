@@ -1103,7 +1103,12 @@ private async updateQualityAndRiskData(
       if (fg.dirty) {
 
         // 🔴 TIN VALIDATION
-        if (!commonData.tin || commonData.tin.toString().trim() === '') {
+        // tin starts life as String(t.tin), so a genuinely-empty TIN from
+        // the server (null) becomes the literal string "null" here — which
+        // is truthy and non-empty, so it silently passed this check and let
+        // validation fall through straight to "Provider is required"
+        // without ever telling the user TIN itself was the real problem.
+        if (!commonData.tin || commonData.tin.toString().trim() === '' || commonData.tin.toString().toLowerCase() === 'null') {
           fg.get('tin')?.setErrors({ required: true });
           fg.get('tin')?.markAsTouched();
           this.showRequiredFieldAlert('TIN is required for quality gap entries', () => this.focusQualityField(fg, 'tin'));
@@ -1259,7 +1264,12 @@ private async updateQualityAndRiskData(
       if (hasValue) { 
 
         // 🔴 TIN VALIDATION
-        if (!commonData.tin || commonData.tin.toString().trim() === '') {
+        // tin starts life as String(t.tin), so a genuinely-empty TIN from
+        // the server (null) becomes the literal string "null" here — which
+        // is truthy and non-empty, so it silently passed this check and let
+        // validation fall through straight to "Provider is required"
+        // without ever telling the user TIN itself was the real problem.
+        if (!commonData.tin || commonData.tin.toString().trim() === '' || commonData.tin.toString().toLowerCase() === 'null') {
           fg.get('tin')?.setErrors({ required: true });
           fg.get('tin')?.markAsTouched();
           this.showRequiredFieldAlert('TIN is required for quality gap entries', () => this.focusQualityField(fg, 'tin'));
@@ -1678,6 +1688,54 @@ private async updateQualityAndRiskData(
     );
   }
 
+  /** TIN and Provider are validated in that order: Provider only becomes
+   *  required once a TIN is actually picked, and TIN itself only becomes
+   *  required once some other field on the row has a value — same order as
+   *  the manual checks in updateQualityAndRiskData. Called both reactively
+   *  (on every value change) and once synchronously whenever a row is
+   *  (re)displayed, so a stale manually-set error from an earlier failed
+   *  submit can never linger on screen against the row's current values. */
+  private syncQualityGapConditionalValidators(fg: FormGroup): void {
+    const val = fg.getRawValue();
+
+    const hasAnyValue =
+      val.Observation_Date ||
+      val.CPTPx ||
+      val.HCPCSPx ||
+      val.SNOMED ||
+      val.ICDDX ||
+      val.ICDDX10 ||
+      val.ICDDX_2 ||
+      val.ICDDX10_2 ||
+      val.LOINC ||
+      val.RxNorm ||
+      val.CVX ||
+      val.QuantityDispensed ||
+      val.Observation_Result ||
+      val.note;
+
+    const tinControl = fg.get('tin');
+
+    if (hasAnyValue) {
+      tinControl?.setValidators([Validators.required]);
+    } else {
+      tinControl?.clearValidators();
+    }
+
+    tinControl?.updateValueAndValidity({ emitEvent: false });
+
+    const hasTin = !!val.tin && val.tin.toString().trim() !== '' && val.tin.toString().toLowerCase() !== 'null';
+    const providerControl = fg.get('provider_id');
+
+    if (hasTin) {
+      providerControl?.setValidators([Validators.required]);
+    } else {
+      providerControl?.clearValidators();
+    }
+
+    providerControl?.updateValueAndValidity({ emitEvent: false });
+  }
+
   async setQualityGapsData(qualityGapsdata: any) {
     // A gap the user just filled in and saved can be briefly missing from
     // the server's response (e.g. it no longer counts as "open" but hasn't
@@ -1782,36 +1840,16 @@ private async updateQualityAndRiskData(
 const indexq = this.qualityGapsList.length;
 
 this.registerQualityGapAutocomplete(fg, indexq);
-        fg.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-
-          const hasAnyValue =
-            val.Observation_Date ||
-            val.CPTPx ||
-            val.HCPCSPx ||
-            val.SNOMED ||
-            val.ICDDX ||
-            val.ICDDX10 ||
-            val.ICDDX_2 ||
-            val.ICDDX10_2 ||
-            val.LOINC ||
-            val.RxNorm ||
-            val.CVX ||
-            val.QuantityDispensed ||
-            val.Observation_Result ||
-            val.note;
-
-          const tinControl = fg.get('tin');
-
-          if (hasAnyValue) {
-            tinControl?.setValidators([Validators.required]);
-          } else {
-            tinControl?.clearValidators();
-          }
-
-          tinControl?.updateValueAndValidity({ emitEvent: false });
-
+        fg.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+          this.syncQualityGapConditionalValidators(fg);
         });
-
+        // Prime once synchronously — don't wait for the first valueChanges
+        // emission. A row reused via staleControls (below) or reset via
+        // resetQualityGapRow() can otherwise keep a stale "Provider is
+        // required" error from an earlier submit attempt even while its TIN
+        // field is genuinely empty, because nothing has changed value since
+        // to re-trigger the reactive sync.
+        this.syncQualityGapConditionalValidators(fg);
 
         fg.get('Observation_Result')?.valueChanges
           .pipe(takeUntilDestroyed(this.destroyRef))
@@ -1839,6 +1877,11 @@ this.registerQualityGapAutocomplete(fg, indexq);
       const index = this.qualityGapsList.length;
       this.registerQualityGapAutocomplete(fg, index);
       this.qualityGapsList.push(fg);
+      // Re-prime for the same reason as fresh rows above — a preserved row
+      // can carry a stale manually-set "Provider is required" error from an
+      // earlier failed submit even though its current TIN value no longer
+      // warrants one.
+      this.syncQualityGapConditionalValidators(fg);
 
       const tin = fg.get('tin')?.value;
       const providerId = fg.get('provider_id')?.value;
