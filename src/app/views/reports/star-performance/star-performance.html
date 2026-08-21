@@ -4,6 +4,18 @@
             <form [formGroup]="starPerformanceFormGroup" class="filter-row" (ngSubmit)="applyFilter()">
 
                 
+                <!-- YEAR -->
+                <mat-form-field appearance="outline">
+                    <mat-label>YEAR</mat-label>
+                    <mat-select formControlName="year">
+                        @for (y of years; track y) {
+                        <mat-option [value]="y">
+                            {{ y }}
+                        </mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
                 <!-- PLAN -->
                 <mat-form-field appearance="outline">
                     <mat-label>PLAN</mat-label>
