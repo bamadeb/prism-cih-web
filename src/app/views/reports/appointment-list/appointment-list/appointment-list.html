@@ -31,6 +31,17 @@
         End Date must be after Start Date
       </mat-error>
       </mat-form-field>
+
+      <mat-form-field appearance="outline" style="min-width:220px;">
+          <mat-label>TIN</mat-label>
+          <mat-select formControlName="vendor">
+            <mat-option value="">ALL</mat-option>
+            @for (vendor of availableVendors; track vendor.VENDOR_NUM) {
+              <mat-option [value]="vendor.VENDOR_NUM" class="txupper">{{vendor.LAST_NAME}} ({{vendor.VENDOR_NUM}})</mat-option>
+            }
+          </mat-select>
+      </mat-form-field>
+
           <button mat-raised-button color="primary" [disabled]="appListFormGroup.invalid" (click)="applyFilter()" class="search-btn">
           @if (!isLoading) {
                 SEARCH
@@ -75,7 +86,7 @@
         </ng-container>
 
         <ng-container matColumnDef="vendor_id">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>VENDOR</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>TIN</th>
           <td mat-cell *matCellDef="let row">{{ row.vendor_id }}</td>
         </ng-container>
 

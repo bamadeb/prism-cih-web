@@ -141,6 +141,39 @@
   background-color: #f4f8fc;
 }
 
+/* Sticky first column: keep header/body backgrounds correct while sticky
+   (Material recomputes an inline background for sticky cells, so
+   !important is needed to keep our colors on top of it). */
+.table-wrapper td.mat-column-member_name {
+  position: sticky;
+  left: 0;
+  background: #fff !important;
+  z-index: 2;
+  min-width: 220px;
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: middle;
+  padding-left: 10px !important;
+}
+
+.table-wrapper .mat-mdc-row:nth-child(even) td.mat-column-member_name {
+  background: #fafbfc !important;
+}
+
+.table-wrapper .mat-mdc-row:hover td.mat-column-member_name {
+  background: #f4f8fc !important;
+}
+
+.table-wrapper th.mat-column-member_name {
+  position: sticky;
+  left: 0;
+  background: var(--brand-primary) !important;
+  z-index: 3;
+  min-width: 220px;
+  text-align: left;
+  padding-left: 10px !important;
+}
+
 .no-data {
   text-align: center;
   padding: 28px;

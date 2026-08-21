@@ -42,6 +42,8 @@ export class AppointmentList implements AfterViewInit,OnInit {
   appListFormGroup!: FormGroup;
   isLoading = false;
   appointmentList: any[] = [];
+  availableVendors: { VENDOR_NUM: string; LAST_NAME: string }[] = [];
+  searchText = '';
   dataSource = new MatTableDataSource<any>([]);
   selection = new SelectionModel<any>(true, []);
 
@@ -75,7 +77,8 @@ export class AppointmentList implements AfterViewInit,OnInit {
     thirtyDaysBefore.setDate(today.getDate() - 30);
     this.appListFormGroup = this.fb.group({
       start_date: [thirtyDaysBefore, Validators.required],
-      end_date: [today, Validators.required]
+      end_date: [today, Validators.required],
+      vendor: ['']
     },
       { validators: this.dateRangeValidator } // ✅ custom validator
     );
@@ -84,8 +87,21 @@ export class AppointmentList implements AfterViewInit,OnInit {
   async ngOnInit() {
     this.titleService.setTitle('PRISM :: APPOINTMENTS');
     this.headerService.setTitle('APPOINTMENTS');
-    // Load page 
+    await this.loadVendors();
+    this.appListFormGroup.get('vendor')?.valueChanges.subscribe(() => {
+      this.applyCombinedFilter();
+    });
+    // Load page
     await this.applyFilter();
+  }
+
+  async loadVendors() {
+    try {
+      const result = await this.apiService.addActionMaster<any>({});
+      this.availableVendors = result.data?.vendorList || [];
+    } catch (err) {
+      console.error('Vendor load failed', err);
+    }
   }
 
 
@@ -104,6 +120,31 @@ export class AppointmentList implements AfterViewInit,OnInit {
       const value = item[property];
       return typeof value === 'string' ? value.toLowerCase() : value;
     };
+
+    this.dataSource.filterPredicate = (row: any, filter: string) => {
+      let text = '';
+      let vendor = '';
+      try {
+        ({ text = '', vendor = '' } = JSON.parse(filter));
+      } catch {
+        text = filter;
+      }
+
+      const matchesText = !text || Object.values(row).some(value =>
+        (value ?? '').toString().toLowerCase().includes(text)
+      );
+
+      const matchesVendor = !vendor || (row.vendor_id ?? '').toString() === vendor;
+
+      return matchesText && matchesVendor;
+    };
+
+    this.applyCombinedFilter();
+  }
+
+  applyCombinedFilter(): void {
+    const vendor = this.appListFormGroup.get('vendor')?.value ?? '';
+    this.dataSource.filter = JSON.stringify({ text: this.searchText, vendor });
   }
 
   async applyFilter() {
@@ -113,8 +154,9 @@ export class AppointmentList implements AfterViewInit,OnInit {
     }
 
     this.isLoading = true;
+    this.cdr.markForCheck();
 
-    try { 
+    try {
       const formvalues= this.appListFormGroup.value;
       const start_date= this.formatDateToYMD(formvalues.start_date);
       const end_date= this.formatDateToYMD(formvalues.end_date);
@@ -233,8 +275,8 @@ export class AppointmentList implements AfterViewInit,OnInit {
 
 
   filter(event: Event): void {
-    const value = (event.target as HTMLInputElement).value ?? '';
-    this.dataSource.filter = value.trim().toLowerCase();
+    this.searchText = ((event.target as HTMLInputElement).value ?? '').trim().toLowerCase();
+    this.applyCombinedFilter();
   }
 
 }

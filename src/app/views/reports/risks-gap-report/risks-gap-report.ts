@@ -132,11 +132,6 @@ export class RisksGapReport implements AfterViewInit, OnInit {
     this.headerService.setTitle('GAPS REPORT');
     const user = this.userData.getUser();
     this.userId = user.ID;
-    this.riskGapsFormGroup.get('gaps_type')?.valueChanges.subscribe(type => {
-      if (type !== 'quality') {
-        this.riskGapsFormGroup.get('tin')?.setValue('');
-      }
-    });
     await this.loadTins();
     await this.applyFilter();
   }
@@ -185,6 +180,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
     }
 
     this.isLoading = true;
+    this.cdr.markForCheck();
 
     try {
       const { start_date, end_date, gaps_type, tin } = this.riskGapsFormGroup.value;

@@ -60,7 +60,7 @@
                 <table mat-table [dataSource]="dataSource" matSort #mainSort="matSort" class="txupper">
                     
                     <!-- MEDICAID ID -->
-                    <ng-container matColumnDef="member_name">
+                    <ng-container matColumnDef="member_name" sticky>
                         <th mat-header-cell *matHeaderCellDef mat-sort-header>MEMBER</th>
                         <td mat-cell *matCellDef="let row">{{ row.member_name }} (#{{row.medicaid_id}})</td>
                     </ng-container>
