@@ -35,7 +35,7 @@ export class StarPerformance implements OnInit {
   vendorPlanList: any[] = [];
   plans: { name: string }[] = [];
 
-  measurementYear = 2025;
+  measurementYear = new Date().getFullYear();
 
 
   years = [2026,2025, 2024, 2023, 2022];
@@ -124,13 +124,16 @@ async loadVendors() {
 
 
 async applyFilter() {
-  const { year, plan, tins } = this.starPerformanceFormGroup.value;
+  const { year: selectedYear, plan, tins } = this.starPerformanceFormGroup.value;
   this.isLoading = true;
   try {
-    const currentYear = new Date().getFullYear();
-    const payload = { year, plan, tins ,currentYear};  
+    // The YEAR dropdown selects currentYear; year is always the prior year,
+    // sent alongside it so the API can return both years for comparison.
+    const currentYear = selectedYear;
+    const year = selectedYear - 1;
+    const payload = { year, plan, tins ,currentYear};
     this.currentYear = currentYear;
-    
+
     const result = await this.apiService.getStarPerformanceByYear<any>(payload);
     
 
