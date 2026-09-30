@@ -101,7 +101,6 @@ export class AddAction implements OnInit , AfterViewInit {
   filteredhspcsOptions: Observable<any[]>[] = []; 
   icdList: any[] = [];
   filteredicdOptions: Observable<any[]>[] = [];
-  filteredicdOptions2: Observable<any[]>[] = [];
   suppSourceList = [
   { value: 'E', label: 'EHR Standard Supplemental' },
   { value: 'M', label: 'EHR Non-Standard Supplemental' },
@@ -1070,6 +1069,7 @@ private async updateQualityAndRiskData(
         // 🔥 ADD THESE
         tin: qualityGap.tin,
         provider_id: qualityGap.provider_id,
+        ReferenceID: qualityGap.ReferenceID,
         DOSThru: this.datePipe.transform(qualityGap.Observation_Date, 'yyyy-MM-dd'),
         CPTPx: qualityGap.CPTPx,
         HCPCSPx: qualityGap.HCPCSPx,
@@ -1077,16 +1077,14 @@ private async updateQualityAndRiskData(
         SNOMED: qualityGap.SNOMED,
         ICDDX: qualityGap.ICDDX,
         ICDDX10: qualityGap.ICDDX10,
-        ICDDX_2: qualityGap.ICDDX_2,
-        ICDDX10_2: qualityGap.ICDDX10_2,
+        ICDPx: qualityGap.ICDPx,
+        ICDPx10: qualityGap.ICDPx10,
         RxNorm: qualityGap.RxNorm,
         CVX: qualityGap.CVX,
         Modifier: qualityGap.Modifier,
         RxProviderFlag: qualityGap.RxProviderFlag,
         PCPFlag: qualityGap.PCPFlag,
         QuantityDispensed: qualityGap.QuantityDispensed,
-        //ICDPx: qualityGap.ICDPx,
-        //ICDPx10: qualityGap.ICDPx10,
         SuppSource: qualityGap.SuppSource,
         LOINCAnswer: qualityGap.LOINCAnswer,
         Result: qualityGap.Result,
@@ -1233,15 +1231,16 @@ private async updateQualityAndRiskData(
 
           qualityGap.tin,
           qualityGap.provider_id,
-          qualityGap.Observation_Date, 
+          qualityGap.ReferenceID,
+          qualityGap.Observation_Date,
           qualityGap.CPTPx,
           qualityGap.HCPCSPx,
           qualityGap.LOINC,
           qualityGap.SNOMED,
           qualityGap.ICDDX,
           qualityGap.ICDDX10,
-          qualityGap.ICDDX_2,
-          qualityGap.ICDDX10_2,
+          qualityGap.ICDPx,
+          qualityGap.ICDPx10,
           qualityGap.RxNorm,
           qualityGap.CVX,
           qualityGap.Modifier,
@@ -1668,20 +1667,6 @@ private async updateQualityAndRiskData(
           .slice(0, 50);
       })
     );
-    this.filteredicdOptions2[index] = fg.get('ICDDX10_2')!.valueChanges.pipe(
-      startWith(''),
-      debounceTime(300),
-      distinctUntilChanged(),
-      map(value => {
-        const filterValue = (value || '').toLowerCase();
-        return this.icdList
-          .filter(cpt =>
-            (cpt.code || '').toLowerCase().includes(filterValue) ||
-            (cpt.label || '').toLowerCase().includes(filterValue)
-          )
-          .slice(0, 50);
-      })
-    );
   }
 
   /** TIN and Provider are validated in that order: Provider only becomes
@@ -1701,8 +1686,8 @@ private async updateQualityAndRiskData(
       val.SNOMED ||
       val.ICDDX ||
       val.ICDDX10 ||
-      val.ICDDX_2 ||
-      val.ICDDX10_2 ||
+      val.ICDPx ||
+      val.ICDPx10 ||
       val.LOINC ||
       val.RxNorm ||
       val.CVX ||
@@ -1796,22 +1781,21 @@ private async updateQualityAndRiskData(
           // ✅ REQUIRED FIELD
           tin: [String(t.tin)],
           provider_id: [this.sanitize(t.provider_id)],
-          CPTPx: [this.sanitize(t.CPTPx)],          
+          ReferenceID: [this.sanitize(t.ReferenceID)],
+          CPTPx: [this.sanitize(t.CPTPx)],
           HCPCSPx: [this.sanitize(t.HCPCSPx)],
           LOINC: [this.sanitize(t.LOINC)],
           SNOMED: [this.sanitize(t.SNOMED)],
           ICDDX: [this.sanitize(t.ICDDX)],
           ICDDX10: [this.sanitize(t.ICDDX10)],
-          ICDDX_2: [this.sanitize(t.ICDDX_2)],
-          ICDDX10_2: [this.sanitize(t.ICDDX10_2)],
+          ICDPx: [this.sanitize(t.ICDPx)],
+          ICDPx10: [this.sanitize(t.ICDPx10)],
           RxNorm: [this.sanitize(t.RxNorm)],
           CVX: [this.sanitize(t.CVX)],
           Modifier: [this.sanitize(t.Modifier)],
           RxProviderFlag: [this.sanitize(t.RxProviderFlag)],
           PCPFlag: [this.sanitize(t.PCPFlag)],
           QuantityDispensed: [this.sanitize(t.QuantityDispensed)],
-          //ICDPx: [this.sanitize(t.ICDPx)],
-          //ICDPx10: [this.sanitize(t.ICDPx10)],
           SuppSource: [this.sanitize(t.SuppSource)],
           LOINCAnswer: [this.sanitize(t.LOINCAnswer)],
           Result: [this.sanitize(t.Result)],

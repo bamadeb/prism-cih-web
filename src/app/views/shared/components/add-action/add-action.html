@@ -540,7 +540,7 @@
 
                                 <mat-select formControlName="provider_id" style="text-transform: uppercase;">
                                 <mat-option *ngFor="let p of providerLists[i]" [value]="p.Provider_ID">
-                                  {{ p.Provider_ID }} ({{ p.Provider_Name }})
+                                  {{ p.Provider_Name }} - {{ p.Provider_ID }}
                                 </mat-option>
                               </mat-select>
 
@@ -558,9 +558,18 @@
                               </mat-form-field>
                               </div>
 
-                              <!-- Provider Taxonomy Code / Service Provider Type -->
-                              <div class="d-flex gap-3 align-items-start mb-2">
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                              <!-- Reference ID / Provider Taxonomy Code / Service Provider Type / DOS /
+                                   CPTPx / HCPCSPx / SNOMED / ICDDX / ICDDX10 /
+                                   LOINC / LOINC Result / RxNorm / CVX / Modifier / Supp Source
+                                   — single wrapping row so fields flow left-to-right with no empty
+                                   half-row gaps as fields are conditionally shown/hidden (e.g. LOINC Result) -->
+                              <div class="d-flex flex-wrap gap-3 mb-2">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
+                                  <mat-label>REFERENCE ID</mat-label>
+                                  <input matInput formControlName="ReferenceID">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>PROVIDER TAXONOMY CODE</mat-label>
                                   <mat-select formControlName="Service_Provider_Taxonomy_Code" style="text-transform: uppercase;">
                                     <mat-option *ngFor="let t of taxonomyList" [value]="t.code">
@@ -569,7 +578,7 @@
                                   </mat-select>
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>SERVICE PROVIDER TYPE</mat-label>
                                   <mat-select formControlName="Service_Provider_Type" style="text-transform: uppercase;">
                                     <mat-option *ngFor="let s of serviceProviderTypeList" [value]="s.name">
@@ -577,11 +586,8 @@
                                     </mat-option>
                                   </mat-select>
                                 </mat-form-field>
-                              </div>
 
-                              <!-- DOS -->
-                             <div class="d-flex gap-3 align-items-start mb-2"> 
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>DOS</mat-label>
                                   <input matInput [matDatepicker]="dosPicker"
                                         formControlName="Observation_Date"
@@ -593,7 +599,7 @@
                                 </mat-form-field>
 
                                 <!-- CPTPx -->
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>CPTPx</mat-label>
 
                                   <input
@@ -609,11 +615,9 @@
                                   </mat-autocomplete>
 
                                 </mat-form-field>
-                              </div>                             
 
-                              <!-- HCPCSPx -->
-                               <div class="d-flex gap-3 align-items-start mb-2">
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                <!-- HCPCSPx -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>HCPCSPx</mat-label>
                                   <!-- <input matInput formControlName="HCPCSPx"> -->
 
@@ -628,24 +632,21 @@
                                       {{ cpt.HCPCS_Code }} - {{ cpt.subcategory }}
                                     </mat-option>
                                   </mat-autocomplete>
-                                </mat-form-field>                           
+                                </mat-form-field>
 
-
-                                 <!-- SNOMED -->
-                                 <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                <!-- SNOMED -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>SNOMED</mat-label>
                                   <input matInput formControlName="SNOMED">
                                 </mat-form-field>
-                              </div>                  
 
-                              <!-- ICDDX -->
-                              <div class="d-flex gap-3 align-items-start mb-2">
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                <!-- ICDDX -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>ICDDX</mat-label>
                                   <input matInput formControlName="ICDDX">
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>ICDDX10</mat-label>
                                   <!-- <input matInput formControlName="ICDDX10"> -->
                                   <input
@@ -662,61 +663,38 @@
 
 
                                 </mat-form-field>
-                              </div>
 
-                              <!-- ICDDX 2 -->
-                              <div class="d-flex gap-3 align-items-start mb-2">
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
-                                  <mat-label>ICDDX 2</mat-label>
-                                  <input matInput formControlName="ICDDX_2">
-                                </mat-form-field>
-
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
-                                  <mat-label>ICDDX10 2</mat-label>
-                                  <input
-                                    type="text"
-                                    matInput
-                                    formControlName="ICDDX10_2"
-                                    [matAutocomplete]="autoIcd2">
-
-                                  <mat-autocomplete #autoIcd2="matAutocomplete">
-                                    <mat-option *ngFor="let cpt of filteredicdOptions2[i] | async; trackBy: trackByCpt" [value]="cpt.code">
-                                      {{ cpt.code }} - {{ cpt.label }}
-                                    </mat-option>
-                                  </mat-autocomplete>
-                                </mat-form-field>
-                              </div>
-
-                               <!-- LOINC -->
-                               <div class="d-flex gap-3 align-items-start mb-2">
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                <!-- LOINC -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>LOINC</mat-label>
                                   <input matInput formControlName="LOINC">
                                 </mat-form-field>
 
                                 <!-- LOINC Answer -->
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;" *ngIf="qgap.get('LOINC')?.value?.trim()">
-                                    <mat-label>LOINC Answer</mat-label>
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;" *ngIf="qgap.get('LOINC')?.value?.trim()">
+                                    <mat-label>LOINC Result</mat-label>
                                     <input matInput formControlName="LOINCAnswer">
                                 </mat-form-field>
-                              </div>      
 
-                              <!-- RxNorm -->
-                              <div class="d-flex gap-3 align-items-start mb-2">
-                                <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                <!-- RxNorm -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>RxNorm</mat-label>
                                   <input matInput formControlName="RxNorm">
                                 </mat-form-field>
 
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>CVX</mat-label>
                                   <input matInput formControlName="CVX">
                                 </mat-form-field>
-                              </div>  
 
-                              <!-- RxProviderFlag / PCPFlag -->
-                              <div class="d-flex gap-3 align-items-start mb-3">
-                                <div style="width: 49%;">
+                                <!-- Modifier -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
+                                  <mat-label>MODIFIER</mat-label>
+                                  <input matInput formControlName="Modifier">
+                                </mat-form-field>
+
+                                <!-- Rx Provider Flag -->
+                                <div style="flex:1 1 47%;">
                                   <label class="form-label fw-semibold">Rx PROVIDER FLAG</label>
                                   <mat-radio-group formControlName="RxProviderFlag" class="d-flex gap-3"
                                     [class.field-error]="qgap.get('RxProviderFlag')?.invalid && qgap.get('RxProviderFlag')?.touched"
@@ -725,7 +703,10 @@
                                     <mat-radio-button [value]="0">NO</mat-radio-button>
                                   </mat-radio-group>
                                 </div>
+                              </div>
 
+                              <!-- PCPFlag / ICDPx -->
+                              <div class="d-flex gap-3 align-items-start mb-3">
                                 <div style="width: 49%;">
                                   <label class="form-label fw-semibold">PCP FLAG</label>
                                   <mat-radio-group formControlName="PCPFlag" class="d-flex gap-3"
@@ -735,25 +716,35 @@
                                     <mat-radio-button [value]="0">NO</mat-radio-button>
                                   </mat-radio-group>
                                 </div>
-                              </div>
-                              
 
-                              <!-- Quantity Dispensed -->
+                                <mat-form-field appearance="outline" style="width: 49%;">
+                                  <mat-label>ICDPx</mat-label>
+                                  <input matInput formControlName="ICDPx">
+                                </mat-form-field>
+                              </div>
+
+                              <!-- ICDPx10 / Quantity Dispensed -->
                               <div class="d-flex gap-3 align-items-start mb-2">
-                                  <mat-form-field appearance="outline" class="flex-fill" style="margin-right: 2%;width: 49%;">
+                                <mat-form-field appearance="outline" style="width: 49%;">
+                                  <mat-label>ICDPx10</mat-label>
+                                  <input matInput formControlName="ICDPx10">
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" style="width: 49%;">
                                   <mat-label>QUANTITY DISPENSED</mat-label>
                                   <input matInput formControlName="QuantityDispensed">
                                 </mat-form-field>
+                              </div>
 
-                                <mat-form-field appearance="outline" class="flex-fill" style="width: 49%;">
+                              <!-- Result / Supp Source -->
+                              <div class="d-flex flex-wrap gap-3 mb-2">
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>RESULT</mat-label>
                                   <input matInput formControlName="Observation_Result" >
                                 </mat-form-field>
-                              </div> 
 
-                              <!-- SuppSource -->
-                              <div class="col-lg-3 col-md-6 mb-2">
-                                <mat-form-field appearance="outline" class="w-100">
+                                <!-- SuppSource -->
+                                <mat-form-field appearance="outline" style="flex:1 1 47%;">
                                   <mat-label>SUPP SOURCE</mat-label>
                                   <mat-select formControlName="SuppSource">
                                     <mat-option *ngFor="let item of suppSourceList" [value]="item.value">
@@ -763,9 +754,8 @@
                                 </mat-form-field>
                               </div>
 
-
                               <!-- Note -->
-                              <div class="col-lg-9 col-md-12 mb-2">
+                              <div class="d-flex mb-2">
                                 <mat-form-field appearance="outline" class="w-100">
                                   <mat-label>NOTE</mat-label>
                                   <textarea matInput rows="2" formControlName="note" style="height:32px;"></textarea>

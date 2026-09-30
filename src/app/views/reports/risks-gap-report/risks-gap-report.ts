@@ -80,26 +80,29 @@ export class RisksGapReport implements AfterViewInit, OnInit {
     'medicaid_id',
     'mode',
     'PROVIDER_ID',
+    'ReferenceID',
     'DOS',
     'DOSThru',
-    'Service_Provider_Taxonomy_Code',
     'Service_Provider_Type',
-    'CPTPx',
+    'Service_Provider_Taxonomy_Code',
+    'CPTPx1',
+    'CPTPx2',
     'HCPCSPx',
     'LOINC',
+    'LOINCAnswer',
     'SNOMED',
     'ICDDX',
     'ICDDX10',
-    'ICDDX_2',
-    'ICDDX10_2',
+    'ICDPx',
+    'ICDPx10',
     'RxNorm',
     'CVX',
+    'Modifier',
     'Observation_Result',
     'RxProviderFlag',
     'PCPFlag',
     'QuantityDispensed',
-    'SuppSource',
-    'LOINCAnswer'
+    'SuppSource'
   ];
   displayedColumns: string[] = [];
 
@@ -170,6 +173,59 @@ export class RisksGapReport implements AfterViewInit, OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     const year = date.getFullYear();
     return `${year}-${month}-${day}`; // m/d/Y format
+  }
+
+  /**
+   * Wraps a YYYY-MM-DD date in an Excel text formula (="YYYY-MM-DD") so Excel does not
+   * re-interpret it and display it in the machine's locale (e.g. DD-MM-YYYY).
+   * Returns '' for blank/sentinel values.
+   */
+  formatDosDateForExcel(value: any): string {
+    const ymd = this.formatDosDate(value);
+    return ymd ? `="${ymd}"` : '';
+  }
+
+  /** Formats DOS / DOSThru values to YYYY-MM-DD; blank for empty or the 01/01/1900 sentinel */
+  formatDosDate(value: any): string {
+    if (value === null || value === undefined) return '';
+    const str = value.toString().trim();
+    if (!str || str.startsWith('01/01/1900') || str.startsWith('1900-01-01')) return '';
+
+    let m = /^(\d{4})-(\d{2})-(\d{2})/.exec(str);
+    if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+
+    m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(str);
+    if (m) {
+      return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+    }
+
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  /** Formats a quality-gap row's provider as "Provider Name (provider_id)" */
+  formatProviderCell(item: any): string {
+    const name = (item.PROVIDER_NAME ?? '').toString().trim();
+    const id = (item.provider_id ?? '').toString().trim();
+    return name ? `${name} (${id})` : id;
+  }
+
+  /** Splits a "+"-joined CPTPx value (e.g. "3077F + 3079F") into its individual parts for display. */
+  getCptPxPart(value: any, part: 1 | 2): string {
+    const s = (value ?? '').toString().trim();
+    if (!s) return '';
+    const parts = s.split('+').map((p: string) => p.trim());
+    return parts[part - 1] ?? '';
+  }
+
+  /** Normalizes flag values to Y / N (from Yes/No, true/false, 1/0). Blank stays blank. */
+  formatYN(value: any): string {
+    if (value === null || value === undefined || value === '') return '';
+    const s = value.toString().trim().toLowerCase();
+    if (['y', 'yes', 'true', '1'].includes(s)) return 'Y';
+    if (['n', 'no', 'false', '0'].includes(s)) return 'N';
+    return value.toString();
   }
 
 
@@ -318,19 +374,22 @@ export class RisksGapReport implements AfterViewInit, OnInit {
       header = [
         'MemberKey',
         'ProviderKey',
+        'ReferenceID',
         'DOS',
         'DOSThru',
-        'ServiceProviderTaxonomyCode',
-        'ServiceProviderType',
+        'ProviderType',
+        'ProviderTaxonomy',
         'CPTPx',
+        'CPTPx2',
         'HCPCSPx',
         'LOINC',
         'SNOMED',
         'ICDDX10',
-        'ICDDX 2',
-        'ICDDX10 2',
+        'ICDPx',
+        'ICDPx10',
         'RxNorm',
         'CVX',
+        'Modifier',
         'RxProviderFlag',
         'PCPFlag',
         'QuantityDispensed',
@@ -342,36 +401,36 @@ export class RisksGapReport implements AfterViewInit, OnInit {
       rows = this.riskGapsReportList.map(item =>
         [
           item.RECIP_NO ?? '',
-          item.provider_id ?? '',
-          item.ObservationDate !== '01/01/1900'
-            ? item.ObservationDate
-            : '',
-          item.DOSThru !== '01/01/1900'
-            ? item.DOSThru
-            : '',
-          item.Service_Provider_Taxonomy_Code ?? '',
+          this.formatProviderCell(item),
+          item.ReferenceID ?? '',
+          this.formatDosDateForExcel(item.ObservationDate),
+          this.formatDosDateForExcel(item.DOSThru),
           item.Service_Provider_Type ?? '',
-          item.CPTPx ?? '',
+          item.Service_Provider_Taxonomy_Code ?? '',
+          this.getCptPxPart(item.CPTPx, 1),
+          this.getCptPxPart(item.CPTPx, 2),
           item.HCPCSPx ?? '',
           item.LOINC ?? '',
           item.SNOMED ?? '',
           item.ICDDX10 ?? '',
-          item.ICDDX_2 ?? '',
-          item.ICDDX10_2 ?? '',
+          item.ICDPx ?? '',
+          item.ICDPx10 ?? '',
           item.RxNorm ?? '',
           item.CVX ?? '',
-          item.RxProviderFlag ?? '',
-          item.PCPFlag ?? '',
+          item.Modifier ?? '',
+          this.formatYN(item.RxProviderFlag),
+          this.formatYN(item.PCPFlag),
           item.QuantityDispensed ?? '',
           item.SuppSource ?? '',
           item.Observation_Result ?? '',
           item.LOINCAnswer ?? ''
         ]
-          .map(value =>
-            `"${(value ?? '')
-              .toString()
-              .replace(/"/g, '""')}"`
-          )
+          .map(value => {
+            const s = (value ?? '').toString();
+            // Keep Excel text formulas (="...") unquoted so Excel evaluates them
+            if (/^="[^"]*"$/.test(s)) return s;
+            return `"${s.replace(/"/g, '""')}"`;
+          })
           .join(',')
       );
     }
@@ -487,19 +546,22 @@ export class RisksGapReport implements AfterViewInit, OnInit {
         header = [
           'MemberKey',
           'ProviderKey',
+          'ReferenceID',
           'DOS',
           'DOSThru',
-          'ServiceProviderTaxonomyCode',
-          'ServiceProviderType',
+          'ProviderTaxonomy',
+          'ProviderType',
           'CPTPx',
+          'CPTPx2',
           'HCPCSPx',
           'LOINC',
           'SNOMED',
           'ICDDX10',
-          'ICDDX 2',
-          'ICDDX10 2',
+          'ICDPx',
+          'ICDPx10',
           'RxNorm',
           'CVX',
+          'Modifier',
           'RxProviderFlag',
           'PCPFlag',
           'QuantityDispensed',
@@ -511,22 +573,25 @@ export class RisksGapReport implements AfterViewInit, OnInit {
         rows = this.riskGapsReportList.map(item =>
           [
             item.RECIP_NO ?? '',
-            item.provider_id ?? '',
-            item.ObservationDate !== '01/01/1900' ? item.ObservationDate : '',
-            item.DOSThru !== '01/01/1900' ? item.DOSThru : '',
-            item.Service_Provider_Taxonomy_Code ?? '',
+            this.formatProviderCell(item),
+            item.ReferenceID ?? '',
+            this.formatDosDate(item.ObservationDate),
+            this.formatDosDate(item.DOSThru),
             item.Service_Provider_Type ?? '',
-            item.CPTPx ?? '',
+            item.Service_Provider_Taxonomy_Code ?? '',
+            this.getCptPxPart(item.CPTPx, 1),
+            this.getCptPxPart(item.CPTPx, 2),
             item.HCPCSPx ?? '',
             item.LOINC ?? '',
             item.SNOMED ?? '',
             item.ICDDX10 ?? '',
-            item.ICDDX_2 ?? '',
-            item.ICDDX10_2 ?? '',
+            item.ICDPx ?? '',
+            item.ICDPx10 ?? '',
             item.RxNorm ?? '',
             item.CVX ?? '',
-            item.RxProviderFlag ?? '',
-            item.PCPFlag ?? '',
+            item.Modifier ?? '',
+            this.formatYN(item.RxProviderFlag),
+            this.formatYN(item.PCPFlag),
             item.QuantityDispensed ?? '',
             item.SuppSource ?? '',
             item.Observation_Result ?? '',

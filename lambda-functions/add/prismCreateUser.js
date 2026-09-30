@@ -64,7 +64,13 @@ exports.handler = async (event) => {
 
     try {
         // ✅ Input validation
-        if (!FistName || !LastName || !EmailID || !body.Password) {
+        // role_id/department_id/member_status use an explicit presence check
+        // rather than `!field` -- member_status 0 (ACTIVE) is a valid value
+        // and must not be rejected as "missing".
+        const isMissing = (v) => v === undefined || v === null || v === '';
+
+        if (!FistName || !LastName || !EmailID || !body.Password ||
+            isMissing(role_id) || isMissing(department_id) || isMissing(member_status)) {
 
             return buildResponse(400,{data: 'Missing required fields'},event);
         }

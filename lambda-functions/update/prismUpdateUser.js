@@ -59,12 +59,16 @@ exports.handler = async (event) => {
     Password
   } = body;
 
-  // role and department are both required on the frontend's edit form
-  // (Validators.required on 'role'/'department') -- match that here.
+  // role, department and status are all required on the frontend's edit form
+  // (Validators.required on 'role'/'department'/'status') -- match that here.
+  // member_status uses the same explicit presence check as role_id/department_id
+  // rather than `!member_status`, since 0 (ACTIVE) is a valid value and must
+  // not be rejected as "missing".
   if (!ID || !FistName || !LastName
       || role_id === undefined || role_id === null || role_id === ''
-      || department_id === undefined || department_id === null || department_id === '') {
-    return buildResponse(400, { message: "ID, FistName, LastName, role_id and department_id are required" }, event);
+      || department_id === undefined || department_id === null || department_id === ''
+      || member_status === undefined || member_status === null || member_status === '') {
+    return buildResponse(400, { message: "ID, FistName, LastName, role_id, department_id and member_status are required" }, event);
   }
 
   if (!Number.isInteger(Number(role_id)) || !Number.isInteger(Number(department_id))) {

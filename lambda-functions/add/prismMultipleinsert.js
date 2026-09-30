@@ -107,7 +107,7 @@ const REQUIRED_FIELDS = {
   MEM_ATTACHMENT: ['type', 'type_id', 'attachment', 'added_by', 'status'],
   MEM_PLAN_MEMBERS: ['medicaid_id', 'plan_id', 'added_by'],
   MEM_PLAN_MASTER: ['plan_name', 'start_date', 'end_date', 'status'],
-  MEM_REFERRING: ['medicaid_id', 'department_id', 'refer_to', 'refer_by']
+  MEM_REFERRING: ['medicaid_id', 'refer_to', 'refer_by']
 };
 
 function isBlank(value) {
