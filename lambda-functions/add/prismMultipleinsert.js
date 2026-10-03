@@ -114,6 +114,16 @@ function isBlank(value) {
   return value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
 }
 
+// Finding 3.3.8: this endpoint had NO authentication check at all -- not even
+// "is this a logged-in user", let alone a role check. The table allow-list
+// and required-field validation above stop writes to the wrong table or with
+// missing data, but do nothing to stop a completely anonymous caller from
+// writing to any allow-listed table. Require a valid, known caller for every
+// call. ROLE_PAGE_ACCESS is additionally Admin-only, matching the gate
+// already added to prismGetPageAccessList.js for the same ADMIN-only page.
+const ADMIN_ROLE_ID = 7;
+const ADMIN_ONLY_TABLES = new Set(['ROLE_PAGE_ACCESS']);
+
 // ✅ Chunk helper
 function chunkArray(array, size) {
   const chunks = [];
@@ -160,8 +170,25 @@ exports.handler = async (event) => {
     }
   }
 
+  const claims = event.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { message: "Unauthorized" }, event);
+  }
+
   try {
     const pool = await getDBConnection();
+
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller) {
+      return buildResponse(401, { message: "Unauthorized" }, event);
+    }
+    if (ADMIN_ONLY_TABLES.has(table_name) && Number(caller.role_id) !== ADMIN_ROLE_ID) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
 
     // ✅ Validate columns
     const columns = Object.keys(insertDataArray[0]).filter(col => isValidName(col));

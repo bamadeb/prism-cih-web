@@ -1,9 +1,11 @@
 import {
   CognitoIdentityProviderClient,
-  AdminEnableUserCommand
+  AdminDisableUserCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 import { createRequire } from "module";
 
+// The /opt/dbConfig layer is CommonJS; createRequire lets this ESM handler
+// load it without relying on static named-export detection.
 const require = createRequire(import.meta.url);
 const { getDBConnection, sql } = require('/opt/dbConfig');
 
@@ -18,12 +20,12 @@ const client = new CognitoIdentityProviderClient({
 });
 
 export const handler = async (event) => {
-  // Finding 3.1.6, "Missing Authentication on Account Lock/Unlock Endpoints":
-  // if this route turns out to have no Cognito authorizer attached at the API
-  // Gateway level at all (checked the same way prismGetcallhistory-prod's
-  // "CognitoProd" authorizer was confirmed earlier), that's a separate infra
-  // fix needed alongside the role check below.
   try {
+    // Finding 3.1.6: locking/disabling ANY user's account had no auth check
+    // at all -- only that a username was supplied. If this route turns out to
+    // have no Cognito authorizer attached at the API Gateway level (checked
+    // the same way prismGetcallhistory-prod's "CognitoProd" authorizer was
+    // confirmed), that's a separate infra fix needed alongside this one.
     const claims = event.requestContext?.authorizer?.claims || {};
     const callerSub = claims.sub;
     if (!callerSub) {
@@ -53,35 +55,33 @@ export const handler = async (event) => {
       };
     }
 
-    // 🔓 Enable user
-    const command = new AdminEnableUserCommand({
+    // 🔒 Disable user
+    const command = new AdminDisableUserCommand({
       UserPoolId: USER_POOL_ID,
       Username: username
     });
 
     await client.send(command);
 
-    console.log("🔓 User enabled:", username);
+    console.log("🔒 User disabled:", username);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         status: "success",
-        message: "User unlocked successfully",
+        message: "User disabled successfully",
         username
       })
     };
 
   } catch (error) {
-    // Log the real error server-side only -- don't echo raw SDK/exception
-    // messages back to the caller.
-    console.error("❌ Enable error:", error);
+    console.error("❌ Disable error:", error);
 
     return {
       statusCode: 500,
       body: JSON.stringify({
         status: "error",
-        message: "Failed to unlock user"
+        message: error.message || "Failed to disable user"
       })
     };
   }

@@ -1,3 +1,4 @@
+
 const { getDBConnection, sql } = require('/opt/dbConfig');
 const { buildResponse, handleOptions } = require('/opt/responseHelper');
 // const sql = require('mssql');
@@ -36,36 +37,30 @@ const { buildResponse, handleOptions } = require('/opt/responseHelper');
 //   }
 // }
 // Finding 3.4.7: medicaid_id came straight from the client with no check
-// that the caller is that member's assigned care coordinator -- any
-// authenticated caller could reset ANY member's gap/risk status. Admin
-// bypasses, matching the pattern used for reads on this same data
-// (prismGetMemberGapsList.js, prismMemberAllDetails.js).
+// that the caller is that member's assigned care coordinator -- same gap as
+// its three siblings (prismUnSetMemberGapsStatus.js, prismUpdategapStatus.js,
+// prismUpdatequalityStatus.js), all fixed the same way. Admin bypasses.
 const ADMIN_ROLE_ID = 7;
 
 exports.handler = async (event) => {
-  if (event.httpMethod === "OPTIONS") {
-    return buildResponse(200, {}, event);
-  }
-
   const body = JSON.parse(event.body || "{}");
-  const action_id = body.action_id ?? 0;
-  const medicaid_id = body.medicaid_id;
-
-  // Both UPDATE statements below are scoped by medicaid_id (as well as
-  // PROCESS_STATUS = '1'), so a missing/invalid medicaid_id can't broadly
-  // affect other members -- but it should still be rejected explicitly
-  // rather than silently running a query that matches zero rows.
-  if (!medicaid_id) {
-    return buildResponse(400, { error: "medicaid_id is required" }, event);
-  }
-
-  const claims = event.requestContext?.authorizer?.claims || {};
-  const callerSub = claims.sub;
-  if (!callerSub) {
-    return buildResponse(401, { error: "Unauthorized" }, event);
-  }
+  const { action_id, medicaid_id } = body;
 
   try {
+    if (event.httpMethod === "OPTIONS") {
+      return buildResponse(200,{},event);
+    }
+
+    if (!medicaid_id) {
+      return buildResponse(400, { error: "medicaid_id is required" }, event);
+    }
+
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const callerSub = claims.sub;
+    if (!callerSub) {
+      return buildResponse(401, { error: "Unauthorized" }, event);
+    }
+
     const pool = await getDBConnection();
 
     const callerLookup = await pool.request()
@@ -87,7 +82,7 @@ exports.handler = async (event) => {
     }
 
     const result = await pool.request()
-      .input('action_id', sql.Int, action_id)
+      .input('action_id', sql.VarChar, action_id)
       .input('medicaid_id', sql.VarChar, medicaid_id)
       .query(`
         UPDATE QU 
@@ -95,8 +90,7 @@ exports.handler = async (event) => {
             QU.UPDATE_DATE = GETDATE(), 
             QU.ACTION_ID = @action_id
         FROM MEM_CIH_QUALITY AS QU
-        WHERE QU.MEDICAID_ID = @medicaid_id 
-          AND QU.NUMERATOR_GAP = '0' 
+        WHERE QU.MEDICAID_ID = @medicaid_id           
           AND QU.PROCESS_STATUS = '1';
           -- Update Risk Gaps
       UPDATE g
@@ -110,12 +104,12 @@ exports.handler = async (event) => {
         AND g.PROCESS_STATUS = '1'
       `);
 
-   // return { statusCode: 200, data: result.rowsAffected };
+    //return { statusCode: 200, data: result.rowsAffected };
     return buildResponse(200,{ data: result.rowsAffected },event);
   } catch (err) {
     console.error('Database connection error:', err);
     //return { statusCode: 500, error: err.message };
-    return buildResponse(500,{ error: "Internal server error" },event);
+    return buildResponse(500,{ error: 'Interna server error.' },event);
   }
 };
 

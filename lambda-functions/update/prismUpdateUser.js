@@ -38,15 +38,25 @@ const VALID_MEMBER_STATUS = new Set([0, 1]);
 //   return poolPromise;
 // }
 
+// The MANAGE USERS page this endpoint backs is Admin-only by design (confirmed
+// via prismGetPageAccessList-prod: only role_id 7 has a "MANAGE USERS" row) --
+// there is no legitimate self-service profile-edit path through this endpoint.
+// A security review confirmed a Navigator could send {"ID": <own_id>,
+// "role_id": 7} and self-escalate to Admin, and separately modify an
+// unrelated user's role/department/status by supplying a different ID
+// (CWE-915 mass assignment + broken object-level authorization).
+const ADMIN_ROLE_ID = 7;
+
 exports.handler = async (event) => {
-  // TODO(authorization): ID is taken directly from the request body with no
-  // check that the caller is an admin or is updating their own record. As
-  // written, any authenticated caller can pass any other user's ID and
-  // change their role_id/department_id/member_status, or reset their
-  // Password -- full account takeover. Wire in a check here once the
-  // auth-claims shape reaching this Lambda is confirmed (e.g.
-  // event.requestContext.authorizer.claims): either require an admin role,
-  // or require ID to match the caller's own id for a self-service update.
+  // API Gateway has a Cognito User Pool authorizer (confirmed: "CognitoProd")
+  // in front of this route, so the caller's verified ID token claims arrive
+  // here in event.requestContext.authorizer.claims -- `sub` is the Cognito
+  // user's UUID, which is stored in MEM_USERS.cognito_username.
+  const claims = event.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { message: "Unauthorized" }, event);
+  }
 
   const body = JSON.parse(event.body || "{}");
   const {
@@ -93,6 +103,18 @@ exports.handler = async (event) => {
 
   try {
     pool = await getDBConnection();
+
+    // Look up the caller's own role by their verified Cognito sub -- never
+    // trust a role/id claimed in the request body itself.
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+
+    const caller = callerLookup.recordset[0];
+    if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
+
     const request = pool.request();
 
     request.input('FistName', sql.VarChar, FistName);

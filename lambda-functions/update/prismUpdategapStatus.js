@@ -1,3 +1,4 @@
+
 const { getDBConnection, sql } = require('/opt/dbConfig');
 const { buildResponse, handleOptions } = require('/opt/responseHelper');
 // const sql = require('mssql');
@@ -34,14 +35,29 @@ const { buildResponse, handleOptions } = require('/opt/responseHelper');
 //   }
 // }
 
+// Finding 3.4.7: medicaid_id came straight from the client with no check
+// that the caller is that member's assigned care coordinator. Admin
+// bypasses, matching the pattern used for reads on this same data.
+const ADMIN_ROLE_ID = 7;
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return buildResponse(200,{},event);
   }
-  const body = JSON.parse(event.body || "{}");   
-    var diagVal = body.diag_codes; 
-    var action_id = body.action_id; 
-    var medicaid_id = body.medicaid_id; 
+  const body = JSON.parse(event.body || "{}");
+    var diagVal = body.diag_codes;
+    var action_id = body.action_id;
+    var medicaid_id = body.medicaid_id;
+
+    if (!medicaid_id) {
+      return buildResponse(400, { error: "medicaid_id is required" }, event);
+    }
+
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const callerSub = claims.sub;
+    if (!callerSub) {
+      return buildResponse(401, { error: "Unauthorized" }, event);
+    }
 
     // ✅ Convert to array safely
     let diagArray;
@@ -79,6 +95,25 @@ exports.handler = async (event) => {
   //  WHERE m.RECIP_NO = '` + medicaid_id + `' AND DIAG_CODE IN (${diagVal}) AND g.PROCESS_STATUS='0'`;
    
         pool = await getDBConnection();
+
+        const callerLookup = await pool.request()
+          .input('cognito_username', sql.VarChar, callerSub)
+          .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+        const caller = callerLookup.recordset[0];
+        if (!caller) {
+          return buildResponse(401, { error: "Unauthorized" }, event);
+        }
+
+        if (Number(caller.role_id) !== ADMIN_ROLE_ID) {
+          const assignmentLookup = await pool.request()
+            .input('medicaid_id', sql.VarChar, medicaid_id)
+            .query('SELECT Care_Coordinator_id FROM MEM_OUTREACH_MEMBERS WHERE medicaid_id = @medicaid_id');
+          const member = assignmentLookup.recordset[0];
+          if (!member || Number(member.Care_Coordinator_id) !== Number(caller.ID)) {
+            return buildResponse(403, { error: "Forbidden" }, event);
+          }
+        }
+
         const request = pool.request();
 
         request.input('action_id', sql.Int, action_id);
