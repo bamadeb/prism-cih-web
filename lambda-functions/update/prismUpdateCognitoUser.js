@@ -31,12 +31,17 @@ export const handler = async (event) => {
   // event.requestContext.authorizer.claims).
 
   try {
-    // Every other Lambda behind this API parses JSON.parse(event.body) --
-    // reading top-level event.username/event.attributes here means, behind
-    // API Gateway proxy integration, those are always undefined and this
-    // handler always throws "username is required". Fixed to match the
-    // other handlers' parsing.
-    const body = JSON.parse(event.body || "{}");
+    // CONFIRMED VIA LIVE TESTING (CloudWatch log showed "username is
+    // required" even though the caller sent a username): this route is on a
+    // non-proxy/custom API Gateway integration where the request fields land
+    // directly on top-level `event`, NOT under event.body -- same as
+    // prismProcessPCRdataSessionId.js. An earlier "fix" here wrongly assumed
+    // this endpoint matched its siblings' JSON.parse(event.body) pattern and
+    // broke it. Handling both shapes so this isn't fragile to which
+    // integration type actually fronts it.
+    const body = event.body
+      ? (() => { try { return JSON.parse(event.body); } catch { return {}; } })()
+      : event;
     const { username, attributes, newPassword } = body;
 
     if (!username) {

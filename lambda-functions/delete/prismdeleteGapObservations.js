@@ -28,22 +28,29 @@ const { buildResponse, handleOptions } = require('/opt/responseHelper');
 
 const MAX_RECORDS = 500;
 
-exports.handler = async (event) => {
-  // TODO(authorization): these ids/subscriber_number values come straight
-  // from the client with no check that the caller has access to the members
-  // they belong to. Wire in an ownership check here once the auth-claims
-  // shape reaching this Lambda is confirmed (e.g.
-  // event.requestContext.authorizer.claims).
+// This route is confirmed to have the Cognito authorizer attached at the API
+// Gateway level (checked via the OpenAPI export, same way prismGetcallhistory-
+// prod's authorizer was confirmed) -- so event.requestContext.authorizer.claims
+// will actually be populated here, unlike a few sibling routes still missing
+// the authorizer entirely.
+//
+// Ownership is required for every caller, with no role-based bypass: only the
+// member's assigned care coordinator may delete that member's gap
+// observations. Admin gets no special-case exemption here -- an Admin can
+// only delete a given member's gaps if that Admin is ALSO the member's
+// assigned Care_Coordinator_id, same as any other user. (Unlike most other
+// endpoints in this review, where Admin bypasses the ownership check
+// entirely -- this one is deliberately different per explicit instruction.)
 
-  //const records = event.records;
+exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") {
+    return buildResponse(200,{},event);
+  }
+
   const body = JSON.parse(event.body || "{}");
   const records = body.records;
 
   if (!records || !Array.isArray(records) || !records.length) {
-    // return {
-    //   statusCode: 400,
-    //   data: JSON.stringify({ error: 'No records provided' })
-    // };
     return buildResponse(400,{ error: 'No records provided' },event);
   }
 
@@ -55,11 +62,59 @@ exports.handler = async (event) => {
     return buildResponse(400,{ error: 'Invalid record id' },event);
   }
 
+  if (records.some(r => !r.subscriber_number)) {
+    return buildResponse(400,{ error: 'subscriber_number is required on every record' },event);
+  }
+
+  const claims = event.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { error: 'Unauthorized' }, event);
+  }
+
   let pool;
   let transaction;
 
   try {
     pool = await getDBConnection();
+
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller) {
+      return buildResponse(401, { error: 'Unauthorized' }, event);
+    }
+
+    // Ownership check, no role-based bypass: every record's subscriber_number
+    // must belong to a member THIS caller is the assigned care coordinator
+    // for. MEM_MEMBERS.SUBSCRIBER_NUMBER -> RECIP_NO (medicaid_id) ->
+    // MEM_OUTREACH_MEMBERS.Care_Coordinator_id, same assignment chain already
+    // used in prismGetcallhistory.js / prismMemberAllDetails.js.
+    const subscriberNumbers = [...new Set(records.map(r => r.subscriber_number))];
+    const ownerCheckRequest = pool.request();
+    const inParams = subscriberNumbers.map((sn, i) => {
+      ownerCheckRequest.input(`sn${i}`, sql.VarChar(50), sn);
+      return `@sn${i}`;
+    }).join(',');
+
+    const ownerCheck = await ownerCheckRequest.query(`
+      SELECT m.SUBSCRIBER_NUMBER, mo.Care_Coordinator_id
+      FROM MEM_MEMBERS AS m
+      JOIN MEM_OUTREACH_MEMBERS AS mo ON mo.medicaid_id = m.RECIP_NO
+      WHERE m.SUBSCRIBER_NUMBER IN (${inParams})
+    `);
+
+    const ownedSubscriberNumbers = new Set(
+      ownerCheck.recordset
+        .filter(row => Number(row.Care_Coordinator_id) === Number(caller.ID))
+        .map(row => row.SUBSCRIBER_NUMBER)
+    );
+
+    const unauthorized = subscriberNumbers.some(sn => !ownedSubscriberNumbers.has(sn));
+    if (unauthorized) {
+      return buildResponse(403, { error: 'Forbidden' }, event);
+    }
 
     // 🔥 transaction must be created from pool
     transaction = new sql.Transaction(pool);
