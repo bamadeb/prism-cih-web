@@ -264,12 +264,20 @@ async setupQrCode() {
       }
     }
     catch (err: any) {
-      this.errorMessage = err.message || "Login failed";
+      // Cognito has already accepted the password at this point, so a 401 from
+      // prismAuthentication means the user is inactive in the app database.
+      // The 401 comes back without CORS headers, so the browser reports it as
+      // status 0 ("Unknown Error") instead of 401.
+      if (err?.status === 401 || err?.status === 0) {
+        this.errorMessage = 'Please contact the administrator to activate your account.';
+      } else {
+        this.errorMessage = err.message || "Login failed";
+      }
     }
     finally {
       this.isLoading = false;
     }
-  }  
+  }
   onOtpInput(value: string) {
     this.errorMessage = '';
     if (value.length === 6) {

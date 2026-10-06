@@ -383,6 +383,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
         'CPTPx2',
         'HCPCSPx',
         'LOINC',
+        'LOINCResult',
         'SNOMED',
         'ICDDX10',
         'ICDPx',
@@ -394,8 +395,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
         'PCPFlag',
         'QuantityDispensed',
         'SuppSource',
-        'Result',
-        'LOINCAnswer'
+        'Result'
       ];
 
       rows = this.riskGapsReportList.map(item =>
@@ -411,6 +411,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           this.getCptPxPart(item.CPTPx, 2),
           item.HCPCSPx ?? '',
           item.LOINC ?? '',
+          item.LOINCAnswer ?? '',
           item.SNOMED ?? '',
           item.ICDDX10 ?? '',
           item.ICDPx ?? '',
@@ -422,8 +423,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           this.formatYN(item.PCPFlag),
           item.QuantityDispensed ?? '',
           item.SuppSource ?? '',
-          item.Observation_Result ?? '',
-          item.LOINCAnswer ?? ''
+          item.Observation_Result ?? ''
         ]
           .map(value => {
             const s = (value ?? '').toString();
@@ -555,6 +555,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           'CPTPx2',
           'HCPCSPx',
           'LOINC',
+          'LOINCResult',
           'SNOMED',
           'ICDDX10',
           'ICDPx',
@@ -566,8 +567,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           'PCPFlag',
           'QuantityDispensed',
           'SuppSource',
-          'Result',
-          'LOINCAnswer'
+          'Result'
         ];
 
         rows = this.riskGapsReportList.map(item =>
@@ -583,6 +583,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
             this.getCptPxPart(item.CPTPx, 2),
             item.HCPCSPx ?? '',
             item.LOINC ?? '',
+            item.LOINCAnswer ?? '',
             item.SNOMED ?? '',
             item.ICDDX10 ?? '',
             item.ICDPx ?? '',
@@ -594,8 +595,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
             this.formatYN(item.PCPFlag),
             item.QuantityDispensed ?? '',
             item.SuppSource ?? '',
-            item.Observation_Result ?? '',
-            item.LOINCAnswer ?? ''
+            item.Observation_Result ?? ''
           ]
             .map(v => (v ?? '').toString().replace(/\|/g, ' '))
             .join('|')
