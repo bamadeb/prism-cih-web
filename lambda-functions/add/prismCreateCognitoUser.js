@@ -1,6 +1,3 @@
-// Lambda: createCognitoUser.mjs
-// Node.js 18+ (ESM import version)
-
 import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
@@ -9,17 +6,15 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 import { createRequire } from "module";
 
-// The /opt/dbConfig layer is CommonJS; createRequire lets this ESM handler
-// load it without relying on static named-export detection.
+// The /opt layers are CommonJS; createRequire lets this ESM handler load them.
 const require = createRequire(import.meta.url);
 const { getDBConnection, sql } = require('/opt/dbConfig');
+const { buildResponse } = require('/opt/responseHelper');
 
-// Environment Variables
 const USER_POOL_ID = process.env.USER_POOL_ID;
 const REGION = process.env.COGNITO_REGION || "us-east-1";
 const ADMIN_ROLE_ID = 7;
 
-// Cognito Client
 const client = new CognitoIdentityProviderClient({
   region: REGION
 });
@@ -35,6 +30,10 @@ const PASSWORD_POLICY_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{1
 
 export const handler = async (event) => {
   try {
+    if (event.httpMethod === "OPTIONS") {
+      return buildResponse(200, {}, event);
+    }
+
     // Do not log the raw event -- it contains the plaintext password from
     // the request body and would otherwise land in CloudWatch logs.
     console.log("📥 Received createCognitoUser request");
@@ -47,7 +46,7 @@ export const handler = async (event) => {
     const claims = event.requestContext?.authorizer?.claims || {};
     const callerSub = claims.sub;
     if (!callerSub) {
-      return { statusCode: 401, body: JSON.stringify({ message: "Unauthorized" }) };
+      return buildResponse(401, { message: "Unauthorized" }, event);
     }
 
     const authPool = await getDBConnection();
@@ -56,10 +55,9 @@ export const handler = async (event) => {
       .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
     const caller = callerLookup.recordset[0];
     if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
-      return { statusCode: 403, body: JSON.stringify({ message: "Forbidden" }) };
+      return buildResponse(403, { message: "Forbidden" }, event);
     }
 
-    // Parse JSON body safely
     const body =
       typeof event.body === "string" ? JSON.parse(event.body) : event;
 
@@ -72,24 +70,15 @@ export const handler = async (event) => {
     } = body;
 
     if (!email || !password) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Email and Password are required" })
-      };
+      return buildResponse(400, { message: "Email and Password are required" }, event);
     }
 
     if (!EMAIL_RE.test(email)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Invalid email address" })
-      };
+      return buildResponse(400, { message: "Invalid email address" }, event);
     }
 
     if (!PASSWORD_POLICY_RE.test(password)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Password must be at least 15 characters and include uppercase, lowercase, a number, and a special character" })
-      };
+      return buildResponse(400, { message: "Password must be at least 15 characters and include uppercase, lowercase, a number, and a special character" }, event);
     }
 
     // role feeds into a Cognito custom attribute below -- restrict it to a
@@ -97,16 +86,10 @@ export const handler = async (event) => {
     // arbitrary string, since custom:role may be read elsewhere for
     // authorization decisions.
     if (role !== undefined && role !== null && role !== '' && !/^\d+$/.test(String(role))) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: "Invalid role" })
-      };
+      return buildResponse(400, { message: "Invalid role" }, event);
     }
 
-    // ------------------------------
-    // 1️⃣ CREATE COGNITO USER
-    // ------------------------------
-    const createUserCmd = new AdminCreateUserCommand({
+    const createResult = await client.send(new AdminCreateUserCommand({
       UserPoolId: USER_POOL_ID,
       Username: email,
       TemporaryPassword: password,
@@ -117,51 +100,34 @@ export const handler = async (event) => {
         { Name: "given_name", Value: firstName || "" },
         { Name: "family_name", Value: lastName || "" }
       ]
-    });
-
-    const createResult = await client.send(createUserCmd);
+    }));
     console.log("✅ AdminCreateUser success");
     const cognitoUsername = createResult.User?.Username;
-    // ------------------------------
-    // 2️⃣ SET PERMANENT PASSWORD
-    // ------------------------------
-    const passwordCmd = new AdminSetUserPasswordCommand({
+
+    await client.send(new AdminSetUserPasswordCommand({
       UserPoolId: USER_POOL_ID,
       Username: email,
       Password: password,
       Permanent: true
-    });
-
-    await client.send(passwordCmd);
+    }));
     console.log("🔐 Password set permanently");
 
-    // ------------------------------
-    // 3️⃣ OPTIONAL: UPDATE ROLE ATTRIBUTE
-    // ------------------------------
     if (role) {
-      const updateAttrCmd = new AdminUpdateUserAttributesCommand({
+      await client.send(new AdminUpdateUserAttributesCommand({
         UserPoolId: USER_POOL_ID,
         Username: email,
         UserAttributes: [
           { Name: "custom:role", Value: String(role) }
         ]
-      });
-
-      await client.send(updateAttrCmd);
+      }));
       console.log("🎯 custom:role added:", role);
     }
 
-    // ------------------------------
-    // SUCCESS RESPONSE
-    // ------------------------------
-    return {
-      statusCode: 200,
-      data: JSON.stringify({
-        status: "success",
-        message: "User created successfully in Cognito",
-        user: { email, firstName, lastName, role, cognitoUsername }
-      })
-    };
+    return buildResponse(200, {
+      status: "success",
+      message: "User created successfully in Cognito",
+      user: { email, firstName, lastName, role, cognitoUsername }
+    }, event);
 
   } catch (error) {
     // Finding 3.5.1: error.message (which can include raw AWS SDK/Cognito
@@ -169,12 +135,9 @@ export const handler = async (event) => {
     // only and return a generic message.
     console.error("❌ Error creating Cognito user:", error);
 
-    return {
-      statusCode: 500,
-      data: JSON.stringify({
-        status: "error",
-        message: "Cognito user creation failed"
-      })
-    };
+    return buildResponse(500, {
+      status: "error",
+      message: "Cognito user creation failed"
+    }, event);
   }
 };
