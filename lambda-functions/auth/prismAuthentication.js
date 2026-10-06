@@ -2,6 +2,10 @@ const { getDBConnection, sql } = require('/opt/dbConfig');
 const { buildResponse, handleOptions } = require('/opt/responseHelper');
 const bcrypt = require('bcryptjs');
 
+// Fixed, never-matching bcrypt hash used solely to normalize response timing
+// for nonexistent usernames (Finding 3.4.9) -- not a real user's password hash.
+const DUMMY_BCRYPT_HASH = '$2a$10$CwTycUXWue0Thq9StjUM0uJ8G/IP/NMnCPGnZAnuY/Grlf6jKkpiMK';
+
 // const sql = require('mssql');
 // const conn = require('/opt/config.json');
 // const { buildResponse, handleOptions } = require('/opt/responseHelper');
@@ -153,7 +157,14 @@ WHERE U.EmailID = @username
     const result = await request.query(query);
     const res = await request.query(query1);
 
+    // Finding 3.4.9: a nonexistent username used to short-circuit here before
+    // ever calling bcrypt.compare(), while a valid username always paid the
+    // ~80-100ms bcrypt cost below. That timing gap let an attacker tell
+    // "wrong password" apart from "no such user" by latency alone, even
+    // though both return the same empty 401. Comparing against a fixed dummy
+    // hash here keeps the timing the same on both paths.
     if (result.recordset.length === 0) {
+      await bcrypt.compare(password, DUMMY_BCRYPT_HASH);
       return buildResponse(401,{},event);
     }
 

@@ -5,6 +5,14 @@
   <title>PRISM</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Finding 3.5.2 (partial mitigation only): a meta-tag CSP cannot carry
+       frame-ancestors/sandbox/report-uri per spec -- those are silently
+       ignored outside a real HTTP header. Clickjacking protection
+       (X-Frame-Options or CSP frame-ancestors) MUST still be added at
+       whatever serves this static build (CloudFront/Amplify/nginx/etc,
+       none of which live in this repo); this tag only restricts script/
+       style/connect sources as defense-in-depth. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.amazonaws.com; base-uri 'self'; form-action 'self';">
   <link rel="icon" type="image/x-icon" href="assets/images/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

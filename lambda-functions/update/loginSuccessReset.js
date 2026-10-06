@@ -5,15 +5,13 @@ const { buildResponse, handleOptions } = require('/opt/responseHelper');
 // check, so any authenticated caller could clear ANY account's failed-login
 // lockout counter.
 //
-// REVERTED an ownership check that required event.requestContext.authorizer.
-// claims.sub: confirmed via live testing that this route is called right
-// after prismAuthentication.js succeeds, BEFORE the frontend has a Cognito
-// bearer token to attach -- there is no API Gateway Cognito authorizer on
-// this route (same underlying gap the pentest report calls out for the
-// account lock/unlock endpoints). Enforcing ownership here isn't possible
-// from application code alone until that infra gap is addressed; fixing it
-// needs a login-flow-aware approach (e.g. a short-lived server-issued token
-// scoped to "just logged in as this username"), not a blind claims check.
+// An earlier attempt at this fix was reverted after live testing showed the
+// Cognito authorizer wasn't attached to this route yet, making claims.sub
+// always empty and 401-ing every caller. Since confirmed (via API Gateway
+// Method Request) that Cognito_Dev is now attached to this route, re-applying
+// the ownership check. Non-admins may only reset their own account.
+const ADMIN_ROLE_ID = 7;
+
 exports.handler = async (event) => {
   const body = JSON.parse(event.body || '{}');
   const username = body.username;
@@ -26,7 +24,26 @@ exports.handler = async (event) => {
       return buildResponse(400, { error: 'username is required' }, event);
     }
 
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const callerSub = claims.sub;
+    if (!callerSub) {
+      return buildResponse(401, { error: 'Unauthorized' }, event);
+    }
+
     pool = await getDBConnection();
+
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id, EmailID FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller) {
+      return buildResponse(401, { error: 'Unauthorized' }, event);
+    }
+
+    if (Number(caller.role_id) !== ADMIN_ROLE_ID &&
+        String(caller.EmailID).toLowerCase() !== String(username).toLowerCase()) {
+      return buildResponse(403, { error: 'Forbidden' }, event);
+    }
 
     const result = await pool
       .request()

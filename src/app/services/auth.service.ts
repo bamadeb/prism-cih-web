@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-import * as CryptoJS from 'crypto-js';
+import { AppEnvService } from './app-env.service';
 import {
   CognitoIdentityProviderClient,
   InitiateAuthCommand,
@@ -14,7 +14,24 @@ const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private inactivityTimer: any;
-  constructor(private readonly router: Router, private readonly ngZone: NgZone) { this.startInactivityWatcher(); }  // ✅ keep only this, no `router: any`
+
+  // Finding 3.4.3: access/ID tokens now live only in memory (cleared on a
+  // full page reload) instead of localStorage. The refresh token never
+  // touches browser JS at all -- prismStoreRefreshToken stores it as an
+  // httpOnly cookie right after login, and only prismRefreshSession (also
+  // reading it as an httpOnly cookie) ever sees its value again. A page
+  // reload re-establishes these via the token interceptor's existing
+  // isTokenExpired() -> refreshToken() path, since no in-memory expiry looks
+  // exactly like an expired one.
+  private accessToken: string | null = null;
+  private idToken: string | null = null;
+  private tokenExpiry: number | null = null;
+
+  constructor(
+    private readonly router: Router,
+    private readonly ngZone: NgZone,
+    private readonly environmentService: AppEnvService
+  ) { this.startInactivityWatcher(); }
 
   // ✅ Start tracking user activity
   private startInactivityWatcher(): void {
@@ -86,6 +103,13 @@ export class AuthService {
     this.clearUser();
     sessionStorage.clear();
     localStorage.clear();
+    this.accessToken = null;
+    this.idToken = null;
+    this.tokenExpiry = null;
+    // Best-effort, not awaited -- logout should proceed regardless of
+    // whether this call succeeds. An httpOnly cookie can't be cleared from
+    // JS directly, so the backend has to do it.
+    this.clearSessionCookie();
     this.router.navigate(['/']); // works now
   }
 
@@ -94,26 +118,16 @@ export class AuthService {
     region: environment.cognito.region
   });
 
-  private calculateSecretHash(username: string): string {
-    const message = username + environment.cognito.clientId;
-    const secretKey = environment.cognito.clientSecret;
-    const hash = CryptoJS.HmacSHA256(message, secretKey);
-    return CryptoJS.enc.Base64.stringify(hash);
-  }
-
   // ------------------------
   // LOGIN
   // ------------------------
   async login(username: string, password: string) {
-    const secretHash = this.calculateSecretHash(username);
-
     const command = new InitiateAuthCommand({
       AuthFlow: "USER_PASSWORD_AUTH",
       ClientId: environment.cognito.clientId,
       AuthParameters: {
         USERNAME: username,
-        PASSWORD: password,
-        SECRET_HASH: secretHash
+        PASSWORD: password
       }
     });
 
@@ -121,7 +135,7 @@ export class AuthService {
 
     // ➤ Case 1: Auth success (no MFA)
     if (result.AuthenticationResult) {
-      this.storeTokens(result.AuthenticationResult, username);
+      await this.storeTokens(result.AuthenticationResult, username);
       return { status: "SUCCESS", tokens: result.AuthenticationResult };
     }
     // ✅ CASE 2: FIRST TIME → NEED QR CODE
@@ -155,23 +169,20 @@ export class AuthService {
     throw new Error("Unknown authentication challenge.");
   }
   async confirmMfaCode(username: string, code: string, session: string) {
-    const secretHash = this.calculateSecretHash(username);
-
     const command = new RespondToAuthChallengeCommand({
       ClientId: environment.cognito.clientId,
       ChallengeName: "SMS_MFA",
       Session: session,
       ChallengeResponses: {
         USERNAME: username,
-        SMS_MFA_CODE: code,
-        SECRET_HASH: secretHash
+        SMS_MFA_CODE: code
       }
     });
 
     const response: any = await this.client.send(command);
 
     if (response.AuthenticationResult) {
-      this.storeTokens(response.AuthenticationResult, username);
+      await this.storeTokens(response.AuthenticationResult, username);
       return response.AuthenticationResult;
     }
 
@@ -181,73 +192,90 @@ export class AuthService {
   // ------------------------
   // REFRESH TOKEN
   // ------------------------
+  // Finding 3.4.3: this used to read a refresh token back out of
+  // localStorage and call Cognito directly. Now it calls our own backend,
+  // which reads the refresh token from an httpOnly cookie the browser can't
+  // see -- the cookie is sent automatically by the browser via
+  // credentials:'include', never handled by this code at all.
   async refreshToken(): Promise<string | null> {
-    const refreshToken = localStorage.getItem('refresh_token');
-    const username = localStorage.getItem('username');
-
-    if (!refreshToken || !username) return null;
-
-    const secretHash = this.calculateSecretHash(username);
-
-    const command = new InitiateAuthCommand({
-      AuthFlow: "REFRESH_TOKEN_AUTH",
-      ClientId: environment.cognito.clientId,
-      AuthParameters: {
-        REFRESH_TOKEN: refreshToken,
-        SECRET_HASH: secretHash
-      }
-    });
-
     try {
-      const result: any = await this.client.send(command);
+      const url = `${this.environmentService.endpointUrl()}prismRefreshSession-${this.environmentService.envType()}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'include'
+      });
 
-      if (result.AuthenticationResult) {
-        this.storeTokens(result.AuthenticationResult, username);
-        return result.AuthenticationResult.IdToken;
+      if (!res.ok) {
+        return null;
       }
+
+      const data = await res.json();
+      this.accessToken = data.accessToken;
+      this.idToken = data.idToken;
+      this.tokenExpiry = Date.now() + data.expiresIn * 1000;
+      return this.idToken;
     } catch (err) {
       console.error("Refresh Token Error:", err);
+      return null;
     }
-
-    return null;
   }
 
   // ------------------------
   // STORE TOKENS
   // ------------------------
-  storeTokens(tokens: any, username: string) {
+  async storeTokens(tokens: any, username: string) {
 
     const idToken = tokens.IdToken;
-    const decoded: any = JSON.parse(atob(idToken.split('.')[1]));
 
-    const cognitoUsername = decoded['sub'];   // REAL USERNAME
-
-    localStorage.setItem('access_token', tokens.AccessToken);
-    localStorage.setItem('id_token', idToken);
-
-    // ❗ Store Cognito username instead of email
-    localStorage.setItem('username', cognitoUsername);
+    this.accessToken = tokens.AccessToken;
+    this.idToken = idToken;
+    this.tokenExpiry = Date.now() + tokens.ExpiresIn * 1000;
 
     if (tokens.RefreshToken) {
-      localStorage.setItem('refresh_token', tokens.RefreshToken);
+      await this.persistRefreshToken(tokens.RefreshToken);
     }
-
-    const expiry = Date.now() + tokens.ExpiresIn * 1000;
-    localStorage.setItem('token_expiry', expiry.toString());
   }
 
+  // Hands the refresh token to the backend once, immediately after login, so
+  // it can be stored as an httpOnly cookie instead of anywhere JS can read
+  // it again. Best-effort: a failure here degrades to "session won't survive
+  // a page reload" rather than blocking login.
+  private async persistRefreshToken(refreshToken: string): Promise<void> {
+    try {
+      const url = `${this.environmentService.endpointUrl()}prismStoreRefreshToken-${this.environmentService.envType()}`;
+      await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.idToken}`
+        },
+        body: JSON.stringify({ refreshToken })
+      });
+    } catch (err) {
+      console.error('Failed to persist refresh token:', err);
+    }
+  }
+
+  private async clearSessionCookie(): Promise<void> {
+    try {
+      const url = `${this.environmentService.endpointUrl()}prismClearSession-${this.environmentService.envType()}`;
+      await fetch(url, { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      console.error('Failed to clear session cookie:', err);
+    }
+  }
 
   isTokenExpired(): boolean {
-    const expiry = localStorage.getItem('token_expiry');
-    if (!expiry) return true;
-    return Date.now() > Number(expiry);
+    if (!this.tokenExpiry) return true;
+    return Date.now() > this.tokenExpiry;
   }
 
   getAccessToken() {
-    return localStorage.getItem('access_token');
+    return this.accessToken;
   }
   getIdToken() {
-    return localStorage.getItem('id_token');
+    return this.idToken;
   }
   async associateSoftwareToken(session: string) {
 
@@ -260,7 +288,6 @@ export class AuthService {
     return response;
   }
   async confirmMfaSetup(username: string, session: string, otp: string) {
-    const secretHash = this.calculateSecretHash(username);
     const command =
       new RespondToAuthChallengeCommand({
         ClientId: environment.cognito.clientId,
@@ -268,29 +295,26 @@ export class AuthService {
         Session: session,
         ChallengeResponses: {
           USERNAME: username,
-          SOFTWARE_TOKEN_MFA_CODE: otp,
-          SECRET_HASH: secretHash
+          SOFTWARE_TOKEN_MFA_CODE: otp
         }
       });
     const result: any =
       await this.client.send(command);
-    this.storeTokens(result.AuthenticationResult, username);
+    await this.storeTokens(result.AuthenticationResult, username);
     return result;
   }
   async verifyLoginOtp(username: string, session: string, otp: string) {
-      const secretHash = this.calculateSecretHash(username);
       const command = new RespondToAuthChallengeCommand({
           ClientId: environment.cognito.clientId,
           ChallengeName: "SOFTWARE_TOKEN_MFA",
           Session: session,
           ChallengeResponses: {
             USERNAME: username,
-            SOFTWARE_TOKEN_MFA_CODE: otp,
-            SECRET_HASH: secretHash
+            SOFTWARE_TOKEN_MFA_CODE: otp
           }
         });
       const result: any = await this.client.send(command);
-      this.storeTokens(result.AuthenticationResult, username);
+      await this.storeTokens(result.AuthenticationResult, username);
       return result;
     }
     async verifySoftwareToken(session: string, otp: string) {

@@ -53,12 +53,41 @@ exports.handler = async (event) => {
         return buildResponse(400, { message: 'Invalid PLANYEAR or PLAN_YEAR' }, event);
     }
 
+    // Finding 3.4.6: medicaid_id came straight from the client with no check
+    // that the caller is that member's assigned care coordinator. Admin
+    // bypasses, matching the pattern used for the rest of this gap-status
+    // cluster (Finding 3.4.7). Route confirmed to have Cognito_Dev attached.
+    const ADMIN_ROLE_ID = 7;
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const callerSub = claims.sub;
+    if (!callerSub) {
+        return buildResponse(401, { message: 'Unauthorized' }, event);
+    }
+
     let pool;
 
     try {
 
         // Get database connection
         pool = await getDBConnection();
+
+        const callerLookup = await pool.request()
+            .input('cognito_username', sql.VarChar, callerSub)
+            .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+        const caller = callerLookup.recordset[0];
+        if (!caller) {
+            return buildResponse(401, { message: 'Unauthorized' }, event);
+        }
+
+        if (Number(caller.role_id) !== ADMIN_ROLE_ID) {
+            const assignmentLookup = await pool.request()
+                .input('medicaid_id', sql.VarChar, String(medicaid_id))
+                .query('SELECT Care_Coordinator_id FROM MEM_OUTREACH_MEMBERS WHERE medicaid_id = @medicaid_id');
+            const member = assignmentLookup.recordset[0];
+            if (!member || Number(member.Care_Coordinator_id) !== Number(caller.ID)) {
+                return buildResponse(403, { message: 'Forbidden' }, event);
+            }
+        }
 
         // Execute UPDATE
         const result = await pool

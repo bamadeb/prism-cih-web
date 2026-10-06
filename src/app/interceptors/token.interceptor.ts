@@ -5,6 +5,12 @@ import { from, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
+  // Static config (environment.json) is fetched before the API endpoint is known,
+  // and must not trigger a token refresh that needs that endpoint.
+  if (req.url.startsWith('/assets/')) {
+    return next(req);
+  }
+
   const auth = inject(AuthService);
 
   return from(handle(req, next, auth));

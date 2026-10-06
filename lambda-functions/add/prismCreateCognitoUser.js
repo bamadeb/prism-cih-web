@@ -7,10 +7,17 @@ import {
   AdminSetUserPasswordCommand,
   AdminUpdateUserAttributesCommand
 } from "@aws-sdk/client-cognito-identity-provider";
+import { createRequire } from "module";
+
+// The /opt/dbConfig layer is CommonJS; createRequire lets this ESM handler
+// load it without relying on static named-export detection.
+const require = createRequire(import.meta.url);
+const { getDBConnection, sql } = require('/opt/dbConfig');
 
 // Environment Variables
 const USER_POOL_ID = process.env.USER_POOL_ID;
 const REGION = process.env.COGNITO_REGION || "us-east-1";
+const ADMIN_ROLE_ID = 7;
 
 // Cognito Client
 const client = new CognitoIdentityProviderClient({
@@ -32,10 +39,25 @@ export const handler = async (event) => {
     // the request body and would otherwise land in CloudWatch logs.
     console.log("📥 Received createCognitoUser request");
 
-    // TODO(authorization): this endpoint creates a real, login-capable
-    // account and currently has no check that the caller is an admin. Wire
-    // in a role check here once the auth-claims shape reaching this Lambda
-    // is confirmed (e.g. event.requestContext.authorizer.claims).
+    // Finding 3.5.1 follow-up: this endpoint creates a real, login-capable
+    // account (optionally with an admin custom:role attribute) and had no
+    // check that the caller is an admin -- any authenticated user could call
+    // it directly, since API Gateway only requires a valid Cognito JWT, not a
+    // specific role.
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const callerSub = claims.sub;
+    if (!callerSub) {
+      return { statusCode: 401, body: JSON.stringify({ message: "Unauthorized" }) };
+    }
+
+    const authPool = await getDBConnection();
+    const callerLookup = await authPool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
+      return { statusCode: 403, body: JSON.stringify({ message: "Forbidden" }) };
+    }
 
     // Parse JSON body safely
     const body =
@@ -142,13 +164,16 @@ export const handler = async (event) => {
     };
 
   } catch (error) {
+    // Finding 3.5.1: error.message (which can include raw AWS SDK/Cognito
+    // error text) was echoed straight back to the caller. Log it server-side
+    // only and return a generic message.
     console.error("❌ Error creating Cognito user:", error);
 
     return {
       statusCode: 500,
       data: JSON.stringify({
         status: "error",
-        message: error.message || "Cognito user creation failed"
+        message: "Cognito user creation failed"
       })
     };
   }

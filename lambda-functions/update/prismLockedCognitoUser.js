@@ -75,13 +75,16 @@ export const handler = async (event) => {
     };
 
   } catch (error) {
+    // Finding 3.5.1: error.message (which can include raw AWS SDK/Cognito
+    // error text) was echoed straight back to the caller. Log it server-side
+    // only and return a generic message.
     console.error("❌ Disable error:", error);
 
     return {
       statusCode: 500,
       body: JSON.stringify({
         status: "error",
-        message: error.message || "Failed to disable user"
+        message: "Failed to disable user"
       })
     };
   }

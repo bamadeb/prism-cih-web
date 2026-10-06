@@ -20,16 +20,16 @@ export class AppEnvService {
         return false; 
     }
     version(): string {
-        return this.config.version ?? 'unknown';
+        return this.config?.version ?? 'unknown';
     }
     build(): string {
-        return this.config.build ?? 'unknown';
+        return this.config?.build ?? 'unknown';
     }
     endpointUrl(): string {
-        return this.config.endpointUrl ?? 'unknown';
+        return this.config?.endpointUrl ?? 'unknown';
     }
     envType(): string {
-        return this.config.envType ?? 'unknown';
+        return this.config?.envType ?? 'unknown';
     }
     s3bucket(): string {
         return 'cih-plan-document';
