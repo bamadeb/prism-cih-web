@@ -122,7 +122,10 @@ function isBlank(value) {
 // call. ROLE_PAGE_ACCESS is additionally Admin-only, matching the gate
 // already added to prismGetPageAccessList.js for the same ADMIN-only page.
 const ADMIN_ROLE_ID = 7;
-const ADMIN_ONLY_TABLES = new Set(['ROLE_PAGE_ACCESS']);
+// MEM_PLAN_MASTER (plan definitions) and USER_CREATION_REQUEST (new user
+// accounts) have no per-member owner to check against, so they're Admin-only
+// rather than ownership-checked, same as ROLE_PAGE_ACCESS.
+const ADMIN_ONLY_TABLES = new Set(['ROLE_PAGE_ACCESS', 'MEM_PLAN_MASTER', 'USER_CREATION_REQUEST']);
 
 // ✅ Chunk helper
 function chunkArray(array, size) {
@@ -186,8 +189,46 @@ exports.handler = async (event) => {
     if (!caller) {
       return buildResponse(401, { message: "Unauthorized" }, event);
     }
-    if (ADMIN_ONLY_TABLES.has(table_name) && Number(caller.role_id) !== ADMIN_ROLE_ID) {
+    const isAdmin = Number(caller.role_id) === ADMIN_ROLE_ID;
+    if (ADMIN_ONLY_TABLES.has(table_name) && !isAdmin) {
       return buildResponse(403, { message: "Forbidden" }, event);
+    }
+
+    // Finding 3.3.8: this endpoint had no check that a non-admin caller is
+    // actually the assigned care coordinator for the medicaid_id in the rows
+    // being inserted -- any authenticated user could write member records
+    // (appointments, PCP visits, action follow-ups, alt address/phone, etc.)
+    // for ANY member. Any row carrying a medicaid_id column (case-insensitive,
+    // since different tables use medicaid_id vs MEDICAID_ID) must belong to
+    // one of the caller's own assigned members, unless the caller is Admin.
+    if (!isAdmin) {
+      const medicaidIds = new Set();
+      for (const row of insertDataArray) {
+        const key = Object.keys(row).find(k => k.toLowerCase() === 'medicaid_id');
+        if (key && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {
+          medicaidIds.add(String(row[key]));
+        }
+      }
+
+      if (medicaidIds.size > 0) {
+        const idList = [...medicaidIds];
+        const ownReq = pool.request();
+        const placeholders = idList.map((id, i) => {
+          const p = `mid${i}`;
+          ownReq.input(p, sql.VarChar, id);
+          return `@${p}`;
+        });
+        const ownResult = await ownReq.query(
+          `SELECT medicaid_id, Care_Coordinator_id FROM MEM_OUTREACH_MEMBERS WHERE medicaid_id IN (${placeholders.join(', ')})`
+        );
+        const ownerMap = new Map(ownResult.recordset.map(r => [String(r.medicaid_id), Number(r.Care_Coordinator_id)]));
+
+        for (const id of idList) {
+          if (ownerMap.get(id) !== Number(caller.ID)) {
+            return buildResponse(403, { message: "Forbidden" }, event);
+          }
+        }
+      }
     }
 
     // ✅ Validate columns
