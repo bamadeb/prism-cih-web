@@ -1,51 +1,31 @@
 const { getDBConnection, sql } = require('/opt/dbConfig');
-// const sql = require('mssql');
-// var conn = require('/opt/config.json');
-
-// const config = {
-//     user: conn.dbuser, 
-//     password: conn.dbpassword,
-//     server: conn.dbhost,
-//     database: conn.dbname,
-//     port: 1433, 
-//     options: {
-//         encrypt: true,
-//         trustServerCertificate: true
-//     }
-// };
-
-// let poolPromise;
-
-// async function getDBConnection() {
-//     if (!poolPromise) {
-//         poolPromise = sql.connect(config);
-//     }
-//     return poolPromise;
-// }
+const { buildResponse } = require('/opt/responseHelper');
 
 // Finding 3.1.10: triggers a bulk data-processing stored procedure for any
 // session_id with no role check -- Admin-only, same as the sibling
 // Process*SeccionID endpoints.
 //
-// NOTE: unlike its siblings this handler reads event.session_id directly
-// instead of JSON.parse(event.body), and returns plain {statusCode, body}
-// objects instead of using /opt/responseHelper's buildResponse (no CORS
-// headers set on its responses) -- this suggests it's wired to a different,
-// non-proxy API Gateway integration. Left as-is here since changing it could
-// break that integration without confirming the actual Gateway config; if
-// event.requestContext.authorizer.claims turns out to be unpopulated under
-// this integration type, the auth check below will always 401 and that
-// needs infra investigation, not another code change.
+// Previously read event.session_id directly instead of JSON.parse(event.body)
+// and returned plain {statusCode, body} objects with no CORS headers -- that
+// matched a non-proxy API Gateway integration, but the route's integration
+// (POST and OPTIONS) was switched to aws_proxy as part of fixing the CORS
+// wildcard (Finding 3.4.2), which broke this handler (401/500, no headers).
+// Converted to the same buildResponse + JSON-body pattern its siblings
+// (prismProcessMembersSeccionID.js etc.) already use under aws_proxy.
 const ADMIN_ROLE_ID = 7;
 
 exports.handler = async (event, context) => {
     context.callbackWaitsForEmptyEventLoop = false;
 
+    if (event.httpMethod === "OPTIONS") {
+        return buildResponse(200, {}, event);
+    }
+
     try {
         const claims = event.requestContext?.authorizer?.claims || {};
         const callerSub = claims.sub;
         if (!callerSub) {
-            return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
+            return buildResponse(401, { error: "Unauthorized" }, event);
         }
 
         const pool = await getDBConnection();
@@ -55,20 +35,15 @@ exports.handler = async (event, context) => {
             .query('SELECT role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
         const caller = callerLookup.recordset[0];
         if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
-            return { statusCode: 403, body: JSON.stringify({ error: "Forbidden" }) };
+            return buildResponse(403, { error: "Forbidden" }, event);
         }
 
-        let session_id = event.session_id;
-        // Convert to integer if not null/undefined/empty
+        const body = JSON.parse(event.body || "{}");
+        let session_id = body.session_id;
         if (session_id === undefined || session_id === null || session_id === '' || session_id === 'null') {
             session_id = null;
-        } else {
-            if (isNaN(session_id)) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ error: "Invalid session_id" }),
-                };
-            }
+        } else if (isNaN(session_id)) {
+            return buildResponse(400, { error: "Invalid session_id" }, event);
         }
 
         const result = await pool
@@ -81,15 +56,9 @@ exports.handler = async (event, context) => {
             loglist: result.recordsets[0] || []
         };
 
-        return {
-            statusCode: 200,
-            data: response,
-        };
+        return buildResponse(200, response, event);
     } catch (error) {
         console.error("Error in Lambda:", error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "Internal Server Error" }),
-        };
+        return buildResponse(500, { error: "Internal Server Error" }, event);
     }
 };

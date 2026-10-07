@@ -48,6 +48,10 @@ const VALID_MEMBER_STATUS = new Set([0, 1]);
 const ADMIN_ROLE_ID = 7;
 
 exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") {
+    return buildResponse(200, {}, event);
+  }
+
   // API Gateway has a Cognito User Pool authorizer (confirmed: "CognitoProd")
   // in front of this route, so the caller's verified ID token claims arrive
   // here in event.requestContext.authorizer.claims -- `sub` is the Cognito

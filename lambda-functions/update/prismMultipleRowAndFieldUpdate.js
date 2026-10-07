@@ -52,6 +52,10 @@ const ALLOWED_TABLES = {
 };
 
 exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") {
+    return buildResponse(200, {}, event);
+  }
+
   const body = JSON.parse(event.body || "{}");
   const { table_name, id_field_name, updates } = body;
 

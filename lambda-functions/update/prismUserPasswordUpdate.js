@@ -32,6 +32,10 @@ const PASSWORD_POLICY_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{1
 // }
 
 exports.handler = async (event) => {
+  if (event.httpMethod === "OPTIONS") {
+    return buildResponse(200, {}, event);
+  }
+
   // TODO(authorization): ID is taken directly from the request body with no
   // check that the caller owns that ID (self-service password change) or is
   // an admin performing this on someone's behalf. As written, any
