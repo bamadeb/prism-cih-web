@@ -107,3 +107,13 @@
   z-index: 1;
   right: 0px;
 }
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 4px 0 8px;
+}

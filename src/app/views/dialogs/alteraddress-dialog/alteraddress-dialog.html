@@ -22,10 +22,13 @@
               matInput
               formControlName="alt_address"
               placeholder="ALTERNATE ADDRESS"
-            
+              [attr.maxlength]="addressMax"
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_address')?.touched"  class="error_message">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_address')?.hasError('required') || addAltaddressFormGroup.get('alt_address')?.hasError('whitespace')" class="error_message">
               Alt address required
+            </mat-error>
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_address')?.hasError('maxlength')" class="error_message">
+              Must be {{ addressMax }} characters or fewer
             </mat-error>
           </mat-form-field>
 
@@ -35,19 +38,23 @@
               matInput
               formControlName="alt_city"
               placeholder="ALTERNATE CITY"
+              [attr.maxlength]="cityMax"
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_city')?.touched" class="error_message">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_city')?.hasError('required') || addAltaddressFormGroup.get('alt_city')?.hasError('whitespace')" class="error_message">
               Alt city required
+            </mat-error>
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_city')?.hasError('maxlength')" class="error_message">
+              Must be {{ cityMax }} characters or fewer
             </mat-error>
           </mat-form-field>
 
           <!-- STATE -->
           <mat-form-field appearance="outline" style="width: 100%;">
-            <input
-              matInput
-              formControlName="alt_state"
-              placeholder="ALTERNATE STATE"
-            />
+            <mat-select formControlName="alt_state" placeholder="ALTERNATE STATE">
+              <mat-option *ngFor="let s of states" [value]="s.code">
+                {{ s.code }} - {{ s.name }}
+              </mat-option>
+            </mat-select>
             <mat-error *ngIf="addAltaddressFormGroup.get('alt_state')?.touched" class="error_message">
               Alt state required
             </mat-error>
@@ -62,8 +69,11 @@
               maxlength="10"
               (input)="formatZip($event)"
             />
-            <mat-error *ngIf="addAltaddressFormGroup.get('alt_zip')?.touched" class="error_message">
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_zip')?.hasError('required')" class="error_message">
               Alt zip required
+            </mat-error>
+            <mat-error *ngIf="addAltaddressFormGroup.get('alt_zip')?.hasError('zip')" class="error_message">
+              Enter a 5-digit ZIP or ZIP+4
             </mat-error>
           </mat-form-field>
 
@@ -78,6 +88,11 @@
             <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
             <mat-datepicker #dp></mat-datepicker>
           </mat-form-field>
+
+          <div *ngIf="errorMessage" class="form-error">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
 
           <!-- BUTTON -->
           <div class="bot_12">

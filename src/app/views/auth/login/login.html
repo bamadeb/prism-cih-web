@@ -44,6 +44,9 @@
             matInput
             [(ngModel)]="username"
             name="username"
+            type="email"
+            maxlength="150"
+            autocomplete="username"
             required
             (input)="clearError()"
           >

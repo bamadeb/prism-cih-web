@@ -15,9 +15,18 @@
                             </mat-form-field>
 
                             <mat-error
-                                *ngIf="addAltphoneFormGroup.get('alt_phone_no')?.touched && addAltphoneFormGroup.get('alt_phone_no')?.invalid">
+                                *ngIf="addAltphoneFormGroup.get('alt_phone_no')?.touched && addAltphoneFormGroup.get('alt_phone_no')?.hasError('required')">
                                 Alternative phone no required
                             </mat-error>
+                            <mat-error
+                                *ngIf="addAltphoneFormGroup.get('alt_phone_no')?.touched && addAltphoneFormGroup.get('alt_phone_no')?.hasError('phoneDigits')">
+                                Enter a 10-digit phone number
+                            </mat-error>
+
+                            <div *ngIf="errorMessage" class="form-error">
+                                <mat-icon color="warn">error</mat-icon>
+                                <span>{{ errorMessage }}</span>
+                            </div>
 
                             <!-- BUTTON -->
                             <div class="bot_12" style="margin-top:10px;">

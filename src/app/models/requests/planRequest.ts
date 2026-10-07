@@ -37,12 +37,15 @@ export interface attachmentRequest {
 }
 
 export interface attchFileremoveRequest {
-  id: number; 
+  id: number;
+  replace_url?: string;  // set → swap the row's file to this URL and delete only the old S3 object
 }
 
 
 export interface S3UploadResponse {
-  body: string;   // backend sends JSON string
+  uploadUrl?: string;
+  fileUrl?: string;
+  body?: string;   // legacy non-proxy integration: JSON string of { uploadUrl, fileUrl }
 }
 
 export interface FileRequest {
@@ -64,8 +67,8 @@ export interface UpdateFileRequest {
   id_field_name: string;
   id_field_value: number; 
   updateData: {
-    attachment: string;
-    title: string; 
+    attachment?: string;
+    title: string;
     status: number;  
   };
 } 

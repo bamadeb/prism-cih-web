@@ -11,14 +11,18 @@ import { FormBuilder, FormGroup, Validators,ReactiveFormsModule  } from '@angula
 import { AltphoneRequest, LogRequest } from '../../../models/requests/dashboardRequest';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatIconModule } from '@angular/material/icon';
+import { PhoneDigitsValidator } from '../../../validators/validators';
+
+const digitsOnly = (v: any) => String(v ?? '').replace(/\D/g, '');
 
 @Component({
   selector: 'app-alterphone-dialog',
   imports: [
-    MatDialogContent, MatFormFieldModule, MatInputModule, 
+    MatDialogContent, MatFormFieldModule, MatInputModule,
     MatButtonModule, PhoneFormatPipe, CommonModule, MatCard, MatCardContent,
     ReactiveFormsModule, MatFormField, MatError,
-    MatProgressSpinner
+    MatProgressSpinner, MatIconModule
 ],
   templateUrl: './alterphone-dialog.html',
   styleUrls: ['./alterphone-dialog.css']
@@ -26,6 +30,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
 export class AlterphoneDialog implements OnInit{
   addAltphoneFormGroup!: FormGroup;
   isLoading = false;
+  errorMessage = '';
 
   constructor(
     private readonly dialogRef: MatDialogRef<AlterphoneDialog>,
@@ -41,7 +46,24 @@ export class AlterphoneDialog implements OnInit{
 
   private buildForm(): void {
     this.addAltphoneFormGroup = this.fb.group({
-      alt_phone_no: ['', Validators.required]
+      alt_phone_no: ['', [Validators.required, PhoneDigitsValidator]]
+    });
+
+    this.addAltphoneFormGroup.valueChanges.subscribe(() => this.errorMessage = '');
+  }
+
+  // Compares digits only, so "(555) 123-4567" matches "5551234567".
+  // A stored number with a leading US country code (11 digits) is compared on its last 10.
+  private isDuplicatePhone(phone: string): boolean {
+    const target = digitsOnly(phone);
+    const m = this.data.member ?? {};
+    const existing = [
+      m.phone, m.HOME_PHONE, m.OTHER_PHONE,
+      ...(this.data.alt_phone ?? []).map((p: any) => p.alt_phone_no)
+    ];
+    return existing.some(p => {
+      const d = digitsOnly(p);
+      return d.length >= 10 && d.slice(-10) === target;
     });
   }
 
@@ -54,17 +76,29 @@ export class AlterphoneDialog implements OnInit{
       return;
     }
 
+    if (this.isDuplicatePhone(this.addAltphoneFormGroup.value.alt_phone_no)) {
+      this.errorMessage = 'This phone number is already on file for this member.';
+      return;
+    }
+
+    this.errorMessage = '';
     this.isLoading = true;
 
     try {
       const payload = this.buildPhonePayload();
       await this.apiService.insert(payload);
 
-      await this.logSuccess();
+      // The phone is saved at this point; a failed audit-log write
+      // shouldn't keep the dialog open and invite a duplicate submit.
+      await this.logSuccess().catch(err => console.error('Audit log failed', err));
       this.closeWithRefresh();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Add alternative phone failed', error);
+      this.errorMessage =
+        error?.error?.message ||
+        error?.error?.error ||
+        'Failed to save the alternate phone. Please try again.';
     } finally {
       this.isLoading = false;
     }
