@@ -4,30 +4,32 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 import { createRequire } from "module";
 
+// The /opt layers are CommonJS; createRequire lets this ESM handler load them.
 const require = createRequire(import.meta.url);
 const { getDBConnection, sql } = require('/opt/dbConfig');
+const { buildResponse } = require('/opt/responseHelper');
 
-// Env
 const USER_POOL_ID = process.env.USER_POOL_ID;
 const REGION = process.env.COGNITO_REGION || "us-east-1";
 const ADMIN_ROLE_ID = 7;
 
-// Client
 const client = new CognitoIdentityProviderClient({
   region: REGION
 });
 
+// Finding 3.3.6: unlocking any account had no authentication or role check.
+// API Gateway's Cognito authorizer supplies the caller's verified claims; the
+// caller must also be an Admin in MEM_USERS. Only Admin can unlock accounts.
 export const handler = async (event) => {
-  // Finding 3.1.6, "Missing Authentication on Account Lock/Unlock Endpoints":
-  // if this route turns out to have no Cognito authorizer attached at the API
-  // Gateway level at all (checked the same way prismGetcallhistory-prod's
-  // "CognitoProd" authorizer was confirmed earlier), that's a separate infra
-  // fix needed alongside the role check below.
+  if (event?.httpMethod === "OPTIONS") {
+    return buildResponse(200, {}, event);
+  }
+
   try {
     const claims = event.requestContext?.authorizer?.claims || {};
     const callerSub = claims.sub;
     if (!callerSub) {
-      return { statusCode: 401, body: JSON.stringify({ message: "Unauthorized" }) };
+      return buildResponse(401, { message: "Unauthorized" }, event);
     }
 
     const pool = await getDBConnection();
@@ -36,7 +38,7 @@ export const handler = async (event) => {
       .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
     const caller = callerLookup.recordset[0];
     if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
-      return { statusCode: 403, body: JSON.stringify({ message: "Forbidden" }) };
+      return buildResponse(403, { message: "Forbidden" }, event);
     }
 
     const body =
@@ -45,44 +47,27 @@ export const handler = async (event) => {
     const { username } = body;
 
     if (!username) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({
-          message: "Username is required"
-        })
-      };
+      return buildResponse(400, { message: "Username is required" }, event);
     }
 
-    // 🔓 Enable user
-    const command = new AdminEnableUserCommand({
+    await client.send(new AdminEnableUserCommand({
       UserPoolId: USER_POOL_ID,
       Username: username
-    });
-
-    await client.send(command);
+    }));
 
     console.log("🔓 User enabled:", username);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        status: "success",
-        message: "User unlocked successfully",
-        username
-      })
-    };
+    return buildResponse(200, {
+      status: "success",
+      message: "User unlocked successfully",
+      username
+    }, event);
 
   } catch (error) {
-    // Log the real error server-side only -- don't echo raw SDK/exception
-    // messages back to the caller.
     console.error("❌ Enable error:", error);
-
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        status: "error",
-        message: "Failed to unlock user"
-      })
-    };
+    return buildResponse(500, {
+      status: "error",
+      message: "Failed to unlock user"
+    }, event);
   }
 };

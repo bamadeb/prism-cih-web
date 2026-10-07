@@ -61,6 +61,13 @@
               "buildTarget": "prism-cih-web:build:development"
             }
           },
+          "options": {
+            "headers": {
+              "X-Frame-Options": "DENY",
+              "Content-Security-Policy": "frame-ancestors 'none'",
+              "X-Content-Type-Options": "nosniff"
+            }
+          },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {

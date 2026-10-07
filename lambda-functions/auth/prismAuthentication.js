@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 // Fixed, never-matching bcrypt hash used solely to normalize response timing
 // for nonexistent usernames (Finding 3.4.9) -- not a real user's password hash.
-const DUMMY_BCRYPT_HASH = '$2a$10$CwTycUXWue0Thq9StjUM0uJ8G/IP/NMnCPGnZAnuY/Grlf6jKkpiMK';
+const DUMMY_BCRYPT_HASH = '$2b$10$wG8gHa0rYV9qfqVbUUwSweKPZRUHRinUf7RZ6iS4EFexnQ5a5qlXO';
 
 // const sql = require('mssql');
 // const conn = require('/opt/config.json');
