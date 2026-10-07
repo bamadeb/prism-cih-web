@@ -23,3 +23,12 @@
   margin-top:-18px!important;
   padding:0px 0px!important;
 }
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 4px 0 8px;
+}

@@ -156,7 +156,7 @@ private async updateStatusOnly(status: number): Promise<void> {
 
     try {
       const res = await this.apiService.s3fileupload<S3UploadResponse>(request);
-      const parsed = JSON.parse(res.body);
+      const parsed = res.body ? JSON.parse(res.body) : res;
 
       await this.uploadToS3(parsed.uploadUrl, file);
 
@@ -239,12 +239,17 @@ private async updateFileUrlToDB(
     throw new Error('currentId is not set. Cannot update attachment.');
   }
 
+  // Points the row at the new file and deletes the previous file from S3
+  await this.apiService.deleteAttachment<any>({
+    id: this.currentId,
+    replace_url: fileUrl
+  });
+
   const payload: UpdateFileRequest = {
     table_name: 'MEM_ATTACHMENT',
     id_field_name: 'id',
     id_field_value: this.currentId, // ✅ now guaranteed number
     updateData: {
-      attachment: fileUrl,
       title: 'Update Attachment',
       status: fileStatus
     }

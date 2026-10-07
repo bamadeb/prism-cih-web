@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,11 +10,22 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfigService } from '../../../services/api.service';
+import { UserDataService } from '../../../services/user-data-service';
+import { EMAIL_MAX, EMAIL_RE, NAME_MAX, NameValidator } from '../../../validators/validators';
 import {
   UserRequest,
   UpdateUserRequest,
   UsernameRequest
 } from '../../../models/requests/userRequest';
+
+const ADMIN_ROLE_ID = 7;
+
+function confirmPasswordValidator(control: AbstractControl): ValidationErrors | null {
+  const password = control.parent?.get('password')?.value || '';
+  const confirm = control.value || '';
+  if (!password && !confirm) return null;
+  return password === confirm ? null : { mismatch: true };
+}
 
 @Component({
   selector: 'app-adduser-dialog',
@@ -43,11 +54,13 @@ export class AdduserDialog implements OnInit {
   currentUserId: number | null = null;
   cognitoUsername: string | null = null;
   errorMessage: string = '';
+  isEditingSelf = false;
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private readonly fb: FormBuilder,
     private readonly apiService: ConfigService,
-    private readonly dialogRef: MatDialogRef<AdduserDialog>
+    private readonly dialogRef: MatDialogRef<AdduserDialog>,
+    private readonly userData: UserDataService
   ) { }
 
   // 🔹 INIT
@@ -59,18 +72,20 @@ export class AdduserDialog implements OnInit {
     }
       this.addUserFormGroup.get('password')?.valueChanges.subscribe(() => {
         this.errorMessage = '';
+        this.addUserFormGroup.get('confirmPassword')?.updateValueAndValidity({ emitEvent: false });
       });
   }
 
   // 🔹 FORM BUILDER
   private buildForm(): void {
     this.addUserFormGroup = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      firstName: ['', [Validators.required, Validators.maxLength(NAME_MAX), NameValidator]],
+      lastName: ['', [Validators.required, Validators.maxLength(NAME_MAX), NameValidator]],
       role: ['', Validators.required],
       department: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, Validators.maxLength(EMAIL_MAX), Validators.pattern(EMAIL_RE)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', confirmPasswordValidator],
       status: ['', Validators.required]
     });
   }
@@ -98,6 +113,17 @@ export class AdduserDialog implements OnInit {
     });
 
     this.addUserFormGroup.get('email')?.disable();
+
+    // A user (in practice an Admin, the only role on this page) may not
+    // deactivate their own account or change their own role -- that would
+    // lock them out of user management. getRawValue() still sends the
+    // unchanged values.
+    const loggedInUser = this.userData.getUser();
+    this.isEditingSelf = !!loggedInUser && Number(loggedInUser.ID) === Number(user.ID);
+    if (this.isEditingSelf) {
+      this.addUserFormGroup.get('role')?.disable();
+      this.addUserFormGroup.get('status')?.disable();
+    }
   }
 
 
@@ -108,8 +134,24 @@ export class AdduserDialog implements OnInit {
       return;
     }
 
-    this.isLoading = true;
     const formValue = this.addUserFormGroup.getRawValue();
+    formValue.firstName = formValue.firstName.trim();
+    formValue.lastName = formValue.lastName.trim();
+    formValue.email = formValue.email.trim();
+
+    if (this.isEditingSelf &&
+        (Number(formValue.status) !== Number(this.data.user.member_status) ||
+         Number(formValue.role) !== Number(this.data.user.roleId))) {
+      this.errorMessage = 'You cannot change your own role or status.';
+      return;
+    }
+    if (this.isEditingSelf && Number(this.data.user.roleId) === ADMIN_ROLE_ID &&
+        Number(formValue.role) !== ADMIN_ROLE_ID) {
+      this.errorMessage = 'You cannot remove your own Admin role.';
+      return;
+    }
+
+    this.isLoading = true;
 
     try {
       await this.processUser(formValue);

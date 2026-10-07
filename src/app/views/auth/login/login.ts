@@ -24,6 +24,9 @@ import { QRCodeComponent   } from 'angularx-qrcode';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
 
+// Same rule as the server (prismCreateUser.js EMAIL_RE); usernames are email addresses.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -91,9 +94,14 @@ export class Login implements OnInit, OnDestroy {
     clearInterval(this.intervalId);
   }
   async onSubmit() {
-    this.isLoading = true;
     this.clearError();
- 
+    this.username = this.username.trim();
+    if (!EMAIL_RE.test(this.username)) {
+      this.errorMessage = 'Please enter a valid email address.';
+      return;
+    }
+    this.isLoading = true;
+
     try {
       const cognitoResult = await this.auth.login(this.username, this.password);
       if (cognitoResult.status === "SUCCESS") {
@@ -132,15 +140,18 @@ export class Login implements OnInit, OnDestroy {
             };
             const result = await this.authService.loginfailedincrement<any>(request);
             if (result.is_locked) {
-              
-               const lockeRresult =await this.authService.lockedUser<any>(request);
-              
-              if(lockeRresult.statusCode==200){
-                this.errorMessage = "Your account is locked. Please contact the administrator.";
+              // The DB lock flag is already set at this point, and prismAuthentication
+              // refuses a locked account (423) even if disabling it in Cognito fails,
+              // so show the locked message regardless of this call's outcome.
+              try {
+                await this.authService.lockedUser<any>(request);
+              } catch (lockErr) {
+                console.error('Failed to disable user in Cognito', lockErr);
               }
+              this.errorMessage = "Your account is locked. Please contact the administrator.";
               const message = `Account is locked due to multiple login failures (${this.username}).`;
-              this.logAction('Account Lock', message);
-              
+              this.logAction('Account Lock', message).catch(() => { /* best-effort audit log */ });
+
               return;
             }
 
@@ -228,19 +239,24 @@ async setupQrCode() {
   async continueBackendLogin() {
     try {
       this.isLoading = true;
-       const requestUnkock: LoginRequest = {
-        username: this.username
-      };
-      const resultUpdate = await this.authService.loginSuccessReset<any>(requestUnkock);     
       const request: LoginRequest = {
         username: this.username,
         password: this.password
       };
       const result = await this.authService.login<any>(request);
       if (result.data && result.data.length > 0) {
+        // Reset the failed-attempt counter only after prismAuthentication has
+        // accepted the login. Resetting first cleared LOCKED before
+        // prismAuthentication could refuse a locked account.
+        const requestUnlock: LoginRequest = {
+          username: this.username
+        };
+        await this.authService.loginSuccessReset<any>(requestUnlock);
+
         const user = result.data[0];
         user.pageAccess = result.pageAccess;
-        this.userData.setUser(user);
+        // The full user (with pageAccess) is stored only in completeLogin(), so
+        // an expired-password user never gets a session that can open app pages.
         // 🔒 Password expired (STRICT)
         if (user.is_password_expired === 1) {
           this.isLoading = false;
@@ -268,7 +284,9 @@ async setupQrCode() {
       // prismAuthentication means the user is inactive in the app database.
       // The 401 comes back without CORS headers, so the browser reports it as
       // status 0 ("Unknown Error") instead of 401.
-      if (err?.status === 401 || err?.status === 0) {
+      if (err?.status === 423) {
+        this.errorMessage = 'Your account is locked. Please contact the administrator.';
+      } else if (err?.status === 401 || err?.status === 0) {
         this.errorMessage = 'Please contact the administrator to activate your account.';
       } else {
         this.errorMessage = err.message || "Login failed";
@@ -310,18 +328,32 @@ async setupQrCode() {
       // 🔒 Expired → must reset
       if (isExpired) {
         if (action === 'change') {
-          this.router.navigate(['/change-password']);
+          this.startPasswordChange(user);
+        } else {
+          this.userData.clearUser();
         }
         return; // ⛔ never allow login
       }
 
       // ⚠️ Warning → optional
       if (action === 'change') {
-        this.router.navigate(['/change-password']);
+        this.startPasswordChange(user);
       } else {
         this.completeLogin(user);
       }
     });
+  }
+
+  // Stores only what the change-password page needs. With no role_id or
+  // pageAccess, HeaderService.setTitle sends every app page to /access-denied.
+  private startPasswordChange(user: any): void {
+    this.userData.setUser({
+      ID: user.ID,
+      cognito_username: user.cognito_username,
+      EmailID: user.EmailID,
+      password_change_required: true
+    });
+    this.router.navigate(['/change-password']);
   }
 
   private completeLogin(user: any): void {

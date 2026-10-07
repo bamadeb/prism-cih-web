@@ -11,24 +11,32 @@
         <!-- FIRST NAME -->
         <mat-form-field appearance="outline" class="mr common-field">
           <mat-label>FIRST NAME</mat-label>
-          <input matInput formControlName="firstName">
+          <input matInput formControlName="firstName" maxlength="100">
 
-          <mat-error *ngIf="
-            addUserFormGroup.get('firstName')?.touched &&
-            addUserFormGroup.get('firstName')?.invalid">
+          <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('required') || addUserFormGroup.get('firstName')?.hasError('whitespace')">
             First name is required
+          </mat-error>
+          <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('namePattern')">
+            Use letters, spaces, hyphens or apostrophes only
+          </mat-error>
+          <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('maxlength')">
+            Must be 100 characters or fewer
           </mat-error>
         </mat-form-field>
 
         <!-- LAST NAME -->
         <mat-form-field appearance="outline" class="mr common-field">
           <mat-label>LAST NAME</mat-label>
-          <input matInput formControlName="lastName">
+          <input matInput formControlName="lastName" maxlength="100">
 
-          <mat-error *ngIf="
-            addUserFormGroup.get('lastName')?.touched &&
-            addUserFormGroup.get('lastName')?.invalid">
+          <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('required') || addUserFormGroup.get('lastName')?.hasError('whitespace')">
             Last name is required
+          </mat-error>
+          <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('namePattern')">
+            Use letters, spaces, hyphens or apostrophes only
+          </mat-error>
+          <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('maxlength')">
+            Must be 100 characters or fewer
           </mat-error>
         </mat-form-field>
 
@@ -41,6 +49,7 @@
             </mat-option>
           </mat-select>
 
+          <mat-hint *ngIf="isEditingSelf">You cannot change your own role</mat-hint>
           <mat-error *ngIf="
             addUserFormGroup.get('role')?.touched &&
             addUserFormGroup.get('role')?.invalid">
@@ -50,7 +59,7 @@
         <!-- EMAIL -->
         <mat-form-field appearance="outline" class="mr email-field mt-5">
           <mat-label>EMAIL</mat-label>
-          <input matInput type="email" formControlName="email" [readonly]="isEditMode" autocomplete="email">
+          <input matInput type="email" formControlName="email" [readonly]="isEditMode" autocomplete="email" maxlength="150">
           <mat-hint *ngIf="isEditMode">Email cannot be changed</mat-hint>
           <mat-error *ngIf="
             addUserFormGroup.get('email')?.touched &&
@@ -66,13 +75,33 @@
 
           <mat-error *ngIf="
             addUserFormGroup.get('email')?.touched &&
-            addUserFormGroup.get('email')?.hasError('email')">
+            addUserFormGroup.get('email')?.hasError('pattern')">
             Enter a valid email address
+          </mat-error>
+
+          <mat-error *ngIf="addUserFormGroup.get('email')?.hasError('maxlength')">
+            Email must be 150 characters or fewer
           </mat-error>
         </mat-form-field>
 
         
-<mat-form-field appearance="outline" class="mr common-field">
+        <!-- DEPARTMENT -->
+        <mat-form-field appearance="outline" class="common-field mt-5">
+          <mat-label>DEPARTMENT</mat-label>
+          <mat-select formControlName="department" class="txupper">
+            <mat-option class="txupper" *ngFor="let d of data.departments" [value]="d.id">
+              {{ d.department }}
+            </mat-option>
+          </mat-select>
+
+          <mat-error *ngIf="
+            addUserFormGroup.get('department')?.touched &&
+            addUserFormGroup.get('department')?.invalid">
+            Department is required
+          </mat-error>
+        </mat-form-field>        
+
+<mat-form-field appearance="outline" class="mr common-field mt-5">
   <mat-label>PASSWORD</mat-label>
 
   <input
@@ -82,10 +111,6 @@
     autocomplete="new-password"
   >
 
-  <!-- ✅ Password policy hint -->
-  <mat-hint class="password-hint">
-    Password must be at least 15 characters long and include uppercase, lowercase, number, and special character (e.g., ! @ # $ % ^ & *).
-  </mat-hint>
 
   <!-- Required error -->
   <mat-error *ngIf="
@@ -102,30 +127,36 @@
   </mat-error>
 
 </mat-form-field>
-        <!-- DEPARTMENT -->
-        <mat-form-field appearance="outline" class="mr common-field mt-5" >
-          <mat-label>DEPARTMENT</mat-label>
-          <mat-select formControlName="department" class="txupper">
-            <mat-option class="txupper" *ngFor="let d of data.departments" [value]="d.id">
-              {{ d.department }}
-            </mat-option>
-          </mat-select>
 
-          <mat-error *ngIf="
-            addUserFormGroup.get('department')?.touched &&
-            addUserFormGroup.get('department')?.invalid">
-            Department is required
-          </mat-error>
-        </mat-form-field>        
+<mat-form-field appearance="outline" class="mr common-field mt-5">
+  <mat-label>CONFIRM PASSWORD</mat-label>
 
+  <input
+    matInput
+    type="password"
+    formControlName="confirmPassword"
+    autocomplete="new-password"
+  >
+
+  <mat-error *ngIf="addUserFormGroup.get('confirmPassword')?.hasError('mismatch')">
+    Passwords do not match
+  </mat-error>
+</mat-form-field>
         <!-- STATUS -->
-        <mat-form-field appearance="outline" class="common-field">
+        <mat-form-field appearance="outline" class="common-field mt-5">
         <mat-label>STATUS</mat-label>
         <mat-select formControlName="status">
             <mat-option [value]="0">ACTIVE</mat-option>
             <mat-option [value]="1">IN-ACTIVE</mat-option>
         </mat-select>
+        <mat-hint *ngIf="isEditingSelf">You cannot change your own status</mat-hint>
         </mat-form-field>
+
+
+        <!-- Password policy hint (full width, so it can't overlap the next row) -->
+        <div class="password-hint">
+          Password must be at least 15 characters long and include uppercase, lowercase, number, and special character (e.g., ! @ # $ % ^ &amp; *).
+        </div>
 
         <!-- ACTION BUTTONS -->
         <div class="mt-3" style="display:flex;justify-content:space-between">

@@ -13,17 +13,29 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { NotBlankValidator, ZipValidator } from '../../../validators/validators';
+import { US_STATES } from '../../../constants/us-states';
+
+// Field limits for the alternate address form.
+const ADDRESS_MAX = 150;
+const CITY_MAX = 50;
 
 @Component({
   selector: 'app-alteraddress-dialog',
    providers: [provideNativeDateAdapter()], // ✅ REQUIRED
-  imports: [MatDialogContent, MatDatepickerModule, MatNativeDateModule, MatFormFieldModule, MatInputModule, MatButtonModule, CommonModule, MatCard, MatCardContent, ReactiveFormsModule, MatFormField, MatError, MatProgressSpinner],
+  imports: [MatDialogContent, MatDatepickerModule, MatNativeDateModule, MatFormFieldModule, MatInputModule, MatButtonModule, CommonModule, MatCard, MatCardContent, ReactiveFormsModule, MatFormField, MatError, MatProgressSpinner, MatSelectModule, MatIconModule],
   templateUrl: './alteraddress-dialog.html',
   styleUrl: './alteraddress-dialog.css',
 })
 export class AlteraddressDialog implements OnInit{
   addAltaddressFormGroup!: FormGroup;
   isLoading = false;
+  errorMessage = '';
+  readonly states = US_STATES;
+  readonly addressMax = ADDRESS_MAX;
+  readonly cityMax = CITY_MAX;
 
   constructor(
     private readonly dialogRef: MatDialogRef<AlteraddressDialog>,
@@ -39,12 +51,29 @@ export class AlteraddressDialog implements OnInit{
 
   private buildForm(): void {
     this.addAltaddressFormGroup = this.fb.group({
-      alt_address: ['', Validators.required],
-      alt_city: ['', Validators.required],
+      alt_address: ['', [Validators.required, Validators.maxLength(ADDRESS_MAX), NotBlankValidator]],
+      alt_city: ['', [Validators.required, Validators.maxLength(CITY_MAX), NotBlankValidator]],
       alt_state: ['', Validators.required],
-      alt_zip: ['', Validators.required],
+      alt_zip: ['', [Validators.required, ZipValidator]],
       add_date: ['']
     });
+
+    this.addAltaddressFormGroup.valueChanges.subscribe(() => this.errorMessage = '');
+  }
+
+  // Same street + city + state + ZIP (ignoring case, spacing and punctuation)
+  // as the member's primary address or an existing alternate address.
+  private isDuplicateAddress(f: any): boolean {
+    const key = (address: any, city: any, state: any, zip: any) =>
+      [address, city, state, String(zip ?? '').replace(/\D/g, '').slice(0, 5)]
+        .map(v => String(v ?? '').toLowerCase().replace(/[^a-z0-9]/g, ''))
+        .join('|');
+
+    const target = key(f.alt_address, f.alt_city, f.alt_state, f.alt_zip);
+    const m = this.data.member ?? {};
+    if (target === key(m.ADDR1, m.CITY, m.STATE, m.ZIP)) return true;
+    return (this.data.alt_address ?? []).some((a: any) =>
+      target === key(a.alt_address, a.alt_city, a.alt_state, a.alt_zip));
   }
 
   // ============================
@@ -56,17 +85,29 @@ export class AlteraddressDialog implements OnInit{
       return;
     }
 
+    if (this.isDuplicateAddress(this.addAltaddressFormGroup.value)) {
+      this.errorMessage = 'This address is already on file for this member.';
+      return;
+    }
+
+    this.errorMessage = '';
     this.isLoading = true;
 
     try {
       const payload = this.buildAddressPayload();
       await this.apiService.insert(payload);
 
-      await this.logSuccess();
+      // The address is saved at this point; a failed audit-log write
+      // shouldn't keep the dialog open and invite a duplicate submit.
+      await this.logSuccess().catch(err => console.error('Audit log failed', err));
       this.closeWithRefresh();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Add alternative address failed', error);
+      this.errorMessage =
+        error?.error?.message ||
+        error?.error?.error ||
+        'Failed to save the alternate address. Please try again.';
     } finally {
       this.isLoading = false;
     }
@@ -83,10 +124,10 @@ export class AlteraddressDialog implements OnInit{
       table_name: 'MEM_ALT_ADDRESS',
       insertDataArray: [{
         medicaid_id: this.data.member.medicaid_id,
-        alt_address: f.alt_address,
-        alt_city: f.alt_city,
-        alt_state: f.alt_state, 
-        alt_zip: f.alt_zip,
+        alt_address: f.alt_address.trim(),
+        alt_city: f.alt_city.trim(),
+        alt_state: f.alt_state,
+        alt_zip: f.alt_zip.trim(),
         add_date: this.formatDateToYMD(f.add_date),
         add_by: user.ID
       }]

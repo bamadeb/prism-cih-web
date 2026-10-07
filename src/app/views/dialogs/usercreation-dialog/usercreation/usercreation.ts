@@ -14,6 +14,17 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDatepicker } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from '@angular/material/core'; 
 import { UserDataService } from '../../../../services/user-data-service';
+import {
+  EMAIL_MAX,
+  EMAIL_RE,
+  NAME_MAX,
+  NameValidator,
+  NotFutureDateValidator,
+  PhoneDigitsValidator
+} from '../../../../validators/validators';
+
+// USER_CREATION_REQUEST.STATUS values that still count as an open request.
+const OPEN_REQUEST_STATUSES = new Set([0, 1]); // NEW, IN-PROCESS
 
 @Component({
   selector: 'app-usercreation',
@@ -43,6 +54,8 @@ export class Usercreation implements OnInit{
     isEditMode = false;
     roles: any[] = [];
     currentPlanId: number | null = null;
+    errorMessage = '';
+    readonly today = new Date();
   
     constructor(
       @Inject(MAT_DIALOG_DATA) public data: any,
@@ -63,22 +76,30 @@ export class Usercreation implements OnInit{
     buildForm() {
   // ✅ create form FIRST
   this.userCreationFormGroup = this.fb.group({
-    first_name: ['', Validators.required],
-    last_name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    phone: ['', Validators.required],
+    first_name: ['', [Validators.required, Validators.maxLength(NAME_MAX), NameValidator]],
+    last_name: ['', [Validators.required, Validators.maxLength(NAME_MAX), NameValidator]],
+    email: ['', [Validators.required, Validators.maxLength(EMAIL_MAX), Validators.pattern(EMAIL_RE)]],
+    phone: ['', [Validators.required, PhoneDigitsValidator]],
     role_id: [9, Validators.required],
-    request_date: [new Date(), Validators.required],
+    request_date: [new Date(), [Validators.required, NotFutureDateValidator]],
+    // A new request always starts as NEW; the field is hidden on create.
     status: ['0', Validators.required]
   });
+
+  this.userCreationFormGroup.valueChanges.subscribe(() => this.errorMessage = '');
 
   // ✅ then load roles async
   this.loadRoles();
 }
 
 async loadRoles() {
-  const res = await this.apiService.users<any>();
-  this.roles = res?.data?.roles ?? [];
+  try {
+    const res = await this.apiService.users<any>();
+    this.roles = res?.data?.roles ?? [];
+  } catch (error) {
+    console.error('Failed to load roles', error);
+    this.errorMessage = 'Could not load roles. Please close and try again.';
+  }
 }
   
   
@@ -89,11 +110,18 @@ async loadRoles() {
         return;
       }
   
+      this.errorMessage = '';
       this.isLoading = true;
       const formValue = this.userCreationFormGroup.getRawValue();
-      console.log(formValue);
-      
+      formValue.first_name = formValue.first_name.trim();
+      formValue.last_name = formValue.last_name.trim();
+      formValue.email = formValue.email.trim();
+
       try {
+        if (!this.isEditMode) {
+          formValue.status = '0';
+          await this.checkDuplicateEmail(formValue.email);
+        }
         await this.processRequest(formValue);
         this.dialogRef.close({ refresh: true });
   
@@ -140,10 +168,45 @@ async loadRoles() {
   
     
   
+    // 🔹 DUPLICATE EMAIL CHECK (existing user, or an open request)
+    private async checkDuplicateEmail(email: string): Promise<void> {
+      const existing = await this.apiService.checkuserexist<any>({ username: email });
+      if (Array.isArray(existing?.data) && existing.data.length > 0) {
+        throw { code: 'USER_EXISTS' };
+      }
+
+      const requests = await this.apiService.userRequestList<any>();
+      const target = email.toLowerCase();
+      const hasOpenRequest = (requests?.data?.plans ?? []).some((r: any) =>
+        String(r.EMAIL ?? '').trim().toLowerCase() === target &&
+        OPEN_REQUEST_STATUSES.has(Number(r.STATUS))
+      );
+      if (hasOpenRequest) {
+        throw { code: 'REQUEST_EXISTS' };
+      }
+    }
+
     // 🔹 ERROR HANDLER
     private handleError(error: any): void {
       console.error('❌ Request operation failed:', error);
-    } 
+
+      const emailControl = this.userCreationFormGroup.get('email');
+      if (error?.code === 'USER_EXISTS') {
+        emailControl?.setErrors({ userExists: true });
+        emailControl?.markAsTouched();
+        return;
+      }
+      if (error?.code === 'REQUEST_EXISTS') {
+        emailControl?.setErrors({ requestExists: true });
+        emailControl?.markAsTouched();
+        return;
+      }
+
+      this.errorMessage =
+        error?.error?.message ||
+        error?.error?.error ||
+        'Failed to save the request. Please try again.';
+    }
 
      formatPhone(event: Event): void {
     const input = event.target as HTMLInputElement;
