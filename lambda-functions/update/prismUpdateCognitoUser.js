@@ -3,10 +3,18 @@ import {
   AdminUpdateUserAttributesCommand,
   AdminSetUserPasswordCommand
 } from "@aws-sdk/client-cognito-identity-provider";
+import { createRequire } from "module";
+
+// The /opt layers are CommonJS; createRequire lets this ESM handler load them.
+const require = createRequire(import.meta.url);
+const { getDBConnection, sql } = require('/opt/dbConfig');
+const { buildResponse } = require('/opt/responseHelper');
 
 const client = new CognitoIdentityProviderClient({
   region: process.env.COGNITO_REGION
 });
+
+const ADMIN_ROLE_ID = 7;
 
 // Matches the policy the frontend's own password field displays as a hint
 // (adduser-dialog.html: "at least 15 characters long and include uppercase,
@@ -24,28 +32,44 @@ const PASSWORD_POLICY_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{1
 const ALLOWED_ATTRIBUTES = new Set(['given_name', 'family_name']);
 
 export const handler = async (event) => {
-  // TODO(authorization): this endpoint can reset ANY user's password given
-  // just a username, with no check that the caller is an admin or the
-  // account owner. Wire in a role/identity check here once the auth-claims
-  // shape reaching this Lambda is confirmed (e.g.
-  // event.requestContext.authorizer.claims).
+  if (event?.httpMethod === "OPTIONS") {
+    return buildResponse(200, {}, event);
+  }
+
+  // Finding 3.5.1-adjacent: this endpoint could reset ANY user's password or
+  // rename them given just a username, with no check that the caller is an
+  // admin or the account owner -- any logged-in caller could take over any
+  // other account, including an admin's. Admin-only, same pattern as
+  // prismCreateCognitoUser.js.
+  const claims = event?.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { message: "Unauthorized" }, event);
+  }
 
   try {
+    const pool = await getDBConnection();
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
+
     // CONFIRMED VIA LIVE TESTING (CloudWatch log showed "username is
-    // required" even though the caller sent a username): this route is on a
+    // required" even though the caller sent a username): this route was on a
     // non-proxy/custom API Gateway integration where the request fields land
     // directly on top-level `event`, NOT under event.body -- same as
-    // prismProcessPCRdataSessionId.js. An earlier "fix" here wrongly assumed
-    // this endpoint matched its siblings' JSON.parse(event.body) pattern and
-    // broke it. Handling both shapes so this isn't fragile to which
-    // integration type actually fronts it.
+    // prismProcessPCRdataSessionId.js. Handling both shapes so this isn't
+    // fragile to which integration type actually fronts it.
     const body = event.body
       ? (() => { try { return JSON.parse(event.body); } catch { return {}; } })()
       : event;
     const { username, attributes, newPassword } = body;
 
     if (!username) {
-      throw new Error("username is required");
+      return buildResponse(400, { message: "username is required" }, event);
     }
 
     // -----------------------------
@@ -60,13 +84,11 @@ export const handler = async (event) => {
         }));
 
       if (UserAttributes.length > 0) {
-        const updateCommand = new AdminUpdateUserAttributesCommand({
+        await client.send(new AdminUpdateUserAttributesCommand({
           UserPoolId: process.env.USER_POOL_ID,
           Username: username,
           UserAttributes,
-        });
-
-        await client.send(updateCommand);
+        }));
       }
     }
 
@@ -75,34 +97,25 @@ export const handler = async (event) => {
     // -----------------------------
     if (newPassword) {
       if (!PASSWORD_POLICY_RE.test(newPassword)) {
-        return {
-          statusCode: 400,
+        return buildResponse(400, {
           message: "Password must be at least 15 characters and include uppercase, lowercase, a number, and a special character"
-        };
+        }, event);
       }
 
-      const passCommand = new AdminSetUserPasswordCommand({
+      await client.send(new AdminSetUserPasswordCommand({
         UserPoolId: process.env.USER_POOL_ID,
         Username: username,
         Password: newPassword,
-        Permanent: true  // Password will not expire
-      });
-
-      await client.send(passCommand);
+        Permanent: true
+      }));
     }
 
-    return {
-      statusCode: 200,
-      message: "User updated successfully"
-    };
+    return buildResponse(200, { message: "User updated successfully" }, event);
 
   } catch (err) {
     // Log the real error server-side only -- don't echo raw SDK/exception
     // messages back to the caller.
     console.error("Error updating Cognito user:", err);
-    return {
-      statusCode: 500,
-      error: "Internal server error"
-    };
+    return buildResponse(500, { error: "Internal server error" }, event);
   }
 };
