@@ -41,3 +41,11 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+src/app/views/autocomplete-demo/autocomplete-demo/autocomplete-demo.css
+src/app/views/autocomplete-demo/autocomplete-demo/autocomplete-demo.html
+src/app/views/autocomplete-demo/autocomplete-demo/autocomplete-demo.spec.ts
+src/app/views/autocomplete-demo/autocomplete-demo/autocomplete-demo.ts
+src/assets/environment.json
+angular.json
+package.json
+package-lock.json
