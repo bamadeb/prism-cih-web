@@ -1,6 +1,8 @@
 const { getDBConnection, sql } = require('/opt/dbConfig');
-const { buildResponse, handleOptions } = require('/opt/responseHelper');
+const { buildResponse } = require('/opt/responseHelper');
 const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+
+const ADMIN_ROLE_ID = 7;
 
 // MEM_ATTACHMENT.attachment stores the full S3 URL produced by
 // prismUploadplandocument.js (https://cih-plan-document.s3.us-east-1.
@@ -65,12 +67,18 @@ exports.handler = async (event) => {
     return buildResponse(200, {}, event);
   }
 
-  // TODO(authorization): id is a plain, likely-sequential integer with no
-  // check that this attachment belongs to a plan/record the caller has
-  // access to -- any authenticated caller can delete any attachment by
-  // guessing/enumerating ids. Wire in an ownership check here once the
-  // auth-claims shape reaching this Lambda is confirmed (e.g.
-  // event.requestContext.authorizer.claims).
+  // Finding (authorization): id is a plain, likely-sequential integer and had
+  // no check that the caller may touch this attachment at all -- any
+  // authenticated caller could delete/replace any attachment by
+  // guessing/enumerating ids. Mirrors the permission rule
+  // prismUploadplandocument.js already enforces for the same type/type_id
+  // pair: 'user'-type attachments require Admin, 'plan'-type attachments
+  // only require being a known logged-in app user.
+  const claims = event.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { message: "Unauthorized" }, event);
+  }
 
   //const id = event.id;
   const body = JSON.parse(event.body || "{}");
@@ -96,16 +104,29 @@ exports.handler = async (event) => {
   try {
     const pool = await getDBConnection();
 
-    if (replaceUrl !== undefined) {
-      const oldLookup = await pool
-        .request()
-        .input('id', sql.Int, id)
-        .query('SELECT attachment FROM MEM_ATTACHMENT WHERE id = @id');
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
 
-      if (oldLookup.recordset.length === 0) {
-        return buildResponse(404,{ message: 'Attachment not found' },event);
-      }
-      const oldUrl = oldLookup.recordset[0].attachment;
+    const attachmentLookup = await pool
+      .request()
+      .input('id', sql.Int, id)
+      .query('SELECT attachment, type FROM MEM_ATTACHMENT WHERE id = @id');
+
+    if (attachmentLookup.recordset.length === 0) {
+      return buildResponse(404, { message: 'Attachment not found' }, event);
+    }
+    const attachmentRow = attachmentLookup.recordset[0];
+    if (attachmentRow.type === 'user' && Number(caller.role_id) !== ADMIN_ROLE_ID) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
+
+    if (replaceUrl !== undefined) {
+      const oldUrl = attachmentRow.attachment;
 
       // Update the row first: if this fails, the old file is still referenced
       // and must not be deleted.
@@ -130,14 +151,9 @@ exports.handler = async (event) => {
       return buildResponse(200,{ success: true, replaced: true, rowsAffected: updated.rowsAffected[0] },event);
     }
 
-    // Fetch the attachment's URL before deleting the row -- it won't be
-    // queryable afterward.
-    const lookup = await pool
-      .request()
-      .input('id', sql.Int, id)
-      .query('SELECT attachment FROM MEM_ATTACHMENT WHERE id = @id');
-
-    const attachmentUrl = lookup.recordset[0]?.attachment;
+    // attachmentRow was already fetched above (and used for the ownership
+    // check), so no need to look it up again before deleting the row.
+    const attachmentUrl = attachmentRow.attachment;
     const key = attachmentUrl ? keyFromAttachmentUrl(attachmentUrl) : null;
 
     if (key) {

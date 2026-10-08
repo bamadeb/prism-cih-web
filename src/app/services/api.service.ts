@@ -569,36 +569,37 @@ async updateUser<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
 
   
 async createCognitoUser(request: any): Promise<string> {
-
-  const res: any = await commonPostApi(
-    this.httpClient,
-    this.environmentService,
-    'prismCreateCognitoUser',
-    request
-  );
-
-  // Parse response safely
-  const parsed =
-    typeof res.data === 'string'
-      ? JSON.parse(res.data)
-      : res.data;
-
-  // ✅ Handle error from Cognito
-  if (res.statusCode !== 200 || parsed?.status === 'error') {
-    throw new Error(
-      parsed?.message ||
-      'Failed to create user. Password does not meet policy requirements.'
+  // Bug fix: this used to check res.statusCode/res.data, a shape that never
+  // existed on what commonPostApi actually returns (HttpClient.post<T>()
+  // resolves with the parsed JSON body itself, with no statusCode/data
+  // wrapper) -- so res.statusCode was always undefined, meaning this threw
+  // "Failed to create user..." on EVERY call, including ones where the
+  // Cognito account was actually created successfully (leaving an orphaned
+  // Cognito user with no matching MEM_USERS row, since insertUsers() was
+  // never reached after the throw). Angular's HttpClient rejects the promise
+  // for any non-2xx status; the Lambda's real JSON body (e.g. { message })
+  // lands on error.error, not on a resolved value.
+  try {
+    const res: any = await commonPostApi(
+      this.httpClient,
+      this.environmentService,
+      'prismCreateCognitoUser',
+      request
     );
+
+    // Success shape: { status: 'success', message, user: { cognitoUsername, ... } }
+    const cognitoUsername = res?.user?.cognitoUsername;
+    if (!cognitoUsername) {
+      throw new Error(res?.message || 'Cognito username not returned');
+    }
+    return cognitoUsername;
+  } catch (error: any) {
+    const message =
+      error?.error?.message ||
+      error?.message ||
+      'Failed to create user. Password does not meet policy requirements.';
+    throw new Error(message);
   }
-
-  // ✅ Success case
-  const cognitoUsername = parsed?.user?.cognitoUsername;
-
-  if (!cognitoUsername) {
-    throw new Error('Cognito username not returned');
-  }
-
-  return cognitoUsername;
 }
 
 
@@ -617,23 +618,26 @@ async createCognitoUser(request: any): Promise<string> {
       cognitoPayload.newPassword = newPassword;
     }
 
-    const res: any = await commonPostApi(
-      this.httpClient,
-      this.environmentService,
-      'prismUpdateCognitoUser',
-      cognitoPayload
-    );
-
-    // ✅ Handle Cognito error properly
-    if (res?.statusCode !== 200) {
-
-      throw new Error(
-        res?.error || res?.message || 'Failed to update Cognito user'
+    // Same bug as createCognitoUser() above: res never had a .statusCode
+    // field (commonPostApi resolves with the parsed body itself), so this
+    // always threw, even on a genuine 200. Angular's HttpClient rejects the
+    // promise on any non-2xx status; the real error body lands on
+    // error.error.
+    try {
+      const res: any = await commonPostApi(
+        this.httpClient,
+        this.environmentService,
+        'prismUpdateCognitoUser',
+        cognitoPayload
       );
-
+      return res;
+    } catch (error: any) {
+      const message =
+        error?.error?.message ||
+        error?.message ||
+        'Failed to update Cognito user';
+      throw new Error(message);
     }
-
-    return res;
   }
 
   async deleteGapObservations<TResponse, TRequest>(request: TRequest): Promise<TResponse> {
