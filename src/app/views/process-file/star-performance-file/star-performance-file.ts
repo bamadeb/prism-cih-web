@@ -245,19 +245,13 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
   /* ============================ PROCESS FILE ============================ */
 
+  // Temporarily disabled: prismProcessStarPerformanceSeccionID isn't
+  // complete / deployed yet (confirmed 403, no route on this API Gateway
+  // stage). The PROCESS button that called this is commented out in the
+  // template; this guard is a second layer in case anything else ever
+  // wires up a call to this method before that backend work ships.
   async processQualityGaps(): Promise<void> {
-    if (!this.sessionId) return;
-
-    this.isProcessing = true;
-    try {
-      const res = await this.apiService.processStarPerformanceSeccionID<any>({
-        session_id: this.sessionId
-      });
-      this.processLogList = res?.data?.loglist ?? [];
-      this.clearResults();
-    } finally {
-      this.isProcessing = false;
-    }
+    console.warn('Star Performance processing is not available yet.');
   }
 
   private clearResults(): void {

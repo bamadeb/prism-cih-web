@@ -1,8 +1,6 @@
 const { getDBConnection, sql } = require('/opt/dbConfig');
 const { buildResponse } = require('/opt/responseHelper');
 
-const ADMIN_ROLE_ID = 7;
-
 exports.handler = async (event) => {
     if (event.httpMethod === "OPTIONS") {
         return buildResponse(200, {}, event);
@@ -13,11 +11,9 @@ exports.handler = async (event) => {
     const gaps_type  = body.gaps_type;
     const tin = body.tin || '';
 
-    // Finding: this returns gap-observation PHI (name, DOB, diagnosis codes)
-    // for EVERY member in the date range, with no per-caller scoping at all
-    // -- it's a bulk cross-member report with no natural per-row ownership
-    // to check, so it's gated to Admin, same as other reporting/staging
-    // endpoints with the same shape.
+    // This report is intentionally available to every authenticated user,
+    // not just Admins -- confirmed as a business requirement. Still requires
+    // a valid caller that exists in MEM_USERS (not just a valid JWT).
     const claims = event.requestContext?.authorizer?.claims || {};
     const callerSub = claims.sub;
     if (!callerSub) {
@@ -30,10 +26,10 @@ exports.handler = async (event) => {
 
         const callerLookup = await pool.request()
             .input('cognito_username', sql.VarChar, callerSub)
-            .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+            .query('SELECT ID FROM MEM_USERS WHERE cognito_username = @cognito_username');
         const caller = callerLookup.recordset[0];
-        if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
-            return buildResponse(403, { message: "Forbidden" }, event);
+        if (!caller) {
+            return buildResponse(401, { message: "Unauthorized" }, event);
         }
 
         const request = pool.request();

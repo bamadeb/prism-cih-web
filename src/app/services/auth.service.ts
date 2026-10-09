@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AppEnvService } from './app-env.service';
@@ -10,11 +10,8 @@ import {
   VerifySoftwareTokenCommand
 } from "@aws-sdk/client-cognito-identity-provider";
 const USER_KEY = 'app_user';
-const INACTIVITY_LIMIT = 10 * 60 * 1000; // 10 minutes in milliseconds
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private inactivityTimer: any;
-
   // Finding 3.4.3: access/ID tokens now live only in memory (cleared on a
   // full page reload) instead of localStorage. The refresh token never
   // touches browser JS at all -- prismStoreRefreshToken stores it as an
@@ -29,36 +26,19 @@ export class AuthService {
 
   constructor(
     private readonly router: Router,
-    private readonly ngZone: NgZone,
     private readonly environmentService: AppEnvService
-  ) { this.startInactivityWatcher(); }
+  ) {}
 
-  // ✅ Start tracking user activity
-  private startInactivityWatcher(): void {
-    ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'].forEach(event =>
-      window.addEventListener(event, () => this.resetInactivityTimer())
-    );
-    this.resetInactivityTimer();
-  }
-  // ✅ Reset inactivity timer
-  private resetInactivityTimer(): void {
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-    }
-
-    this.ngZone.runOutsideAngular(() => {
-      this.inactivityTimer = setTimeout(() => {
-        this.ngZone.run(() => this.logoutDueToInactivity());
-      }, INACTIVITY_LIMIT);
-    });
-  }
-
-  // ✅ Handle logout due to inactivity
-  private logoutDueToInactivity(): void {
-    this.clearUser();
-    sessionStorage.clear();
-    this.router.navigate(['/']);
-  }
+  // Finding (functional test): this used to run a second, uncoordinated
+  // 10-minute inactivity-logout watcher alongside IdleTimeoutService's
+  // 30-minute one, both keyed on the same 'app_user' localStorage entry.
+  // It started unconditionally in the constructor (not gated on login
+  // state) and was never stopped, so any logged-in user who went 10
+  // minutes without a raw mousemove/keydown/click/scroll/touchstart event
+  // (e.g. reading a report, working in another window) got silently
+  // logged out client-side well short of the intended 30-minute window --
+  // even though their actual session/tokens were still fully valid.
+  // IdleTimeoutService (idle-timeout.ts) is the single source of truth now.
 
   // ✅ Get full name with role
   getUserName(): string {

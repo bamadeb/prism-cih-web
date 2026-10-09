@@ -51,6 +51,11 @@
             </div>
 
             <!-- PROCESS BUTTON -->
+            <!-- Temporarily removed: the backend endpoint this calls
+                 (prismProcessStarPerformanceSeccionID) is not complete / not
+                 deployed to this API Gateway stage yet (confirmed returning
+                 403 with no route). Re-enable once that work is finished. -->
+            <!--
             <div class="mt-1" *ngIf="totalRecords > 0">
                 <button mat-raised-button color="primary" (click)="processQualityGaps()" [disabled]="isProcessing">
 
@@ -62,6 +67,7 @@
 
                 </button>
             </div>
+            -->
 
             <!-- SAMPLE FILE -->
             <div *ngIf="totalRecords === 0" class="sample-link">
