@@ -40,7 +40,9 @@ const MAX_RECORDS = 500;
 // only delete a given member's gaps if that Admin is ALSO the member's
 // assigned Care_Coordinator_id, same as any other user. (Unlike most other
 // endpoints in this review, where Admin bypasses the ownership check
-// entirely -- this one is deliberately different per explicit instruction.)
+// entirely -- this one is deliberately different per explicit instruction.
+// A brief attempt to add an Admin bypass here was reverted -- keep it
+// strict owner-only.)
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
@@ -86,32 +88,35 @@ exports.handler = async (event) => {
       return buildResponse(401, { error: 'Unauthorized' }, event);
     }
 
-    // Ownership check, no role-based bypass: every record's subscriber_number
-    // must belong to a member THIS caller is the assigned care coordinator
-    // for. MEM_MEMBERS.SUBSCRIBER_NUMBER -> RECIP_NO (medicaid_id) ->
-    // MEM_OUTREACH_MEMBERS.Care_Coordinator_id, same assignment chain already
-    // used in prismGetcallhistory.js / prismMemberAllDetails.js.
-    const subscriberNumbers = [...new Set(records.map(r => r.subscriber_number))];
+    // Ownership check, no role-based bypass: the caller must be the user who
+    // originally created each observation row -- MEM_GAP_OBSERVATION_DATA.
+    // added_by -- not the member's current assigned care coordinator. Those
+    // are frequently different people (a care-coordinator reassignment, or
+    // an Admin who entered the observation directly), and checking the
+    // member's Care_Coordinator_id instead of the row's own added_by is what
+    // caused every caller -- including the Admin who actually created the
+    // record -- to be incorrectly blocked when that member's assigned
+    // coordinator turned out to be a stale/orphaned user ID.
+    const ownerCheckIds = [...new Set(records.map(r => Number(r.id)))];
     const ownerCheckRequest = pool.request();
-    const inParams = subscriberNumbers.map((sn, i) => {
-      ownerCheckRequest.input(`sn${i}`, sql.VarChar(50), sn);
-      return `@sn${i}`;
+    const ownerCheckIdParams = ownerCheckIds.map((id, i) => {
+      ownerCheckRequest.input(`ownerid${i}`, sql.Int, id);
+      return `@ownerid${i}`;
     }).join(',');
 
     const ownerCheck = await ownerCheckRequest.query(`
-      SELECT m.SUBSCRIBER_NUMBER, mo.Care_Coordinator_id
-      FROM MEM_MEMBERS AS m
-      JOIN MEM_OUTREACH_MEMBERS AS mo ON mo.medicaid_id = m.RECIP_NO
-      WHERE m.SUBSCRIBER_NUMBER IN (${inParams})
+      SELECT id, added_by
+      FROM MEM_GAP_OBSERVATION_DATA
+      WHERE id IN (${ownerCheckIdParams})
     `);
 
-    const ownedSubscriberNumbers = new Set(
+    const ownedIds = new Set(
       ownerCheck.recordset
-        .filter(row => Number(row.Care_Coordinator_id) === Number(caller.ID))
-        .map(row => row.SUBSCRIBER_NUMBER)
+        .filter(row => Number(row.added_by) === Number(caller.ID))
+        .map(row => row.id)
     );
 
-    const unauthorized = subscriberNumbers.some(sn => !ownedSubscriberNumbers.has(sn));
+    const unauthorized = ownerCheckIds.some(id => !ownedIds.has(id));
     if (unauthorized) {
       return buildResponse(403, { error: 'Forbidden' }, event);
     }
