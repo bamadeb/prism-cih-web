@@ -15,7 +15,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-import { NotBlankValidator, ZipValidator } from '../../../validators/validators';
+import { NotBlankValidator, NotFutureDateValidator, ZipValidator } from '../../../validators/validators';
 import { US_STATES } from '../../../constants/us-states';
 
 // Field limits for the alternate address form.
@@ -36,6 +36,7 @@ export class AlteraddressDialog implements OnInit{
   readonly states = US_STATES;
   readonly addressMax = ADDRESS_MAX;
   readonly cityMax = CITY_MAX;
+  readonly today = new Date();
 
   constructor(
     private readonly dialogRef: MatDialogRef<AlteraddressDialog>,
@@ -55,7 +56,7 @@ export class AlteraddressDialog implements OnInit{
       alt_city: ['', [Validators.required, Validators.maxLength(CITY_MAX), NotBlankValidator]],
       alt_state: ['', Validators.required],
       alt_zip: ['', [Validators.required, ZipValidator]],
-      add_date: ['']
+      add_date: ['', NotFutureDateValidator]
     });
 
     this.addAltaddressFormGroup.valueChanges.subscribe(() => this.errorMessage = '');

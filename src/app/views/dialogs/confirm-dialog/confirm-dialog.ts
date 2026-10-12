@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { NOTE_MAX, NotBlankValidator } from '../../../validators/validators';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -29,6 +30,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 export class ConfirmDialog {
 
   isLoading = false;
+  readonly noteMax = NOTE_MAX;
   noteForm!: FormGroup;
 
   constructor(
@@ -38,7 +40,7 @@ export class ConfirmDialog {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.noteForm = this.fb.group({
-      note: ['', Validators.required]
+      note: ['', [Validators.required, Validators.maxLength(NOTE_MAX), NotBlankValidator]]
     });
   }
 
@@ -48,6 +50,11 @@ export class ConfirmDialog {
   async confirm(result: boolean, medicaidId: number, type: number): Promise<void> {
     if (!result) {
       this.dialogRef.close({ refresh: false });
+      return;
+    }
+
+    if (this.noteForm.invalid) {
+      this.noteForm.markAllAsTouched();
       return;
     }
 

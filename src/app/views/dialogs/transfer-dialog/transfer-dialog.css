@@ -27,3 +27,10 @@
   text-transform: uppercase;
 }
 .bot_12{display:flex; justify-content: flex-start; gap: 12px; margin-top: 8px;}
+
+.form-error {
+  color: #d32f2f;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 4px 0 8px;
+}

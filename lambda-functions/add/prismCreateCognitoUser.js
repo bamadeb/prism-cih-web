@@ -19,7 +19,11 @@ const client = new CognitoIdentityProviderClient({
   region: REGION
 });
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Email format: local part of letters/digits/._%+- (no leading, trailing or
+// double dots), domain labels that don't start/end with '-', and a final
+// part of 2+ letters -- so 'name@gmail.c' or 'a@b' are rejected.
+// Same rule in validators.ts, prismCreateUser.js and prismCreateCognitoUser.js.
+const EMAIL_RE = /^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
 
 // Matches the policy the frontend's own password field displays as a hint
 // (adduser-dialog.html: "at least 15 characters long and include uppercase,

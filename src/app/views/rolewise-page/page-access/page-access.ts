@@ -118,8 +118,8 @@ export class PageAccess implements OnInit, AfterViewInit {
       this.isLoading = true;
   
       const dialogRef = pageaccess
-        ? this.pageDialogService.editDialog(this.roleList, this.pagelist, pageaccess)
-        : this.pageDialogService.addDialog(this.roleList, this.pagelist);
+        ? this.pageDialogService.editDialog(this.roleList, this.pagelist, pageaccess, this.dataSource.data)
+        : this.pageDialogService.addDialog(this.roleList, this.pagelist, this.dataSource.data);
   
       dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
         this.isLoading = false;

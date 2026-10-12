@@ -19,7 +19,7 @@
           </span>
         </div>
 
-        <input #fileInput type="file" hidden (change)="onFileSelect($event)" />
+        <input #fileInput type="file" hidden accept=".csv" (change)="onFileSelect($event)" />
 
         <mat-error *ngIf="processMembersFormGroup.get('file')?.touched &&
                  processMembersFormGroup.get('file')?.invalid">
@@ -37,6 +37,7 @@
         </button>
 
       </form>
+      <app-csv-errors [errors]="csvErrors"></app-csv-errors>
 
       <!-- SUMMARY -->
       <div *ngIf="totalRecords > 0" class="summary-row">

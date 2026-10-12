@@ -23,6 +23,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { NOTE_MAX, NotBlankValidator } from '../../../validators/validators';
+
+const ADMIN_ROLE_ID = 7;
 
 @Component({
   selector: 'app-transfer-dialog',
@@ -53,6 +56,9 @@ export class TransferDialog implements OnInit {
   transferFormGroup!: FormGroup;
   userList: any[] = [];
 
+  errorMessage = '';
+  readonly reasonMax = NOTE_MAX;
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly apiService: ConfigService,
@@ -69,8 +75,18 @@ export class TransferDialog implements OnInit {
     this.transferFormGroup = this.fb.group({
       department_id: [null, Validators.required],
       user_id: [null, Validators.required],
-      referring_reason: ['']
+      referring_reason: ['', [Validators.required, Validators.maxLength(NOTE_MAX), NotBlankValidator]]
     });
+
+    this.transferFormGroup.valueChanges.subscribe(() => this.errorMessage = '');
+  }
+
+  // Care_Coordinator_id comes from prismGetUserMemberList. Until that column
+  // is deployed, a non-admin's list only contains their own members, so the
+  // logged-in user is the owner.
+  private currentOwnerId(member: any, user: any): number | null {
+    if (member?.Care_Coordinator_id != null) return member.Care_Coordinator_id;
+    return Number(user?.role_id) !== ADMIN_ROLE_ID ? user?.ID : null;
   }
 
   // ========================= TRANSFER =========================
@@ -81,12 +97,24 @@ export class TransferDialog implements OnInit {
       return;
     }
 
+    const user = this.userData.getUser();
+    const members = this.normalizeMembers(this.data.members);
+    const v = {
+      ...this.transferFormGroup.value,
+      referring_reason: this.transferFormGroup.value.referring_reason.trim()
+    };
+
+    const alreadyOwned = members.filter(m => Number(this.currentOwnerId(m, user)) === Number(v.user_id));
+    if (alreadyOwned.length) {
+      this.errorMessage = members.length === 1
+        ? 'This member is already assigned to the selected user.'
+        : `${alreadyOwned.length} of the selected members are already assigned to the selected user.`;
+      return;
+    }
+
     this.isLoading = true;
 
     try {
-      const user = this.userData.getUser();
-      const members = this.normalizeMembers(this.data.members);
-      const v = this.transferFormGroup.value;
 
       await this.insertTransferRecords(members, v, user.ID);
       await this.updateOutreachMembers(members, v.user_id);

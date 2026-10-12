@@ -14,6 +14,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDatepicker } from "@angular/material/datepicker";
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { PlanRequest, UpdatePlanRequest } from '../../../models/requests/planRequest';
+import { NotBlankValidator } from '../../../validators/validators';
+
+const PLAN_NAME_MAX = 100;
 
 @Component({
   selector: 'app-plans-dialog',
@@ -42,6 +45,7 @@ export class PlansDialog implements OnInit{
   isLoading = false;
   isEditMode = false;
   currentPlanId: number | null = null;
+  readonly planNameMax = PLAN_NAME_MAX;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -62,7 +66,7 @@ export class PlansDialog implements OnInit{
   // 🔹 FORM BUILDER
   private buildForm(): void {
     this.plansFormGroup = this.fb.group({
-      plan_name: ['', Validators.required],
+      plan_name: ['', [Validators.required, Validators.maxLength(PLAN_NAME_MAX), NotBlankValidator]],
       start_date: ['', Validators.required],
       end_date: ['', Validators.required],  
       status: ['', Validators.required]
@@ -92,12 +96,19 @@ export class PlansDialog implements OnInit{
 
     this.isLoading = true;
     const formValue = this.plansFormGroup.getRawValue();
+    formValue.plan_name = formValue.plan_name.trim();
     if (!this.checkDates(formValue.start_date, formValue.end_date)) {
         this.isLoading = false;
-        return; 
+        return;
       }
 
     try {
+      if (await this.isDuplicatePlanName(formValue.plan_name)) {
+        const nameControl = this.plansFormGroup.get('plan_name');
+        nameControl?.setErrors({ duplicate: true });
+        nameControl?.markAsTouched();
+        return;
+      }
       await this.processPlan(formValue);
       this.dialogRef.close({ refresh: true });
 
@@ -106,6 +117,16 @@ export class PlansDialog implements OnInit{
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // 🔹 DUPLICATE NAME CHECK (case-insensitive, ignoring the plan being edited)
+  private async isDuplicatePlanName(name: string): Promise<boolean> {
+    const res = await this.apiService.plans<any>();
+    const target = name.toLowerCase();
+    return (res?.data?.plans ?? []).some((p: any) =>
+      String(p.plan_name ?? '').trim().toLowerCase() === target &&
+      Number(p.id) !== Number(this.currentPlanId)
+    );
   }
 
   // 🔹 PROCESS ADD / UPDATE

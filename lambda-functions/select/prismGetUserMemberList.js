@@ -163,6 +163,7 @@ LatestPCPVisitPre AS (
     )
 	SELECT 
 		MT.medicaid_id,
+		MT.Care_Coordinator_id,
 		M.FIRST_NAME,
 		M.LAST_NAME,
 		M.MEM_NO,

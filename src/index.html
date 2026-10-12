@@ -16,7 +16,11 @@
   <link rel="icon" type="image/x-icon" href="assets/images/favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="styles.css" rel="stylesheet">   
+  <!-- The global stylesheet is added by the Angular build. Critical-CSS
+       inlining is off in angular.json (production): it loads the full
+       stylesheet via an inline onload="" handler, which the CSP above
+       (script-src 'self') blocks -- leaving every page after login with
+       only the login page's CSS. -->
 </head>
 <body>
   <app-root></app-root>

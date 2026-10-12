@@ -37,7 +37,7 @@
                     </mat-select>
                 </mat-form-field>
 
-                <button mat-raised-button color="primary"  >
+                <button mat-raised-button color="primary" type="submit" [disabled]="starPerformanceFormGroup.invalid">
                     <mat-icon>search</mat-icon>
                     SEARCH
                 </button>

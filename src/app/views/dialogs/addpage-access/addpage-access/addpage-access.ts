@@ -12,6 +12,9 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfigService } from '../../../../services/api.service';
 import { UserDataService } from '../../../../services/user-data-service'; 
 
+// page_name of this screen, as checked by HeaderService.setTitle('PAGE ACCESS').
+const PAGE_ACCESS_PAGE_NAME = 'PAGE ACCESS';
+
 @Component({
   selector: 'app-addpage-access',
   standalone: true,
@@ -62,6 +65,8 @@ export class AddpageAccess implements OnInit {
       page_id: ['', Validators.required],    
       status: ['', Validators.required]
     });
+
+    this.addUserFormGroup.valueChanges.subscribe(() => this.errorMessage = '');
   }
 
   // 🔹 EDIT MODE SETUP
@@ -84,8 +89,19 @@ export class AddpageAccess implements OnInit {
       return;
     }
 
-    this.isLoading = true;
     const formValue = this.addUserFormGroup.getRawValue();
+
+    if (this.isDuplicate(formValue)) {
+      this.errorMessage = 'This role already has an access entry for this page.';
+      return;
+    }
+    if (this.removesOwnAccessToThisPage(formValue)) {
+      this.errorMessage = 'You cannot remove your own role\'s access to the Page Access page.';
+      return;
+    }
+
+    this.errorMessage = '';
+    this.isLoading = true;
 
     try {
       await this.processUser(formValue);
@@ -93,9 +109,43 @@ export class AddpageAccess implements OnInit {
 
     } catch (error: any) {
       console.error('Error:', error);
+      this.errorMessage =
+        error?.error?.message ||
+        error?.error?.error ||
+        'Failed to save page access. Please try again.';
     } finally {
       this.isLoading = false;
     }
+  }
+
+  // Another row (any status) with the same role + page.
+  private isDuplicate(formValue: any): boolean {
+    return (this.data?.existing ?? []).some((row: any) =>
+      Number(row.role_id) === Number(formValue.role_id) &&
+      Number(row.page_id) === Number(formValue.page_id) &&
+      Number(row.id) !== Number(this.currentUserId)
+    );
+  }
+
+  // Editing the active row that gives the logged-in user's own role access to
+  // this screen: changing its role, page or status would lock them out of it.
+  private removesOwnAccessToThisPage(formValue: any): boolean {
+    if (!this.isEditMode) return false;
+    const original = this.data.list;
+    const user = this.userData.getUser();
+    const pageAccessPage = (this.data.pagelist ?? []).find((p: any) =>
+      String(p.page_name ?? '').toUpperCase() === PAGE_ACCESS_PAGE_NAME);
+    if (!user || !pageAccessPage) return false;
+
+    const isOwnAccessRow =
+      Number(original.role_id) === Number(user.role_id) &&
+      Number(original.page_id) === Number(pageAccessPage.id) &&
+      Number(original.status) === 0;
+    if (!isOwnAccessRow) return false;
+
+    return Number(formValue.role_id) !== Number(original.role_id) ||
+      Number(formValue.page_id) !== Number(original.page_id) ||
+      Number(formValue.status) !== 0;
   }
 
   // 🔹 PROCESS ADD / UPDATE

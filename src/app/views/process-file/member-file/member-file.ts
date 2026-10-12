@@ -30,6 +30,10 @@ import { ConfigService } from '../../../services/api.service';
 import { HeaderService } from '../../../services/header.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
+import { CsvRowError, CsvRowRules, checkCsvFile, parseCsv, validateCsvRows } from '../../../utilities/csv-import';
+import { MatDialog } from '@angular/material/dialog';
+import { confirmProcessImport } from '../../../utilities/confirm';
+import { CsvErrorsComponent } from '../../../shared/components/csv-errors/csv-errors.component';
  const expectedHeaders = [
       'SUBSCRIBER_ID', 'MBR_PERIOD', 'FIRST_NM', 'MIDDLE_NM', 'LAST_NM',
       'MEDICARE_ID', 'MEDICAID_ID', 'DT_OF_BIRTH', 'SEX', 'ADDRESS_1',
@@ -41,6 +45,12 @@ import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
       'AGT_REC_NM', 'AGT_REC_PH', 'AGT_REC_EM'
     ]; 
  const TABLE = 'MEM_MEMBERS_TEMP';
+ // Row checks before upload. Required = the member's identifiers.
+ const MEMBER_ROW_RULES: CsvRowRules = {
+   required: ['SUBSCRIBER_ID', 'MEDICAID_ID'],
+   dates: ['DT_OF_BIRTH', 'ENROLL_DT', 'PCP_EFF_DT_S'],
+   numbers: ['RISK_SCORE']
+ };
 @Component({
   selector: 'app-member-file', 
   standalone: true,
@@ -50,7 +60,7 @@ import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatButtonModule, MatIcon],
+    MatButtonModule, MatIcon, CsvErrorsComponent],
   providers: [provideNativeDateAdapter()],   // <-- REQUIRED FIX
   templateUrl: './member-file.html',
   styleUrl: './member-file.css',
@@ -91,8 +101,10 @@ export class MemberFile implements OnInit, AfterViewInit {
   isProcessing = false;
   isLoading = false;   
   processLogList: any[] = []; 
+  csvErrors: CsvRowError[] = [];
  
   constructor(
+    private readonly dialog: MatDialog,
     private readonly apiService: ConfigService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
@@ -131,15 +143,21 @@ export class MemberFile implements OnInit, AfterViewInit {
   };
 }
 
-onFileSelect(event: any): void {
-    const file = event.target.files[0];
-    if (file?.type === 'text/csv') {
+  // Checked by extension: browsers report .csv with different MIME types
+  // (Windows with Excel installed uses application/vnd.ms-excel).
+  onFileSelect(event: any): void {
+    const file: File | undefined = event.target.files?.[0];
+    this.csvErrors = [];
+    if (file && file.name.toLowerCase().endsWith('.csv')) {
       this.selectedFile = file;
       this.processMembersFormGroup.patchValue({ file: file });
-    } else { 
-      this.selectedFile = null; 
-      this.processMembersFormGroup.get('file')?.reset(); 
+    } else {
+      this.selectedFile = null;
+      this.processMembersFormGroup.get('file')?.reset();
+      if (this.fileInput) this.fileInput.nativeElement.value = '';
+      if (file) this.csvErrors = [{ row: 0, message: 'Only .csv files are allowed.' }];
     }
+    this.cdr.markForCheck();
   }
 
  private resetFile(): void {
@@ -164,26 +182,37 @@ async membersFileSubmit(): Promise<void> {
 
   const file = this.selectedFile;
   this.processLogList = [];
+  this.csvErrors = [];
 
-  // ------------------ File extension check ------------------
-  const ext = file.name.split('.').pop()?.toLowerCase();
-  if (ext !== 'csv') {
-    alert('Only .csv files are allowed.');
+  // ------------------ File checks (type, empty, size) ------------------
+  const fileError = checkCsvFile(file);
+  if (fileError) {
+    this.csvErrors = [{ row: 0, message: fileError }];
     this.resetFile();
     this.isUpload = false;
+    this.cdr.markForCheck();
     return;
   }
 
   try {
-    // ------------------ Read file ------------------
-    const rows = await this.readCsvFile(file); 
+    // ------------------ Read + validate file ------------------
+    const parsed = await parseCsv(file);
+    if (JSON.stringify(parsed.fields) !== JSON.stringify(expectedHeaders)) {
+      throw new Error('HEADER_MISMATCH');
+    }
+
+    const errors = [...parsed.errors, ...validateCsvRows(parsed.rows, MEMBER_ROW_RULES)];
+    if (errors.length) {
+      this.csvErrors = errors;
+      this.resetFile();
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.sessionId = Math.floor(Date.now() / 1000).toString();
 
-    // ------------------ Header parsing ------------------
-    const headers = this.parseAndValidateHeaders(rows[0], expectedHeaders);
-
     // ------------------ Data parsing ------------------
-    const insertDataArray = this.parseCsvDataRows(rows, headers, this.sessionId);
+    const insertDataArray = this.buildInsertRows(parsed.rows, this.sessionId);
 
     // ------------------ Batch processing ------------------
     await this.uploadInBatches(insertDataArray); 
@@ -196,11 +225,13 @@ async membersFileSubmit(): Promise<void> {
     this.selectedFile = null;
     this.resetFile();
 
-  } catch (error) {
+  } catch (error: any) {
     this.isUpload = false;
     console.error('Error reading or uploading CSV:', error);
-    alert('Error processing member file. Please check your CSV format.');
-    
+    alert(error?.message === 'HEADER_MISMATCH'
+      ? 'File header mismatch. The columns must match the member file template exactly.'
+      : 'Error processing member file. Please check your CSV format.');
+
   } finally {
     this.isUpload = false;
   }
@@ -210,6 +241,10 @@ async membersFileSubmit(): Promise<void> {
 
 async processMembers(): Promise<void> {
     if (!this.sessionId) return;
+
+    if (!(await confirmProcessImport(this.dialog, 'member', this.totalRecords, this.error_count))) {
+      return;
+    }
 
     this.isProcessing = true;
     try {
@@ -232,7 +267,6 @@ async processMembers(): Promise<void> {
     for (let i = 0; i < batches.length; i++) {
       try {
         await this.insertTemptable(batches[i]);
-        console.log(`✅ Batch ${i + 1}/${batches.length} completed.`);
       } catch (err) {
         console.error(`❌ Batch ${i + 1} failed`, err);
         throw err;
@@ -275,9 +309,8 @@ private async loadTempMembers(): Promise<void> {
  
   /* ============================ CSV HELPERS ============================ */
 
-  private parseCsvDataRows(
-  rows: string[],
-  headers: string[],
+  private buildInsertRows(
+  parsedRows: Record<string, any>[],
   sessionId: string
 ): any[] {
   const insertDataArray: any[] = [];
@@ -290,13 +323,10 @@ private async loadTempMembers(): Promise<void> {
     'DISENROLL_DT'
   ];
 
-  for (let i = 1; i < rows.length; i++) {
-    const cols = rows[i].split(',').map(c => c.trim());
-    if (cols.length !== headers.length) continue;
-
+  for (const parsed of parsedRows) {
     const row: any = {};
-    headers.forEach((header, index) => {
-      row[header] = cols[index] || null;
+    expectedHeaders.forEach(header => {
+      row[header] = String(parsed[header] ?? '').trim() || null;
     });
 
     // Format required date fields
@@ -316,40 +346,6 @@ private async loadTempMembers(): Promise<void> {
   return insertDataArray;
 }
 
-
-  private parseAndValidateHeaders(
-    headerRow: string,
-    expectedHeaders: string[]
-  ): string[] {
-    const headers = headerRow
-      .split(',')
-      .map(h => h.trim().replace(/\r/g, ''));
-
-    if (JSON.stringify(headers) !== JSON.stringify(expectedHeaders)) {
-      throw new Error('HEADER_MISMATCH');
-    }
-
-    return headers;
-}
-
-
-  private async readCsvFile(file: File): Promise<string[]> {
-  const ext = file.name.split('.').pop()?.toLowerCase();
-  if (ext !== 'csv') {
-    throw new Error('INVALID_FILE_TYPE');
-  }
-
-  const text = await file.text();
-  const rows = text
-    .split(/\r?\n/)
-    .filter(line => line.trim());
-
-  if (rows.length < 2) {
-    throw new Error('EMPTY_OR_INVALID_FILE');
-  }
-
-  return rows;
-}   
 
    /* ============================ UTILS ============================ */
 

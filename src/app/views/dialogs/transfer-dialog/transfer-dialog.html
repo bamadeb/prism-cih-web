@@ -39,16 +39,22 @@
         <!-- COMMENT -->
         <mat-form-field appearance="outline" style="width:100%;margin-top:30px;">
           <mat-label>TRANSFER REASON</mat-label>
-           <input matInput formControlName="referring_reason">
-          
-           
+           <input matInput formControlName="referring_reason" [attr.maxlength]="reasonMax">
+          <mat-error *ngIf="transferFormGroup.get('referring_reason')?.hasError('required') || transferFormGroup.get('referring_reason')?.hasError('whitespace')">
+            Transfer reason is required
+          </mat-error>
+          <mat-error *ngIf="transferFormGroup.get('referring_reason')?.hasError('maxlength')">
+            Must be {{ reasonMax }} characters or fewer
+          </mat-error>
         </mat-form-field>
+
+        <div *ngIf="errorMessage" class="form-error">{{ errorMessage }}</div>
 
         <!-- BUTTON -->
        <div  class="mt-3">
           <div class="bot_12">
          <div class="left"><button mat-raised-button color="primary" type="submit" [disabled]="isLoading">SUBMIT </button></div>
-            <div class="right"><button mat-raised-button color="primary" (click)="close()">CLOSE</button></div>
+            <div class="right"><button mat-raised-button color="primary" type="button" (click)="close()">CLOSE</button></div>
         </div>
         </div>
 

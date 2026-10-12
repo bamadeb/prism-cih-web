@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { NOTE_MAX, NotBlankValidator } from '../../../validators/validators';
 import { LoginRequest } from '../../../models/requests/loginRequest';
 import { Auth } from '../../../services/auth';
 @Component({
@@ -30,6 +31,7 @@ import { Auth } from '../../../services/auth';
 export class UnlockUserConfirm {
 
   isLoading = false;
+  readonly noteMax = NOTE_MAX;
   noteForm!: FormGroup;
 
   constructor(
@@ -40,7 +42,7 @@ export class UnlockUserConfirm {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.noteForm = this.fb.group({
-      note: ['', Validators.required]
+      note: ['', [Validators.required, Validators.maxLength(NOTE_MAX), NotBlankValidator]]
     });
   }
 
@@ -55,6 +57,11 @@ async confirm(result: boolean): Promise<void> {
   }
 
   
+  if (this.noteForm.invalid) {
+    this.noteForm.markAllAsTouched();
+    return;
+  }
+
   this.isLoading = true;
 
   try {
@@ -63,7 +70,7 @@ async confirm(result: boolean): Promise<void> {
     // ✅ Call unlock API
     await this.unlockUser(this.data.userId, this.data.cognito_username, this.data.email);
    
-    const logNote = `Unlocked user ${this.data.email} (${this.data.role})`;
+    const logNote = `Unlocked user ${this.data.email} (${this.data.role}): ${note}`;
     // ✅ Log action
     await this.logAction(this.data.userId, logNote);
 

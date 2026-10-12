@@ -2,7 +2,7 @@
   {{ data.title }}
 </h2>
 
-<mat-dialog-content style="max-height: 350px;">
+<mat-dialog-content style="max-height: 75vh;">
   <mat-card>
     <mat-card-content>
 
@@ -17,7 +17,7 @@
             First name is required
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('namePattern')">
-            Use letters, spaces, hyphens or apostrophes only
+            Letters, spaces, - or ' only
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('maxlength')">
             Must be 100 characters or fewer
@@ -33,7 +33,7 @@
             Last name is required
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('namePattern')">
-            Use letters, spaces, hyphens or apostrophes only
+            Letters, spaces, - or ' only
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('maxlength')">
             Must be 100 characters or fewer
@@ -119,11 +119,9 @@
     Password is required
   </mat-error>
 
-  <!-- Length error -->
-  <mat-error *ngIf="
-    addUserFormGroup.get('password')?.touched &&
-    addUserFormGroup.get('password')?.hasError('minlength')">
-    Password must be at least 15 characters long
+  <!-- Policy error (same rule as the server) -->
+  <mat-error *ngIf="addUserFormGroup.get('password')?.hasError('passwordPolicy')">
+    15+ chars with upper, lower, number &amp; symbol
   </mat-error>
 
 </mat-form-field>

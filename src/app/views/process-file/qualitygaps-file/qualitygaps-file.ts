@@ -30,14 +30,26 @@ import { ConfigService } from '../../../services/api.service';
 import { HeaderService } from '../../../services/header.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
-import * as Papa from 'papaparse';
+import { CsvRowError, CsvRowRules, checkCsvFile, parseCsv, validateCsvRows } from '../../../utilities/csv-import';
+import { MatDialog } from '@angular/material/dialog';
+import { confirmProcessImport } from '../../../utilities/confirm';
+import { CsvErrorsComponent } from '../../../shared/components/csv-errors/csv-errors.component';
 const TABLE = 'MEM_CIH_QUALITY_TEMP';
+
+const FILE_HEADERS = ['Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
+      'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
+      'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'];
+// Row checks before upload: the record's key columns.
+const ROW_RULES: CsvRowRules = {
+  required: ['Subscriber_ID', 'Measure_Name', 'Submeasure'],
+  dates: ['Date_of_Birth']
+};
 
 @Component({
   selector: 'app-qualitygaps-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
+  imports: [CsvErrorsComponent, MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -82,9 +94,11 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
   isUpload = false;
   isProcessing = false;
   isLoading = false;
+  csvErrors: CsvRowError[] = [];
   processLogList: any[] = [];
 
   constructor(
+    private readonly dialog: MatDialog,
     private readonly apiService: ConfigService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
@@ -123,17 +137,21 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
     };
   }
 
+  // Checked by extension: browsers report .csv with different MIME types
+  // (Windows with Excel installed uses application/vnd.ms-excel).
   onFileSelect(event: any): void {
-    const file = event.target.files[0];    
-    if (file?.type === 'text/csv') {
+    const file: File | undefined = event.target.files?.[0];
+    this.csvErrors = [];
+    if (file && file.name.toLowerCase().endsWith('.csv')) {
       this.selectedFile = file;
       this.processQualityFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
       this.processQualityFormGroup.get('file')?.reset();
-      this.isUpload = false;
-      alert('Only .csv files are allowed.');
+      if (this.fileInput) this.fileInput.nativeElement.value = '';
+      if (file) this.csvErrors = [{ row: 0, message: 'Only .csv files are allowed.' }];
     }
+    this.cdr.markForCheck();
   }
 
   private resetFile(): void {
@@ -157,80 +175,59 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
     this.processLogList = [];
 
     const file = this.selectedFile;
-    const ext = file.name.split('.').pop()?.toLowerCase();
+    this.csvErrors = [];
 
-    if (ext !== 'csv') {
-      alert('Only .csv files are allowed.');
+    const fileError = checkCsvFile(file);
+    if (fileError) {
+      this.csvErrors = [{ row: 0, message: fileError }];
       this.resetFile();
       this.isUpload = false;
+      this.cdr.markForCheck();
       return;
     }
 
     try {
+      const parsed = await parseCsv(file);
+
+      if (JSON.stringify(parsed.fields) !== JSON.stringify(FILE_HEADERS)) {
+        alert("File header mismatch.");
+        return;
+      }
+
+      const errors = [...parsed.errors, ...validateCsvRows(parsed.rows, ROW_RULES)];
+      if (errors.length) {
+        this.csvErrors = errors;
+        this.resetFile();
+        return;
+      }
+
       this.sessionId = Math.floor(Date.now() / 1000).toString();
 
-      // Parse CSV using PapaParse
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: false,
-
-        complete: async (result) => {
-          const rows: any[] = result.data;
-          const parsedHeaders: string[] = result.meta.fields || [];
-
-          const expectedHeaders = [
-            'Subscriber_ID', 'Measure_Name', 'Submeasure', 'First_Name', 'Middle_Name',
-            'Last_Name', 'Medicare_ID', 'Medicaid_ID', 'Date_of_Birth', 'Sex',
-            'Provider_ID', 'Provider_TIN', 'Provider_Name', 'Numerator_Gap'
-          ];
-
-          // Validate header
-          if (JSON.stringify(parsedHeaders) !== JSON.stringify(expectedHeaders)) {
-            alert("File header mismatch.");
-            this.isUpload = false;
-            return;
-          }
-
-          // Build array for inserting
-          const insertDataArray: any[] = [];
-
-          rows.forEach((row: any) => {
-            if (!row || Object.keys(row).length === 0) return;
-
-            if (row.Date_of_Birth) {
-              row.Date_of_Birth = this.cleanDate(row.Date_of_Birth);
-            }
-
-            row.INSERT_SESSION_ID = this.sessionId;
-            insertDataArray.push(row);
-          });
-
-
-          // ------------------ Batch processing ------------------
-          await this.uploadInBatches(insertDataArray);
-
-          // ------------------ Fetch temp members ------------------
-          await this.loadTempRecords();
-
-          // Reset form + file
-          this.processQualityFormGroup.reset();
-          this.selectedFile = null;
-          this.resetFile();
-          this.isUpload = false;
-        },
-
-        error: (err: any) => {
-          console.error("CSV Parse Error:", err);
-          alert("Unable to read CSV file.");
-          this.isUpload = false;
-        }
+      const insertDataArray = parsed.rows.map((row: any) => {
+      if (row.Date_of_Birth) {
+        row.Date_of_Birth = this.cleanDate(row.Date_of_Birth);
+      }
+        row.INSERT_SESSION_ID = this.sessionId;
+        return row;
       });
 
+      // ------------------ Batch processing ------------------
+      await this.uploadInBatches(insertDataArray);
+
+      // ------------------ Fetch temp records ------------------
+      await this.loadTempRecords();
+
+      // Reset form + file
+      this.processQualityFormGroup.reset();
+      this.selectedFile = null;
+      this.resetFile();
+
     } catch (error) {
-      console.error("Unexpected Error:", error);
+      console.error("CSV upload failed:", error);
       alert("Unexpected error while processing quality gaps file.");
+    } finally {
       this.isUpload = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -238,6 +235,10 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
 
   async processQualityGaps(): Promise<void> {
     if (!this.sessionId) return;
+
+    if (!(await confirmProcessImport(this.dialog, 'quality gaps', this.totalRecords, this.error_count))) {
+      return;
+    }
 
     this.isProcessing = true;
     try {
@@ -267,7 +268,6 @@ export class QualitygapsFile implements AfterViewInit, OnInit {
     for (let i = 0; i < batches.length; i++) {
       try {
         await this.insertTemptable(batches[i]);
-        console.log(`✅ Batch ${i + 1}/${batches.length} completed.`);
       } catch (err) {
         console.error(`❌ Batch ${i + 1} failed`, err);
         throw err;

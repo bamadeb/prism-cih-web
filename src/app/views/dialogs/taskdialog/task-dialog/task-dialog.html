@@ -32,12 +32,14 @@
         <div class="d-flex gap-3 task-fields-row">
           <mat-form-field appearance="outline" class="task-field">
             <mat-label>Task Date</mat-label>
-            <input matInput [matDatepicker]="dp" formControlName="task_date" readonly>
+            <input matInput [matDatepicker]="dp" [min]="isEditMode ? null : today" formControlName="task_date" readonly>
             <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
             <mat-datepicker #dp></mat-datepicker>
-            <mat-error *ngIf="addTaskFormGroup.get('task_date')?.touched &&
-                            addTaskFormGroup.get('task_date')?.invalid">
+            <mat-error *ngIf="addTaskFormGroup.get('task_date')?.hasError('required')">
             Task date required
+          </mat-error>
+            <mat-error *ngIf="addTaskFormGroup.get('task_date')?.hasError('pastDate') || addTaskFormGroup.get('task_date')?.hasError('matDatepickerMin')">
+            Task date cannot be in the past
           </mat-error>
           </mat-form-field>
 
@@ -71,7 +73,11 @@
         <!-- NOTE -->
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Comment</mat-label>
-          <textarea matInput rows="2" formControlName="task_action_note" style="text-transform: none;"></textarea>
+          <textarea matInput rows="2" formControlName="task_action_note" [attr.maxlength]="noteMax" style="text-transform: none;"></textarea>
+          <mat-hint align="end">{{ addTaskFormGroup.get('task_action_note')?.value?.length || 0 }} / {{ noteMax }}</mat-hint>
+          <mat-error *ngIf="addTaskFormGroup.get('task_action_note')?.hasError('maxlength')">
+            Comment must be {{ noteMax }} characters or fewer
+          </mat-error>
         </mat-form-field>
 
         <!-- BUTTON -->

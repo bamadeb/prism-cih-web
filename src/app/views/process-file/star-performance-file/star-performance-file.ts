@@ -30,14 +30,21 @@ import { ConfigService } from '../../../services/api.service';
 import { HeaderService } from '../../../services/header.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
-import * as Papa from 'papaparse';
+import { CsvRowError, MAX_CSV_ROWS, checkCsvFile, parseCsv } from '../../../utilities/csv-import';
+import { MatDialog } from '@angular/material/dialog';
+import { confirmProcessImport } from '../../../utilities/confirm';
+import { CsvErrorsComponent } from '../../../shared/components/csv-errors/csv-errors.component';
 const TABLE = 'MEM_STAR_PERFORMANCE_REPORT_DATA_TEMP';
+
+const REQUIRED_STAR_COLUMNS = ['Measure Name', 'Statistics'];
+// Same pattern the importer has always used to spot measure-date columns.
+const DATE_COLUMN_RE = /\d{1,2}\/\d{1,2}\/\d{4}/;
 
 @Component({
   selector: 'app-star-performance-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
+  imports: [CsvErrorsComponent, MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -76,9 +83,11 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
   isUpload = false;
   isProcessing = false;
   isLoading = false;
+  csvErrors: CsvRowError[] = [];
   processLogList: any[] = [];
 
   constructor(
+    private readonly dialog: MatDialog,
     private readonly apiService: ConfigService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
@@ -117,16 +126,21 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
     };
   }
 
+  // Checked by extension: browsers report .csv with different MIME types
+  // (Windows with Excel installed uses application/vnd.ms-excel).
   onFileSelect(event: any): void {
-    const file = event.target.files[0];    
-    if (file?.type === 'text/csv') {
+    const file: File | undefined = event.target.files?.[0];
+    this.csvErrors = [];
+    if (file && file.name.toLowerCase().endsWith('.csv')) {
       this.selectedFile = file;
       this.processMembersFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
       this.processMembersFormGroup.get('file')?.reset();
-      alert('Only .csv files are allowed.');
+      if (this.fileInput) this.fileInput.nativeElement.value = '';
+      if (file) this.csvErrors = [{ row: 0, message: 'Only .csv files are allowed.' }];
     }
+    this.cdr.markForCheck();
   }
 
   private resetFile(): void {
@@ -150,96 +164,116 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
     this.processLogList = [];
 
     const file = this.selectedFile;
-    const ext = file.name.split('.').pop()?.toLowerCase();
+    this.csvErrors = [];
 
-    if (ext !== 'csv') {
-      alert('Only .csv files are allowed.');
+    const fileError = checkCsvFile(file);
+    if (fileError) {
+      this.csvErrors = [{ row: 0, message: fileError }];
       this.resetFile();
       this.isUpload = false;
+      this.cdr.markForCheck();
       return;
     }
 
     try {
+      const parsed = await parseCsv(file);
+
+      // Columns are dynamic (one per measure date), so check the fixed ones
+      // and that at least one date column exists.
+      const dateColumns = parsed.fields.filter(f => DATE_COLUMN_RE.test(f));
+      const missing = REQUIRED_STAR_COLUMNS.filter(c => !parsed.fields.includes(c));
+      if (missing.length || !dateColumns.length) {
+        alert(`File header mismatch. Expected columns ${REQUIRED_STAR_COLUMNS.join(', ')} and at least one date column (M/D/YYYY).`);
+        return;
+      }
+
+      const errors: CsvRowError[] = [...parsed.errors];
+      if (!parsed.rows.length) {
+        errors.push({ row: 0, message: 'The file has no data rows.' });
+      } else if (parsed.rows.length > MAX_CSV_ROWS) {
+        errors.push({ row: 0, message: `The file has ${parsed.rows.length} rows; the maximum is ${MAX_CSV_ROWS}.` });
+      }
+
       this.sessionId = Math.floor(Date.now() / 1000).toString();
 
-      // Parse CSV using PapaParse
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: false,
+      // Build array for inserting
+      const insertDataArray: any[] = [];
+      const seen = new Map<string, number>();
+      let lastMeasureName = '';
+      let lastMeasureCode = '';
+      parsed.rows.forEach((row: any, i: number) => {
+        const line = i + 2;
 
-        complete: async (result) => {
-          const rows: any[] = result.data;
-
-          // Build array for inserting
-          const insertDataArray: any[] = [];
-          let lastMeasureName = '';
-          let lastMeasureCode = '';
-          rows.forEach((row: any) => {
-
-          let measureName = (row['Measure Name'] || '').trim();
-          let measureCode = (row['Measure Name_1'] || row['Measure'] || '').trim();
-          const statistics = (row['Statistics'] || '').trim();
-            if (statistics !== 'Numerator' && statistics !== 'Denominator') {
-              return; // ignore Pct or any other values
-            }
-          // ✅ Use previous value if blank
-          if (!measureName) measureName = lastMeasureName;
-          if (!measureCode) measureCode = lastMeasureCode;
-
-          // store current as previous
-          lastMeasureName = measureName;
-          lastMeasureCode = measureCode;
-            Object.keys(row).forEach((key) => {
-
-              // detect date columns
-              if (/\d{1,2}\/\d{1,2}\/\d{4}/.test(key)) {
-
-                const value = row[key];
-
-                if (value !== '' && value !== null && value !== undefined) {
-
-                  insertDataArray.push({
-                    Measure_Name: measureName,
-                    Measure_Code: measureCode,
-                    Statistics: statistics,
-                    Measure_Date: this.cleanDate(key),
-                    Measure_Value: value,
-                    INSERT_SESSION_ID: this.sessionId
-                  });
-
-                }
-              }
-
-            });
-
-          });
-
-          console.log("Insert Data:", insertDataArray);
-          // ------------------ Batch processing ------------------
-          await this.uploadInBatches(insertDataArray);
-
-          // ------------------ Fetch temp members ------------------
-          await this.loadTempStarPerformance();
-
-          // Reset form + file
-          this.processMembersFormGroup.reset();
-          this.selectedFile = null;
-          this.resetFile();
-          this.isUpload = false;
-        },
-
-        error: (err: any) => {
-          console.error("CSV Parse Error:", err);
-          alert("Unable to read CSV file.");
-          this.isUpload = false;
+        let measureName = (row['Measure Name'] || '').trim();
+        let measureCode = (row['Measure Name_1'] || row['Measure'] || '').trim();
+        const statistics = (row['Statistics'] || '').trim();
+        if (statistics !== 'Numerator' && statistics !== 'Denominator') {
+          return; // ignore Pct or any other values
         }
+        // ✅ Use previous value if blank
+        if (!measureName) measureName = lastMeasureName;
+        if (!measureCode) measureCode = lastMeasureCode;
+
+        // store current as previous
+        lastMeasureName = measureName;
+        lastMeasureCode = measureCode;
+
+        if (!measureName) {
+          errors.push({ row: line, message: 'Measure Name is required.' });
+        }
+
+        dateColumns.forEach((key) => {
+          // Counts may use thousands separators ("1,234").
+          const value = String(row[key] ?? '').trim().replace(/,/g, '');
+          if (value === '') return;
+
+          if (!/^-?\d+(\.\d+)?$/.test(value)) {
+            errors.push({ row: line, message: `${key} "${value}" is not a number.` });
+            return;
+          }
+
+          const dupKey = `${measureName}|${measureCode}|${statistics}|${key}`;
+          const firstLine = seen.get(dupKey);
+          if (firstLine !== undefined) {
+            errors.push({ row: line, message: `${measureName} ${statistics} for ${key} duplicates line ${firstLine}.` });
+            return;
+          }
+          seen.set(dupKey, line);
+
+          insertDataArray.push({
+            Measure_Name: measureName,
+            Measure_Code: measureCode,
+            Statistics: statistics,
+            Measure_Date: this.cleanDate(key),
+            Measure_Value: value,
+            INSERT_SESSION_ID: this.sessionId
+          });
+        });
       });
 
+      if (errors.length) {
+        this.csvErrors = errors;
+        this.resetFile();
+        return;
+      }
+
+      // ------------------ Batch processing ------------------
+      await this.uploadInBatches(insertDataArray);
+
+      // ------------------ Fetch temp members ------------------
+      await this.loadTempStarPerformance();
+
+      // Reset form + file
+      this.processMembersFormGroup.reset();
+      this.selectedFile = null;
+      this.resetFile();
+
     } catch (error) {
-      console.error("Unexpected Error:", error);
-      alert("Unexpected error while processing quality gaps file.");
+      console.error("CSV upload failed:", error);
+      alert("Unexpected error while processing star performance file.");
+    } finally {
       this.isUpload = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -247,6 +281,10 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
 
   async processQualityGaps(): Promise<void> {
     if (!this.sessionId) return;
+
+    if (!(await confirmProcessImport(this.dialog, 'star performance', this.totalRecords, this.error_count))) {
+      return;
+    }
 
     this.isProcessing = true;
     try {
@@ -276,7 +314,6 @@ export class StarPerformanceFile implements OnInit , AfterViewInit {
     for (let i = 0; i < batches.length; i++) {
       try {
         await this.insertTemptable(batches[i]);
-        console.log(`✅ Batch ${i + 1}/${batches.length} completed.`);
       } catch (err) {
         console.error(`❌ Batch ${i + 1} failed`, err);
         throw err;

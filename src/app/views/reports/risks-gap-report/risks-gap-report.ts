@@ -1,4 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { csvCell } from '../../../utilities/csv-export';
+import { MatDialog } from '@angular/material/dialog';
+import { confirmAction } from '../../../utilities/confirm';
+import { DateRangeErrorMatcher, reportDateRangeValidator, REPORT_MAX_RANGE_DAYS } from '../../../validators/validators';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConfigService } from '../../../services/api.service';
 import { Title } from '@angular/platform-browser';
@@ -39,6 +43,8 @@ import { UserDataService } from '../../../services/user-data-service';
   styleUrl: './risks-gap-report.css',
 })
 export class RisksGapReport implements AfterViewInit, OnInit {
+  readonly maxRangeDays = REPORT_MAX_RANGE_DAYS;
+  readonly dateRangeMatcher = new DateRangeErrorMatcher();
 
 
   riskGapsFormGroup!: FormGroup;
@@ -93,8 +99,6 @@ export class RisksGapReport implements AfterViewInit, OnInit {
     'SNOMED',
     'ICDDX',
     'ICDDX10',
-    'ICDPx',
-    'ICDPx10',
     'RxNorm',
     'CVX',
     'Modifier',
@@ -102,12 +106,15 @@ export class RisksGapReport implements AfterViewInit, OnInit {
     'RxProviderFlag',
     'PCPFlag',
     'QuantityDispensed',
+    'ICDPx',
+    'ICDPx10',
     'SuppSource'
   ];
   displayedColumns: string[] = [];
 
 
   constructor(
+    private readonly dialog: MatDialog,
     private readonly apiService: ConfigService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
@@ -126,7 +133,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required]
     },
-      { validators: this.dateRangeValidator } // ✅ custom validator
+      { validators: reportDateRangeValidator() } // ✅ custom validator
     );
   }
 
@@ -275,19 +282,6 @@ export class RisksGapReport implements AfterViewInit, OnInit {
   }
 
 
-  dateRangeValidator(control: AbstractControl): ValidationErrors | null {
-    const start = control.get('start_date')?.value;
-    const end = control.get('end_date')?.value;
-
-    if (!start || !end) return null;
-
-    const startDate = new Date(start).getTime();
-    const endDate = new Date(end).getTime();
-
-    return endDate >= startDate
-      ? null
-      : { dateRangeInvalid: true };
-  }
 
 
 
@@ -357,11 +351,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           item.Provider_Group_Name ?? '',
           item.Source ?? ''
         ]
-          .map(value =>
-            `"${(value ?? '')
-              .toString()
-              .replace(/"/g, '""')}"`
-          )
+          .map(csvCell)
           .join(',')
       );
     }
@@ -386,14 +376,14 @@ export class RisksGapReport implements AfterViewInit, OnInit {
         'LOINCResult',
         'SNOMED',
         'ICDDX10',
-        'ICDPx',
-        'ICDPx10',
         'RxNorm',
         'CVX',
         'Modifier',
         'RxProviderFlag',
         'PCPFlag',
         'QuantityDispensed',
+        'ICDPx',
+        'ICDPx10',
         'SuppSource',
         'Result'
       ];
@@ -414,22 +404,24 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           item.LOINCAnswer ?? '',
           item.SNOMED ?? '',
           item.ICDDX10 ?? '',
-          item.ICDPx ?? '',
-          item.ICDPx10 ?? '',
           item.RxNorm ?? '',
           item.CVX ?? '',
           item.Modifier ?? '',
           this.formatYN(item.RxProviderFlag),
           this.formatYN(item.PCPFlag),
           item.QuantityDispensed ?? '',
+          item.ICDPx ?? '',
+          item.ICDPx10 ?? '',
           item.SuppSource ?? '',
           item.Observation_Result ?? ''
         ]
-          .map(value => {
+          .map((value, index) => {
             const s = (value ?? '').toString();
-            // Keep Excel text formulas (="...") unquoted so Excel evaluates them
-            if (/^="[^"]*"$/.test(s)) return s;
-            return `"${s.replace(/"/g, '""')}"`;
+            // DOS / DOSThru (columns 3 and 4) are our own ="YYYY-MM-DD" text
+            // formulas -- keep them unquoted so Excel shows the date as text.
+            // Every other cell is user data and gets formula-escaped.
+            if ((index === 3 || index === 4) && /^="[^"]*"$/.test(s)) return s;
+            return csvCell(s);
           })
           .join(',')
       );
@@ -558,14 +550,14 @@ export class RisksGapReport implements AfterViewInit, OnInit {
           'LOINCResult',
           'SNOMED',
           'ICDDX10',
-          'ICDPx',
-          'ICDPx10',
           'RxNorm',
           'CVX',
           'Modifier',
           'RxProviderFlag',
           'PCPFlag',
           'QuantityDispensed',
+          'ICDPx',
+          'ICDPx10',
           'SuppSource',
           'Result'
         ];
@@ -586,14 +578,14 @@ export class RisksGapReport implements AfterViewInit, OnInit {
             item.LOINCAnswer ?? '',
             item.SNOMED ?? '',
             item.ICDDX10 ?? '',
-            item.ICDPx ?? '',
-            item.ICDPx10 ?? '',
             item.RxNorm ?? '',
             item.CVX ?? '',
             item.Modifier ?? '',
             this.formatYN(item.RxProviderFlag),
             this.formatYN(item.PCPFlag),
             item.QuantityDispensed ?? '',
+            item.ICDPx ?? '',
+            item.ICDPx10 ?? '',
             item.SuppSource ?? '',
             item.Observation_Result ?? ''
           ]
@@ -661,8 +653,11 @@ export class RisksGapReport implements AfterViewInit, OnInit {
   async removeSelected(): Promise<void> {
     if (!this.selection.hasValue()) return;
 
-  const confirmed = confirm(
-    `Remove ${this.selection.selected.length} selected record(s)?`
+  const confirmed = await confirmAction(
+    this.dialog,
+    'Remove records',
+    `Remove ${this.selection.selected.length} selected record(s)? This cannot be undone.`,
+    'Remove'
   );
   if (!confirmed) return;
 

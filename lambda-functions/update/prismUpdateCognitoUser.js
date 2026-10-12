@@ -39,8 +39,9 @@ export const handler = async (event) => {
   // Finding 3.5.1-adjacent: this endpoint could reset ANY user's password or
   // rename them given just a username, with no check that the caller is an
   // admin or the account owner -- any logged-in caller could take over any
-  // other account, including an admin's. Admin-only, same pattern as
-  // prismCreateCognitoUser.js.
+  // other account, including an admin's. Now: Admin for any account (same
+  // pattern as prismCreateCognitoUser.js), or the account owner for their own
+  // password only (checked once the body is parsed below).
   const claims = event?.requestContext?.authorizer?.claims || {};
   const callerSub = claims.sub;
   if (!callerSub) {
@@ -53,9 +54,10 @@ export const handler = async (event) => {
       .input('cognito_username', sql.VarChar, callerSub)
       .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
     const caller = callerLookup.recordset[0];
-    if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
+    if (!caller) {
       return buildResponse(403, { message: "Forbidden" }, event);
     }
+    const isAdmin = Number(caller.role_id) === ADMIN_ROLE_ID;
 
     // CONFIRMED VIA LIVE TESTING (CloudWatch log showed "username is
     // required" even though the caller sent a username): this route was on a
@@ -70,6 +72,17 @@ export const handler = async (event) => {
 
     if (!username) {
       return buildResponse(400, { message: "username is required" }, event);
+    }
+
+    // Admins may update any account. Anyone else may only change their OWN
+    // password (the change-password page, incl. expired passwords) -- MEM_USERS
+    // stores the Cognito username as cognito_username, which is the caller's sub.
+    const isSelf = String(username) === String(callerSub);
+    if (!isAdmin && !isSelf) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
+    if (!isAdmin && attributes && typeof attributes === "object" && Object.keys(attributes).length > 0) {
+      return buildResponse(403, { message: "Forbidden" }, event);
     }
 
     // -----------------------------

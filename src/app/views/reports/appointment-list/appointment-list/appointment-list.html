@@ -20,7 +20,7 @@
 
       <mat-form-field appearance="outline">
         <mat-label>END DATE</mat-label>
-        <input matInput [matDatepicker]="endPicker" formControlName="end_date" readonly>
+        <input matInput [matDatepicker]="endPicker" formControlName="end_date" [errorStateMatcher]="dateRangeMatcher" readonly>
         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
         <mat-error *ngIf="appListFormGroup.get('end_date')?.hasError('required')">
@@ -30,6 +30,7 @@
       <mat-error *ngIf="appListFormGroup.hasError('dateRangeInvalid') && appListFormGroup.get('end_date')?.touched">
         End Date must be after Start Date
       </mat-error>
+<mat-error *ngIf="appListFormGroup.hasError('dateRangeTooLong')">Date range cannot exceed {{ maxRangeDays }} days</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" style="min-width:220px;">
@@ -42,7 +43,7 @@
           </mat-select>
       </mat-form-field>
 
-          <button mat-raised-button color="primary" [disabled]="appListFormGroup.invalid" (click)="applyFilter()" class="search-btn">
+          <button mat-raised-button color="primary" type="submit" [disabled]="appListFormGroup.invalid" class="search-btn">
           @if (!isLoading) {
                 SEARCH
               } @else {

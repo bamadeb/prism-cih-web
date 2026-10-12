@@ -1,3 +1,5 @@
+import { csvCell } from '../../../../utilities/csv-export';
+import { DateRangeErrorMatcher, reportDateRangeValidator, REPORT_MAX_RANGE_DAYS } from '../../../../validators/validators';
 import { ChangeDetectorRef,
   Component,
   OnInit,
@@ -48,6 +50,8 @@ import { MatIcon } from "@angular/material/icon";
   styleUrl: './outreach-activity.css',
 })
 export class OutreachActivity implements OnInit, AfterViewInit {
+  readonly maxRangeDays = REPORT_MAX_RANGE_DAYS;
+  readonly dateRangeMatcher = new DateRangeErrorMatcher();
   displayedColumns: string[] = [
       'medicaid_id',
       'Panel_Name',
@@ -112,7 +116,7 @@ roles: any[] = [];
       action_status: [null],
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required],
-    },{ validators: this.dateRangeValidator });
+    },{ validators: reportDateRangeValidator() });
   }
 
   async ngOnInit() {
@@ -143,10 +147,8 @@ roles: any[] = [];
       end_date: this.formatYMD(this.actionLogFormGroup.value.end_date),
     };
 
-    console.log('Filter payload:', payload); // Debug log
 
     const result = await this.apiService.getActionlogData<any>(payload);
-    console.log('API result:', result); // Debug log
     const rawData = result?.data ?? [];
     this.totalCount = rawData.length;
 
@@ -267,10 +269,7 @@ async loadLogreport() {
       return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
     };
 
-    const escapeCsv = (value: any): string => {
-      if (value === null || value === undefined) return '""';
-      return `"${value.toString().replace(/"/g, '""')}"`; // escape quotes
-    };
+    const escapeCsv = csvCell; // quotes + formula-injection safe
 
     const rows = this.dataSource.data.map(item => [
       item.medicaid_id ?? '',
@@ -305,16 +304,6 @@ async loadLogreport() {
 }
 
 
-dateRangeValidator(control: AbstractControl) {
-  const start = control.get('start_date')?.value;
-  const end = control.get('end_date')?.value;
-
-  if (!start || !end) return null; // skip if not set yet
-
-  return new Date(end).getTime() >= new Date(start).getTime()
-    ? null
-    : { dateRangeInvalid: true }; // error key
-}
 
 
   formatYMD(date:Date) {

@@ -14,10 +14,13 @@
 
  <form [formGroup]="noteForm">
   <mat-form-field appearance="outline"  style="width: 400px;">
-    <mat-label>NOTE</mat-label>  <input matInput formControlName="note">
+    <mat-label>NOTE</mat-label>  <input matInput formControlName="note" [attr.maxlength]="noteMax">
 
-    <mat-error *ngIf="noteForm.get('note')?.invalid">
+    <mat-error *ngIf="noteForm.get('note')?.hasError('required') || noteForm.get('note')?.hasError('whitespace')">
       Note is required
+    </mat-error>
+    <mat-error *ngIf="noteForm.get('note')?.hasError('maxlength')">
+      Note must be {{ noteMax }} characters or fewer
     </mat-error>
   </mat-form-field>
 </form>

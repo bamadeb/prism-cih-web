@@ -8,7 +8,7 @@ import {
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCard, MatCardContent } from "@angular/material/card";
-import { MatFormField, MatLabel, MatError } from "@angular/material/form-field";
+import { MatFormField, MatLabel, MatError, MatHint } from "@angular/material/form-field";
 import { MatSelect, MatOption } from "@angular/material/select";
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -27,7 +27,7 @@ import { MatProgressSpinner } from "@angular/material/progress-spinner";
   imports: [
     CommonModule, ReactiveFormsModule, MatDialogTitle, MatDialogContent, 
     MatButtonModule, MatCard, MatCardContent, MatFormField, MatLabel, MatSelect, MatOption,
-    MatError,
+    MatError, MatHint,
     MatProgressSpinner
 ],
   templateUrl: './assignplan-dialog.html',
@@ -49,8 +49,33 @@ export class AssignplanDialog implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
+  // Plans that can be assigned today: ACTIVE (status 0) and start <= today <= end.
+  // planList comes from the outreach SP; a field it doesn't return (or can't
+  // parse) is not used to exclude a plan.
+  activePlans: any[] = [];
+
   ngOnInit(): void {
     this.buildForm();
+    this.activePlans = this.filterActivePlans(this.data.planList ?? []);
+  }
+
+  private filterActivePlans(plans: any[]): any[] {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const parse = (v: any): Date | null => {
+      if (!v) return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
+    return plans.filter(p => {
+      if (p.status !== undefined && p.status !== null && Number(p.status) !== 0) return false;
+      const start = parse(p.start_date);
+      const end = parse(p.end_date);
+      if (start) { start.setHours(0, 0, 0, 0); if (start > today) return false; }
+      if (end) { end.setHours(0, 0, 0, 0); if (end < today) return false; }
+      return true;
+    });
   }
 
   private buildForm(): void {

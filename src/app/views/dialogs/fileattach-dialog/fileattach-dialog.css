@@ -120,3 +120,47 @@
     top:2px;
     right:0;
 }
+
+.file-rules {
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+}
+
+/* ---- Edit mode: which attachment is being changed ---- */
+.editing-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 0 12px;
+  padding: 10px 12px;
+  border-left: 4px solid #1e88e5;
+  border-radius: 6px;
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+.editing-text { flex: 1; min-width: 0; }
+.editing-label { font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+.editing-name {
+  font-size: 15px;
+  font-weight: 600;
+  word-break: break-all;
+}
+.editing-hint { font-size: 12px; color: #355a85; margin-top: 2px; }
+
+.attachments-table tbody tr.editing-row,
+.attachments-table tbody tr.editing-row:hover {
+  background: #e3f2fd;
+  box-shadow: inset 4px 0 0 #1e88e5;
+}
+.editing-tag {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #1e88e5;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  vertical-align: middle;
+}

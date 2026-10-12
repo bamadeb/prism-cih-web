@@ -1,3 +1,4 @@
+import { DateRangeErrorMatcher, reportDateRangeValidator, REPORT_MAX_RANGE_DAYS } from '../../../validators/validators';
 import { ChangeDetectorRef,
   Component,
   OnInit,
@@ -45,6 +46,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
   styleUrl: './system-log.css',
 })
 export class SystemLog implements OnInit, AfterViewInit {
+  readonly maxRangeDays = REPORT_MAX_RANGE_DAYS;
+  readonly dateRangeMatcher = new DateRangeErrorMatcher();
 
   displayedColumns: string[] = [
       'medicaid_id',
@@ -79,7 +82,7 @@ navigatorList: any[] = [];
       user_id: [null],
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required],
-    },{ validators: this.dateRangeValidator });
+    },{ validators: reportDateRangeValidator() });
   }
 
   async ngOnInit() {
@@ -154,16 +157,6 @@ async loadLogreport() {
 }
 
   ////////////////////// Helper ///////////////////////////
-  dateRangeValidator(control: AbstractControl) {
-    const start = control.get('start_date')?.value;
-    const end = control.get('end_date')?.value;
-
-    if (!start || !end) return null; // skip if not set yet
-
-    return new Date(end).getTime() >= new Date(start).getTime()
-      ? null
-      : { dateRangeInvalid: true }; // error key
-  }
 
   formatYMD(date:Date) {
     const d = new Date(date);

@@ -11,6 +11,7 @@ import { Title } from '@angular/platform-browser';
 
 import { ConfigService } from '../../services/api.service';
 import { UserDataService } from '../../services/user-data-service';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-change-password',
@@ -29,6 +30,7 @@ import { UserDataService } from '../../services/user-data-service';
 })
 export class ChangePassword implements OnInit, OnDestroy {
 
+  currentPassword = '';
   newPassword = '';
   confirmPassword = '';
   isLoading = false;
@@ -51,7 +53,8 @@ export class ChangePassword implements OnInit, OnDestroy {
     private readonly router: Router,
     private readonly titleService: Title,
     private readonly apiService: ConfigService,
-    private readonly userData: UserDataService
+    private readonly userData: UserDataService,
+    private readonly authService: Auth
   ) { }
 
   ngOnInit() {
@@ -85,12 +88,44 @@ export class ChangePassword implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.newPassword === this.currentPassword) {
+      this.errorMessage = 'New password must be different from your current password.';
+      return;
+    }
+
+    const personalInfoError = this.containsPersonalInfo(this.newPassword, user);
+    if (personalInfoError) {
+      this.errorMessage = personalInfoError;
+      return;
+    }
+
     this.isLoading = true;
 
     try {
+      if (!(await this.isCurrentPasswordCorrect(user.EmailID, this.currentPassword))) {
+        this.errorMessage = 'Current password is incorrect.';
+        return;
+      }
+
       const cognito_username = user.cognito_username;
       if (!cognito_username) {
         throw new Error('COGNITO_USERNAME_MISSING');
+      }
+
+      // Password-history check (no reuse of recent passwords) BEFORE Cognito is
+      // changed, so a rejected password leaves both Cognito and the DB as they were.
+      try {
+        await this.apiService.prismUserPasswordUpdate<any>({
+          ID: user.ID,
+          Password: this.newPassword,
+          check_only: true
+        });
+      } catch (err: any) {
+        if (err?.status === 409) {
+          this.errorMessage = err?.error?.message || 'You cannot reuse a recent password.';
+          return;
+        }
+        throw err;
       }
 
       const response = await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
@@ -110,8 +145,10 @@ export class ChangePassword implements OnInit, OnDestroy {
       });
 
     } catch (error: any) {
-      if (error?.error) {
+      if (typeof error?.error === 'string') {
         this.errorMessage = error.error;
+      } else if (error?.error?.message) {
+        this.errorMessage = error.error.message;
       } else if (error?.message) {
         this.errorMessage = error.message;
       } else {
@@ -127,8 +164,38 @@ export class ChangePassword implements OnInit, OnDestroy {
     if (!/[A-Z]/.test(password))     return 'Password must include at least one uppercase letter.';
     if (!/[a-z]/.test(password))     return 'Password must include at least one lowercase letter.';
     if (!/[0-9]/.test(password))     return 'Password must include at least one number.';
-    if (!/[!@#$%^&*]/.test(password)) return 'Password must include at least one special character (! @ # $ % ^ & *).';
+    // Same rule as the server (PASSWORD_POLICY_RE): any non-alphanumeric character.
+    if (!/[^A-Za-z0-9]/.test(password)) return 'Password must include at least one special character (e.g. ! @ # $ % ^ & *).';
     return null;
+  }
+
+  // prismAuthentication checks the password against the stored hash; 200 means
+  // it matched, 401 means it didn't. Other failures are passed up as errors.
+  private async isCurrentPasswordCorrect(email: string, password: string): Promise<boolean> {
+    try {
+      const res = await this.authService.login<any>({ username: email, password });
+      return Array.isArray(res?.data) && res.data.length > 0;
+    } catch (err: any) {
+      if (err?.status === 401) return false;
+      throw err;
+    }
+  }
+
+  // Rejects a password containing the user's first name, last name, or the
+  // part of their email before "@" (case-insensitive; parts under 3 chars ignored).
+  private containsPersonalInfo(password: string, user: any): string | null {
+    const lower = password.toLowerCase();
+    const parts = [
+      user.FistName,
+      user.LastName,
+      String(user.EmailID ?? '').split('@')[0]
+    ]
+      .map(p => String(p ?? '').trim().toLowerCase())
+      .filter(p => p.length >= 3);
+
+    return parts.some(p => lower.includes(p))
+      ? 'Password must not contain your name or email.'
+      : null;
   }
 
   clearError(): void {

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { escapeHtml } from '../utilities/html';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service';
@@ -38,6 +39,8 @@ export class CallListDialogService {
   // DIALOG CONTENT BUILDER
   // ============================
   private openDialog(row: any, callList: any[]): void {
+    // Every DB value in this HTML must go through escapeHtml(): the result is
+    // marked trusted below, so Angular will not sanitize it.
     const html = this.buildHtml(callList);
 
     const title = `CALL LIST - ${row.FIRST_NAME} ${row.LAST_NAME} (#${row.MEM_NO})`;
@@ -77,9 +80,9 @@ export class CallListDialogService {
               <tr>
                 <td>${i + 1}</td>
                 <td>${this.formatDate(q.action_date)}</td>
-                <td>${q.action_type ?? ''}</td>
-                <td>${q.action_result ?? ''}</td>
-                <td>${q.action_note ?? ''}</td>
+                <td>${escapeHtml(q.action_type)}</td>
+                <td>${escapeHtml(q.action_result)}</td>
+                <td>${escapeHtml(q.action_note)}</td>
               </tr>
             `).join('')}
           </tbody>

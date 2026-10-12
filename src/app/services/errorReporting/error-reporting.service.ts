@@ -25,7 +25,6 @@ export class ErrorReportingService {
   }
 
   getAllErrors(pageIndex: number, rowsPerPage: number): Promise<GetAllErrorReportsResponse> {
-    console.log('getting error reports...');
 
     const requestUrl = `${this.environmentService.endpointUrl()}/api/ErrorReport/index?pageIndex=${pageIndex}&rowsPerPage=${rowsPerPage}`;
     const headers: HttpHeaders = new  HttpHeaders( {'content-type': 'application/json'});

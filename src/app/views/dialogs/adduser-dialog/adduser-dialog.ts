@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ConfigService } from '../../../services/api.service';
 import { UserDataService } from '../../../services/user-data-service';
-import { EMAIL_MAX, EMAIL_RE, NAME_MAX, NameValidator } from '../../../validators/validators';
+import { EMAIL_MAX, EMAIL_RE, NAME_MAX, NameValidator, PasswordPolicyValidator } from '../../../validators/validators';
 import {
   UserRequest,
   UpdateUserRequest,
@@ -84,7 +84,7 @@ export class AdduserDialog implements OnInit {
       role: ['', Validators.required],
       department: ['', Validators.required],
       email: ['', [Validators.required, Validators.maxLength(EMAIL_MAX), Validators.pattern(EMAIL_RE)]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, PasswordPolicyValidator]],
       confirmPassword: ['', confirmPasswordValidator],
       status: ['', Validators.required]
     });
@@ -98,8 +98,8 @@ export class AdduserDialog implements OnInit {
 
     // 🔥 Make password optional in edit mode
     const passwordControl = this.addUserFormGroup.get('password');
-    passwordControl?.clearValidators(); // remove required & minlength
-    passwordControl?.setValidators([Validators.minLength(6)]); // optional but validate if typed
+    passwordControl?.clearValidators(); // remove required
+    passwordControl?.setValidators([PasswordPolicyValidator]); // optional but validate if typed
     passwordControl?.updateValueAndValidity();
 
     this.addUserFormGroup.patchValue({

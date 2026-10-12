@@ -1,4 +1,5 @@
-import { FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormControl, FormGroup, ValidatorFn, AbstractControl, ValidationErrors, FormGroupDirective, NgForm } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { ValidatorUtility } from '../services/validator.service';
 
 /**
@@ -41,8 +42,11 @@ export function CannotContainSpace(control: FormControl): { cannotContainSpace: 
     return null;
 }
 
-// Same rule as the server (prismCreateUser.js EMAIL_RE).
-export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Email format: local part of letters/digits/._%+- (no leading, trailing or
+// double dots), domain labels that don't start/end with '-', and a final
+// part of 2+ letters -- so 'name@gmail.c' or 'a@b' are rejected.
+// Same rule in validators.ts, prismCreateUser.js and prismCreateCognitoUser.js.
+export const EMAIL_RE = /^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
 export const NAME_MAX = 100;
 export const EMAIL_MAX = 150;
 // Letters (any language), spaces, hyphens and apostrophes; must start with a letter.
@@ -89,4 +93,68 @@ export function ZipValidator(control: AbstractControl): ValidationErrors | null 
     const value = String(control.value ?? '').trim();
     if (!value) return null;
     return /^\d{5}(-\d{4})?$/.test(value) ? null : { zip: true };
+}
+
+/** Default max length for free-text notes / reasons / comments. */
+export const NOTE_MAX = 500;
+
+/** Same limit as the server (prismLogdetailsbymedicaid MAX_RANGE_DAYS). */
+export const REPORT_MAX_RANGE_DAYS = 366;
+
+/**
+ * Group validator for report filters with start_date / end_date controls:
+ * end >= start (dateRangeInvalid), span <= maxDays (dateRangeTooLong) and,
+ * unless allowFuture, no date after today (futureDate).
+ */
+export function reportDateRangeValidator(
+    options: { maxDays?: number; allowFuture?: boolean } = {}
+): ValidatorFn {
+    const maxDays = options.maxDays ?? REPORT_MAX_RANGE_DAYS;
+    return (group: AbstractControl): ValidationErrors | null => {
+        const start = group.get('start_date')?.value;
+        const end = group.get('end_date')?.value;
+        if (!start || !end) return null;
+
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
+
+        if (endDate < startDate) return { dateRangeInvalid: true };
+
+        const days = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (days > maxDays) return { dateRangeTooLong: true };
+
+        if (!options.allowFuture) {
+            const endOfToday = new Date();
+            endOfToday.setHours(23, 59, 59, 999);
+            if (startDate > endOfToday || endDate > endOfToday) return { futureDate: true };
+        }
+        return null;
+    };
+}
+
+const DATE_RANGE_ERRORS = ['dateRangeInvalid', 'dateRangeTooLong', 'futureDate'];
+
+/**
+ * Put on the end_date input so reportDateRangeValidator's group-level errors
+ * show as that field's mat-error (a mat-error only renders when its own
+ * control is in an error state).
+ */
+export class DateRangeErrorMatcher implements ErrorStateMatcher {
+    isErrorState(control: FormControl | null, _form: FormGroupDirective | NgForm | null): boolean {
+        if (!control) return false;
+        const group = control.parent;
+        const groupError = !!group && DATE_RANGE_ERRORS.some(k => group.hasError(k));
+        return groupError || (control.invalid && (control.touched || control.dirty));
+    }
+}
+
+/** Same rule as the server's PASSWORD_POLICY_RE (prismCreateUser / prismUserPasswordUpdate). */
+export const PASSWORD_POLICY_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{15,}$/;
+
+/** 15+ characters with upper, lower, digit and special character. Empty = handled by `required`. */
+export function PasswordPolicyValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value) return null;
+    return PASSWORD_POLICY_RE.test(value) ? null : { passwordPolicy: true };
 }

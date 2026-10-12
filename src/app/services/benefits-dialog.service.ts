@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { escapeHtml } from '../utilities/html';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ConfigService } from './api.service';
@@ -64,13 +65,13 @@ export class BenefitsDialogService {
     return benefitsList.map(b => `
       <div style="margin-bottom:12px" class="txupper">
         <div style="font-weight:600">
-          ${this.escapeHtml(b.plan_name)}
-          (${b.start_date} - ${b.end_date})
+          ${escapeHtml(b.plan_name)}
+          (${escapeHtml(b.start_date)} - ${escapeHtml(b.end_date)})
         </div>
-          ${b.file_name ? `
+          ${/^https:\/\//i.test(b.file_name ?? '') ? `
           <ul>
             <li>
-              <a href="${this.escapeHtml(b.file_name)}"
+              <a href="${escapeHtml(b.file_name)}"
                 target="_blank"
                 rel="noopener noreferrer">
                 View Link
@@ -85,13 +86,5 @@ export class BenefitsDialogService {
   // ============================
   // HTML ESCAPER
   // ============================
-  private escapeHtml(text: string = ''): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 }
 

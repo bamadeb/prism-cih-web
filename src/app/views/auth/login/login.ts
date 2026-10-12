@@ -298,6 +298,13 @@ async setupQrCode() {
   }
   onOtpInput(value: string) {
     this.errorMessage = '';
+    // Digits only, leading zeros kept (the shared integer directives would
+    // strip them, which breaks codes like 012345).
+    const digits = (value ?? '').replace(/\D/g, '').slice(0, 6);
+    if (digits !== value) {
+      this.otp = digits;
+      value = digits;
+    }
     if (value.length === 6) {
       if (this.showQrScreen) {
         this.verifyFirstOtp();
@@ -351,6 +358,8 @@ async setupQrCode() {
       ID: user.ID,
       cognito_username: user.cognito_username,
       EmailID: user.EmailID,
+      FistName: user.FistName,
+      LastName: user.LastName,
       password_change_required: true
     });
     this.router.navigate(['/change-password']);

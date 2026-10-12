@@ -1,5 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { UserDataService } from '../../../services/user-data-service';
@@ -25,6 +27,10 @@ interface Attachment {
   attachment: string;
   status: number;
 }
+
+// Documents and images only -- no executables, scripts, HTML or archives.
+const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt', 'png', 'jpg', 'jpeg'];
+const MAX_FILE_SIZE_MB = 10;
 
 @Component({
   selector: 'app-fileattach-dialog',
@@ -53,6 +59,12 @@ export class FileattachDialog implements OnInit {
   currentId: number | null = null; 
   isAddMode = true; 
   isStatusOnlyUpdate = false;
+  /** The attachment row being edited (null = adding a new file). */
+  editingRow: Attachment | null = null;
+  fileError = '';
+  readonly acceptTypes = ALLOWED_EXTENSIONS.map(e => '.' + e).join(',');
+  readonly allowedTypesLabel = ALLOWED_EXTENSIONS.join(', ').toUpperCase();
+  readonly maxFileSizeMb = MAX_FILE_SIZE_MB;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -64,7 +76,8 @@ export class FileattachDialog implements OnInit {
     private readonly apiService: ConfigService,
     private readonly envService: AppEnvService,
     private readonly userData: UserDataService,
-    private readonly dialogRef: MatDialogRef<FileattachDialog>
+    private readonly dialogRef: MatDialogRef<FileattachDialog>,
+    private readonly dialog: MatDialog
   ) {
     
   }
@@ -79,8 +92,14 @@ export class FileattachDialog implements OnInit {
   }
 
   onFileSelected(event: Event): void {
-    const file = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    // Clear so choosing the same file again still fires (change) after a rejection.
+    input.value = '';
     if (!file) return;
+
+    this.fileError = this.validateFile(file);
+    if (this.fileError) return;
 
     this.setFileRequired(true); 
     this.selectedFile = file;
@@ -89,6 +108,22 @@ export class FileattachDialog implements OnInit {
 
   }
 
+
+  // The `accept` attribute is only a picker hint, so the extension and size
+  // are checked here too.
+  private validateFile(file: File): string {
+    const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return `File type not allowed. Allowed: ${this.allowedTypesLabel}.`;
+    }
+    if (file.size === 0) {
+      return 'The selected file is empty.';
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      return `File is larger than ${MAX_FILE_SIZE_MB} MB.`;
+    }
+    return '';
+  }
 
  upload(): void {
    if (this.isLoading) return;
@@ -182,14 +217,12 @@ private async updateStatusOnly(status: number): Promise<void> {
 
   private async loadAttachments(): Promise<void> {
   try {
-    console.log(this.data.type+'===='+this.data.entity.id);
     const res = await this.apiService.attachments<any>({
       type: this.data.type,
       type_id: this.data.entity.id
     });
 
     this.data.attachments = res.data;
-    console.log(this.data.attachments);
   } catch (err) {
     console.error('❌ Failed to load attachments', err);
   }
@@ -263,9 +296,10 @@ private async updateFileUrlToDB(
   // UI ACTIONS
   // ===============================
   edit(row: any): void {
-  
-    this.isAddMode = false; 
+
+    this.isAddMode = false;
     this.currentId = row.id;
+    this.editingRow = row;
     this.isStatusOnlyUpdate = true; 
     this.setFileRequired(false);
 
@@ -290,7 +324,17 @@ private async updateFileUrlToDB(
   }
 
   async remove(row: Attachment): Promise<void> {
-    if (!confirm('Are you sure you want to delete this attachment?')) return;
+    const confirmed = await firstValueFrom(
+      this.dialog.open(ConfirmDialogComponent, {
+        width: '420px',
+        data: {
+          title: 'Delete attachment',
+          message: `Delete "${this.fileDisplayName(row.attachment)}"? The file will be permanently removed.`,
+          confirmButtonName: 'Delete'
+        }
+      }).afterClosed()
+    );
+    if (!confirmed) return;
 
     this.isLoading = true;
 
@@ -298,6 +342,9 @@ private async updateFileUrlToDB(
       await this.apiService.deleteAttachment({ id: row.id });
       this.data.attachments =
         this.data.attachments.filter(a => a.id !== row.id);
+      if (this.currentId === row.id) {
+        this.resetForm();
+      }
     } catch (err) {
       console.error('❌ Delete failed', err);
     } finally {
@@ -313,8 +360,27 @@ private async updateFileUrlToDB(
     this.uploadForm.reset({ status: 0 });
     this.selectedFile = null;
     this.currentId = null;
+    this.editingRow = null;
     this.isAddMode = true;
     this.isStatusOnlyUpdate = false;
+    this.fileError = '';
+    this.setFileRequired(true);
+  }
+
+  /** Leave edit mode and go back to adding a new file (dialog stays open). */
+  cancelEdit(): void {
+    this.resetForm();
+  }
+
+  /**
+   * Readable name from a stored S3 URL: last path segment, URL-decoded, without
+   * the "<timestamp>-" prefix prismUploadplandocument adds to every key.
+   */
+  fileDisplayName(url: string | null | undefined): string {
+    if (!url) return '';
+    let name = String(url).split('?')[0].split('/').pop() || '';
+    try { name = decodeURIComponent(name); } catch { /* keep raw */ }
+    return name.replace(/^\d{10,}-/, '');
   }
 
   close(): void {

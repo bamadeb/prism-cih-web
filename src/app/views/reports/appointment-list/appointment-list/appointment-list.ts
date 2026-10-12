@@ -1,4 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { csvCell } from '../../../../utilities/csv-export';
+import { DateRangeErrorMatcher, reportDateRangeValidator, REPORT_MAX_RANGE_DAYS } from '../../../../validators/validators';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConfigService } from '../../../../services/api.service';
 import { Title } from '@angular/platform-browser';
@@ -38,6 +40,8 @@ interface AppointmentResponse {
 
 
 export class AppointmentList implements AfterViewInit,OnInit {
+  readonly maxRangeDays = REPORT_MAX_RANGE_DAYS;
+  readonly dateRangeMatcher = new DateRangeErrorMatcher();
 
   appListFormGroup!: FormGroup;
   isLoading = false;
@@ -80,7 +84,7 @@ export class AppointmentList implements AfterViewInit,OnInit {
       end_date: [today, Validators.required],
       vendor: ['']
     },
-      { validators: this.dateRangeValidator } // ✅ custom validator
+      { validators: reportDateRangeValidator({ allowFuture: true }) } // ✅ custom validator
     );
   }
 
@@ -188,19 +192,6 @@ export class AppointmentList implements AfterViewInit,OnInit {
 
 
 
-  dateRangeValidator(control: AbstractControl): ValidationErrors | null {
-    const start = control.get('start_date')?.value;
-    const end = control.get('end_date')?.value;
-
-    if (!start || !end) return null;
-
-    const startDate = new Date(start).getTime();
-    const endDate = new Date(end).getTime();
-
-    return endDate >= startDate
-      ? null
-      : { dateRangeInvalid: true };
-  }
 
 
 
@@ -232,10 +223,7 @@ export class AppointmentList implements AfterViewInit,OnInit {
       return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
     };
 
-    const escapeCsv = (value: any): string => {
-      if (value === null || value === undefined) return '""';
-      return `"${value.toString().replace(/"/g, '""')}"`; // escape quotes
-    };
+    const escapeCsv = csvCell; // quotes + formula-injection safe
 
     const rows = this.appointmentList.map(item => [
       item.medicaid_id ?? '',

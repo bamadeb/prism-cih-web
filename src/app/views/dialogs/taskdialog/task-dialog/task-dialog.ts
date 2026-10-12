@@ -15,6 +15,8 @@ import { UserDataService } from '../../../../services/user-data-service';
 import { LogRequest, TaskRequest,UpdateTaskRequest } from '../../../../models/requests/dashboardRequest';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatProgressSpinner } from "@angular/material/progress-spinner";
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { NOTE_MAX } from '../../../../validators/validators';
 
 
 
@@ -50,6 +52,8 @@ export class TaskDialog implements OnInit {
   navigatorList: any[] = [];
   loginid: any;
   dialog: any;
+  readonly noteMax = NOTE_MAX;
+  readonly today = new Date();
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -67,11 +71,21 @@ export class TaskDialog implements OnInit {
   private buildForm(): void {
     this.addTaskFormGroup = this.fb.group({
       task_next_panel_id: ['', Validators.required],
-      task_date: ['', Validators.required],
+      task_date: ['', [Validators.required, (c: AbstractControl) => this.notPastForNewTask(c)]],
       task_assign_to: ['', Validators.required],
       task_status: ['', Validators.required],
-      task_action_note: ['']
+      task_action_note: ['', Validators.maxLength(NOTE_MAX)]
     });
+  }
+
+  // A new task can't be scheduled in the past. Editing an existing task keeps
+  // its original date valid (it may legitimately be in the past by now).
+  private notPastForNewTask(control: AbstractControl): ValidationErrors | null {
+    if (this.isEditMode || !control.value) return null;
+    const date = new Date(control.value);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return date < startOfToday ? { pastDate: true } : null;
   }
 
   private loadDropdowns(): void {

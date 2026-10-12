@@ -30,14 +30,25 @@ import { ConfigService } from '../../../services/api.service';
 import { HeaderService } from '../../../services/header.service';
 import { UserDataService } from '../../../services/user-data-service';
 import { MemberFileRequest } from '../../../models/requests/memberFileRequest';
-import * as Papa from 'papaparse';
+import { CsvRowError, CsvRowRules, checkCsvFile, parseCsv, validateCsvRows } from '../../../utilities/csv-import';
+import { MatDialog } from '@angular/material/dialog';
+import { confirmProcessImport } from '../../../utilities/confirm';
+import { CsvErrorsComponent } from '../../../shared/components/csv-errors/csv-errors.component';
 const TABLE = 'MEM_RISK_GAP_TEMP';
+
+const FILE_HEADERS = ['PAT_ID', 'MBR_ID', 'PRODUCT_TYPE', 'HCC_CATEGORY', 'HCC_MODEL', 'STATUS',
+      'RELEVANT_DATE', 'DIAG_SOURCE', 'DIAG_CODE', 'DIAG_DESC', 'PROV_SPECIALTY'];
+// Row checks before upload: the record's key columns.
+const ROW_RULES: CsvRowRules = {
+  required: ['MBR_ID', 'DIAG_CODE'],
+  dates: ['RELEVANT_DATE']
+};
 
 @Component({
   selector: 'app-riskgaps-file',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
+  imports: [CsvErrorsComponent, MatCardModule, MatFormField, MatFormFieldModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule,
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
@@ -82,9 +93,11 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
   isUpload = false;
   isProcessing = false;
   isLoading = false;
+  csvErrors: CsvRowError[] = [];
   processLogList: any[] = [];
 
   constructor(
+    private readonly dialog: MatDialog,
     private readonly apiService: ConfigService,
     private readonly cdr: ChangeDetectorRef,
     private readonly fb: FormBuilder,
@@ -123,17 +136,21 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
     };
   }
 
+  // Checked by extension: browsers report .csv with different MIME types
+  // (Windows with Excel installed uses application/vnd.ms-excel).
   onFileSelect(event: any): void {
-    const file = event.target.files[0];
-    if (file?.type === 'text/csv') {
+    const file: File | undefined = event.target.files?.[0];
+    this.csvErrors = [];
+    if (file && file.name.toLowerCase().endsWith('.csv')) {
       this.selectedFile = file;
       this.processRiskFormGroup.patchValue({ file: file });
     } else {
       this.selectedFile = null;
       this.processRiskFormGroup.get('file')?.reset();
-      this.isUpload = false;
-      alert('Only .csv files are allowed.');
+      if (this.fileInput) this.fileInput.nativeElement.value = '';
+      if (file) this.csvErrors = [{ row: 0, message: 'Only .csv files are allowed.' }];
     }
+    this.cdr.markForCheck();
   }
 
   private resetFile(): void {
@@ -157,76 +174,59 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
     this.processLogList = [];
 
     const file = this.selectedFile;
-    const ext = file.name.split('.').pop()?.toLowerCase();
+    this.csvErrors = [];
 
-    if (ext !== 'csv') {
-      alert('Only .csv files are allowed.');
+    const fileError = checkCsvFile(file);
+    if (fileError) {
+      this.csvErrors = [{ row: 0, message: fileError }];
       this.resetFile();
       this.isUpload = false;
+      this.cdr.markForCheck();
       return;
     }
 
     try {
+      const parsed = await parseCsv(file);
+
+      if (JSON.stringify(parsed.fields) !== JSON.stringify(FILE_HEADERS)) {
+        alert("File header mismatch.");
+        return;
+      }
+
+      const errors = [...parsed.errors, ...validateCsvRows(parsed.rows, ROW_RULES)];
+      if (errors.length) {
+        this.csvErrors = errors;
+        this.resetFile();
+        return;
+      }
+
       this.sessionId = Math.floor(Date.now() / 1000).toString();
 
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: false,
-
-        complete: async (result) => {
-          const rows: any[] = result.data;
-          const parsedHeaders: string[] = result.meta.fields || [];
-
-          const expectedHeaders = [
-            'PAT_ID', 'MBR_ID', 'PRODUCT_TYPE', 'HCC_CATEGORY', 'HCC_MODEL', 'STATUS',
-            'RELEVANT_DATE', 'DIAG_SOURCE', 'DIAG_CODE', 'DIAG_DESC', 'PROV_SPECIALTY'
-          ];
-
-          // ✅ Header validation
-          if (JSON.stringify(parsedHeaders) !== JSON.stringify(expectedHeaders)) {
-            alert("File header mismatch.");
-            this.isUpload = false;
-            return;
-          }
-
-          const insertDataArray: any[] = [];
-
-          rows.forEach((row: any) => {
-            if (!row || Object.keys(row).length === 0) return;
-
-            if (row.RELEVANT_DATE) {
-              row.RELEVANT_DATE = this.cleanDate(row.RELEVANT_DATE);
-            }
-
-            row.INSERT_SESSION_ID = this.sessionId;
-            insertDataArray.push(row);
-          });
-
-          // ------------------ Batch processing ------------------
-          await this.uploadInBatches(insertDataArray);
-
-          // ------------------ Fetch temp members ------------------
-          await this.loadTempRiskGaps();
-
-          // Reset form + file
-          this.processRiskFormGroup.reset();
-          this.selectedFile = null;
-          this.resetFile();
-          this.isUpload = false;
-        },
-
-        error: (err) => {
-          console.error("CSV Parse Error:", err);
-          alert("Unable to read CSV file.");
-          this.isUpload = false;
-        }
+      const insertDataArray = parsed.rows.map((row: any) => {
+      if (row.RELEVANT_DATE) {
+        row.RELEVANT_DATE = this.cleanDate(row.RELEVANT_DATE);
+      }
+        row.INSERT_SESSION_ID = this.sessionId;
+        return row;
       });
 
+      // ------------------ Batch processing ------------------
+      await this.uploadInBatches(insertDataArray);
+
+      // ------------------ Fetch temp records ------------------
+      await this.loadTempRiskGaps();
+
+      // Reset form + file
+      this.processRiskFormGroup.reset();
+      this.selectedFile = null;
+      this.resetFile();
+
     } catch (error) {
-      console.error("Unexpected Error:", error);
+      console.error("CSV upload failed:", error);
       alert("Unexpected error while processing risk gaps file.");
+    } finally {
       this.isUpload = false;
+      this.cdr.markForCheck();
     }
   }
    
@@ -234,6 +234,10 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
 
   async processRiskGaps(): Promise<void> {
     if (!this.sessionId) return;
+
+    if (!(await confirmProcessImport(this.dialog, 'risk gaps', this.totalRecords, this.error_count))) {
+      return;
+    }
 
     this.isProcessing = true;
     try {
@@ -256,7 +260,6 @@ export class RiskgapsFile implements AfterViewInit, OnInit {
     for (let i = 0; i < batches.length; i++) {
       try {
         await this.insertTemptable(batches[i]);
-        console.log(`✅ Batch ${i + 1}/${batches.length} completed.`);
       } catch (err) {
         console.error(`❌ Batch ${i + 1} failed`, err);
         throw err;

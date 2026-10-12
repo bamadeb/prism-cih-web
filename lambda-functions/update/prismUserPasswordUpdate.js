@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 // Angular validator only enforces Validators.minLength(6), which doesn't
 // match its own hint. Enforcing the real policy here.
 const PASSWORD_POLICY_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{15,}$/;
+const ADMIN_ROLE_ID = 7;
 // var conn = require('/opt/config.json');
 // const { buildResponse, handleOptions } = require('/opt/responseHelper');
 // const config = {
@@ -36,20 +37,28 @@ exports.handler = async (event) => {
     return buildResponse(200, {}, event);
   }
 
-  // TODO(authorization): ID is taken directly from the request body with no
-  // check that the caller owns that ID (self-service password change) or is
-  // an admin performing this on someone's behalf. As written, any
-  // authenticated caller can pass any other user's ID and reset their
-  // password. Wire in a check here once the auth-claims shape reaching this
-  // Lambda is confirmed (e.g. event.requestContext.authorizer.claims).
+  // Authorization: ID comes from the request body, so the caller (verified
+  // Cognito sub -> MEM_USERS) must be that same user or an Admin -- otherwise
+  // any authenticated caller could reset anyone's password.
 
-  const body = JSON.parse(event.body || "{}");
+  const claims = event.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { message: "Unauthorized" }, event);
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch {
+    return buildResponse(400, { message: "Invalid JSON body" }, event);
+  }
   const {
     ID,
     Password
   } = body;
 
-  if (!ID) {
+  if (!ID || !/^\d+$/.test(String(ID))) {
     return buildResponse(400, { message: "ID is required" }, event);
   }
 
@@ -68,6 +77,20 @@ exports.handler = async (event) => {
 
   try {
     pool = await getDBConnection();
+
+    // Only the account owner (change-password page) or an Admin may set a
+    // user's password.
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
+    if (Number(caller.role_id) !== ADMIN_ROLE_ID && Number(caller.ID) !== Number(ID)) {
+      return buildResponse(403, { message: "Forbidden" }, event);
+    }
+
     const request = pool.request();
 
     // password_last_changed is set from the server's own clock (GETDATE())

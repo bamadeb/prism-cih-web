@@ -27,6 +27,12 @@ const { buildResponse, handleOptions } = require('/opt/responseHelper');
 //   return poolPromise;
 // }
 
+// Attachment owners the app uses (same values prismUploadplandocument.js
+// allows as directories). 'user' = user-creation requests: Admin only, same
+// rule as prismdeleteAttachment.js.
+const ALLOWED_TYPES = new Set(['plan', 'user']);
+const ADMIN_ROLE_ID = 7;
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return buildResponse(200, {}, event);
@@ -36,7 +42,18 @@ exports.handler = async (event) => {
   //event.type_id = '3';
   // const type = event.type;
   // const type_id = event.type_id;
-  const body = JSON.parse(event.body || "{}");
+  const claims = event.requestContext?.authorizer?.claims || {};
+  const callerSub = claims.sub;
+  if (!callerSub) {
+    return buildResponse(401, { message: 'Unauthorized' }, event);
+  }
+
+  let body;
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch {
+    return buildResponse(400, { message: 'Invalid JSON body' }, event);
+  }
   const type = body.type;        // e.g. "plan"
   const type_id = body.type_id;  // e.g. 3
 
@@ -47,9 +64,20 @@ exports.handler = async (event) => {
     // };
     return buildResponse(400, { message: 'type and type_id are required' }, event);
   }
+  if (!ALLOWED_TYPES.has(type)) {
+    return buildResponse(400, { message: 'Invalid type' }, event);
+  }
 
   try {
     const pool = await getDBConnection();
+
+    const callerLookup = await pool.request()
+      .input('cognito_username', sql.VarChar, callerSub)
+      .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+    const caller = callerLookup.recordset[0];
+    if (!caller || (type === 'user' && Number(caller.role_id) !== ADMIN_ROLE_ID)) {
+      return buildResponse(403, { message: 'Forbidden' }, event);
+    }
 
     const result = await pool
       .request()

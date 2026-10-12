@@ -44,3 +44,22 @@
   font-size: 14px;
   font-weight: 500;
 }
+/* The global styles.css collapses every field's subscript (error/hint) area
+   to 1px, so multi-line errors here overflowed onto the next row. In this
+   dialog, give the subscript room so a message pushes the next row down. */
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  height: auto !important;
+  min-height: 20px;
+}
+
+:host ::ng-deep .mat-mdc-form-field-error,
+:host ::ng-deep .mat-mdc-form-field-hint {
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+:host ::ng-deep .mat-mdc-form-field-error-wrapper,
+:host ::ng-deep .mat-mdc-form-field-hint-wrapper {
+  position: static;
+  padding: 2px 0 0 4px;
+}

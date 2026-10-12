@@ -27,7 +27,11 @@ const bcrypt = require('bcryptjs');
 //     return poolPromise;
 // }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Email format: local part of letters/digits/._%+- (no leading, trailing or
+// double dots), domain labels that don't start/end with '-', and a final
+// part of 2+ letters -- so 'name@gmail.c' or 'a@b' are rejected.
+// Same rule in validators.ts, prismCreateUser.js and prismCreateCognitoUser.js.
+const EMAIL_RE = /^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
 
 // Matches the policy the frontend's own password field displays as a hint
 // (adduser-dialog.html: "at least 15 characters long and include uppercase,
@@ -41,16 +45,41 @@ const PASSWORD_POLICY_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{1
 // STATUS select in adduser-dialog.html only offers these two values.
 const VALID_MEMBER_STATUS = new Set([0, 1]);
 
-exports.handler = async (event) => {
-    // TODO(authorization): this creates a real user account and currently
-    // has no check that the caller is an admin. Wire in a role check here
-    // once the auth-claims shape reaching this Lambda is confirmed (e.g.
-    // event.requestContext.authorizer.claims).
+const ADMIN_ROLE_ID = 7;
 
+exports.handler = async (event) => {
     if (event.httpMethod === "OPTIONS") {
         return buildResponse(200,{},event);
     }
-    const body = JSON.parse(event.body || "{}");
+
+    // Authorization: this creates a real user account (with any role_id,
+    // including Admin), so only an Admin may call it -- same check as
+    // prismCreateCognitoUser.js, which the Add User dialog calls first.
+    const claims = event.requestContext?.authorizer?.claims || {};
+    const callerSub = claims.sub;
+    if (!callerSub) {
+        return buildResponse(401, { data: 'Unauthorized' }, event);
+    }
+    try {
+        const authPool = await getDBConnection();
+        const callerLookup = await authPool.request()
+            .input('cognito_username', sql.VarChar, callerSub)
+            .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
+        const caller = callerLookup.recordset[0];
+        if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
+            return buildResponse(403, { data: 'Forbidden' }, event);
+        }
+    } catch (authErr) {
+        console.error('Authorization lookup failed:', authErr);
+        return buildResponse(500, { data: 'Internal Server Error' }, event);
+    }
+
+    let body;
+    try {
+        body = JSON.parse(event.body || "{}");
+    } catch {
+        return buildResponse(400, { data: 'Invalid JSON body' }, event);
+    }
     // Trimmed server-side too -- the frontend already trims firstName/lastName
     // before sending, but a direct call bypassing the UI wouldn't, and a
     // whitespace-only value (e.g. "   ") passes a plain truthy check.

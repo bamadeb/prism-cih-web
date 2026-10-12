@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { MatCardModule } from "@angular/material/card";
 import { ConfigService } from '../../../services/api.service';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,7 +38,8 @@ export class StarPerformance implements OnInit {
   measurementYear = new Date().getFullYear();
 
 
-  years = [2026,2025, 2024, 2023, 2022];
+  // Current year and the four before it.
+  years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
   
  
 availableTins: { VENDOR_NUM: string; LAST_NAME: string }[] = [];
@@ -51,8 +52,8 @@ currentYear: any;
   ) {     
      
     this.starPerformanceFormGroup = this.fb.group({      
-      year: [],
-      plan: ['AHC'],
+      year: [null, Validators.required],
+      plan: ['AHC', Validators.required],
       tins: [[]]     // multi-select
     });
   }
@@ -124,6 +125,11 @@ async loadVendors() {
 
 
 async applyFilter() {
+  if (this.starPerformanceFormGroup.invalid ||
+      !this.years.includes(Number(this.starPerformanceFormGroup.value.year))) {
+    this.starPerformanceFormGroup.markAllAsTouched();
+    return;
+  }
   const { year: selectedYear, plan, tins } = this.starPerformanceFormGroup.value;
   this.isLoading = true;
   try {

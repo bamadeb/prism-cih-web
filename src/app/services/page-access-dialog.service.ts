@@ -10,13 +10,15 @@ export class PageAccessDialogService {
   /** ---------------- ADD PAGE ACCESS ---------------- */
   addDialog(
     roles: any[],
-    pagelist: any[]
+    pagelist: any[],
+    existing: any[] = []
   ): MatDialogRef<AddpageAccess> {
 
     return this.openDialog({
       title: 'ADD PAGE ACCESS',
       roles,
       pagelist,
+      existing,
       isEditMode: false
     });
   }
@@ -25,7 +27,8 @@ export class PageAccessDialogService {
   editDialog(
     roles: any[],
     pagelist: any[],
-    list: any
+    list: any,
+    existing: any[] = []
   ): MatDialogRef<AddpageAccess> {
 
     return this.openDialog({
@@ -33,6 +36,7 @@ export class PageAccessDialogService {
       roles,
       pagelist,
       list,
+      existing,
       isEditMode: true
     });
   }

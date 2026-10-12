@@ -1,6 +1,8 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { UserDataService } from '../services/user-data-service';
 import { from, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 
@@ -12,11 +14,13 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   const auth = inject(AuthService);
+  const snackBar = inject(MatSnackBar);
+  const userData = inject(UserDataService);
 
-  return from(handle(req, next, auth));
+  return from(handle(req, next, auth, snackBar, userData));
 };
 
-async function handle(req: any, next: any, auth: AuthService) {
+async function handle(req: any, next: any, auth: AuthService, snackBar: MatSnackBar, userData: UserDataService) {
   // Refresh token if expired
   if (auth.isTokenExpired()) {
     await auth.refreshToken();
@@ -33,6 +37,9 @@ async function handle(req: any, next: any, auth: AuthService) {
     catchError((error) => {
       if (error.status === 401) {
         return from(refreshAndRetry(req, next, auth));
+      }
+      if (error.status === 403) {
+        notifyForbidden(snackBar, userData);
       }
       return throwError(() => error);
     })
@@ -54,4 +61,15 @@ async function refreshAndRetry(req: any, next: any, auth: AuthService) {
   });
 
   return next(newReq).toPromise();
+}
+
+// A Lambda refused the action for this user's role/ownership. The error is
+// still passed on so the page can react; this just makes sure the user sees
+// why. Skipped when nobody is logged in (e.g. the login page's own calls).
+function notifyForbidden(snackBar: MatSnackBar, userData: UserDataService): void {
+  if (!userData.getUser()) return;
+  snackBar.open('You do not have permission to perform this action.', 'Close', {
+    duration: 5000,
+    verticalPosition: 'top'
+  });
 }
