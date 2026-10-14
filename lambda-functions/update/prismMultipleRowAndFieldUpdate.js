@@ -1,39 +1,6 @@
 const { getDBConnection, sql } = require('/opt/dbConfig');
 const { buildResponse, handleOptions } = require('/opt/responseHelper');
-// const sql = require('mssql');
-// const conn = require('/opt/config.json');
-// const { buildResponse, handleOptions } = require('/opt/responseHelper');
-// const config = {
-//   user: conn.dbuser,
-//   password: conn.dbpassword,
-//   server: conn.dbhost,
-//   database: conn.dbname,
-//   port: 1433,
-//   options: {
-//     encrypt: true,
-//     trustServerCertificate: true
-//   },
-//   pool: {
-//     max: 20,
-//     min: 1,
-//     idleTimeoutMillis: 300000,
-//     acquireTimeoutMillis: 10000
-//   }
-// };
 
-// // Create pool outside handler
-// let connectionPoolPromise = sql.connect(config);
-
-// async function getDBConnection() {
-//   try {
-//     const pool = await connectionPoolPromise;
-//     return pool;
-//   } catch (err) {
-//     console.error("Reconnecting to SQL Server...", err.message);
-//     connectionPoolPromise = sql.connect(config);
-//     return await connectionPoolPromise;
-//   }
-// }
 // ✅ Only allow safe column name pattern
 function isValidColumnName(name) {
   return /^[a-zA-Z0-9_]+$/.test(name);
@@ -51,13 +18,27 @@ const ALLOWED_TABLES = {
   MEM_OUTREACH_MEMBERS: 'medicaid_id'
 };
 
-// Columns each table may set. MEM_OUTREACH_MEMBERS is the Transfer Member
-// dialog, which only reassigns the care coordinator.
+// Columns each table may set.
+//  - MEM_OUTREACH_MEMBERS: the Transfer Member dialog only reassigns the care
+//    coordinator, so restrict writes to that single column.
+//  - MEM_GAP_OBSERVATION_DATA / MEM_MEMBER_ACTION_FOLLOW_UP: these ARE edited
+//    by non-admins (the add-action gap/observation and action edit forms in
+//    add-action.ts), each writing ~many of the row's own columns. A fixed
+//    column allow-list here was both wrong ("no screen uses these") and
+//    brittle, so `null` now means "any syntactically-valid column, but gated
+//    by row ownership below" -- NOT "admin only". The security boundary for
+//    these two is MEMBER_OWNED_BY_ID: you may only update rows belonging to a
+//    member assigned to you.
 const ALLOWED_COLUMNS = {
   MEM_OUTREACH_MEMBERS: ['Care_Coordinator_id'],
-  MEM_GAP_OBSERVATION_DATA: null,       // no screen uses these two -> Admin only
+  MEM_GAP_OBSERVATION_DATA: null,
   MEM_MEMBER_ACTION_FOLLOW_UP: null
 };
+
+// Tables keyed by `id` whose rows carry a medicaid_id: a non-admin may only
+// update a row whose owning member -- resolved from the row in the DB, never
+// trusted from the request body -- is assigned to them.
+const MEMBER_OWNED_BY_ID = new Set(['MEM_GAP_OBSERVATION_DATA', 'MEM_MEMBER_ACTION_FOLLOW_UP']);
 
 const ADMIN_ROLE_ID = 7;
 const MAX_ROWS = 500;
@@ -123,8 +104,37 @@ exports.handler = async (event) => {
     }
     const isAdmin = Number(caller.role_id) === ADMIN_ROLE_ID;
 
-    if (!allowedColumns && !isAdmin) {
-      return buildResponse(403, { error: "Forbidden" }, event);
+    // Row-ownership gate for the member-data tables that non-admins legitimately
+    // edit (gap observations, member actions). The owning member is resolved
+    // from the row in the DB by its id -- never trusted from the request body --
+    // and must be assigned to the caller. This replaces the former blanket
+    // "null columns => admin only" gate, which wrongly blocked these forms.
+    if (!isAdmin && MEMBER_OWNED_BY_ID.has(table_name)) {
+      const allHaveValidId = updates.every(u => {
+        const v = u[id_field_name];
+        return v !== undefined && v !== null && /^\d+$/.test(String(v));
+      });
+      if (!allHaveValidId) {
+        return buildResponse(400, { error: "Each update must have a valid numeric id" }, event);
+      }
+      const ids = [...new Set(updates.map(u => Number(u[id_field_name])))];
+      const ownReq = pool.request();
+      const ph = ids.map((id, i) => { ownReq.input(`rid${i}`, sql.Int, id); return `@rid${i}`; });
+      const owned = await ownReq.query(
+        `SELECT t.[${id_field_name}] AS rid, o.Care_Coordinator_id AS cc
+           FROM [${table_name}] t
+           LEFT JOIN MEM_OUTREACH_MEMBERS o ON o.medicaid_id = t.medicaid_id
+          WHERE t.[${id_field_name}] IN (${ph.join(', ')})`);
+      const ownerById = new Map(
+        owned.recordset.map(r => [Number(r.rid), (r.cc === null || r.cc === undefined) ? null : Number(r.cc)])
+      );
+      // Every requested id must exist AND resolve to a member assigned to the
+      // caller; a missing id (get() === undefined) also fails this check.
+      for (const id of ids) {
+        if (ownerById.get(id) !== Number(caller.ID)) {
+          return buildResponse(403, { error: "Forbidden" }, event);
+        }
+      }
     }
 
     if (table_name === 'MEM_OUTREACH_MEMBERS') {
