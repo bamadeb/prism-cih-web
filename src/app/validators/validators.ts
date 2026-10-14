@@ -49,8 +49,9 @@ export function CannotContainSpace(control: FormControl): { cannotContainSpace: 
 export const EMAIL_RE = /^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
 export const NAME_MAX = 100;
 export const EMAIL_MAX = 150;
-// Letters (any language), spaces, hyphens and apostrophes; must start with a letter.
-const NAME_RE = /^\p{L}[\p{L} '-]*$/u;
+// Letters (any language), digits, spaces, periods, hyphens and apostrophes;
+// must start with a letter or digit. Symbols like * ( ) / = ; are rejected.
+const NAME_RE = /^[\p{L}\p{N}][\p{L}\p{N} .'-]*$/u;
 
 /**
  * Person name. Checks the trimmed value, so leading/trailing spaces are allowed

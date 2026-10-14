@@ -133,7 +133,7 @@ export class RisksGapReport implements AfterViewInit, OnInit {
       start_date: [thirtyDaysBefore, Validators.required],
       end_date: [today, Validators.required]
     },
-      { validators: reportDateRangeValidator() } // ✅ custom validator
+      { validators: reportDateRangeValidator({ allowFuture: true }) } // ✅ custom validator
     );
   }
 

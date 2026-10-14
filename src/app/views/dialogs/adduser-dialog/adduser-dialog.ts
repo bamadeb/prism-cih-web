@@ -124,6 +124,11 @@ export class AdduserDialog implements OnInit {
       this.addUserFormGroup.get('role')?.disable();
       this.addUserFormGroup.get('status')?.disable();
     }
+
+    // Existing data may not meet today's rules (e.g. an old name format).
+    // Show those messages right away so a disabled UPDATE button always has a
+    // visible reason. Password/confirm stay empty and valid (optional on edit).
+    this.addUserFormGroup.markAllAsTouched();
   }
 
 

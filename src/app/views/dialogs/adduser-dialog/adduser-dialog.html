@@ -17,7 +17,7 @@
             First name is required
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('namePattern')">
-            Letters, spaces, - or ' only
+            Letters, numbers, space . - ' only
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('firstName')?.hasError('maxlength')">
             Must be 100 characters or fewer
@@ -33,7 +33,7 @@
             Last name is required
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('namePattern')">
-            Letters, spaces, - or ' only
+            Letters, numbers, space . - ' only
           </mat-error>
           <mat-error *ngIf="addUserFormGroup.get('lastName')?.hasError('maxlength')">
             Must be 100 characters or fewer

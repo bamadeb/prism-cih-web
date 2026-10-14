@@ -45,7 +45,6 @@
         End Date must be after Start Date
       </mat-error>
 <mat-error *ngIf="riskGapsFormGroup.hasError('dateRangeTooLong')">Date range cannot exceed {{ maxRangeDays }} days</mat-error>
-<mat-error *ngIf="riskGapsFormGroup.hasError('futureDate')">Dates cannot be in the future</mat-error>
       </mat-form-field> 
           <button mat-raised-button color="primary" type="submit" [disabled]="riskGapsFormGroup.invalid">
           @if (!isLoading) {
