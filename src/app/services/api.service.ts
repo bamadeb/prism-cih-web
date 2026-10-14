@@ -630,6 +630,14 @@ async createCognitoUser(request: any): Promise<string> {
         'prismUpdateCognitoUser',
         cognitoPayload
       );
+      // On a non-proxy API Gateway integration a failure comes back as HTTP
+      // 200 carrying the Lambda's { statusCode, body } envelope, so it doesn't
+      // reject. Treat that as a failure here -- both callers (change-password
+      // and the admin edit dialog) save the DB password next, and doing that
+      // after a failed Cognito update leaves the two out of sync.
+      if (res?.statusCode !== undefined && res.statusCode !== 200) {
+        throw new Error('Failed to update Cognito user');
+      }
       return res;
     } catch (error: any) {
       const message =

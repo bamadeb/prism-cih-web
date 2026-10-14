@@ -36,10 +36,6 @@ const { buildResponse, handleOptions } = require('/opt/responseHelper');
 //     return await poolPromise;
 //   }
 // }
-// Finding 3.4.7: medicaid_id came straight from the client with no check
-// that the caller is that member's assigned care coordinator -- same gap as
-// its three siblings (prismUnSetMemberGapsStatus.js, prismUpdategapStatus.js,
-// prismUpdatequalityStatus.js), all fixed the same way. Admin bypasses.
 const ADMIN_ROLE_ID = 7;
 
 exports.handler = async (event) => {
@@ -51,14 +47,13 @@ exports.handler = async (event) => {
       return buildResponse(200,{},event);
     }
 
-    if (!medicaid_id) {
-      return buildResponse(400, { error: "medicaid_id is required" }, event);
-    }
-
+    // Finding: this is a WRITE endpoint (resets a quality/risk-gap status)
+    // for ANY medicaid_id with no ownership check. Admin bypasses; same
+    // pattern as prismUnSetgapStatus.js.
     const claims = event.requestContext?.authorizer?.claims || {};
     const callerSub = claims.sub;
     if (!callerSub) {
-      return buildResponse(401, { error: "Unauthorized" }, event);
+      return buildResponse(401, { error: 'Unauthorized' }, event);
     }
 
     const pool = await getDBConnection();
@@ -68,16 +63,16 @@ exports.handler = async (event) => {
       .query('SELECT ID, role_id FROM MEM_USERS WHERE cognito_username = @cognito_username');
     const caller = callerLookup.recordset[0];
     if (!caller) {
-      return buildResponse(401, { error: "Unauthorized" }, event);
+      return buildResponse(401, { error: 'Unauthorized' }, event);
     }
 
     if (Number(caller.role_id) !== ADMIN_ROLE_ID) {
       const assignmentLookup = await pool.request()
-        .input('medicaid_id', sql.VarChar, medicaid_id)
+        .input('medicaid_id', sql.VarChar, String(medicaid_id))
         .query('SELECT Care_Coordinator_id FROM MEM_OUTREACH_MEMBERS WHERE medicaid_id = @medicaid_id');
       const member = assignmentLookup.recordset[0];
       if (!member || Number(member.Care_Coordinator_id) !== Number(caller.ID)) {
-        return buildResponse(403, { error: "Forbidden" }, event);
+        return buildResponse(403, { error: 'Forbidden' }, event);
       }
     }
 

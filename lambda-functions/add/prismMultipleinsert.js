@@ -205,8 +205,16 @@ exports.handler = async (event) => {
       const medicaidIds = new Set();
       for (const row of insertDataArray) {
         const key = Object.keys(row).find(k => k.toLowerCase() === 'medicaid_id');
-        if (key && row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {
-          medicaidIds.add(String(row[key]));
+        if (key && row[key] !== undefined && row[key] !== null) {
+          const val = String(row[key]).trim();
+          // medicaid_id "0" is the system/non-member sentinel (e.g. LOGIN /
+          // LOGOUT rows in MEM_SYSTEM_LOG, which are not tied to any member).
+          // It can never be "owned" by a care coordinator, so it must be
+          // exempt from the per-member ownership check below -- otherwise
+          // legitimate login-history writes 403 for every non-admin.
+          if (val !== '' && val !== '0') {
+            medicaidIds.add(val);
+          }
         }
       }
 
@@ -226,6 +234,25 @@ exports.handler = async (event) => {
         for (const id of idList) {
           if (ownerMap.get(id) !== Number(caller.ID)) {
             return buildResponse(403, { message: "Forbidden" }, event);
+          }
+        }
+      }
+
+      // Finding 3.1.8 (audit-log forgery) must stay closed on the system-log
+      // path that the medicaid_id="0" exemption above re-opens: without this,
+      // a non-admin could insert a MEM_SYSTEM_LOG row with an arbitrary log_by
+      // (e.g. an admin's id) and frame that user with a fabricated LOGIN/LOGOUT
+      // event. Force log_by to the caller's own id so a non-admin can only
+      // write log rows attributed to themselves. The displayed actor name in
+      // the System Log Report is joined from MEM_USERS via log_by, so this
+      // makes forged attribution impossible for non-admins.
+      if (table_name === 'MEM_SYSTEM_LOG') {
+        for (const row of insertDataArray) {
+          const logByKey = Object.keys(row).find(k => k.toLowerCase() === 'log_by');
+          if (logByKey) {
+            row[logByKey] = caller.ID;
+          } else {
+            row.log_by = caller.ID;
           }
         }
       }

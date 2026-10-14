@@ -128,10 +128,9 @@ export class ChangePassword implements OnInit, OnDestroy {
         throw err;
       }
 
-      const response = await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
-      if (response?.statusCode !== 200) {
-        throw new Error(response?.error || 'Password update failed');
-      }
+      // Throws on failure, so the DB password below is only saved once
+      // Cognito's has actually changed.
+      await this.apiService.updateCognitoUser(cognito_username, {}, this.newPassword);
 
       await this.apiService.prismUserPasswordUpdate<any>({
         ID: user.ID,
