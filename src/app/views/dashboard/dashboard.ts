@@ -260,6 +260,12 @@ async loadTableData(): Promise<void> {
     }
     this.loginRoleId = user.role_id;
 
+    // Load overview stats in background, in parallel with the member list --
+    // it only needs loginUserId, and waiting for the member list first added
+    // that whole call's time to the overview's. Does not block the member
+    // table spinner.
+    this.loadprojectoverviewData();
+
     const request: DashboardRequest = { user_id: this.loginUserId };
     const result = await this.apiService.dashboard<any>(request);
     const members = result?.data || [];
@@ -292,9 +298,6 @@ async loadTableData(): Promise<void> {
 
     this.selection.clear();
   });
-
-  // Load overview stats in background — does not block the member table spinner
-  this.loadprojectoverviewData();
 }
 
 showRiskgaps(row: any) { 

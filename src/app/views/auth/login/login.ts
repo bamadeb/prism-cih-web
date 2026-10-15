@@ -248,10 +248,14 @@ async setupQrCode() {
         // Reset the failed-attempt counter only after prismAuthentication has
         // accepted the login. Resetting first cleared LOCKED before
         // prismAuthentication could refuse a locked account.
+        // Not awaited: nothing below depends on its result, and waiting for it
+        // held the user on the login page for a whole extra round trip
+        // (~2 s on a cold Lambda). The request still completes after navigation.
         const requestUnlock: LoginRequest = {
           username: this.username
         };
-        await this.authService.loginSuccessReset<any>(requestUnlock);
+        this.authService.loginSuccessReset<any>(requestUnlock)
+          .catch(err => console.error('Failed to reset login attempts', err));
 
         const user = result.data[0];
         user.pageAccess = result.pageAccess;
