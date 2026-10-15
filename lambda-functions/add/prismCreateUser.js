@@ -155,9 +155,9 @@ exports.handler = async (event) => {
         request.input('cognito_username', sql.VarChar(150), cognito_username);
 
         const result = await request.query(`
-            INSERT INTO MEM_USERS 
+            INSERT INTO MEM_USERS
             ([FistName],[LastName],[EmailID],[Password],[role_id],[member_status],[department_id],[cognito_username])
-            VALUES 
+            VALUES
             (@FistName,@LastName,@EmailID,@Password,@role_id,@member_status,@department_id,@cognito_username)
         `);
 

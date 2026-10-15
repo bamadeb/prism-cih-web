@@ -1,6 +1,13 @@
 const { getDBConnection, sql } = require('/opt/dbConfig');
 const { buildResponse, handleOptions } = require('/opt/responseHelper');
 const bcrypt = require('bcryptjs');
+const { CognitoIdentityProviderClient, AdminDisableUserCommand, AdminEnableUserCommand } = require('@aws-sdk/client-cognito-identity-provider');
+
+// Cognito client is module-scope so it is reused across warm invocations.
+// COGNITO_REGION / USER_POOL_ID are set as function environment variables and
+// point at the pool this app authenticates against.
+const cognito = new CognitoIdentityProviderClient({ region: process.env.COGNITO_REGION || 'us-east-1' });
+const USER_POOL_ID = process.env.USER_POOL_ID;
 
 // Matches the policy the frontend's own password field displays as a hint
 // (adduser-dialog.html: "at least 15 characters long and include uppercase,
@@ -117,6 +124,32 @@ exports.handler = async (event) => {
     const caller = callerLookup.recordset[0];
     if (!caller || Number(caller.role_id) !== ADMIN_ROLE_ID) {
       return buildResponse(403, { message: "Forbidden" }, event);
+    }
+
+    // Keep the user's Cognito sign-in state in sync with member_status, so that
+    // inactivating a user actually revokes authentication -- not just the app's
+    // own login check (prismAuthentication filters member_status = 0). Without
+    // this, an inactivated user whose Cognito account stayed enabled could
+    // still obtain/refresh tokens and call the APIs directly.
+    //   member_status 0 = active   -> AdminEnableUser
+    //   member_status 1 = inactive -> AdminDisableUser
+    // Done BEFORE the DB write so a Cognito failure leaves nothing committed.
+    // Skipped when an admin edits their own row (prevents self-lockout) and
+    // when the target has no Cognito account.
+    if (USER_POOL_ID && Number(ID) !== Number(caller.ID)) {
+      const tgt = await pool.request()
+        .input('ID', sql.Int, ID)
+        .query('SELECT cognito_username FROM MEM_USERS WHERE ID = @ID');
+      const cognitoUsername = tgt.recordset[0] && tgt.recordset[0].cognito_username;
+      if (cognitoUsername) {
+        try {
+          const Cmd = Number(member_status) === 0 ? AdminEnableUserCommand : AdminDisableUserCommand;
+          await cognito.send(new Cmd({ UserPoolId: USER_POOL_ID, Username: cognitoUsername }));
+        } catch (cognitoErr) {
+          console.error('Cognito status sync failed:', cognitoErr);
+          return buildResponse(502, { message: "Could not update the user's sign-in (Cognito) state; no changes were saved. Please retry." }, event);
+        }
+      }
     }
 
     const request = pool.request();
